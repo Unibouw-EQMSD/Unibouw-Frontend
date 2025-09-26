@@ -1,0 +1,65 @@
+<app-header></app-header>
+
+    <!-- Header -->
+<header class="page-header">
+  <h2>Add RFQ</h2>
+</header>
+
+<div class="form-card">
+  <!-- Left side: Project + Work items -->
+  <div class="workitems-section">
+    <div class="project-name">
+      <label for="projectOptions">Project Name</label>
+      <select id="projectOptions" [(ngModel)]="selectedOption" (change)="onOptionChange($event)" class="custom-dropdown">
+        <option *ngFor="let option of dropdownOptions" [value]="option">
+          {{ option }}
+        </option>
+      </select>
+    </div>
+
+    <table class="workitems-table">
+      <thead>
+        <tr>
+          <th><input type="checkbox" /></th>
+          <th>Work Item</th>
+          <th>RFQ Sent</th>
+          <th>Quote Received</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let item of workitems">
+          <td><input type="checkbox" [(ngModel)]="item.selected" /></td>
+          <td>{{ item.name }}</td>
+          <td>{{ item.rfqSent }}</td>
+          <td>{{ item.quoteReceived }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Right side: Subcontractors -->
+  <div class="subcontractors-card">
+    <div class="card-header">
+      <h3>Subcontractors</h3>
+      <button type="button" [routerLink]="['/add-subcontractor']" class="add-btn">+</button>
+      <label class="show-all">
+        <input type="checkbox" /> Show all
+      </label>
+    </div>
+
+    <div class="checkbox-list">
+      <label *ngFor="let sub of subcontractors">
+        <input type="checkbox" [(ngModel)]="sub.selected" />
+        {{ sub.name }}
+      </label>
+    </div>
+  </div>
+
+  <!-- ✅ Footer Buttons (aligned bottom-right of main container) -->
+  <div class="form-actions main-actions">
+    <button type="button" class="btn cancel-btn">Cancel</button>
+    <button type="submit" class="btn submit-btn">Submit</button>
+  </div>
+</div>
+
+<app-footer></app-footer>

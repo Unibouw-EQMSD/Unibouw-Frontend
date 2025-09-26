@@ -1,0 +1,207 @@
+ <app-header></app-header>
+ 
+ <header class="page-header">
+  <h2>Super Market Project Details</h2>
+</header>
+<div class="project-details-container">
+
+
+
+  <!-- LEFT: Project Details -->
+  <div class="details-card">
+  <h3>Details</h3>
+
+  <div class="detail-row">
+    <span class="label">Project Code</span>
+    <span class="value">829474</span>
+  </div>
+
+  <div class="detail-row">
+    <span class="label">Project</span>
+    <span class="value">Super Market</span>
+  </div>
+
+  <div class="detail-row">
+    <span class="label">Customer</span>
+    <span class="value">Timothy Ronald</span>
+  </div>
+
+  <div class="detail-row">
+    <span class="label">Project Manager</span>
+    <span class="value">David H</span>
+  </div>
+
+  <div class="detail-row">
+    <span class="label">Start Date</span>
+    <span class="value">23-01-2025</span>
+  </div>
+
+  <div class="detail-row">
+    <span class="label">Committed Date</span>
+    <span class="value">18-02-2026</span>
+  </div>
+
+  <div class="detail-row">
+    <span class="label">Status</span>
+    <span class="value status">In Progress</span>
+  </div>
+
+  <div class="detail-row">
+    <span class="label">Total Dimension</span>
+    <span class="value">5000Sqft</span>
+  </div>
+
+  <div class="detail-row">
+    <span class="label">Specification</span>
+    <span class="value">
+      <a href="#">Flooring.pdf</a>, 
+      <a href="#">Glass.pdf</a>, 
+      <a href="#">Roofing.pdf</a>
+    </span>
+  </div>
+</div>
+
+
+  <!-- RIGHT: RFQs -->
+  <div class="rfq-card">
+    <div class="rfq-header">
+      <h3>RFQs</h3>
+      <div class="group-options">
+        <label><input type="radio" name="groupBy" [(ngModel)]="groupBy" value="workItem"> Group by Work Item</label>
+        <label><input type="radio" name="groupBy" [(ngModel)]="groupBy" value="subcontractor"> Group by Subcontractor</label>
+      </div>
+    </div>
+
+    <!-- each work item acts like an accordion -->
+    <div *ngFor="let work of workItems" class="work-item">
+      <!-- header row (click to open/close) -->
+     <div class="work-item-header" (click)="work.open = !work.open">
+        <div class="rfq-summary">
+  <div>
+    <span class="label">Work Item</span>
+    <div class="highlight">{{ work.name }}</div>
+  </div>
+  <div>
+    <span class="label">Requests Sent</span>
+    <div>{{ work.requestsSent }}</div>
+  </div>
+  <div>
+    <span class="label">Not Responded</span>
+    <div>{{ work.notResponded }}</div>
+  </div>
+  <div>
+    <span class="label">Interested</span>
+    <div>{{ work.interested }}</div>
+  </div>
+  <div>
+    <span class="label">Not Interested</span>
+    <div>{{ work.notInterested }}</div>
+  </div>
+  <div>
+    <span class="label">Viewed</span>
+    <div>{{ work.viewed }}</div>
+  </div>
+</div>
+
+        <div><i class="fa" [ngClass]="work.open ? 'fa-chevron-up' : 'fa-chevron-down'"></i></div>
+      </div>
+
+      <!-- body (table + search) -->
+      <div class="work-item-body" *ngIf="work.open">
+        <div class="search-box" style="margin-bottom:12px;">
+          <input type="text" [(ngModel)]="work.searchText" placeholder="Search" />
+        </div>
+
+        <div class="rfq-table-wrapper">
+          <table class="rfq-table">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Date</th>
+                <th>RFQ ID</th>
+                <th>Responded</th>
+                <th>Interested</th>
+                <th>Viewed</th>
+                <th>Quote</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              <tr *ngFor="let rfq of getFilteredRfqs(work)">
+                <td>
+                  {{ rfq.name }}
+                  <div class="rating">★ {{ rfq.rating }}</div>
+                </td>
+                <td>{{ rfq.date }}</td>
+                <td>{{ rfq.rfqId }}</td>
+
+                <td>
+                  <i class="fa fa-check-circle status-icon success" *ngIf="rfq.responded"></i>
+                  <i class="fa fa-times-circle status-icon error" *ngIf="!rfq.responded"></i>
+                </td>
+
+                <td>
+                  <i class="fa fa-check-circle status-icon success" *ngIf="rfq.interested"></i>
+                  <i class="fa fa-times-circle status-icon error" *ngIf="!rfq.interested"></i>
+                </td>
+
+                <td>
+                  <i class="fa fa-check-circle status-icon success" *ngIf="rfq.viewed"></i>
+                  <i class="fa fa-times-circle status-icon error" *ngIf="!rfq.viewed"></i>
+                </td>
+
+                <td>{{ rfq.quote }}</td>
+
+                <td>
+                  <i *ngIf="rfq.actions?.includes('pdf')" class="fa fa-file-pdf action-icon"></i>
+                  <i *ngIf="rfq.actions?.includes('chat')" class="fa fa-comment action-icon"></i>
+                  <i *ngIf="rfq.actions?.includes('lock')" class="fa fa-lock action-icon"></i>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- pagination (static markup, wire to TS if needed) -->
+       <div class="pagination-wrapper">
+      
+      <!-- Left: Records per page -->
+      <div class="records-per-page">
+        <select id="pageSize" [(ngModel)]="pageSize" (change)="onPageSizeChange()">
+          <option *ngFor="let size of pageSizes" [value]="size">{{ size }}</option>
+        </select>
+      </div>
+
+      <!-- Right: Pagination -->
+      <div class="pagination-container">
+        <button 
+          class="page-btn" 
+          [disabled]="currentPage === 1" 
+          (click)="prevPage()">
+          Previous
+        </button>
+
+        <!-- Page Numbers -->
+        <button 
+          class="page-btn" 
+          *ngFor="let page of [].constructor(totalPages); let i = index"
+          [class.active]="currentPage === (i + 1)"
+          (click)="goToPage(i + 1)">
+          {{ i + 1 }}
+        </button>
+
+        <button 
+          class="page-btn" 
+          [disabled]="currentPage === totalPages" 
+          (click)="nextPage()">
+          Next
+        </button>
+      </div>
+</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<app-footer></app-footer>

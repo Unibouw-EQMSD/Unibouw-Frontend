@@ -1,0 +1,83 @@
+.form-card {
+ margin: 1rem auto;
+  width: 90%;
+  overflow-x: auto;
+  background: #fff;
+  padding: 15px;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.form-row {
+  display: flex;
+  gap: 20px;
+}
+
+.form-group {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.form-group.full-width {
+  margin-top: 15px;
+  width: 100%;
+}
+
+label {
+  font-weight: 500;
+  margin-bottom: 8px;
+  color: #555;
+}
+
+.form-control {
+  border: none;
+  border-bottom: 1px solid #ddd;
+  padding: 6px 8px;
+  font-size: 14px;
+  outline: none;
+}
+
+.form-control:focus {
+  border-bottom: 2px solid #f97316; /* orange highlight */
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.btn {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 6px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.cancel-btn {
+  background: #4b5563; /* gray */
+  color: white;
+}
+
+.submit-btn {
+  background: #f97316; /* orange */
+  color: white;
+}
+.page-header {
+  text-align: left;
+  margin: 30px auto 0px;
+  width: 90%;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+}
+
+.page-header h2 {
+  font-size: 1.5rem;
+  color: #003042;
+  margin: 0;
+  font-weight: 200;
+}

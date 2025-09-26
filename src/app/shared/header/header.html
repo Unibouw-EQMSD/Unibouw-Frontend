@@ -1,0 +1,48 @@
+<header>
+  <!-- Header Container -->
+  <div class="container">
+    <!-- Left side -->
+    <div class="logo-text">
+      <p>unibouw</p>
+    </div>
+
+    <!-- Right side -->
+    <div class="header-right">
+      <!-- Notification Bell -->
+      <div class="notification">
+        <i class="fa-regular fa-bell"></i>
+        <span class="badge">4</span>
+      </div>
+
+      <!-- User Dropdown -->
+      <div class="user-dropdown">
+        <button class="dropdown-btn">
+          <i class="fa-solid fa-user"></i>
+          Walter Gerald <i class="fa-solid fa-caret-down"></i>
+        </button>
+        <div class="dropdown-menu">
+          <div class="dropdown-header">Walter Gerald</div>
+          <a href="#" class="dropdown-item">
+            <i class="fa-regular fa-user"></i> My Profile
+          </a>
+          <a href="#" class="dropdown-item">
+            <i class="fa-solid fa-right-from-bracket"></i> Sign Out
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Navbar -->
+  <nav class="navbar">
+    <ul>
+        <li><i class="fa-solid fa-gauge-simple-high" style="color: white;"></i></li>
+      <li><a routerLink="/workitems" [class.active]="isWorkitemActive()">Work Items</a>
+</li>
+      <li><a routerLink="/subcontractor" [class.active]="isSubcontractorActive()">Subcontractors</a></li>
+   <li>
+  <a [routerLink]="'/projectdetails'" [class.active]="isProjectsActive()">Projects</a>
+</li>
+ </ul>
+  </nav>
+</header>

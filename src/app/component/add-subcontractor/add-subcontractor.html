@@ -1,0 +1,102 @@
+<app-header></app-header>
+<header class="page-header">
+  <h2>Add Subcontractor</h2>
+</header>
+<div class="form-card">
+  <!-- Left side: the form -->
+  <form (ngSubmit)="onSubmit()" [formGroup]="subcontractorForm">
+
+    <!-- First Row -->
+    <div class="form-row">
+      <div class="form-group">
+        <label>Subcontractor Name</label>
+        <input type="text" formControlName="name" class="form-control" />
+      </div>
+
+      <div class="form-group">
+        <label>Location</label>
+        <input type="text" formControlName="location" class="form-control" />
+      </div>
+    </div>
+
+    <!-- Second Row -->
+    <div class="form-row">
+      <div class="form-group">
+        <label>Country</label>
+        <select formControlName="country" class="form-control">
+          <option *ngFor="let c of countries" [value]="c">{{ c }}</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Registered Date</label>
+        <input type="date" formControlName="registeredDate" class="form-control" />
+      </div>
+    </div>
+
+    <!-- Third Row -->
+    <div class="form-row">
+      <div class="form-group">
+        <label>Email ID</label>
+        <input type="email" formControlName="email" class="form-control" />
+      </div>
+
+      <div class="form-group">
+        <label>Status</label>
+        <select formControlName="status" class="form-control">
+          <option value="Active">Active</option>
+          <option value="Inactive">Inactive</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Fourth Row -->
+    <div class="form-row">
+      <div class="form-group full-width">
+        <label>Office Address</label>
+        <textarea formControlName="officeAddress" class="form-control"></textarea>
+      </div>
+
+      <div class="form-group full-width">
+        <label>Billing Address</label>
+        <textarea formControlName="billingAddress" class="form-control"></textarea>
+        <div>
+          <input type="checkbox" formControlName="sameAsOffice" /> Same as Office Address
+        </div>
+      </div>
+    </div>
+
+    <!-- Attachments -->
+    <div class="form-group">
+      <label>Attachments</label>
+      <div class="file-upload">
+        <input type="file" (change)="onFileSelected($event)" />
+        <button type="button" class="btn small-btn">Add More</button>
+      </div>
+    </div>
+
+
+  </form>
+
+  <!-- Right side: Workitems -->
+  <div class="workitems-card">
+    <h3>Workitems</h3>
+    <div class="tabs">
+      <button type="button" class="tab active">Standard</button>
+      <button type="button" class="tab">Unibouw</button>
+    </div>
+    <div class="checkbox-list">
+      <label *ngFor="let w of workitems">
+        <input type="checkbox" [value]="w" (change)="toggleWorkitem($event)" checked />
+        {{ w }}
+      </label>
+    </div>
+  </div>
+      <!-- Actions -->
+    <div class="form-actions">
+      <button type="button" class="btn cancel-btn" (click)="onCancel()">Cancel</button>
+      <button type="submit" class="btn submit-btn">Submit</button>
+    </div>
+</div>
+
+<app-footer></app-footer>

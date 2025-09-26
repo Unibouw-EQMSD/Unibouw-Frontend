@@ -1,0 +1,162 @@
+.page-header {
+  text-align: left;
+  margin: 30px auto 0px;
+  width: 90%;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+}
+
+
+.page-header h2 {
+  font-size: 1.5rem;
+  color: #003042;
+  margin: 0;
+  font-weight: 200;
+}
+
+.table-container {
+  margin: 1rem auto;
+  width: 90%;
+  overflow-x: auto;
+  background: #fff;
+  padding: 15px;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.search-box {
+  margin: 20px 0;
+  width: 100%;
+   display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+ 
+}
+
+.search-box input {
+  width: 250px;
+  padding: 6px 10px;
+  border: none;           
+  border-bottom: 2px solid #ccc; 
+  font-size: 17px;
+  outline: none;          
+  transition: border-color 0.3s;
+}
+
+
+.search-box input:focus {
+  border-bottom: 2px solid #905f33; 
+}
+/* Tabs */
+.tabs {
+  display: flex;
+  border-radius: 6px;
+  overflow: hidden;
+  margin-bottom: 15px;
+  width: 90%;
+    margin: 0 auto;
+}
+
+.tabs button {
+  flex: 1;
+  padding: 10px;
+  border: none;
+  cursor: pointer;
+  background: #e8eef3;
+  font-weight: 600;
+  font-size: 16px;
+  color: #ff7f32;;
+}
+
+.tabs button.active {
+  background: #003042;   /* dark blue like in your screenshot */
+  color: white;
+}
+
+/* Table */
+.styled-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.styled-table thead th {
+  text-align: left;
+  padding: 10px;
+  border-bottom: 2px solid #ddd;
+  font-weight: bold;
+  color: black;
+}
+
+.styled-table tbody td {
+  padding: 10px;
+  border-bottom: 1px solid #eee;
+  color: black;
+}
+
+/* Edit icon */
+.edit-icon {
+  color: #ff7f32;
+  cursor: pointer;
+  margin-right: 10px;
+}
+
+
+.pagination-wrapper {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 15px;
+}
+
+.records-per-page {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+}
+
+.records-per-page select {
+  padding: 2px 6px;
+  font-size: 14px;
+}
+
+.pagination-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 15px;
+  gap: 5px;
+}
+
+.page-btn {
+  border: none;
+  background: #f5f7f9;
+  color: #ff7f32; /* orange like your screenshot */
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: 0.2s;
+}
+
+.page-btn:hover:not(:disabled) {
+  background: #e1e6eb;
+}
+
+.page-btn.active {
+  background: #003042;  /* dark blue */
+  color: #fff;
+  font-weight: 600;
+}
+
+.page-btn:disabled {
+  background: #f5f7f9;
+  color: #ccc;
+  cursor: not-allowed;
+}
+
+.pagination span {
+  font-size: 0.9rem;
+}

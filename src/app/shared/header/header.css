@@ -1,0 +1,157 @@
+
+.container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 15px;
+  height: 60px;          /* use min-height instead of fixed height */
+  width: 100%;               /* full width */
+  background-color: #f9fbfd; /* light background */
+  box-sizing: border-box;    /* prevent overflow issues */
+}
+
+.logo-text p {
+  margin: 0;
+  font-family: "Kanit", sans-serif;
+  font-weight: 500;
+  font-size: xx-large;
+  color: #003042;
+}
+
+/* Right section */
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+/* Notification bell */
+.notification {
+  position: relative;
+  font-size: 20px;
+  color: #003042;
+  cursor: pointer;
+  margin-right: 20px;
+}
+
+.notification .badge {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  background: orange;
+  color: white;
+  font-size: 12px;
+  font-weight: bold;
+  border-radius: 50%;
+  padding: 2px 6px;
+}
+
+/* Dropdown */
+.user-dropdown {
+  position: relative;
+}
+
+.dropdown-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+  color: #003042;
+}
+
+.dropdown-btn i {
+  font-size: 14px;
+}
+
+/* Dropdown menu */
+.dropdown-menu {
+  display: none;
+  position: absolute;
+  top: 120%;
+  right: 0;
+  background: white;
+  border-radius: 6px;
+  border: 1px solid #ddd;
+  min-width: 180px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  overflow: hidden;
+  z-index: 100;
+}
+
+/* Dropdown header */
+.dropdown-header {
+  font-weight: bold;
+  padding: 10px;
+  border-bottom: 1px solid #eee;
+  color: #003042;
+      font-size: x-large;
+}
+
+/* Dropdown items */
+.dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px;
+  text-decoration: none;
+  color: #f97316; /* Orange */
+  font-weight: 500;
+  transition: background 0.2s;
+}
+
+.dropdown-item:hover {
+  background: #fef3e7;
+}
+
+.dropdown-item i {
+  font-size: 16px;
+}
+
+/* Show menu on hover */
+.user-dropdown:hover .dropdown-menu {
+  display: block;
+}
+
+header {
+  position: sticky;      
+  top: 0;               
+  z-index: 1000;         
+  background: #f9fbfd;   
+}
+
+.navbar {
+  background: #003042;
+  border-radius: 6px;
+  width: 92%;
+  margin: -30px auto 20px;
+  padding: 20px 20px;
+  display: flex;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+  position: relative;
+  z-index: 5;
+  top: 19px;
+}
+.navbar ul {
+  list-style: none;
+  display: flex;
+  gap: 40px; /* spacing between menu items */
+  margin: 0;
+  padding: 0;
+}
+
+.navbar li a {
+  text-decoration: none;
+  color: white;
+  font-weight: 500;
+  transition: color 0.3s ease;
+}
+
+.navbar li a.active {
+  background-color: #905f33 !important; 
+  color:white ;
+  padding:20px;
+}

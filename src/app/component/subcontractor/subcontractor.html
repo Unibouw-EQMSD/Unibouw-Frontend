@@ -1,0 +1,80 @@
+<app-header></app-header>
+<div class="container">
+    <!-- Header -->
+<header class="page-header">
+  <h2>Subcontractors</h2>
+  <button type="button" [routerLink]="['/add-subcontractor']" style="color: white;background-color: #ff7f32;border: none;border-radius: 5px;"><b>Add Subcontractor</b></button>
+</header>
+<div class="table-container">
+
+<div class="search-box">
+  <input 
+    type="text" 
+    placeholder="Search..." 
+    [(ngModel)]="searchText" 
+    (input)="applyFilter()" />
+</div>
+
+  <table class="styled-table">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Category</th>
+        <th>Contact Person</th>
+        <th>E-Mail Id</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let item of pagedItems">
+        <td>{{ item.name }}</td>
+        <td>{{ item.category }}</td>
+        <td>{{ item.contact }}</td>
+        <td>{{item.email}}</td>
+        <td>
+          <label class="switch">
+            <input type="checkbox" [checked]="item.active" />
+            <span class="slider"></span>
+          </label>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+ <div class="pagination-wrapper">
+      
+      <!-- Left: Records per page -->
+      <div class="records-per-page">
+        <select id="pageSize" [(ngModel)]="pageSize" (change)="onPageSizeChange()">
+          <option *ngFor="let size of pageSizes" [value]="size">{{ size }}</option>
+        </select>
+      </div>
+
+      <!-- Right: Pagination -->
+      <div class="pagination-container">
+        <button 
+          class="page-btn" 
+          [disabled]="currentPage === 1" 
+          (click)="prevPage()">
+          Previous
+        </button>
+
+        <!-- Page Numbers -->
+        <button 
+          class="page-btn" 
+          *ngFor="let page of [].constructor(totalPages); let i = index"
+          [class.active]="currentPage === (i + 1)"
+          (click)="goToPage(i + 1)">
+          {{ i + 1 }}
+        </button>
+
+        <button 
+          class="page-btn" 
+          [disabled]="currentPage === totalPages" 
+          (click)="nextPage()">
+          Next
+        </button>
+      </div>
+</div>
+</div>
+</div>
