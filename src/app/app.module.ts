@@ -16,6 +16,16 @@ import { Rfq } from './component/projects/rfq/rfq';
 import { AddWorkitem } from './component/add-workitem/add-workitem';
 import { AddSubcontractor } from './component/add-subcontractor/add-subcontractor';
 import { ViewProjects } from './component/projects/view-projects/view-projects';
+import { SSOLogin } from './component/sso-login/sso-login';
+import { MsalModule, MsalRedirectComponent, MsalService, MSAL_INSTANCE } from '@azure/msal-angular';
+import { PublicClientApplication, InteractionType } from '@azure/msal-browser';
+import { environment } from '../environments/environment';
+import { HttpClientModule } from '@angular/common/http';
+
+export function MSALInstanceFactory(): PublicClientApplication {
+  return (window as any).msalInstance; // ✅ Use the initialized instance from main.ts
+}
+
 @NgModule({
   declarations: [
     App,
@@ -29,16 +39,33 @@ import { ViewProjects } from './component/projects/view-projects/view-projects';
     Rfq,
     AddWorkitem,
     AddSubcontractor,
-    ViewProjects
+    ViewProjects, 
+
   ],
   imports: [
     BrowserModule,
     AppRoutingModule,
     FormsModule,
-    ReactiveFormsModule   
+            HttpClientModule,
+ SSOLogin,
+
+    ReactiveFormsModule,
+   MsalModule.forRoot(
+      MSALInstanceFactory(), 
+      null as any,
+      null as any
+    ),
+
+   
   ],
   providers: [
-    provideBrowserGlobalErrorListeners()
+    provideBrowserGlobalErrorListeners(),
+    {
+      provide: MSAL_INSTANCE,
+      useFactory: MSALInstanceFactory
+    },
+    MsalService
+
   ],
   bootstrap: [App]
 })

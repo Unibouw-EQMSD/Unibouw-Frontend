@@ -10,13 +10,7 @@
   box-sizing: border-box;    /* prevent overflow issues */
 }
 
-.logo-text p {
-  margin: 0;
-  font-family: "Kanit", sans-serif;
-  font-weight: 500;
-  font-size: xx-large;
-  color: #003042;
-}
+
 
 /* Right section */
 .header-right {

@@ -3,7 +3,8 @@
   <div class="container">
     <!-- Left side -->
     <div class="logo-text">
-      <p>unibouw</p>
+<img src="assets/images/logo-unibouw.svg" alt="logo" style="height:25px"/>
+
     </div>
 
     <!-- Right side -->
@@ -18,14 +19,14 @@
       <div class="user-dropdown">
         <button class="dropdown-btn">
           <i class="fa-solid fa-user"></i>
-          Walter Gerald <i class="fa-solid fa-caret-down"></i>
+          {{ getUserName() }} <i class="fa-solid fa-caret-down"></i>
         </button>
         <div class="dropdown-menu">
-          <div class="dropdown-header">Walter Gerald</div>
+          <div class="dropdown-header"> {{ getUserName() }}</div>
           <a href="#" class="dropdown-item">
             <i class="fa-regular fa-user"></i> My Profile
           </a>
-          <a href="#" class="dropdown-item">
+          <a href="#" class="dropdown-item" (click)="signOut()">
             <i class="fa-solid fa-right-from-bracket"></i> Sign Out
           </a>
         </div>
