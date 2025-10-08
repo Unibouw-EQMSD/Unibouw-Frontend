@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { AppModule } from '../../app-module';
+import { AppModule } from '../../app.module';
 
 
 interface Workitem {

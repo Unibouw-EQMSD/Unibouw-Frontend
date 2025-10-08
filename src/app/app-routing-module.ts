@@ -9,18 +9,27 @@ import { AddWorkitem } from './component/add-workitem/add-workitem';
 import { AddSubcontractor } from './component/add-subcontractor/add-subcontractor';
 import { RfqAdd } from './component/projects/rfq-add/rfq-add';
 import { ViewProjects } from './component/projects/view-projects/view-projects';
+import { SSOLogin } from './component/sso-login/sso-login';
+import { AuthGuard } from './auth.guard';
+import { AlreadyAuthGuard } from './already-auth.guard';
+
 
 const routes: Routes = [
-  { path: 'workitems', component: Workitems },
-  { path: '', redirectTo: 'workitems', pathMatch: 'full' }, // default route
-  { path: 'subcontractor', component: Subcontractor},
-  { path: 'projectdetails', component: ProjectDetails},
-  { path: 'projectlist', component: ProjectList},
-  { path: 'rfq', component:Rfq},
-  { path: 'add-workitem', component:AddWorkitem  },
-  { path: 'add-subcontractor', component:AddSubcontractor},
-  { path: 'add-rfq', component:RfqAdd},
-  { path: 'view-projects', component:ViewProjects}
+  { path: 'login', component: SSOLogin, canActivate: [AlreadyAuthGuard] },
+
+{ path: '', redirectTo: 'workitems', pathMatch: 'full' }, // no guard here
+
+{ path: 'workitems', component: Workitems, canActivate: [AuthGuard] },
+  { path: 'subcontractor', component: Subcontractor, canActivate: [AuthGuard] },
+  { path: 'projectdetails', component: ProjectDetails, canActivate: [AuthGuard] },
+  { path: 'projectlist', component: ProjectList, canActivate: [AuthGuard] },
+  { path: 'rfq', component: Rfq, canActivate: [AuthGuard] },
+  { path: 'add-workitem', component: AddWorkitem, canActivate: [AuthGuard] },
+  { path: 'add-subcontractor', component: AddSubcontractor, canActivate: [AuthGuard] },
+  { path: 'add-rfq', component: RfqAdd, canActivate: [AuthGuard] },
+  { path: 'view-projects', component: ViewProjects, canActivate: [AuthGuard] },
+
+{ path: '**', redirectTo: 'login' }
 ];
 
 @NgModule({
