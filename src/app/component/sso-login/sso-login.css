@@ -34,10 +34,13 @@
   left: 0;
   right: 0;
   height: 100px;
-  /* reduced curve height */
   background: rgb(168 166 146);
-  clip-path: polygon(0% 100%, 0% 45%, 4% 48%, 11% 50%, 20% 51%, 24% 51%, 28% 50%, 39% 47%, 41% 46%, 50% 42%, 51% 41%, 56% 38%, 60% 36%, 65% 32%, 70% 27%, 75% 22%, 80% 17%, 85% 13%, 90% 10%, 95% 9%, 100% 10%, 100% 100%);
-  
+  /* Curve all the way to the bottom corners */
+  clip-path: polygon(
+    0% 100%, 0% 45%, 4% 48%, 11% 50%, 20% 51%, 24% 51%, 28% 50%, 39% 47%, 41% 46%,
+    50% 42%, 51% 41%, 56% 38%, 60% 36%, 65% 32%, 70% 27%, 75% 22%, 80% 17%, 85% 13%,
+    90% 10%, 95% 9%, 100% 10%, 100% 100%
+  );
 }
 
 .logo {
@@ -61,7 +64,7 @@
   position: relative;
   z-index: 3;
   margin-top: -40px;
-  /* pull form upward to reduce gap */
+   border-top: 5px solid rgb(168 166 146);
 }
 
 .form-title {
@@ -99,7 +102,7 @@ input[type="email"] {
 
 /* Focus state */
 input[type="email"]:focus {
-  border-bottom-color: #1a3b4d;
+    border-bottom: 2px solid #1a3b4d;
   background-color: rgb(168, 166, 146) !important; /* prevent focus changing background */
 }
 
