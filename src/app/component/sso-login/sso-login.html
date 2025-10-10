@@ -1,33 +1,34 @@
-<div class="container">
-  <div class="left-panel">
-    <div class="welcome-content">
-      <h2>Welcome to Unibouw</h2>
-    </div>
-  </div>
-
-<div class="right-panel">
-    <div class="logo">
-      <h1>unibouw</h1>
+<div class="login-container">
+  <div class="login-card">
+    <div class="logo-section">
+      <h1 class="logo"><img src="assets/images/unibouw.png" alt="unibouw" style="height:37px"> </h1>
     </div>
     
-    <div class="login-card">
-      <h2>Log in with Microsoft SSO</h2>
-      <label for="email">Email</label>
-    <input
+    <div class="form-section" style="padding: 10px 35px 25px;">
+      <h2 class="form-title">Login with SSO</h2>
+      
+      <div class="input-group">
+        <label for="email" class="input-label">Email ID</label>
+     <input
       id="email"
       type="email"
   [(ngModel)]="email"
       name="email"
-      placeholder="Enter your email"
       required
     />
-      <button (click)="onSubmit()" type="submit" [disabled]="loading" style="color: #fff;">
-        <span *ngIf="loading" style="color: #fff;">
-          <span class="loader"></span> Signing in...
-        </span>
-        <span *ngIf="!loading" style="color: #fff;">
-          Sign in with Microsoft
-        </span>
+      </div>
+      
+      <button 
+        class="microsoft-btn" 
+       (click)="onSubmit()" type="submit"
+      >
+        <div class="microsoft-logo">
+          <div class="logo-square red"></div>
+          <div class="logo-square green"></div>
+          <div class="logo-square blue"></div>
+          <div class="logo-square yellow"></div>
+        </div>
+        Sign in with Microsoft
       </button>
     </div>
   </div>
