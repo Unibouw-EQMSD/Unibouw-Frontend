@@ -30,17 +30,18 @@
 .logo-section::after {
   content: "";
   position: absolute;
-  bottom: 0;
+  bottom: -1px;
   left: 0;
   right: 0;
   height: 100px;
   background: rgb(168 166 146);
-  /* Curve all the way to the bottom corners */
+  /* This ensures the shape closes at the bottom, removing the flat line */
   clip-path: polygon(
-    0% 100%, 0% 45%, 4% 48%, 11% 50%, 20% 51%, 24% 51%, 28% 50%, 39% 47%, 41% 46%,
-    50% 42%, 51% 41%, 56% 38%, 60% 36%, 65% 32%, 70% 27%, 75% 22%, 80% 17%, 85% 13%,
-    90% 10%, 95% 9%, 100% 10%, 100% 100%
+    0% 100%, 0% 45%, 4% 48%, 11% 50%, 20% 51%, 24% 51%, 28% 50%, 39% 47%, 41% 46%, 
+    50% 42%, 51% 41%, 56% 38%, 60% 36%, 65% 32%, 70% 27%, 75% 22%, 80% 17%, 85% 13%, 
+    90% 10%, 95% 9%, 100% 10%, 100% 100%, 0% 100%
   );
+  z-index: 2;
 }
 
 .logo {
@@ -64,7 +65,7 @@
   position: relative;
   z-index: 3;
   margin-top: -40px;
-   border-top: 5px solid rgb(168 166 146);
+   border-top: -1px solid rgb(168 166 146);
 }
 
 .form-title {
