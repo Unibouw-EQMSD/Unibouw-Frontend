@@ -1,99 +1,96 @@
 <app-header></app-header>
 <div class="container">
 
+  <header class="page-header">
+    <h2>Work Items</h2>
+    <button type="button" [routerLink]="['/add-workitem']"
+            style="color: white;background-color:#ff7f32;border: none;border-radius: 5px;">
+      <b>Add Workitem</b>
+    </button>
+  </header>
 
+  <!-- Loading spinner -->
+  <div class="loading" *ngIf="isLoading">
+    <i class="fa fa-spinner fa-spin"></i> Loading...
+  </div>
 
+  <div class="table-container" *ngIf="!isLoading">
+    <div class="tabs">
+      <button [class.active]="activeTab === 'standard'" (click)="setTab('standard')">Standard</button>
+      <button [class.active]="activeTab === 'unibouw'" (click)="setTab('unibouw')">Unibouw</button>
+    </div>
 
-<!-- Header -->
-<header class="page-header">
-  <h2>Work Items</h2>
-    <button type="button" [routerLink]="['/add-workitem']" style="color: white;background-color: #ff7f32;border: none;border-radius: 5px;"><b>Add Workitem</b></button>
+    <div class="search-box">
+      <input type="text" placeholder="Search..." [(ngModel)]="searchText" (input)="applyFilter()" />
+    </div>
 
-</header>
+    <!-- No workitems message -->
+    <div *ngIf="filteredItems.length === 0" class="no-data">
+      No WorkItems found.
+    </div>
 
+    <table class="styled-table" *ngIf="filteredItems.length > 0">
+      <thead>
+        <tr>
+          <th>Code</th>
+          <th>Workitem</th>
+          <th>Description</th>
+          <th *ngIf="isAdmin">Action</th>
+        </tr>
+      </thead>
+      <tbody>
+       <tr *ngFor="let item of pagedItems">
+  <td>{{ item.number }}</td>
+  <td>{{ item.name }}</td>
 
-<!-- Table Section -->
-<div class="table-container">
-  <!-- Tabs -->
-<div class="tabs">
-  <button 
-    [class.active]="activeTab === 'standard'" 
-    (click)="setTab('standard')">
-    Standard
-  </button>
-  <button 
-    [class.active]="activeTab === 'unibouw'" 
-    (click)="setTab('unibouw')">
-    Unibouw
-  </button>
-</div>
-<div class="search-box">
+  <!-- Editable Description -->
+  <td>
   <input 
     type="text" 
-    placeholder="Search..." 
-    [(ngModel)]="searchText" 
-    (input)="applyFilter()" />
-</div>
+    [(ngModel)]="item.description" 
+    [readonly]="!item.isEditing" 
+    class="description-input"
+  />
+  <button 
+    *ngIf="!item.isEditing" 
+    (click)="item.isEditing = true"
+  >
+    Edit
+  </button>
+  <button 
+    *ngIf="item.isEditing" 
+    (click)="saveDescription(item)"
+  >
+    Save
+  </button>
+</td>
 
-  <table class="styled-table">
-    <thead>
-      <tr>
-        <th>Code</th>
-        <th>Workitem</th>
-        <th>Description</th>
-        <th>Action</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr *ngFor="let item of pagedItems">
-        <td>{{ item.code }}</td>
-        <td>{{ item.workitem }}</td>
-        <td>{{ item.description }}</td>
-        <td>
-          <i class="fa-regular fa-pen-to-square edit-icon" (click)="editItem(item)"></i>
-          <label class="switch">
-            <input type="checkbox" [checked]="item.active" />
-            <span class="slider"></span>
-          </label>
-        </td>
-      </tr>
-    </tbody>
-  </table>
 
- <div class="pagination-wrapper">
-      
-      <!-- Left: Records per page -->
+  <td *ngIf="isAdmin">
+    <label class="switch">
+      <input type="checkbox" [checked]="item.isActive" (change)="toggleIsActive(item)" />
+      <span class="slider"></span>
+    </label>
+  </td>
+</tr>
+      </tbody>
+    </table>
+
+    <div class="pagination-wrapper" *ngIf="filteredItems.length > 0">
       <div class="records-per-page">
         <select id="pageSize" [(ngModel)]="pageSize" (change)="onPageSizeChange()">
           <option *ngFor="let size of pageSizes" [value]="size">{{ size }}</option>
         </select>
       </div>
 
-      <!-- Right: Pagination -->
       <div class="pagination-container">
-        <button 
-          class="page-btn" 
-          [disabled]="currentPage === 1" 
-          (click)="prevPage()">
-          Previous
-        </button>
-
-        <!-- Page Numbers -->
-        <button 
-          class="page-btn" 
-          *ngFor="let page of [].constructor(totalPages); let i = index"
-          [class.active]="currentPage === (i + 1)"
-          (click)="goToPage(i + 1)">
-          {{ i + 1 }}
-        </button>
-
-        <button 
-          class="page-btn" 
-          [disabled]="currentPage === totalPages" 
-          (click)="nextPage()">
-          Next
-        </button>
+        <button class="page-btn" [disabled]="currentPage === 1" (click)="prevPage()">Previous</button>
+        <button class="page-btn" *ngFor="let page of [].constructor(totalPages); let i = index"
+                [class.active]="currentPage === (i + 1)" (click)="goToPage(i + 1)">{{ i + 1 }}</button>
+        <button class="page-btn" [disabled]="currentPage === totalPages" (click)="nextPage()">Next</button>
       </div>
-</div>
+    </div>
+  </div>
+
 </div>
 <app-footer></app-footer>
