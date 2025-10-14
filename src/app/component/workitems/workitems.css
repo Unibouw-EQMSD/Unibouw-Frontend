@@ -7,6 +7,50 @@
   font-weight: bold;
   margin-top: 4px;
 }
+/* Popup / Toast message */
+.popup {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  background-color: #4caf50;
+  color: white;
+  padding: 12px 20px;
+  border-radius: 6px;
+  font-size: 14px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  opacity: 0;
+  transform: translateY(-10px);
+  animation: fadeInOut 3s ease forwards;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.popup.error {
+  background-color: #e74c3c; /* Red for errors */
+}
+
+@keyframes fadeInOut {
+  0% {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  15% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  85% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+}
+
+
 
 /* Navigation Bar */
 /* Navbar floating pill */
@@ -113,18 +157,62 @@
   100% { transform: rotate(360deg); }
 }
 
-.description-input {
-  width: 61%;
-  padding: 6px 10px;
-  border: 1px solid #ccc;
-  border-radius: 6px;
-  font-size: 15px;
-  outline: none;
-  transition: border-color 0.3s, background-color 0.3s;
-  background-color: #f5f7f9; /* light background matching table */
-  color: #003042; /* dark text color */
+.input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
 }
 
+/* Description Input Field */
+.description-input {
+  width: 100%;
+  padding: 8px 35px 8px 10px; /* right padding for icon */
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 14px;
+  transition: 0.2s ease;
+}
+
+.description-input[readonly] {
+  background-color: #f7f7f7;
+  color: #666;
+  cursor: default;
+}
+
+/* Common Icon Style */
+.input-wrapper i {
+  position: absolute;
+  right: 10px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+/* Pencil (Edit) Icon */
+.edit-icon {
+  color: #007bff;
+}
+.edit-icon:hover {
+  color: #0056b3;
+}
+
+/* Check (Save) Icon */
+.save-icon {
+  color: #28a745;
+}
+.save-icon:hover {
+  color: #1e7e34;
+}
+
+/* Disabled State */
+.disabled {
+  opacity: 0.5;
+  pointer-events: none;
+}
+.description-column {
+  width: 600px; /* adjust this as needed */
+}
 .description-input:focus {
   border-color: #ff7f32; /* orange border on focus */
   background-color: #fff; /* slightly brighter */
@@ -161,6 +249,66 @@
 .description-input + button:nth-of-type(2):hover {
   background-color: #00506d;
 }
+
+
+
+/* Table Container */
+.table-scroll-container {
+  width: 100%;
+  max-height: 400px; /* adjust the scroll height */
+  overflow-y: auto;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+}
+
+/* Table */
+.styled-table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed; /* keep column widths fixed */
+}
+
+/* Table header - sticky */
+.styled-table thead th {
+  position: sticky;
+  top: 0;
+  background: #fff; /* header background */
+  z-index: 2;
+  padding: 10px;
+  border-bottom: 1px solid #ddd;
+  text-align: left;
+  font-weight: bold;
+}
+
+/* Table body */
+.styled-table tbody td {
+  padding: 10px;
+  border-bottom: 1px solid #eee;
+  text-align: left;
+}
+
+
+
+/* Scrollbar styling (optional) */
+.table-scroll-container::-webkit-scrollbar {
+  width: 8px;
+}
+
+.table-scroll-container::-webkit-scrollbar-thumb {
+  background-color: rgba(0,0,0,0.2);
+  border-radius: 4px;
+}
+
+tr.inactive td {
+  background-color: #f0f0f0;
+  color: #888;
+}
+
+tr.inactive input,
+tr.inactive button {
+  pointer-events: none;
+  opacity: 0.6;
+}
 /* Tabs */
 .tabs {
   display: flex;
@@ -188,7 +336,7 @@
 }
 
 /* Table */
-.styled-table {
+/* .styled-table {
   width: 100%;
   border-collapse: collapse;
 }
@@ -205,7 +353,7 @@
   padding: 10px;
   border-bottom: 1px solid #eee;
   color: black;
-}
+} */
 
 /* Edit icon */
 .edit-icon {
@@ -232,7 +380,7 @@ tr.inactive {
 
 tr.inactive input,
 tr.inactive button {
-  pointer-events: none; /* prevent editing */
+  pointer-events: none; 
   opacity: 0.6;
 }
 td.inactive{
@@ -322,4 +470,22 @@ input:checked + .slider:before {
 
 .pagination span {
   font-size: 0.9rem;
+}
+
+.styled-table th:nth-child(1), 
+.styled-table td:nth-child(1) {
+  width: 130px; 
+}
+.styled-table th:nth-child(2), 
+.styled-table td:nth-child(2) {
+  width: 200px; 
+}
+.styled-table th:nth-child(3), 
+.styled-table td:nth-child(3) {
+  width: 500px; 
+}
+
+.styled-table th:nth-child(4), 
+.styled-table td:nth-child(4) {
+  width: 50px; 
 }

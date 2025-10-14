@@ -1,128 +1,135 @@
 <app-header></app-header>
-<div class="container">
 
+<div class="container">
   <header class="page-header">
     <h2>Work Items</h2>
-    <!-- <button type="button" [routerLink]="['/add-workitem']"
-            style="color: white;background-color:#ff7f32;border: none;border-radius: 5px;">
-      <b>Add Workitem</b>
-    </button> -->
   </header>
 
-  <!-- Loading spinner -->
+  <!-- Loading Spinner -->
   <div class="loading" *ngIf="isLoading">
     <i class="fa fa-spinner fa-spin"></i> Loading...
   </div>
 
   <div class="table-container" *ngIf="!isLoading">
+    <!-- Tabs -->
     <div class="tabs">
       <button [class.active]="activeTab === 'standard'" (click)="setTab('standard')">Standard</button>
       <button [class.active]="activeTab === 'unibouw'" (click)="setTab('unibouw')">Unibouw</button>
     </div>
 
+    <!-- Search Box -->
     <div class="search-box">
-      <input type="text" placeholder="Search..." [(ngModel)]="searchText" (input)="applyFilter()" />
+      <input
+        type="text"
+        placeholder="Search..."
+        [(ngModel)]="searchText"
+        (input)="applyFilter()"
+      />
     </div>
 
-    <!-- No workitems message -->
+    <!-- No Data Message -->
     <div *ngIf="filteredItems.length === 0" class="no-data" style="text-align: center;">
       No WorkItems found.
     </div>
 
-    <table class="styled-table" *ngIf="filteredItems.length > 0">
-      <thead>
-        <tr>
-          <th>Code</th>
-          <th>Workitem</th>
-          <th>Description</th>
-          <th *ngIf="isAdmin">Action</th>
-        </tr>
-      </thead>
-      <tbody>
-       <tr *ngFor="let item of pagedItems" [class.inactive]="!item.isActive">
-  <td [class.inactive]="!item.isActive">{{ item.number }}</td>
-  <td [class.inactive]="!item.isActive">{{ item.name }}</td>
+    <!-- Workitems Table -->
+ <div class="table-scroll-container">
+  <table class="styled-table" *ngIf="filteredItems.length > 0">
+    <thead>
+      <tr>
+        <th>Code</th>
+        <th>Workitem</th>
+        <th>Description</th>
+        <th *ngIf="isAdmin">Action</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let item of pagedItems" [class.inactive]="!item.isActive">
+        <td [class.inactive]="!item.isActive">{{ item.number }}</td>
+        <td [class.inactive]="!item.isActive">{{ item.name }}</td>
+        <td class="editable-cell description-column">
+          <div class="input-wrapper">
+            <input
+              type="text"
+              [(ngModel)]="item.description"
+              [readonly]="!item.isEditing || !item.isActive"
+              class="description-input"
+            />
+            <i
+              *ngIf="!item.isEditing"
+              class="fa fa-pencil edit-icon"
+              title="Edit"
+              (click)="item.isEditing = true"
+              [class.disabled]="!item.isActive"
+            ></i>
+            <i
+              *ngIf="item.isEditing"
+              class="fa fa-check save-icon"
+              title="Save"
+              (click)="saveDescription(item)"
+            ></i>
+          </div>
+        </td>
+        <td *ngIf="isAdmin">
+          <label class="switch">
+            <input
+              type="checkbox"
+              [checked]="item.isActive"
+              (change)="toggleIsActive(item)"
+            />
+            <span class="slider"></span>
+          </label>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
 
-  <!-- Editable Description -->
-  <td>
-  <input 
-    type="text" 
-    [(ngModel)]="item.description" 
-    [readonly]="!item.isEditing || !item.isActive" 
-    class="description-input"
-  />
-  <button 
-    *ngIf="!item.isEditing" 
-    (click)="item.isEditing = true"
-          [disabled]="!item.isActive"
 
-  >
-    Edit
-  </button>
-  <button 
-    *ngIf="item.isEditing" 
-    (click)="saveDescription(item)"
-  >
-    Save
-  </button>
-
-  <div *ngIf="item.showSavedMsg" class="saved-msg">
-    Description saved successfully!
-  </div>
-</td>
-
-
-  <td *ngIf="isAdmin">
-    <label class="switch">
-      <input type="checkbox" [checked]="item.isActive" (change)="toggleIsActive(item)" />
-      <span class="slider"></span>
-    </label>
-  </td>
-</tr>
-      </tbody>
-    </table>
-
-
-  <div class="pagination-wrapper">
- <div >
-      
-      <!-- Left: Records per page -->
+    <!-- Pagination -->
+    <div class="pagination-wrapper">
       <div class="records-per-page">
         <select id="pageSize" [(ngModel)]="pageSize" (change)="onPageSizeChange()">
           <option *ngFor="let size of pageSizes" [value]="size">{{ size }}</option>
         </select>
-         {{ paginationInfo }}
+        {{ paginationInfo }}
       </div>
 
-      
-</div>
-<!-- Right: Pagination -->
       <div class="pagination-container">
-        <button 
-          class="page-btn" 
-          [disabled]="currentPage === 1" 
-          (click)="prevPage()">
+        <button
+          class="page-btn"
+          [disabled]="currentPage === 1"
+          (click)="prevPage()"
+        >
           Previous
         </button>
 
-        <!-- Page Numbers -->
-        <button 
-          class="page-btn" 
+        <button
+          class="page-btn"
           *ngFor="let page of [].constructor(totalPages); let i = index"
           [class.active]="currentPage === (i + 1)"
-          (click)="goToPage(i + 1)">
+          (click)="goToPage(i + 1)"
+        >
           {{ i + 1 }}
         </button>
 
-        <button 
-          class="page-btn" 
-          [disabled]="currentPage === totalPages" 
-          (click)="nextPage()">
+        <button
+          class="page-btn"
+          [disabled]="currentPage === totalPages"
+          (click)="nextPage()"
+        >
           Next
         </button>
       </div>
+    </div>
   </div>
-  </div>
-
 </div>
+
+<!-- ✅ Success/Error Popup -->
+<div *ngIf="showPopup" [ngClass]="{ 'popup': true, 'error': popupError }">
+  <span *ngIf="!popupError">✅</span>
+  <span *ngIf="popupError">❌</span>
+  {{ popupMessage }}
+</div>
+
 <app-footer></app-footer>
