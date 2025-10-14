@@ -31,33 +31,57 @@ email: string = '';
   }
 
   async ngOnInit() {
-    const res = await this.msalInstance.handleRedirectPromise().catch(err => {
-      console.error('MSAL handleRedirectPromise error:', err);
-      return null;
-    });
+  // Get active account
+  const activeAccount = this.msalInstance.getActiveAccount();
 
-    if (res?.account) {
-      this.msalInstance.setActiveAccount(res.account);
-    } else {
-      const accounts = this.msalInstance.getAllAccounts();
-      if (accounts.length === 1) this.msalInstance.setActiveAccount(accounts[0]);
-    }
-
-    const accounts = this.msalInstance.getAllAccounts();
-    if (accounts.length > 0) {
+  if (activeAccount) {
+    // Only continue login flow if on /login page
+    if (this.router.url === '/login') {
       this.loading = true;
       try {
-        await this.continueLoginFlow(accounts[0]);
+        await this.continueLoginFlow(activeAccount);
       } catch (e) {
         console.error('Continue login flow failed:', e);
       } finally {
         this.loading = false;
       }
     }
+    // If not on /login, do nothing (prevents flash)
+    return;
   }
 
-  async onSubmit() {
-  if (!this.email) return alert('Please enter your email.');
+  // If no active account, handle redirect (first login)
+  const res = await this.msalInstance.handleRedirectPromise().catch(err => {
+    console.error('MSAL handleRedirectPromise error:', err);
+    return null;
+  });
+
+  if (res?.account) {
+    this.msalInstance.setActiveAccount(res.account);
+  } else {
+    const accounts = this.msalInstance.getAllAccounts();
+    if (accounts.length === 1) this.msalInstance.setActiveAccount(accounts[0]);
+  }
+
+  const accounts = this.msalInstance.getAllAccounts();
+  if (accounts.length > 0 && this.router.url === '/login') {
+    this.loading = true;
+    try {
+      await this.continueLoginFlow(accounts[0]);
+    } catch (e) {
+      console.error('Continue login flow failed:', e);
+    } finally {
+      this.loading = false;
+    }
+  }
+}
+
+  async onSubmit(emailRef: any) {
+  // if (!this.email) return alert('Please enter your email.');
+   if (emailRef.invalid) {
+    emailRef.control.markAsTouched(); // mark as touched to show error
+    return;
+  }
   this.loading = true;
 
   try {

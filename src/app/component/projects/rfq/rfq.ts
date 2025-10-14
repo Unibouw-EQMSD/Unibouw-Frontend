@@ -114,6 +114,16 @@ onPageSizeChange() {
   this.updatePagedItems();
 }
 
+get paginationInfo(): string {
+  if (!this.filteredItems || this.filteredItems.length === 0) {
+    return 'Showing 0 to 0 of 0 entries';
+  }
+
+  const start = (this.currentPage - 1) * this.pageSize + 1;
+  let end = start + this.pagedItems.length - 1;
+
+  return `Showing ${start} to ${end} of ${this.filteredItems.length} entries`;
+}
 
 
 }

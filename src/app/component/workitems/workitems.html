@@ -3,10 +3,10 @@
 
   <header class="page-header">
     <h2>Work Items</h2>
-    <button type="button" [routerLink]="['/add-workitem']"
+    <!-- <button type="button" [routerLink]="['/add-workitem']"
             style="color: white;background-color:#ff7f32;border: none;border-radius: 5px;">
       <b>Add Workitem</b>
-    </button>
+    </button> -->
   </header>
 
   <!-- Loading spinner -->
@@ -25,7 +25,7 @@
     </div>
 
     <!-- No workitems message -->
-    <div *ngIf="filteredItems.length === 0" class="no-data">
+    <div *ngIf="filteredItems.length === 0" class="no-data" style="text-align: center;">
       No WorkItems found.
     </div>
 
@@ -39,21 +39,23 @@
         </tr>
       </thead>
       <tbody>
-       <tr *ngFor="let item of pagedItems">
-  <td>{{ item.number }}</td>
-  <td>{{ item.name }}</td>
+       <tr *ngFor="let item of pagedItems" [class.inactive]="!item.isActive">
+  <td [class.inactive]="!item.isActive">{{ item.number }}</td>
+  <td [class.inactive]="!item.isActive">{{ item.name }}</td>
 
   <!-- Editable Description -->
   <td>
   <input 
     type="text" 
     [(ngModel)]="item.description" 
-    [readonly]="!item.isEditing" 
+    [readonly]="!item.isEditing || !item.isActive" 
     class="description-input"
   />
   <button 
     *ngIf="!item.isEditing" 
     (click)="item.isEditing = true"
+          [disabled]="!item.isActive"
+
   >
     Edit
   </button>
@@ -63,6 +65,10 @@
   >
     Save
   </button>
+
+  <div *ngIf="item.showSavedMsg" class="saved-msg">
+    Description saved successfully!
+  </div>
 </td>
 
 
@@ -76,20 +82,46 @@
       </tbody>
     </table>
 
-    <div class="pagination-wrapper" *ngIf="filteredItems.length > 0">
+
+  <div class="pagination-wrapper">
+ <div >
+      
+      <!-- Left: Records per page -->
       <div class="records-per-page">
         <select id="pageSize" [(ngModel)]="pageSize" (change)="onPageSizeChange()">
           <option *ngFor="let size of pageSizes" [value]="size">{{ size }}</option>
         </select>
+         {{ paginationInfo }}
       </div>
 
+      
+</div>
+<!-- Right: Pagination -->
       <div class="pagination-container">
-        <button class="page-btn" [disabled]="currentPage === 1" (click)="prevPage()">Previous</button>
-        <button class="page-btn" *ngFor="let page of [].constructor(totalPages); let i = index"
-                [class.active]="currentPage === (i + 1)" (click)="goToPage(i + 1)">{{ i + 1 }}</button>
-        <button class="page-btn" [disabled]="currentPage === totalPages" (click)="nextPage()">Next</button>
+        <button 
+          class="page-btn" 
+          [disabled]="currentPage === 1" 
+          (click)="prevPage()">
+          Previous
+        </button>
+
+        <!-- Page Numbers -->
+        <button 
+          class="page-btn" 
+          *ngFor="let page of [].constructor(totalPages); let i = index"
+          [class.active]="currentPage === (i + 1)"
+          (click)="goToPage(i + 1)">
+          {{ i + 1 }}
+        </button>
+
+        <button 
+          class="page-btn" 
+          [disabled]="currentPage === totalPages" 
+          (click)="nextPage()">
+          Next
+        </button>
       </div>
-    </div>
+  </div>
   </div>
 
 </div>
