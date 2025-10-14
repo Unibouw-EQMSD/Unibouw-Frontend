@@ -12,6 +12,8 @@ export interface Workitem {
   editItem?: boolean;
     isActive?: boolean;
   isEditing?: boolean;
+    showSavedMsg?: boolean;
+
     
 
 }

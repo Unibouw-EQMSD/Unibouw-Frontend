@@ -58,15 +58,19 @@
   </table>
 
  <div class="pagination-wrapper">
+ <div >
       
       <!-- Left: Records per page -->
       <div class="records-per-page">
         <select id="pageSize" [(ngModel)]="pageSize" (change)="onPageSizeChange()">
           <option *ngFor="let size of pageSizes" [value]="size">{{ size }}</option>
         </select>
+         {{ paginationInfo }}
       </div>
 
-      <!-- Right: Pagination -->
+      
+</div>
+<!-- Right: Pagination -->
       <div class="pagination-container">
         <button 
           class="page-btn" 
@@ -91,7 +95,7 @@
           Next
         </button>
       </div>
-</div>
+  </div>
 </div>
 </div>
 

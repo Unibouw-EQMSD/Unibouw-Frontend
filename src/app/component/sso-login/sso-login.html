@@ -1,35 +1,42 @@
 <div class="login-container">
   <div class="login-card">
     <div class="logo-section">
-      <h1 class="logo"><img src="assets/images/unibouw.png" alt="unibouw" style="height:37px"> </h1>
+      <h1 class="logo">
+        <img src="assets/images/unibouw.png" alt="unibouw" style="height:37px">
+      </h1>
     </div>
-    
+
     <div class="form-section" style="padding: 10px 35px 25px;">
       <h2 class="form-title">Login with SSO</h2>
-      
+
       <div class="input-group">
         <label for="email" class="input-label">Email ID</label>
-     <input
-      id="email"
-      type="email"
-  [(ngModel)]="email"
-      name="email"
-      required
-    />
-      </div>
-      
-      <button 
-        class="microsoft-btn" 
-       (click)="onSubmit()" type="submit"
-      >
-        <div class="microsoft-logo">
-          <div class="logo-square red"></div>
-          <div class="logo-square green"></div>
-          <div class="logo-square blue"></div>
-          <div class="logo-square yellow"></div>
+        <input
+          id="email"
+          type="email"
+          [(ngModel)]="email"
+          name="email"
+          #emailRef="ngModel"
+          required
+        />
+        <div class="error-msg" *ngIf="emailRef.invalid && emailRef.touched" style="color: red;">
+          Email is required
         </div>
-        Sign in with Microsoft
-      </button>
+      </div>
     </div>
+
+    <button 
+      class="microsoft-btn" 
+      (click)="onSubmit(emailRef)" 
+      type="submit"
+    >
+      <div class="microsoft-logo">
+        <div class="logo-square red"></div>
+        <div class="logo-square green"></div>
+        <div class="logo-square blue"></div>
+        <div class="logo-square yellow"></div>
+      </div>
+      Sign in with Microsoft
+    </button>
   </div>
 </div>

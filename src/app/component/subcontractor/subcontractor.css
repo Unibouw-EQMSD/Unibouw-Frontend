@@ -1,5 +1,5 @@
 .container{
-    background-color: #e8eef3 !important;
+    background-color: #f5f5f9 !important;
 }
 
 .page-header {
@@ -117,7 +117,10 @@ input:checked + .slider:before {
   align-items: center;
   margin-top: 15px;
 }
-
+.pagination-info {
+  margin: 0 20px;
+  align-self: center;
+}
 .records-per-page {
   display: flex;
   align-items: center;

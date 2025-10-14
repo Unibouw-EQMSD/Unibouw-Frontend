@@ -125,7 +125,8 @@ input[type="email"]:-webkit-autofill:active {
 
 /* ====== Microsoft Button ====== */
 .microsoft-btn {
-  width: 100%;
+  width: 85%;
+  margin: auto auto 10px;
   background: #2f2f2f;
   color: white;
   border: none;

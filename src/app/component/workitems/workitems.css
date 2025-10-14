@@ -1,5 +1,11 @@
 .container{
-    background-color: #e8eef3 !important;
+    background-color: #f5f5f9 !important;
+}
+
+.saved-msg {
+  color: green;
+  font-weight: bold;
+  margin-top: 4px;
 }
 
 /* Navigation Bar */
@@ -161,7 +167,7 @@
   border-radius: 6px;
   overflow: hidden;
   margin-bottom: 15px;
-  width: 90%;
+  width: 100%;
     margin: 0 auto;
 }
 
@@ -217,6 +223,21 @@
 }
 .switch input {
   display: none;
+}
+
+tr.inactive {
+  background-color: #f0f0f0;
+  color: #888;
+}
+
+tr.inactive input,
+tr.inactive button {
+  pointer-events: none; /* prevent editing */
+  opacity: 0.6;
+}
+td.inactive{
+    color: #888 !important;
+
 }
 .slider {
   position: absolute;
