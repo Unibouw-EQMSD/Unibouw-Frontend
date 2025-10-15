@@ -25,39 +25,42 @@ export class Workitems implements OnInit {
   userRoles: string[] = [];
   isAdmin: boolean = false;
   isLoading: boolean = false; // loading indicator
+  showPopup = false;
+  popupMessage = '';
+  popupError = false;
 
-  constructor(private workitemService: WorkitemService, private msalService: MsalService, private userService: UserService) {}
+  constructor(private workitemService: WorkitemService, private msalService: MsalService, private userService: UserService) { }
 
   ngOnInit() {
-   const user = this.userService.getUser();
-  this.userRoles = this.userService.getUserRoles();
-  this.isAdmin = this.userService.isAdmin();
+    const user = this.userService.getUser();
+    this.userRoles = this.userService.getUserRoles();
+    this.isAdmin = this.userService.isAdmin();
 
-  this.loadCategoriesAndWorkitems();
+    this.loadCategoriesAndWorkitems();
   }
 
-setUserRoles() {
-  const account = this.msalService.instance.getAllAccounts()[0];
-  if (!account) return;
+  setUserRoles() {
+    const account = this.msalService.instance.getAllAccounts()[0];
+    if (!account) return;
 
-  const claims: any = account.idTokenClaims;
+    const claims: any = account.idTokenClaims;
 
-  // Handle string or array for roles
-  let roles: string[] = [];
+    // Handle string or array for roles
+    let roles: string[] = [];
 
-  if (claims?.roles) {
-    if (Array.isArray(claims.roles)) {
-      roles = claims.roles;
-    } else if (typeof claims.roles === 'string') {
-      roles = claims.roles.split(',').map((r: string) => r.trim()); // in case multiple roles are comma-separated
+    if (claims?.roles) {
+      if (Array.isArray(claims.roles)) {
+        roles = claims.roles;
+      } else if (typeof claims.roles === 'string') {
+        roles = claims.roles.split(',').map((r: string) => r.trim()); // in case multiple roles are comma-separated
+      }
     }
+
+    this.userRoles = roles;
+    this.isAdmin = roles.some(r => r.toLowerCase() === 'admin');
+
+    console.log('Roles:', this.userRoles, 'isAdmin:', this.isAdmin);
   }
-
-  this.userRoles = roles;
-  this.isAdmin = roles.some(r => r.toLowerCase() === 'admin');
-
-  console.log('Roles:', this.userRoles, 'isAdmin:', this.isAdmin);
-}
 
 
 
@@ -84,14 +87,14 @@ setUserRoles() {
         const categoryId = this.categoryMap[this.activeTab];
         if (categoryId) this.loadWorkitems(categoryId);
       },
-       error: (err) => {
-      this.isLoading = false;
-      console.error('Error fetching categories', err);
-      // alert(err?.error?.message || 'Error fetching categories. Please try again later.');
-      this.categories = [];
-      this.workitems = [];
-      this.applyFilter();
-    }
+      error: (err) => {
+        this.isLoading = false;
+        console.error('Error fetching categories', err);
+        // alert(err?.error?.message || 'Error fetching categories. Please try again later.');
+        this.categories = [];
+        this.workitems = [];
+        this.applyFilter();
+      }
     });
   }
 
@@ -100,74 +103,72 @@ setUserRoles() {
     this.workitemService.getWorkitems(categoryId).subscribe({
       next: (workitems: Workitem[]) => {
         this.isLoading = false;
-    this.workitems = (workitems || []).map(it => ({
-  ...it,
-  editItem: false,
-  isEditing: false
-}));
+        this.workitems = (workitems || []).map(it => ({
+          ...it,
+          editItem: false,
+          isEditing: false
+        }));
         this.applyFilter();
       },
       error: (err) => {
-      this.isLoading = false;
-      console.error('Error fetching workitems', err);
-      // alert(err?.error?.message || 'Error fetching workitems. Please try again later.');
-      this.workitems = [];
-      this.applyFilter();
-    }
+        this.isLoading = false;
+        console.error('Error fetching workitems', err);
+        // alert(err?.error?.message || 'Error fetching workitems. Please try again later.');
+        this.workitems = [];
+        this.applyFilter();
+      }
     });
   }
 
-descriptionEditItem(item: Workitem) {
-  if (item.editItem) {
-    // Save changes here
-    this.workitemService.updateDescription(item.id, item.description)
-      .subscribe({
-        next: () => alert('Description updated successfully'),
-        error: (err) => alert(err?.error?.message || 'Failed to update description')
-      });
+  descriptionEditItem(item: Workitem) {
+    if (item.editItem) {
+      // Save changes here
+      this.workitemService.updateDescription(item.id, item.description)
+        .subscribe({
+          next: () => alert('Description updated successfully'),
+          error: (err) => alert(err?.error?.message || 'Failed to update description')
+        });
+    }
+    item.editItem = !item.editItem;
   }
-  item.editItem = !item.editItem;
-}
 
-saveDescription(item: Workitem) {
+ saveDescription(item: Workitem) {
   item.isEditing = false;
 
   this.workitemService.updateDescription(item.id, item.description).subscribe({
     next: () => {
-      item.showSavedMsg = true; // show the saved message
-
-      // hide after 2 seconds
-      setTimeout(() => {
-        item.showSavedMsg = false;
-      }, 2000);
+      // show popup message on success
+      this.showPopupMessage('Description saved successfully!');
     },
     error: (err) => {
-      alert(err?.error?.message || 'Error updating description');
+      console.error('Error updating description', err);
+      this.showPopupMessage('Failed to save description. Please try again.', true);
       item.isEditing = true; // revert back if update fails
     }
   });
 }
 
-applyFilter() {
-  const keyword = this.searchText.toLowerCase().trim();
 
-  if (keyword.length >= 2) {
-    this.filteredItems = this.workitems.filter(item =>
-      (item.number || '').toLowerCase().includes(keyword) ||
-      (item.name || '').toLowerCase().includes(keyword) ||
-      (item.description || '').toLowerCase().includes(keyword)
-    );
-  } else {
-    this.filteredItems = [...this.workitems];
+  applyFilter() {
+    const keyword = this.searchText.toLowerCase().trim();
+
+    if (keyword.length >= 2) {
+      this.filteredItems = this.workitems.filter(item =>
+        (item.number || '').toLowerCase().includes(keyword) ||
+        (item.name || '').toLowerCase().includes(keyword) ||
+        (item.description || '').toLowerCase().includes(keyword)
+      );
+    } else {
+      this.filteredItems = [...this.workitems];
+    }
+
+    // Sort alphabetically by name
+    this.filteredItems.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+
+    this.currentPage = 1;
+    this.totalPages = Math.ceil(this.filteredItems.length / this.pageSize) || 1;
+    this.updatePagedItems();
   }
-
-  // Sort alphabetically by name
-  this.filteredItems.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
-
-  this.currentPage = 1;
-  this.totalPages = Math.ceil(this.filteredItems.length / this.pageSize) || 1;
-  this.updatePagedItems();
-}
 
   updatePagedItems() {
     const start = (this.currentPage - 1) * this.pageSize;
@@ -195,24 +196,44 @@ toggleIsActive(item: Workitem) {
   const newStatus = !item.isActive;
   item.isActive = newStatus;
 
-  // Use 'number' as identifier
   this.workitemService.updateIsActive(item.id, newStatus).subscribe({
-    next: () => console.log('Status updated successfully'),
+    next: () => {
+      this.showPopupMessage('Status updated successfully!');
+    },
     error: (err) => {
       console.error('Error updating status', err);
-      item.isActive = !newStatus; // revert if failed
-      alert(err?.error?.message || 'Failed to update status. Please try again later.');
+      item.isActive = !newStatus;
+      this.showPopupMessage('Failed to update status. Please try again.', true);
     }
   });
 }
-get paginationInfo(): string {
-  if (!this.filteredItems || this.filteredItems.length === 0) {
-    return 'Showing 0 to 0 of 0 entries';
+
+
+showPopupMessage(message: string, isError: boolean = false) {
+  this.popupMessage = message;
+  this.showPopup = true;
+
+  // Change popup style dynamically if it's an error
+  const popupEl = document.querySelector('.popup');
+  if (popupEl) {
+    popupEl.classList.toggle('error', isError);
   }
 
-  const start = (this.currentPage - 1) * this.pageSize + 1;
-  let end = start + this.pagedItems.length - 1;
-
-  return `Showing ${start} to ${end} of ${this.filteredItems.length} entries`;
+  // Hide after 3 seconds
+  setTimeout(() => {
+    this.showPopup = false;
+  }, 3000);
 }
+
+
+  get paginationInfo(): string {
+    if (!this.filteredItems || this.filteredItems.length === 0) {
+      return 'Showing 0 to 0 of 0 entries';
+    }
+
+    const start = (this.currentPage - 1) * this.pageSize + 1;
+    let end = start + this.pagedItems.length - 1;
+
+    return `Showing ${start} to ${end} of ${this.filteredItems.length} entries`;
+  }
 }
