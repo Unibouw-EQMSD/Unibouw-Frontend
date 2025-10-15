@@ -3,7 +3,7 @@
   font-size: 12px;   /* very small font */
   color: #666;       /* light gray text */
   padding: 10px 0;
-  background: #f8f9fa;  /* optional light background */
+  /* background: #f8f9fa;   */
   position: relative;   /* stays at bottom */
   top:10px;
   bottom: 0;

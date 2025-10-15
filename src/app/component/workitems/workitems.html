@@ -6,127 +6,121 @@
   </header>
 
   <!-- Loading Spinner -->
-  <div class="loading" *ngIf="isLoading">
-    <i class="fa fa-spinner fa-spin"></i> Loading...
-  </div>
+  <div class="loading" *ngIf="isLoading"><i class="fa fa-spinner fa-spin"></i> Loading...</div>
 
   <div class="table-container" *ngIf="!isLoading">
     <!-- Tabs -->
     <div class="tabs">
-      <button [class.active]="activeTab === 'standard'" (click)="setTab('standard')">Standard</button>
+      <button [class.active]="activeTab === 'standard'" (click)="setTab('standard')">
+        Standard
+      </button>
       <button [class.active]="activeTab === 'unibouw'" (click)="setTab('unibouw')">Unibouw</button>
     </div>
 
-    <!-- Search Box -->
-    <div class="search-box">
-      <input
-        type="text"
-        placeholder="Search..."
-        [(ngModel)]="searchText"
-        (input)="applyFilter()"
-      />
-    </div>
-
-    <!-- No Data Message -->
-    <div *ngIf="filteredItems.length === 0" class="no-data" style="text-align: center;">
-      No WorkItems found.
-    </div>
-
-    <!-- Workitems Table -->
- <div class="table-scroll-container">
-  <table class="styled-table" *ngIf="filteredItems.length > 0">
-    <thead>
-      <tr>
-        <th>Code</th>
-        <th>Workitem</th>
-        <th>Description</th>
-        <th *ngIf="isAdmin">Action</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr *ngFor="let item of pagedItems" [class.inactive]="!item.isActive">
-        <td [class.inactive]="!item.isActive">{{ item.number }}</td>
-        <td [class.inactive]="!item.isActive">{{ item.name }}</td>
-        <td class="editable-cell description-column">
-          <div class="input-wrapper">
-            <input
-              type="text"
-              [(ngModel)]="item.description"
-              [readonly]="!item.isEditing || !item.isActive"
-              class="description-input"
-            />
-            <i
-              *ngIf="!item.isEditing"
-              class="fa fa-pencil edit-icon"
-              title="Edit"
-              (click)="item.isEditing = true"
-              [class.disabled]="!item.isActive"
-            ></i>
-            <i
-              *ngIf="item.isEditing"
-              class="fa fa-check save-icon"
-              title="Save"
-              (click)="saveDescription(item)"
-            ></i>
-          </div>
-        </td>
-        <td *ngIf="isAdmin">
-          <label class="switch">
-            <input
-              type="checkbox"
-              [checked]="item.isActive"
-              (change)="toggleIsActive(item)"
-            />
-            <span class="slider"></span>
-          </label>
-        </td>
-      </tr>
-    </tbody>
-  </table>
-</div>
-
-
-    <!-- Pagination -->
-    <div class="pagination-wrapper">
-      <div class="records-per-page">
-        <select id="pageSize" [(ngModel)]="pageSize" (change)="onPageSizeChange()">
-          <option *ngFor="let size of pageSizes" [value]="size">{{ size }}</option>
-        </select>
-        {{ paginationInfo }}
+    <ng-container *ngIf="filteredItems.length === 0; else showDataDiv">
+      <!-- No Data Message -->
+      <div class="no-data" style="text-align: center; color: gray; padding: 80px">
+        No WorkItems found.
       </div>
+    </ng-container>
 
-      <div class="pagination-container">
-        <button
-          class="page-btn"
-          [disabled]="currentPage === 1"
-          (click)="prevPage()"
-        >
-          Previous
-        </button>
-
-        <button
-          class="page-btn"
-          *ngFor="let page of [].constructor(totalPages); let i = index"
-          [class.active]="currentPage === (i + 1)"
-          (click)="goToPage(i + 1)"
-        >
-          {{ i + 1 }}
-        </button>
-
-        <button
-          class="page-btn"
-          [disabled]="currentPage === totalPages"
-          (click)="nextPage()"
-        >
-          Next
-        </button>
+    <!-- Else block -->
+    <ng-template #showDataDiv>
+      <!-- Search Box -->
+      <div class="search-box">
+        <input
+          type="text"
+          placeholder="Search..."
+          [(ngModel)]="searchText"
+          (input)="applyFilter()"
+        />
       </div>
-    </div>
+      <!-- Workitems Table -->
+      <div class="table-scroll-container">
+        <table class="styled-table" *ngIf="filteredItems.length > 0">
+          <thead>
+            <tr>
+              <th>Code</th>
+              <th>Workitem</th>
+              <th>Description</th>
+              <th *ngIf="isAdmin" style="text-align: center !important">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let item of pagedItems" [class.inactive]="!item.isActive">
+              <td [class.inactive]="!item.isActive">{{ item.number }}</td>
+              <td [class.inactive]="!item.isActive">{{ item.name }}</td>
+              <td class="editable-cell description-column">
+                <div class="input-wrapper">
+                  <input
+                    type="text"
+                    [(ngModel)]="item.description"
+                    [readonly]="!item.isEditing || !item.isActive"
+                    class="description-input"
+                  />
+                  <i
+                    *ngIf="!item.isEditing"
+                    class="fa fa-pencil edit-icon"
+                    title="Edit"
+                    (click)="item.isEditing = true"
+                    [class.disabled]="!item.isActive"
+                  ></i>
+                  <i
+                    *ngIf="item.isEditing"
+                    class="fa fa-check save-icon"
+                    title="Save"
+                    (click)="saveDescription(item)"
+                  ></i>
+                </div>
+              </td>
+              <td *ngIf="isAdmin" style="text-align: center !important">
+                <label class="switch">
+                  <input
+                    type="checkbox"
+                    [checked]="item.isActive"
+                    (change)="toggleIsActive(item)"
+                  />
+                  <span class="slider"></span>
+                </label>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <!-- Pagination -->
+      <div class="pagination-wrapper">
+        <div class="records-per-page">
+          <select id="pageSize" [(ngModel)]="pageSize" (change)="onPageSizeChange()">
+            <option *ngFor="let size of pageSizes" [value]="size">{{ size }}</option>
+          </select>
+          {{ paginationInfo }}
+        </div>
+
+        <div class="pagination-container">
+          <button class="page-btn" [disabled]="currentPage === 1" (click)="prevPage()">
+            Previous
+          </button>
+
+          <button
+            class="page-btn"
+            *ngFor="let page of [].constructor(totalPages); let i = index"
+            [class.active]="currentPage === i + 1"
+            (click)="goToPage(i + 1)"
+          >
+            {{ i + 1 }}
+          </button>
+
+          <button class="page-btn" [disabled]="currentPage === totalPages" (click)="nextPage()">
+            Next
+          </button>
+        </div>
+      </div>
+    </ng-template>
   </div>
 </div>
 
 <!-- ✅ Success/Error Popup -->
-<div *ngIf="showPopup" [ngClass]="{ 'popup': true, 'error': popupError }">
+<div *ngIf="showPopup" [ngClass]="{ popup: true, error: popupError }">
   <span *ngIf="!popupError">✅</span>
   <span *ngIf="popupError">❌</span>
   {{ popupMessage }}
