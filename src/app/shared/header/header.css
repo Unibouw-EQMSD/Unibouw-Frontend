@@ -127,7 +127,8 @@ header {
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
   position: relative;
   z-index: 5;
-  top: 19px;
+    width: 97%;
+
 }
 .navbar ul {
   list-style: none;

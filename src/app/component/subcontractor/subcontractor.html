@@ -14,8 +14,8 @@
     [(ngModel)]="searchText" 
     (input)="applyFilter()" />
 </div>
-
-  <table class="styled-table">
+ <div class="table-scroll-container">
+<table class="styled-table">
     <thead>
       <tr>
         <th>Name</th>
@@ -40,6 +40,8 @@
       </tr>
     </tbody>
   </table>
+ </div>
+  
 
   <div class="pagination-wrapper">
  <div >
