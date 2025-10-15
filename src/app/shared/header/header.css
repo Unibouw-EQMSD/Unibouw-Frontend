@@ -71,7 +71,7 @@
   min-width: 180px;
   box-shadow: 0 4px 8px rgba(0,0,0,0.1);
   overflow: hidden;
-  z-index: 100;
+  z-index: 100; 
 }
 
 /* Dropdown header */
@@ -129,7 +129,8 @@ header {
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
   position: relative;
   z-index: 5;
-  top: 2px;
+    width: 97%;
+
 }
 
 .navbar ul {

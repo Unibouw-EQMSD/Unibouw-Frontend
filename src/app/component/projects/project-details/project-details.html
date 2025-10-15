@@ -26,8 +26,8 @@
     [(ngModel)]="searchText" 
     (input)="applyFilter()" />
 </div>
-
-  <table class="styled-table">
+ <div class="table-scroll-container">
+   <table class="styled-table">
     <thead>
       <tr>
         <th>Code</th>
@@ -58,6 +58,8 @@
       </tr>
     </tbody>
   </table>
+</div>
+ 
 
  <div class="pagination-wrapper">
  <div >
