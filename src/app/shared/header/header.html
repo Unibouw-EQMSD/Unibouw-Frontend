@@ -3,8 +3,7 @@
   <div class="container">
     <!-- Left side -->
     <div class="logo-text">
-<img src="assets/images/logo-unibouw.svg" alt="logo" style="height:25px"/>
-
+      <img src="assets/images/logo-unibouw.svg" alt="logo" style="height: 20px" />
     </div>
 
     <!-- Right side -->
@@ -18,14 +17,23 @@
       <!-- User Dropdown -->
       <div class="user-dropdown">
         <button class="dropdown-btn">
-          <i class="fa-solid fa-user"></i>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            height="22"
+            width="22"
+            viewBox="0 0 48 48"
+            fill="#03303E"
+          >
+            <circle cx="24" cy="18" r="8" />
+            <path d="M24 28c-8 0-14 4-14 8v4h28v-4c0-4-6-8-14-8z" />
+            <circle cx="24" cy="24" r="22" fill="none" stroke="#03303E" stroke-width="3" />
+          </svg>
+          <!-- <i class="fa-solid fa-user"></i> -->
           {{ getUserName() }} <i class="fa-solid fa-caret-down"></i>
         </button>
         <div class="dropdown-menu">
-          <div class="dropdown-header"> {{ getUserName() }}</div>
-          <a href="#" class="dropdown-item">
-            <i class="fa-regular fa-user"></i> My Profile
-          </a>
+          <div class="dropdown-header">{{ getUserName() }}</div>
+          <a href="#" class="dropdown-item"> <i class="fa-regular fa-user"></i> My Profile </a>
           <a href="#" class="dropdown-item" (click)="signOut()">
             <i class="fa-solid fa-right-from-bracket"></i> Sign Out
           </a>
@@ -37,13 +45,14 @@
   <!-- Navbar -->
   <nav class="navbar">
     <ul>
-        <!-- <li><i class="fa-solid fa-gauge-simple-high" style="color: white;"></i></li> -->
-      <li><a routerLink="/workitems" [class.active]="isWorkitemActive()">Work Items</a>
-</li>
-      <li><a routerLink="/subcontractor" [class.active]="isSubcontractorActive()">Subcontractors</a></li>
-   <li>
-  <a [routerLink]="'/projectdetails'" [class.active]="isProjectsActive()">Projects</a>
-</li>
- </ul>
+      <!-- <li><i class="fa-solid fa-gauge-simple-high" style="color: white;"></i></li> -->
+      <li><a routerLink="/workitems" [class.active]="isWorkitemActive()">Work Items</a></li>
+      <li>
+        <a routerLink="/subcontractor" [class.active]="isSubcontractorActive()">Subcontractors</a>
+      </li>
+      <li>
+        <a [routerLink]="'/projectdetails'" [class.active]="isProjectsActive()">Projects</a>
+      </li>
+    </ul>
   </nav>
 </header>
