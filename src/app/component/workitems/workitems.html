@@ -9,7 +9,7 @@
   <!-- <div class="loading" *ngIf="isLoading"><i class="fa fa-spinner fa-spin"></i> Loading...</div> -->
 
   <div class="table-container" *ngIf="!isLoading">
-     <div class="skeleton-wrapper" *ngIf="!isLoading; else showTableContent">
+     <div class="skeleton-wrapper" *ngIf="isLoading; else showTableContent">
     <div class="skeleton-box" *ngFor="let i of [].constructor(6)"></div>
   </div>
     <!-- Tabs -->
