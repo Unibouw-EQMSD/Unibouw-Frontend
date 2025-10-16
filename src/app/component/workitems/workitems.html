@@ -6,10 +6,16 @@
   </header>
 
   <!-- Loading Spinner -->
-  <div class="loading" *ngIf="isLoading"><i class="fa fa-spinner fa-spin"></i> Loading...</div>
+  <!-- <div class="loading" *ngIf="isLoading"><i class="fa fa-spinner fa-spin"></i> Loading...</div> -->
 
   <div class="table-container" *ngIf="!isLoading">
+     <div class="skeleton-wrapper" *ngIf="isLoading; else showTableContent">
+    <div class="skeleton-box" *ngFor="let i of [].constructor(6)"></div>
+  </div>
     <!-- Tabs -->
+      <ng-template #showTableContent>
+
+      
     <div class="tabs">
       <button [class.active]="activeTab === 'standard'" (click)="setTab('standard')">
         Standard
@@ -115,6 +121,7 @@
           </button>
         </div>
       </div>
+    </ng-template>
     </ng-template>
   </div>
 </div>
