@@ -115,7 +115,7 @@ header {
   padding: 0px 35px;             
   z-index: 1000; 
   height: 72px;         
-  background: #f9fbfd;
+  background: #f5f5f9;
   box-shadow: 0px 2px 20px rgb(1 41 112 / 10%); 
 }
 
@@ -129,7 +129,7 @@ header {
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
   position: relative;
   z-index: 5;
-    width: 97%;
+    width: 100%;
 
 }
 
