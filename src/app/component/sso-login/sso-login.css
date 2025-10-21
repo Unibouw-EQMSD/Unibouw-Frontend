@@ -52,7 +52,7 @@
   letter-spacing: 1px;
   position: relative;
   z-index: 2;
-  right: 100px;
+  /* right: 100px; */
   bottom: 30px;
 }
 
