@@ -273,6 +273,16 @@ tr.inactive button {
     margin: 0 auto;
 }
 
+.addbtn{
+      color: white;
+    background-color: #ff7f32;
+    border: none;
+    border-radius: 5px;
+    font-size: 14px;
+    font-weight: 300;
+    padding: 2px 12px;
+}
+
 .tabs button {
   flex: 1;
   padding: 10px;
