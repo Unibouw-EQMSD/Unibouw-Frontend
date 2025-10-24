@@ -6,6 +6,7 @@ import { MsalService } from '@azure/msal-angular';
 
 export interface Workitem {
   id: string;
+  categoryId?: any;
   number: string;
   name: string;
   description: string;

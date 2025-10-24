@@ -6,127 +6,117 @@
   </header>
 
   <!-- Loading Spinner -->
-  <!-- <div class="loading" *ngIf="isLoading"><i class="fa fa-spinner fa-spin"></i> Loading...</div> -->
-
-  <div class="table-container" *ngIf="!isLoading">
-     <div class="skeleton-wrapper" *ngIf="isLoading; else showTableContent">
-    <div class="skeleton-box" *ngFor="let i of [].constructor(6)"></div>
+  <div *ngIf="isLoading" class="loading">
+    <mat-spinner></mat-spinner>
   </div>
-    <!-- Tabs -->
-      <ng-template #showTableContent>
 
-      
+  <!-- Material Table -->
+  <div class="table-container" *ngIf="!isLoading">
+    <!-- Tabs -->
     <div class="tabs">
-      <button [class.active]="activeTab === 'standard'" (click)="setTab('standard')">
+      <button mat-button
+              [ngClass]="{'active': activeTab === 'standard'}"
+              (click)="setTab('standard')"
+              class="standardLabel">
         Standard
       </button>
-      <button [class.active]="activeTab === 'unibouw'" (click)="setTab('unibouw')">Unibouw</button>
+      <button mat-button
+              [ngClass]="{'active': activeTab === 'unibouw'}"
+              (click)="setTab('unibouw')"
+              class="unibouwLabel">
+        Unibouw
+      </button>
     </div>
 
-    <ng-container *ngIf="filteredItems.length === 0; else showDataDiv">
-      <!-- No Data Message -->
-      <div class="no-data" style="text-align: center; color: gray; padding: 80px">
-        No WorkItems found.
-      </div>
-    </ng-container>
+    <!-- Search -->
+    <mat-form-field appearance="fill" class="search-box full-width">
+      <mat-label>Search Work Items</mat-label>
+      <input matInput [(ngModel)]="searchText" (input)="applyFilter()" placeholder="Search..." />
+      <button matSuffix mat-icon-button *ngIf="searchText" (click)="searchText=''; applyFilter()">
+        <mat-icon>close</mat-icon>
+      </button>
+    </mat-form-field>
 
-    <!-- Else block -->
-    <ng-template #showDataDiv>
-      <!-- Search Box -->
-      <div class="search-box">
-        <input
-          type="text"
-          placeholder="Search..."
-          [(ngModel)]="searchText"
-          (input)="applyFilter()"
-        />
-      </div>
-      <!-- Workitems Table -->
-      <div class="table-scroll-container">
-        <table class="styled-table" *ngIf="filteredItems.length > 0">
-          <thead>
-            <tr>
-              <th>Code</th>
-              <th>Workitem</th>
-              <th>Description</th>
-              <th *ngIf="isAdmin" style="text-align: center !important">Action</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngFor="let item of pagedItems" [class.inactive]="!item.isActive">
-              <td [class.inactive]="!item.isActive">{{ item.number }}</td>
-              <td [class.inactive]="!item.isActive">{{ item.name }}</td>
-              <td class="editable-cell description-column">
-                <div class="input-wrapper">
-                  <input
-                    type="text"
-                    [(ngModel)]="item.description"
-                    [readonly]="!item.isEditing || !item.isActive"
-                    class="description-input"
-                  />
-                  <i
-                    *ngIf="!item.isEditing"
-                    class="fa fa-pencil edit-icon"
-                    title="Edit"
-                    (click)="item.isEditing = true"
-                    [class.disabled]="!item.isActive"
-                  ></i>
-                  <i
-                    *ngIf="item.isEditing"
-                    class="fa fa-check save-icon"
-                    title="Save"
-                    (click)="saveDescription(item)"
-                  ></i>
-                </div>
-              </td>
-              <td *ngIf="isAdmin" style="text-align: center !important">
-                <label class="switch">
-                  <input
-                    type="checkbox"
-                    [checked]="item.isActive"
-                    (change)="toggleIsActive(item)"
-                  />
-                  <span class="slider"></span>
-                </label>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-      <!-- Pagination -->
-      <div class="pagination-wrapper">
-        <div class="records-per-page">
-          <select id="pageSize" [(ngModel)]="pageSize" (change)="onPageSizeChange()">
-            <option *ngFor="let size of pageSizes" [value]="size">{{ size }}</option>
-          </select>
-          {{ paginationInfo }}
-        </div>
+    <!-- Table -->
+<!-- Table -->
+<table mat-table [dataSource]="dataSource" matSort 
+       matSortActive="name" matSortDirection="asc" 
+       class="mat-elevation-z2 full-width-table">
+      <!-- Code Column -->
+      <ng-container matColumnDef="number">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header> Code </th>
+        <td mat-cell *matCellDef="let item">{{ item.number }}</td>
+      </ng-container>
 
-        <div class="pagination-container">
-          <button class="page-btn" [disabled]="currentPage === 1" (click)="prevPage()">
-            Previous
-          </button>
+      <!-- Workitem Name Column -->
+      <ng-container matColumnDef="name">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header> Workitem </th>
+        <td mat-cell *matCellDef="let item">{{ item.name }}</td>
+      </ng-container>
 
-          <button
-            class="page-btn"
-            *ngFor="let page of [].constructor(totalPages); let i = index"
-            [class.active]="currentPage === i + 1"
-            (click)="goToPage(i + 1)"
-          >
-            {{ i + 1 }}
-          </button>
+      <!-- Description Column -->
+      <ng-container matColumnDef="description">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header> Description </th>
+        <td mat-cell *matCellDef="let item">
+          <div class="input-wrapper-absolute">
+            <input
+              matInput
+              [(ngModel)]="item.description"
+              [readonly]="!item.isEditing || !item.isActive"
+              class="description-input"
+            />
 
-          <button class="page-btn" [disabled]="currentPage === totalPages" (click)="nextPage()">
-            Next
-          </button>
-        </div>
-      </div>
-    </ng-template>
-    </ng-template>
+            <button
+              *ngIf="!item.isEditing"
+              mat-icon-button
+              class="edit-icon"
+              (click)="item.isEditing = true"
+              [disabled]="!item.isActive">
+              <mat-icon>edit</mat-icon>
+            </button>
+
+            <button
+              *ngIf="item.isEditing"
+              mat-icon-button
+              class="tick-icon"
+              (click)="saveDescription(item)">
+              <mat-icon>check</mat-icon>
+            </button>
+          </div>
+        </td>
+      </ng-container>
+
+      <!-- Action Column (Admin Only) -->
+      <ng-container *ngIf="isAdmin" matColumnDef="action">
+        <th mat-header-cell *matHeaderCellDef> Action </th>
+        <td mat-cell *matCellDef="let item">
+          <mat-slide-toggle style="transform: scale(0.7); transform-origin: left center;" 
+                  color="primary" [checked]="item.isActive" 
+                  (change)="toggleIsActive(item)">
+</mat-slide-toggle>
+        </td>
+      </ng-container>
+
+      <!-- Header and Row Definitions -->
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns" [class.inactive]="!row.isActive"></tr>
+    </table>
+
+    <!-- Paginator -->
+    <mat-paginator
+      [pageSize]="pageSize"
+      [pageSizeOptions]="pageSizeOptions"
+      showFirstLastButtons>
+    </mat-paginator>
+  </div>
+
+  <!-- No Data -->
+  <div *ngIf="!isLoading && dataSource.data.length === 0" class="no-data">
+    No WorkItems found.
   </div>
 </div>
 
-<!-- ✅ Success/Error Popup -->
+<!-- Popup -->
 <div *ngIf="showPopup" [ngClass]="{ popup: true, error: popupError }">
   <span *ngIf="!popupError">✅</span>
   <span *ngIf="popupError">❌</span>

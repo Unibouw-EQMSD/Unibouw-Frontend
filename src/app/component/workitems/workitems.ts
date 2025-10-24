@@ -1,7 +1,10 @@
-import { Component, OnInit } from '@angular/core';
-import { WorkitemService, Workitem, WorkitemCategory, isActive } from '../../services/workitem.service';
+import { Component, OnInit, ViewChild, AfterViewInit } from '@angular/core';
+import { WorkitemService, Workitem, WorkitemCategory } from '../../services/workitem.service';
 import { MsalService } from '@azure/msal-angular';
 import { UserService } from '../../services/User.service.';
+import { MatTableDataSource } from '@angular/material/table';
+import { MatPaginator } from '@angular/material/paginator';
+import { MatSort, Sort } from '@angular/material/sort';
 
 @Component({
   selector: 'app-workitems',
@@ -9,76 +12,98 @@ import { UserService } from '../../services/User.service.';
   templateUrl: './workitems.html',
   styleUrls: ['./workitems.css']
 })
-export class Workitems implements OnInit {
-  workitems: Workitem[] = [];
-  filteredItems: Workitem[] = [];
-  pagedItems: Workitem[] = [];
-  pageSize = 5;
-  currentPage = 1;
-  totalPages = 1;
+export class Workitems implements OnInit, AfterViewInit {
+  displayedColumns: string[] = ['number', 'name', 'description', 'action'];
+  dataSource = new MatTableDataSource<Workitem>([]);
   activeTab: 'standard' | 'unibouw' = 'standard';
   searchText: string = '';
   categories: WorkitemCategory[] = [];
   categoryMap: { [key: string]: string } = {};
-  pageSizes: number[] = [5, 10, 25, 50];
-
-  userRoles: string[] = [];
+  pageSize = 100;
+  pageSizeOptions = [5, 10, 25, 50, 100, 200];
   isAdmin: boolean = false;
-  isLoading: boolean = false; // loading indicator
+  isLoading: boolean = false;
   showPopup = false;
   popupMessage = '';
   popupError = false;
 
-  constructor(private workitemService: WorkitemService, private msalService: MsalService, private userService: UserService) { }
+  @ViewChild(MatPaginator) paginator!: MatPaginator;
+  @ViewChild(MatSort) sort!: MatSort;
+
+  constructor(
+    private workitemService: WorkitemService,
+    private msalService: MsalService,
+    private userService: UserService
+  ) {}
 
   ngOnInit() {
-    const user = this.userService.getUser();
-    this.userRoles = this.userService.getUserRoles();
     this.isAdmin = this.userService.isAdmin();
+
+    // Set filter predicate
+    this.dataSource.filterPredicate = (data: Workitem, filter: string) => {
+      const f = filter.trim().toLowerCase();
+      return data.number.toString().includes(f)
+          || data.name.toLowerCase().includes(f)
+          || (data.description || '').toLowerCase().includes(f);
+    };
+
+    // Configure custom sorting accessor for proper data type handling
+    this.dataSource.sortingDataAccessor = (item: Workitem, property: string) => {
+      switch (property) {
+        case 'number':
+          // Handle both string and number types
+          return typeof item.number === 'number' ? item.number : parseInt(item.number.toString()) || 0;
+        case 'name':
+          return item.name?.toLowerCase() || '';
+        case 'description':
+          return (item.description || '').toLowerCase();
+        default:
+          return (item as any)[property];
+      }
+    };
 
     this.loadCategoriesAndWorkitems();
   }
 
-  setUserRoles() {
-    const account = this.msalService.instance.getAllAccounts()[0];
-    if (!account) return;
-
-    const claims: any = account.idTokenClaims;
-
-    // Handle string or array for roles
-    let roles: string[] = [];
-
-    if (claims?.roles) {
-      if (Array.isArray(claims.roles)) {
-        roles = claims.roles;
-      } else if (typeof claims.roles === 'string') {
-        roles = claims.roles.split(',').map((r: string) => r.trim()); // in case multiple roles are comma-separated
-      }
-    }
-
-    this.userRoles = roles;
-    this.isAdmin = roles.some(r => r.toLowerCase() === 'admin');
-
-    console.log('Roles:', this.userRoles, 'isAdmin:', this.isAdmin);
+  ngAfterViewInit() {
+    // Initialize paginator and sort
+    setTimeout(() => {
+      this.dataSource.paginator = this.paginator;
+      this.dataSource.sort = this.sort;
+    });
   }
 
+  applyFilter() {
+    this.dataSource.filter = this.searchText.trim().toLowerCase();
+    if (this.dataSource.paginator) {
+      this.dataSource.paginator.firstPage();
+    }
+  }
 
+setTab(tab: 'standard' | 'unibouw') {
+  this.activeTab = tab;
+  this.searchText = '';
+  this.dataSource.filter = '';
+
+  // Clear existing data immediately
+  this.dataSource.data = [];
+  if (this.paginator) this.paginator.firstPage();
+
+  const categoryId = this.categoryMap[tab];
+  if (categoryId) {
+    this.loadWorkitems(categoryId);
+  } else {
+    console.warn(`Category ID not found for tab ${tab}.`);
+  }
+}
 
   loadCategoriesAndWorkitems() {
     this.isLoading = true;
     this.workitemService.getCategories().subscribe({
-      next: (categories: WorkitemCategory[]) => {
+      next: (categories) => {
         this.isLoading = false;
-        if (!categories || categories.length === 0) {
-          this.categories = [];
-          this.workitems = [];
-          this.applyFilter();
-          return;
-        }
-
-        this.categories = categories;
+        this.categories = categories || [];
         categories.forEach(cat => {
-          if (!cat?.categoryName) return;
           const name = cat.categoryName.toLowerCase();
           if (name === 'standard') this.categoryMap['standard'] = cat.categoryId;
           if (name === 'unibouw') this.categoryMap['unibouw'] = cat.categoryId;
@@ -87,153 +112,77 @@ export class Workitems implements OnInit {
         const categoryId = this.categoryMap[this.activeTab];
         if (categoryId) this.loadWorkitems(categoryId);
       },
-      error: (err) => {
-        this.isLoading = false;
-        console.error('Error fetching categories', err);
-        // alert(err?.error?.message || 'Error fetching categories. Please try again later.');
-        this.categories = [];
-        this.workitems = [];
-        this.applyFilter();
-      }
+      error: () => this.isLoading = false
     });
   }
 
-  loadWorkitems(categoryId: string) {
-    this.isLoading = true;
-    this.workitemService.getWorkitems(categoryId).subscribe({
-      next: (workitems: Workitem[]) => {
-        this.isLoading = false;
-        this.workitems = (workitems || []).map(it => ({
-          ...it,
-          editItem: false,
-          isEditing: false
-        }));
-        this.applyFilter();
-      },
-      error: (err) => {
-        this.isLoading = false;
-        console.error('Error fetching workitems', err);
-        // alert(err?.error?.message || 'Error fetching workitems. Please try again later.');
-        this.workitems = [];
-        this.applyFilter();
-      }
-    });
-  }
+loadWorkitems(categoryId: string) {
+  this.isLoading = true;
+  this.workitemService.getWorkitems(categoryId).subscribe({
+    next: (workitems) => {
+      this.isLoading = false;
+      
+      // Map and sort data by name (ascending)
+      let mapped = (workitems || []).map(it => ({ ...it, isEditing: false }));
+      
+      // Sort by name ascending
+      mapped = mapped.sort((a, b) => {
+        const nameA = (a.name || '').toLowerCase();
+        const nameB = (b.name || '').toLowerCase();
+        return nameA.localeCompare(nameB);
+      });
+      
+      this.dataSource.data = mapped;
 
-  descriptionEditItem(item: Workitem) {
-    if (item.editItem) {
-      // Save changes here
-      this.workitemService.updateDescription(item.id, item.description)
-        .subscribe({
-          next: () => alert('Description updated successfully'),
-          error: (err) => alert(err?.error?.message || 'Failed to update description')
-        });
-    }
-    item.editItem = !item.editItem;
-  }
+      // Re-connect paginator and sort
+      setTimeout(() => {
+        if (this.paginator) {
+          this.dataSource.paginator = this.paginator;
+          this.paginator.firstPage();
+        }
 
- saveDescription(item: Workitem) {
-  item.isEditing = false;
-
-  this.workitemService.updateDescription(item.id, item.description).subscribe({
-    next: () => {
-      // show popup message on success
-      this.showPopupMessage('Description saved successfully!');
+        if (this.sort) {
+          this.dataSource.sort = this.sort;
+          // Default sort by name ascending
+          this.sort.active = 'name';
+          this.sort.direction = 'asc';
+          this.sort.sortChange.emit({ active: 'name', direction: 'asc' });
+        }
+      });
     },
-    error: (err) => {
-      console.error('Error updating description', err);
-      this.showPopupMessage('Failed to save description. Please try again.', true);
-      item.isEditing = true; // revert back if update fails
-    }
+    error: () => this.isLoading = false
   });
 }
 
 
-  applyFilter() {
-    const keyword = this.searchText.toLowerCase().trim();
-
-    if (keyword.length >= 2) {
-      this.filteredItems = this.workitems.filter(item =>
-        (item.number || '').toLowerCase().includes(keyword) ||
-        (item.name || '').toLowerCase().includes(keyword) ||
-        (item.description || '').toLowerCase().includes(keyword)
-      );
-    } else {
-      this.filteredItems = [...this.workitems];
-    }
-
-    // Sort alphabetically by name
-    this.filteredItems.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
-
-    this.currentPage = 1;
-    this.totalPages = Math.ceil(this.filteredItems.length / this.pageSize) || 1;
-    this.updatePagedItems();
+  saveDescription(item: Workitem) {
+    item.isEditing = false;
+    this.workitemService.updateDescription(item.id, item.description).subscribe({
+      next: () => this.showPopupMessage('Description saved successfully!'),
+      error: () => {
+        this.showPopupMessage('Failed to save description. Please try again.', true);
+        item.isEditing = true;
+      }
+    });
   }
 
-  updatePagedItems() {
-    const start = (this.currentPage - 1) * this.pageSize;
-    const end = start + this.pageSize;
-    this.pagedItems = this.filteredItems.slice(start, end);
+  toggleIsActive(item: Workitem) {
+    if (!this.isAdmin) return;
+    const newStatus = !item.isActive;
+    item.isActive = newStatus;
+    this.workitemService.updateIsActive(item.id, newStatus).subscribe({
+      next: () => this.showPopupMessage('Status updated successfully!'),
+      error: () => {
+        item.isActive = !newStatus;
+        this.showPopupMessage('Failed to update status. Please try again.', true);
+      }
+    });
   }
 
-  nextPage() { if (this.currentPage < this.totalPages) { this.currentPage++; this.updatePagedItems(); } }
-  prevPage() { if (this.currentPage > 1) { this.currentPage--; this.updatePagedItems(); } }
-  editItem(item: Workitem) { item.editItem = !item.editItem; }
-  goToPage(page: number) { if (page >= 1 && page <= this.totalPages) { this.currentPage = page; this.updatePagedItems(); } }
-  onPageSizeChange() { this.currentPage = 1; this.totalPages = Math.ceil(this.filteredItems.length / this.pageSize) || 1; this.updatePagedItems(); }
-
-  setTab(tab: 'standard' | 'unibouw') {
-    this.activeTab = tab;
-    this.currentPage = 1;
-    const categoryId = this.categoryMap[tab];
-    if (categoryId) this.loadWorkitems(categoryId);
-  }
-
-
-toggleIsActive(item: Workitem) {
-  if (!this.isAdmin) return;
-
-  const newStatus = !item.isActive;
-  item.isActive = newStatus;
-
-  this.workitemService.updateIsActive(item.id, newStatus).subscribe({
-    next: () => {
-      this.showPopupMessage('Status updated successfully!');
-    },
-    error: (err) => {
-      console.error('Error updating status', err);
-      item.isActive = !newStatus;
-      this.showPopupMessage('Failed to update status. Please try again.', true);
-    }
-  });
-}
-
-
-showPopupMessage(message: string, isError: boolean = false) {
-  this.popupMessage = message;
-  this.showPopup = true;
-
-  // Change popup style dynamically if it's an error
-  const popupEl = document.querySelector('.popup');
-  if (popupEl) {
-    popupEl.classList.toggle('error', isError);
-  }
-
-  // Hide after 3 seconds
-  setTimeout(() => {
-    this.showPopup = false;
-  }, 3000);
-}
-
-
-  get paginationInfo(): string {
-    if (!this.filteredItems || this.filteredItems.length === 0) {
-      return 'Showing 0 to 0 of 0 entries';
-    }
-
-    const start = (this.currentPage - 1) * this.pageSize + 1;
-    let end = start + this.pagedItems.length - 1;
-
-    return `Showing ${start} to ${end} of ${this.filteredItems.length} entries`;
+  showPopupMessage(message: string, isError: boolean = false) {
+    this.popupMessage = message;
+    this.popupError = isError;
+    this.showPopup = true;
+    setTimeout(() => (this.showPopup = false), 3000);
   }
 }

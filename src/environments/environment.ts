@@ -11,6 +11,7 @@ export const environment = {
   getCategoryTypeById: '/WorkItemCategoryType',
   getWorkitems: '/WorkItems',
     getWorkitemsByCategory: '/WorkItems/WorkItemByCategory',
-
   getWorkitemsById: '/WorkItems',
+  getSubcontractor: '/Subcontractor',
+  postSubcontractor: '/Subcontractor'
 };

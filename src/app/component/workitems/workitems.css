@@ -64,13 +64,9 @@
 
 /* Edit button */
 .description-input + button:nth-of-type(1) {
-  background-color: #ff7f32;
-  color: #fff;
+  color: #ff7f32 !important;
 }
 
-.description-input + button:nth-of-type(1):hover {
-  background-color: #e06c1f;
-}
 
 /* Save button */
 .description-input + button:nth-of-type(2) {
