@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { WorkitemService,Workitem, WorkitemCategory } from '../../services/workitem.service';
 import { SubcontractorService } from '../../services/subcontractor.service';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-add-subcontractor',
@@ -26,7 +27,7 @@ uploadedFilePath: string = '';
   popupMessage = '';
   popupError = false;
   selectedCategoryId: string = '';  
-  constructor(private fb: FormBuilder,private workItemService: WorkitemService,private subcontractorService: SubcontractorService) {
+  constructor(private fb: FormBuilder,private router: Router,private workItemService: WorkitemService,private subcontractorService: SubcontractorService) {
     this.subcontractorForm = this.fb.group({
       name: [''],
       location: [''],
@@ -41,11 +42,36 @@ uploadedFilePath: string = '';
     });
   }
 
-  ngOnInit() {
-if (this.categories.length > 0) {
+ ngOnInit() {
+  if (this.categories.length > 0) {
     this.selectedCategoryId = this.categories[0].categoryId;
     this.loadWorkitems();
-  } }
+  }
+
+  const officeCtrl = this.subcontractorForm.get('officeAddress');
+  const billingCtrl = this.subcontractorForm.get('billingAddress');
+  const sameAsCtrl = this.subcontractorForm.get('sameAsOffice');
+
+  // Whenever checkbox changes
+  sameAsCtrl?.valueChanges.subscribe((checked) => {
+    if (checked) {
+      // Set billingAddress to officeAddress and disable editing
+      billingCtrl?.setValue(officeCtrl?.value);
+      billingCtrl?.disable();
+
+      // Subscribe to officeAddress changes
+      officeCtrl?.valueChanges.subscribe((val) => {
+        if (sameAsCtrl?.value) {
+          billingCtrl?.setValue(val, { emitEvent: false }); // avoid circular updates
+        }
+      });
+    } else {
+      // Enable billingAddress for manual editing
+      billingCtrl?.enable();
+    }
+  });
+}
+
 
   // Load workitems for selected category
    loadWorkitems() {
@@ -104,6 +130,7 @@ addMoreFiles() {
 onSubmit() {
   if (this.subcontractorForm.valid) {
     const formValue = this.subcontractorForm.value;
+    const billingAddress = formValue.sameAsOffice ? formValue.officeAddress : formValue.billingAddress;
 
     const payload = {
       erpId: formValue.erpId || "ERP-SUB-001",
@@ -116,7 +143,7 @@ onSubmit() {
       location: formValue.location,
       country: formValue.country,
       officeAdress: formValue.officeAddress,
-      billingAddress: formValue.billingAddress,
+      billingAddress: billingAddress, 
       registeredDate: formValue.registeredDate,
       isActive: formValue.status === 'Active',
       createdBy: "nitish.ra@flatworldsolutions.com",
@@ -140,6 +167,8 @@ onSubmit() {
     this.subcontractorService.createSubcontractor(payload).subscribe({
       next: res => {
         this.showPopupMessage('Subcontractor created successfully!');
+          // this.router.navigate(['/subcontractor']);
+
         this.onCancel();
       },
       error: err => {
@@ -156,12 +185,14 @@ onSubmit() {
 
 
   onCancel() {
-    this.subcontractorForm.reset({
-      status: 'Active',
-      sameAsOffice: false,
-      attachments: null
-    });
-    this.selectedWorkitems = [];
+    // this.subcontractorForm.reset({
+    //   status: 'Active',
+    //   sameAsOffice: false,
+    //   attachments: null
+    // });
+    // this.selectedWorkitems = [];
+    this.router.navigate(['/subcontractor']);
+
   }
 
   // Helper function for template to check if a workitem is selected

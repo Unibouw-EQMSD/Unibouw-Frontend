@@ -63,14 +63,32 @@ export class Subcontractor implements OnInit, AfterViewInit {
     this.subcontractorService.getSubcontractors().subscribe({
       next: (subcontractors: Subcontractors[]) => {
         this.isLoading = false;
-        this.dataSource.data = subcontractors || [];
+           let mapped = (subcontractors || []).map(it => ({ ...it, isEditing: false }));
+      
+      // Sort by name ascending
+      mapped = mapped.sort((a, b) => {
+        const nameA = (a.name || '').toLowerCase();
+        const nameB = (b.name || '').toLowerCase();
+        return nameA.localeCompare(nameB);
+      });
+        this.dataSource.data = mapped || [];
 
-        // Reconnect paginator after data load
+       // Re-connect paginator and sort
+      setTimeout(() => {
         if (this.paginator) {
           this.dataSource.paginator = this.paginator;
-          this.paginator.pageSize = this.pageSize;
+          this.paginator.firstPage();
         }
-      },
+
+        if (this.sort) {
+          this.dataSource.sort = this.sort;
+          // Default sort by name ascending
+          this.sort.active = 'name';
+          this.sort.direction = 'asc';
+          this.sort.sortChange.emit({ active: 'name', direction: 'asc' });
+        }
+      });
+    },
       error: (err) => {
         this.isLoading = false;
         console.error('Error fetching subcontractors', err);
@@ -114,8 +132,14 @@ export class Subcontractor implements OnInit, AfterViewInit {
     this.showPopup = true;
     setTimeout(() => (this.showPopup = false), 3000);
   }
-  getShortCategory(category: string | null | undefined): string {
-  if (!category) return '';
-  return category.length > 3 ? category.substring(0, 3) + '...' : category;
+getStartIndex(): number {
+  if (!this.paginator) return 0;
+  return this.paginator.pageIndex * this.paginator.pageSize + 1;
+}
+
+getEndIndex(): number {
+  if (!this.paginator) return 0;
+  const end = (this.paginator.pageIndex + 1) * this.paginator.pageSize;
+  return end > this.dataSource.data.length ? this.dataSource.data.length : end;
 }
 }

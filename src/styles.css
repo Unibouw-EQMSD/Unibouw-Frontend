@@ -119,6 +119,45 @@ table.mat-table {
 table.mat-header-row, table.mat-row {
   display: table-row;
 }
+
+.table-scroll {
+  max-height: 400px;   /* adjust height */
+  overflow-y: auto;    /* enable vertical scrolling */
+}
+
+table.mat-table {
+  width: 100%;
+  table-layout: fixed;
+}
+
+.mat-header-row {
+  position: sticky;
+  top: 0;
+  background-color: #fff;  /* ensure header background is solid */
+  z-index: 10;             /* stay on top of rows */
+}
+
+.mat-header-cell {
+  padding: 10px;
+  font-weight: bold;
+  border-bottom: 1px solid #ddd;
+}
+
+.mat-cell {
+  padding: 10px;
+  border-bottom: 1px solid #eee;
+}
+
+.full-width-table {
+  min-width: 600px;    /* optional: horizontal scroll for wide tables */
+}
+
+.sticky-header {
+  position: sticky;
+  top: 0;
+  background-color: #fff;  /* solid background for header */
+  z-index: 5;
+}
 .mat-header-cell {
   position: sticky;
   top: 0;
@@ -380,4 +419,11 @@ button.mat-raised-button {
 /* Keep the sort arrow visible for the active (sorted) column */
 .mat-sort-header-sorted .mat-sort-header-arrow {
   opacity: 1 !important;
+}
+.record-count {
+  text-align: right;
+  font-size: 14px;
+  color: #555;
+  margin-top: 8px;
+  margin-right: 5px;
 }

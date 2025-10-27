@@ -185,4 +185,14 @@ loadWorkitems(categoryId: string) {
     this.showPopup = true;
     setTimeout(() => (this.showPopup = false), 3000);
   }
+  getStartIndex(): number {
+  if (!this.paginator) return 0;
+  return this.paginator.pageIndex * this.paginator.pageSize + 1;
+}
+
+getEndIndex(): number {
+  if (!this.paginator) return 0;
+  const end = (this.paginator.pageIndex + 1) * this.paginator.pageSize;
+  return end > this.dataSource.data.length ? this.dataSource.data.length : end;
+}
 }
