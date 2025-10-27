@@ -90,7 +90,7 @@
       <ng-container *ngIf="isAdmin" matColumnDef="action">
         <th mat-header-cell *matHeaderCellDef> Action </th>
         <td mat-cell *matCellDef="let item">
-          <mat-slide-toggle style="transform: scale(0.7); transform-origin: left center;" 
+          <mat-slide-toggle class="toggle"
                   color="primary" [checked]="item.isActive" 
                   (change)="toggleIsActive(item)">
 </mat-slide-toggle>

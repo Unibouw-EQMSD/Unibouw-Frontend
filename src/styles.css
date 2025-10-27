@@ -427,3 +427,8 @@ button.mat-raised-button {
   margin-top: 8px;
   margin-right: 5px;
 }
+
+.toggle{
+  transform: scale(0.7); 
+  transform-origin: left center;
+}
