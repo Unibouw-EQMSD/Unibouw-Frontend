@@ -23,6 +23,8 @@ export class Workitems implements OnInit, AfterViewInit {
   pageSizeOptions = [5, 10, 25, 50, 100, 200];
   isAdmin: boolean = false;
   isLoading: boolean = false;
+  isSkeletonLoading: boolean = true;
+
   showPopup = false;
   popupMessage = '';
   popupError = false;
@@ -39,32 +41,29 @@ export class Workitems implements OnInit, AfterViewInit {
   ngOnInit() {
     this.isAdmin = this.userService.isAdmin();
 
-    // Set filter predicate
-    this.dataSource.filterPredicate = (data: Workitem, filter: string) => {
-      const f = filter.trim().toLowerCase();
-      return data.number.toString().includes(f)
-          || data.name.toLowerCase().includes(f)
-          || (data.description || '').toLowerCase().includes(f);
-    };
+     this.dataSource.filterPredicate = (data: Workitem, filter: string) => {
+    const f = filter.trim().toLowerCase();
+    return data.number.toString().includes(f)
+        || data.name.toLowerCase().includes(f)
+        || (data.description || '').toLowerCase().includes(f);
+  };
 
-    // Configure custom sorting accessor for proper data type handling
-    this.dataSource.sortingDataAccessor = (item: Workitem, property: string) => {
-      switch (property) {
-        case 'number':
-          // Handle both string and number types
-          return typeof item.number === 'number' ? item.number : parseInt(item.number.toString()) || 0;
-        case 'name':
-          return item.name?.toLowerCase() || '';
-        case 'description':
-          return (item.description || '').toLowerCase();
-        default:
-          return (item as any)[property];
-      }
-    };
+  this.dataSource.sortingDataAccessor = (item: Workitem, property: string) => {
+    switch (property) {
+      case 'number':
+        return typeof item.number === 'number' ? item.number : parseInt(item.number.toString()) || 0;
+      case 'name':
+        return item.name?.toLowerCase() || '';
+      case 'description':
+        return (item.description || '').toLowerCase();
+      default:
+        return (item as any)[property];
+    }
+  };
 
-    this.loadCategoriesAndWorkitems();
-  }
-
+  // first page load
+  this.loadCategoriesAndWorkitems(true);
+}
   ngAfterViewInit() {
     // Initialize paginator and sort
     setTimeout(() => {
@@ -97,67 +96,72 @@ setTab(tab: 'standard' | 'unibouw') {
   }
 }
 
-  loadCategoriesAndWorkitems() {
+loadCategoriesAndWorkitems(isFirstLoad = false) {
+  if (isFirstLoad) {
+    this.isSkeletonLoading = true;
+  } else {
     this.isLoading = true;
-    this.workitemService.getCategories().subscribe({
-      next: (categories) => {
-        this.isLoading = false;
-        this.categories = categories || [];
-        categories.forEach(cat => {
-          const name = cat.categoryName.toLowerCase();
-          if (name === 'standard') this.categoryMap['standard'] = cat.categoryId;
-          if (name === 'unibouw') this.categoryMap['unibouw'] = cat.categoryId;
-        });
-
-        const categoryId = this.categoryMap[this.activeTab];
-        if (categoryId) this.loadWorkitems(categoryId);
-      },
-      error: () => this.isLoading = false
-    });
   }
+
+  this.workitemService.getCategories().subscribe({
+    next: (categories) => {
+      this.isLoading = false;
+      if (isFirstLoad) this.isSkeletonLoading = false;
+
+      this.categories = categories || [];
+      categories.forEach(cat => {
+        const name = cat.categoryName.toLowerCase();
+        if (name === 'standard') this.categoryMap['standard'] = cat.categoryID;
+        if (name === 'unibouw') this.categoryMap['unibouw'] = cat.categoryID;
+      });
+
+      const categoryId = this.categoryMap[this.activeTab];
+      if (categoryId) this.loadWorkitems(categoryId);
+    },
+    error: () => {
+      this.isLoading = false;
+      this.isSkeletonLoading = false;
+    }
+  });
+}
 
 loadWorkitems(categoryId: string) {
   this.isLoading = true;
+
   this.workitemService.getWorkitems(categoryId).subscribe({
     next: (workitems) => {
       this.isLoading = false;
-      
-      // Map and sort data by name (ascending)
+      this.isSkeletonLoading = false;
+
       let mapped = (workitems || []).map(it => ({ ...it, isEditing: false }));
-      
-      // Sort by name ascending
-      mapped = mapped.sort((a, b) => {
-        const nameA = (a.name || '').toLowerCase();
-        const nameB = (b.name || '').toLowerCase();
-        return nameA.localeCompare(nameB);
-      });
-      
+      mapped = mapped.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+
       this.dataSource.data = mapped;
 
-      // Re-connect paginator and sort
       setTimeout(() => {
         if (this.paginator) {
           this.dataSource.paginator = this.paginator;
           this.paginator.firstPage();
         }
-
         if (this.sort) {
           this.dataSource.sort = this.sort;
-          // Default sort by name ascending
           this.sort.active = 'name';
           this.sort.direction = 'asc';
           this.sort.sortChange.emit({ active: 'name', direction: 'asc' });
         }
       });
     },
-    error: () => this.isLoading = false
+    error: () => {
+      this.isLoading = false;
+      this.isSkeletonLoading = false;
+    }
   });
 }
 
 
   saveDescription(item: Workitem) {
     item.isEditing = false;
-    this.workitemService.updateDescription(item.id, item.description).subscribe({
+    this.workitemService.updateDescription(item.workItemID, item.description).subscribe({
       next: () => this.showPopupMessage('Description saved successfully!'),
       error: () => {
         this.showPopupMessage('Failed to save description. Please try again.', true);
@@ -170,7 +174,7 @@ loadWorkitems(categoryId: string) {
     if (!this.isAdmin) return;
     const newStatus = !item.isActive;
     item.isActive = newStatus;
-    this.workitemService.updateIsActive(item.id, newStatus).subscribe({
+    this.workitemService.updateIsActive(item.workItemID, newStatus).subscribe({
       next: () => this.showPopupMessage('Status updated successfully!'),
       error: () => {
         item.isActive = !newStatus;

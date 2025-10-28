@@ -86,8 +86,8 @@
         *ngFor="let cat of categories" 
         type="button" 
         class="tab" 
-        [class.active]="selectedCategoryId === cat.categoryId"
-        (click)="selectCategory(cat.categoryId)"
+        [class.active]="selectedCategoryId === cat.categoryID"
+        (click)="selectCategory(cat.categoryID)"
       >
         {{ cat.categoryName }}
       </button>

@@ -1,127 +1,179 @@
 <app-header></app-header>
 
 <div class="container">
+  <!-- 🧩 Header -->
   <header class="page-header">
     <h2>Work Items</h2>
   </header>
 
-  <!-- Loading Spinner -->
-  <div *ngIf="isLoading" class="loading">
-    <mat-spinner></mat-spinner>
+  <!-- 🦴 Skeleton Loader (Initial Full Page Load) -->
+  <div *ngIf="isSkeletonLoading" class="skeleton-container single-box">
+    <div class="skeleton-box"></div>
   </div>
 
-  <!-- Material Table -->
-  <div class="table-container" *ngIf="!isLoading">
-    <!-- Tabs -->
+  <!-- 📋 Table Container -->
+  <div class="table-container" *ngIf="!isSkeletonLoading">
+    <!-- 🧭 Tabs -->
     <div class="tabs">
-      <button mat-button
-              [ngClass]="{'active': activeTab === 'standard'}"
-              (click)="setTab('standard')"
-              class="standardLabel">
+      <button
+        mat-button
+        [ngClass]="{ active: activeTab === 'standard' }"
+        (click)="setTab('standard')"
+        class="standardLabel"
+      >
         Standard
       </button>
-      <button mat-button
-              [ngClass]="{'active': activeTab === 'unibouw'}"
-              (click)="setTab('unibouw')"
-              class="unibouwLabel">
+      <button
+        mat-button
+        [ngClass]="{ active: activeTab === 'unibouw' }"
+        (click)="setTab('unibouw')"
+        class="unibouwLabel"
+      >
         Unibouw
       </button>
     </div>
 
-    <!-- Search -->
+    <!-- 🔍 Search -->
     <mat-form-field appearance="fill" class="search-box full-width">
-      <input matInput [(ngModel)]="searchText" (input)="applyFilter()" placeholder="Search..." />
-      <button matSuffix mat-icon-button *ngIf="searchText" (click)="searchText=''; applyFilter()">
+      <input
+        matInput
+        [(ngModel)]="searchText"
+        (input)="applyFilter()"
+        placeholder="Search..."
+      />
+      <button
+        matSuffix
+        mat-icon-button
+        *ngIf="searchText"
+        (click)="searchText = ''; applyFilter()"
+      >
         <mat-icon>close</mat-icon>
       </button>
     </mat-form-field>
 
-    <!-- Table -->
-<!-- Table -->
-       <div class="table-scroll">
-        <table mat-table [dataSource]="dataSource" matSort 
-       matSortActive="name" matSortDirection="asc" 
-       class="mat-elevation-z2 full-width-table">
-      <!-- Code Column -->
-      <ng-container matColumnDef="number">
-        <th mat-header-cell *matHeaderCellDef mat-sort-header> Code </th>
-        <td mat-cell *matCellDef="let item">{{ item.number }}</td>
-      </ng-container>
+    <!-- 🧾 Table -->
+    <div class="table-scroll">
+      <table
+        mat-table
+        [dataSource]="dataSource"
+        matSort
+        matSortActive="name"
+        matSortDirection="asc"
+        class="mat-elevation-z2 full-width-table"
+      >
+        <!-- ✅ Number Column -->
+        <ng-container matColumnDef="number">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header> Code </th>
+          <td mat-cell *matCellDef="let item">{{ item.number }}</td>
+        </ng-container>
 
-      <!-- Workitem Name Column -->
-      <ng-container matColumnDef="name">
-        <th mat-header-cell *matHeaderCellDef mat-sort-header> Workitem </th>
-        <td mat-cell *matCellDef="let item">{{ item.name }}</td>
-      </ng-container>
+        <!-- ✅ Workitem Name Column -->
+        <ng-container matColumnDef="name">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header> Workitem </th>
+          <td mat-cell *matCellDef="let item">{{ item.name }}</td>
+        </ng-container>
 
-      <!-- Description Column -->
-      <ng-container matColumnDef="description">
-        <th mat-header-cell *matHeaderCellDef mat-sort-header> Description </th>
-        <td mat-cell *matCellDef="let item">
-          <div class="input-wrapper-absolute">
-            <input
-              matInput
-              [(ngModel)]="item.description"
-              [readonly]="!item.isEditing || !item.isActive"
-              class="description-input"
-            />
+        <!-- ✅ Description Column -->
+        <ng-container matColumnDef="description">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>
+            Description
+          </th>
+          <td mat-cell *matCellDef="let item">
+            <div class="input-wrapper-absolute">
+              <input
+                matInput
+                [(ngModel)]="item.description"
+                [readonly]="!item.isEditing || !item.isActive"
+                class="description-input"
+              />
 
-            <button
-              *ngIf="!item.isEditing"
-              mat-icon-button
-              class="edit-icon"
-              (click)="item.isEditing = true"
-              [disabled]="!item.isActive">
-              <mat-icon>edit</mat-icon>
-            </button>
+              <button
+                *ngIf="!item.isEditing"
+                mat-icon-button
+                class="edit-icon"
+                (click)="item.isEditing = true"
+                [disabled]="!item.isActive"
+              >
+                <mat-icon>edit</mat-icon>
+              </button>
 
-            <button
-              *ngIf="item.isEditing"
-              mat-icon-button
-              class="tick-icon"
-              (click)="saveDescription(item)">
-              <mat-icon>check</mat-icon>
-            </button>
-          </div>
-        </td>
-      </ng-container>
+              <button
+                *ngIf="item.isEditing"
+                mat-icon-button
+                class="tick-icon"
+                (click)="saveDescription(item)"
+              >
+                <mat-icon>check</mat-icon>
+              </button>
+            </div>
+          </td>
+        </ng-container>
 
-      <!-- Action Column (Admin Only) -->
-      <ng-container *ngIf="isAdmin" matColumnDef="action">
-        <th mat-header-cell *matHeaderCellDef> Action </th>
-        <td mat-cell *matCellDef="let item">
-          <mat-slide-toggle class="toggle"
-                  color="primary" [checked]="item.isActive" 
-                  (change)="toggleIsActive(item)">
-</mat-slide-toggle>
-        </td>
-      </ng-container>
+        <!-- ✅ Action Column (Admin Only) -->
+        <ng-container *ngIf="isAdmin" matColumnDef="action">
+          <th mat-header-cell *matHeaderCellDef> Action </th>
+          <td mat-cell *matCellDef="let item">
+            <mat-slide-toggle
+              class="toggle"
+              color="primary"
+              [checked]="item.isActive"
+              (change)="toggleIsActive(item)"
+            >
+            </mat-slide-toggle>
+          </td>
+        </ng-container>
 
-      <!-- Header and Row Definitions -->
-      <tr mat-header-row *matHeaderRowDef="displayedColumns" class="sticky-header"></tr>
-      <tr mat-row *matRowDef="let row; columns: displayedColumns" [class.inactive]="!row.isActive"></tr>
-    </table>
-</div>
+        <!-- ✅ Header and Row Definitions -->
+        <tr
+          mat-header-row
+          *matHeaderRowDef="displayedColumns"
+          [class.hidden]="isLoading || dataSource.data.length === 0"
+          class="sticky-header"
+        ></tr>
 
+        <tr
+          mat-row
+          *matRowDef="let row; columns: displayedColumns"
+          [class.hidden]="isLoading"
+          [class.inactive]="!row.isActive"
+        ></tr>
 
-    <!-- Paginator -->
+        <!-- ✅ Loading or No Data Row -->
+        <tr *matNoDataRow>
+          <td
+            [attr.colspan]="displayedColumns.length"
+            class="table-spinner-cell"
+          >
+            <ng-container *ngIf=" isLoading">
+              <mat-spinner diameter="40"></mat-spinner>
+            </ng-container>
+            <ng-container *ngIf="!isLoading">
+              <div class="no-data-message">No WorkItems found.</div>
+            </ng-container>
+          </td>
+        </tr>
+      </table>
+    </div>
+
+    <!-- 📄 Paginator -->
     <mat-paginator
       [pageSize]="pageSize"
       [pageSizeOptions]="pageSizeOptions"
-      showFirstLastButtons>
+      showFirstLastButtons
+    >
     </mat-paginator>
-    <div class="record-count">
-  Showing {{ getStartIndex() }} – {{ getEndIndex() }} of {{ dataSource.data.length }} entries
-</div>
-  </div>
 
-  <!-- No Data -->
-  <div *ngIf="!isLoading && dataSource.data.length === 0" class="no-data">
-    No WorkItems found.
+    <!-- <div
+      class="record-count"
+      *ngIf="!isLoading && dataSource.data.length > 0"
+    >
+      Showing {{ getStartIndex() }} – {{ getEndIndex() }} of
+      {{ dataSource.data.length }} entries
+    </div> -->
   </div>
 </div>
 
-<!-- Popup -->
+<!-- ✅ Popup -->
 <div *ngIf="showPopup" [ngClass]="{ popup: true, error: popupError }">
   <span *ngIf="!popupError">✅</span>
   <span *ngIf="popupError">❌</span>

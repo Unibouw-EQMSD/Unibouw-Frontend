@@ -9,7 +9,61 @@ body {
   padding: 0;
   background-color: #f5f5f9 !important;
 }
+/* ✅ Skeleton Loader Styles */
+.table-spinner-cell {
+  text-align: center;
+  height: 220px;
+  vertical-align: middle;
+}
 
+.table-spinner-cell mat-spinner {
+  margin: auto;
+}
+
+.no-data-message {
+  text-align: center;
+  font-weight: 500;
+  font-size: 16px;
+  color: #666;
+}
+
+/* ✅ Hide header rows when loading or empty */
+.hidden {
+  display: none !important;
+}
+
+/* ✅ Optional: smoother visual transition */
+.table-scroll {
+  position: relative;
+  width: 100%;
+  overflow-x: auto;
+  transition: opacity 0.2s ease-in-out;
+}
+
+.skeleton-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 300px;
+}
+
+.skeleton-box {
+  width: 80%;
+  height: 200px;
+  background: linear-gradient(90deg, #e0e0e0 25%, #f5f5f5 50%, #e0e0e0 75%);
+  background-size: 400% 100%;
+  animation: skeleton-loading 1.2s infinite;
+  border-radius: 10px;
+}
+
+@keyframes skeleton-loading {
+  0% {
+    background-position: 100% 0;
+  }
+  100% {
+    background-position: -100% 0;
+  }
+}
 /* Container */
 .container {
   padding: 38px 36px 15px;
@@ -24,7 +78,7 @@ body {
 }
 .page-header h2 {
   font-size: 1.5rem;
-  font-weight: 200;
+  font-weight: 400;
   color: #003042;
   margin: 0;
 }
@@ -64,7 +118,9 @@ body {
     color: #ff7f32 !important;
 
 }
-
+.mat-mdc-form-field-focus-overlay{
+  background-color: #fff !important;
+}
 
 /* Search box - fixed width */
 .search-box {
@@ -156,8 +212,9 @@ table.mat-table {
   position: sticky;
   top: 0;
   background-color: #fff;  /* solid background for header */
-  z-index: 5;
+  z-index: 20;
 }
+
 .mat-header-cell {
   position: sticky;
   top: 0;
@@ -217,6 +274,7 @@ td.inactive {
   background: transparent !important;
   border: none !important;
   box-shadow: none !important;
+   z-index: 1;
 }
 
 /* Edit icon styling */

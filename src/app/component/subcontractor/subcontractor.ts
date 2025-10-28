@@ -12,18 +12,17 @@ import { MatSort } from '@angular/material/sort';
   styleUrl: './subcontractor.css',
 })
 export class Subcontractor implements OnInit, AfterViewInit {
-  displayedColumns: string[] = ['name', 'category', 'contactPerson', 'emailId', 'action'];
+ displayedColumns: string[] = ['name', 'category', 'contactPerson', 'emailId', 'action'];
   dataSource = new MatTableDataSource<Subcontractors>([]);
   
-  searchText: string = '';
-  isAdmin: boolean = false;
-  isLoading: boolean = false;
+  searchText = '';
+  isAdmin = false;
 
-  showPopup = false;
-  popupMessage = '';
-  popupError = false;
+  // Loader flags
+  isSkeletonLoading = true;
+  isLoading = false;
 
-  // Paginator settings
+  // Pagination
   pageSize = 100;
   pageSizeOptions = [5, 10, 25, 50, 100];
 
@@ -38,60 +37,40 @@ export class Subcontractor implements OnInit, AfterViewInit {
   ngOnInit() {
     this.isAdmin = this.userService.isAdmin();
 
-    // Filter logic
-    this.dataSource.filterPredicate = (data: Subcontractors, filter: string) => {
-      const f = filter.trim().toLowerCase();
-      return (
-        data.name?.toLowerCase().includes(f) ||
-        (data.category || '').toLowerCase().includes(f) ||
-        (data.contactPerson || '').toLowerCase().includes(f) ||
-        (data.emailId || '').toLowerCase().includes(f)
-      );
-    };
+    // Show skeleton first, then load table
+  this.isSkeletonLoading = true;
 
+  setTimeout(() => {
+    this.isSkeletonLoading = false;
+    this.isLoading = true;
     this.loadSubcontractors();
-  }
+  }, 1000);
+}
+
+  
 
   ngAfterViewInit() {
-    // Attach paginator and sort once view is initialized
     this.dataSource.paginator = this.paginator;
     this.dataSource.sort = this.sort;
   }
 
   loadSubcontractors() {
     this.isLoading = true;
+
     this.subcontractorService.getSubcontractors().subscribe({
       next: (subcontractors: Subcontractors[]) => {
         this.isLoading = false;
-           let mapped = (subcontractors || []).map(it => ({ ...it, isEditing: false }));
-      
-      // Sort by name ascending
-      mapped = mapped.sort((a, b) => {
-        const nameA = (a.name || '').toLowerCase();
-        const nameB = (b.name || '').toLowerCase();
-        return nameA.localeCompare(nameB);
-      });
-        this.dataSource.data = mapped || [];
 
-       // Re-connect paginator and sort
-      setTimeout(() => {
-        if (this.paginator) {
-          this.dataSource.paginator = this.paginator;
-          this.paginator.firstPage();
-        }
+        const mapped = (subcontractors || []).map(it => ({ ...it, isEditing: false }));
+        mapped.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+        this.dataSource.data = mapped;
 
-        if (this.sort) {
-          this.dataSource.sort = this.sort;
-          // Default sort by name ascending
-          this.sort.active = 'name';
-          this.sort.direction = 'asc';
-          this.sort.sortChange.emit({ active: 'name', direction: 'asc' });
-        }
-      });
-    },
+        if (this.paginator) this.dataSource.paginator = this.paginator;
+        if (this.sort) this.dataSource.sort = this.sort;
+      },
       error: (err) => {
-        this.isLoading = false;
         console.error('Error fetching subcontractors', err);
+        this.isLoading = false;
         this.dataSource.data = [];
       },
     });
@@ -99,12 +78,9 @@ export class Subcontractor implements OnInit, AfterViewInit {
 
   applyFilter() {
     this.dataSource.filter = this.searchText.trim().toLowerCase();
-    if (this.dataSource.paginator) {
-      this.dataSource.paginator.firstPage();
-    }
+    if (this.dataSource.paginator) this.dataSource.paginator.firstPage();
   }
 
-  // Called whenever user changes page size
   onPageSizeChange(event: PageEvent) {
     this.pageSize = event.pageSize;
     this.paginator.pageSize = this.pageSize;
@@ -118,28 +94,22 @@ export class Subcontractor implements OnInit, AfterViewInit {
     item.isActive = newStatus;
 
     this.subcontractorService.updateIsActive(item.id, newStatus).subscribe({
-      next: () => this.showPopupMessage('Status updated successfully!'),
+      next: () => console.log('Status updated'),
       error: () => {
         item.isActive = !newStatus;
-        this.showPopupMessage('Failed to update status. Please try again.', true);
+        console.error('Failed to update status');
       },
     });
   }
 
-  showPopupMessage(message: string, isError: boolean = false) {
-    this.popupMessage = message;
-    this.popupError = isError;
-    this.showPopup = true;
-    setTimeout(() => (this.showPopup = false), 3000);
+  getStartIndex(): number {
+    if (!this.paginator) return 0;
+    return this.paginator.pageIndex * this.paginator.pageSize + 1;
   }
-getStartIndex(): number {
-  if (!this.paginator) return 0;
-  return this.paginator.pageIndex * this.paginator.pageSize + 1;
-}
 
-getEndIndex(): number {
-  if (!this.paginator) return 0;
-  const end = (this.paginator.pageIndex + 1) * this.paginator.pageSize;
-  return end > this.dataSource.data.length ? this.dataSource.data.length : end;
-}
+  getEndIndex(): number {
+    if (!this.paginator) return 0;
+    const end = (this.paginator.pageIndex + 1) * this.paginator.pageSize;
+    return end > this.dataSource.data.length ? this.dataSource.data.length : end;
+  }
 }

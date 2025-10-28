@@ -8,37 +8,38 @@
     </button>
   </header>
 
-  <div *ngIf="isLoading" class="loading">
-    <mat-spinner></mat-spinner>
+  <!-- 🦴 SKELETON LOADER (Initial full page load) -->
+  <div *ngIf="isSkeletonLoading" class="skeleton-container">
+    <div class="skeleton-box"></div>
   </div>
 
-  <div class="table-container" *ngIf="!isLoading">
-    <!-- Search -->
-    <mat-form-field appearance="fill" class="search-box full-width">
-      <input matInput [(ngModel)]="searchText" (input)="applyFilter()" placeholder="Search..." />
-      <button matSuffix mat-icon-button *ngIf="searchText" (click)="searchText=''; applyFilter()">
-        <mat-icon>close</mat-icon>
-      </button>
-    </mat-form-field>
+  <!-- 📋 TABLE CONTAINER -->
+ <div class="table-container" *ngIf="!isSkeletonLoading">
 
-    <!-- Table -->
-      <div class="table-scroll">
-<table mat-table [dataSource]="dataSource" matSort 
-       matSortActive="name" matSortDirection="asc" class="mat-elevation-z2 full-width-table">
+  <!-- 🔍 Search -->
+  <mat-form-field appearance="fill" class="search-box full-width">
+    <input matInput [(ngModel)]="searchText" (input)="applyFilter()" placeholder="Search..." />
+    <button matSuffix mat-icon-button *ngIf="searchText" (click)="searchText=''; applyFilter()">
+      <mat-icon>close</mat-icon>
+    </button>
+  </mat-form-field>
+
+  <!-- 🧾 Table -->
+  <div class="table-scroll">
+    <table mat-table [dataSource]="dataSource" matSort class="mat-elevation-z2 full-width-table">
+
+      <!-- ✅ Actual Data Columns -->
       <ng-container matColumnDef="name">
         <th mat-header-cell *matHeaderCellDef mat-sort-header>Name</th>
         <td mat-cell *matCellDef="let item">{{ item.name }}</td>
       </ng-container>
 
-     <ng-container matColumnDef="category">
-  <th mat-header-cell *matHeaderCellDef mat-sort-header>Category</th>
-  <td mat-cell *matCellDef="let item">
-    <span class="truncate-text" [matTooltip]="item.category">
-      {{ item.category }}
-    </span>
-  </td>
-</ng-container>
-
+      <ng-container matColumnDef="category">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>Category</th>
+        <td mat-cell *matCellDef="let item">
+          <span class="truncate-text" [matTooltip]="item.category">{{ item.category }}</span>
+        </td>
+      </ng-container>
 
       <ng-container matColumnDef="contactPerson">
         <th mat-header-cell *matHeaderCellDef mat-sort-header>Contact Person</th>
@@ -53,37 +54,45 @@
       <ng-container *ngIf="isAdmin" matColumnDef="action">
         <th mat-header-cell *matHeaderCellDef>Action</th>
         <td mat-cell *matCellDef="let item">
-          <mat-slide-toggle color="primary" class="toggle" [checked]="item.isActive" (change)="toggleIsActive(item)"></mat-slide-toggle>
+          <mat-slide-toggle color="primary" class="toggle"
+            [checked]="item.isActive"
+            (change)="toggleIsActive(item)">
+          </mat-slide-toggle>
         </td>
       </ng-container>
 
-      <tr mat-header-row *matHeaderRowDef="displayedColumns"  class="sticky-header"></tr>
-      <tr mat-row *matRowDef="let row; columns: displayedColumns" [class.inactive]="!row.isActive"></tr>
+      <!-- ✅ Header and Data Rows (Hide during load or no data) -->
+      <tr mat-header-row *matHeaderRowDef="displayedColumns" [class.hidden]="isLoading || dataSource.data.length === 0"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns;" [class.hidden]="isLoading"></tr>
+
+      <!-- ✅ Loading or No Data Row -->
+      <tr *matNoDataRow>
+        <td [attr.colspan]="displayedColumns.length" class="table-spinner-cell">
+          <ng-container *ngIf="isLoading">
+            <mat-spinner diameter="40"></mat-spinner>
+          </ng-container>
+          <ng-container *ngIf="!isLoading">
+            <div class="no-data-message">No subcontractors found.</div>
+          </ng-container>
+        </td>
+      </tr>
+
     </table>
-      </div>
-    
-
-    <!-- Paginator -->
-   <mat-paginator
-  [pageSize]="pageSize"
-  [pageSizeOptions]="pageSizeOptions"
-  (page)="onPageSizeChange($event)"
-  showFirstLastButtons>
-</mat-paginator>
-<div class="record-count">
-  Showing {{ getStartIndex() }} – {{ getEndIndex() }} of {{ dataSource.data.length }} entries
-</div>
   </div>
 
-  <div *ngIf="!isLoading && dataSource.data.length === 0" class="no-data">
-    No subcontractors found.
-  </div>
+  <!-- 📄 Paginator -->
+  <mat-paginator
+    [pageSize]="pageSize"
+    [pageSizeOptions]="pageSizeOptions"
+    (page)="onPageSizeChange($event)"
+    showFirstLastButtons>
+  </mat-paginator>
+
+  <!-- <div class="record-count" *ngIf="!isLoading && dataSource.data.length > 0">
+    Showing {{ getStartIndex() }} – {{ getEndIndex() }} of {{ dataSource.data.length }} entries
+  </div> -->
 </div>
 
-<div *ngIf="showPopup" [ngClass]="{ popup: true, error: popupError }">
-  <span *ngIf="!popupError">✅</span>
-  <span *ngIf="popupError">❌</span>
-  {{ popupMessage }}
 </div>
 
 <app-footer></app-footer>

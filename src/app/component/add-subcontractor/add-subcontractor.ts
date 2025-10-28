@@ -16,8 +16,8 @@ subcontractorForm: FormGroup;
  workitems: Workitem[] = [];
   selectedWorkitems: Workitem[] = [];
 categories: WorkitemCategory[] = [
-    { categoryId: '5ADD8834-7116-48A2-95BD-7C5914145D35', categoryName: 'Standard' },
-    { categoryId: 'A5D5BF39-BBFC-42C4-88E7-3342091E9770', categoryName: 'Unibouw' }
+    { categoryID: '60a1a614-05fd-402d-81b3-3ba05fdd2d8a', categoryName: 'Standard' },
+    { categoryID: '213cf69b-627e-4962-83ec-53463c8664d2', categoryName: 'Unibouw' }
   ];
   attachments: File[] = [];
   uploadedFileName: string = '';
@@ -44,7 +44,7 @@ uploadedFilePath: string = '';
 
  ngOnInit() {
   if (this.categories.length > 0) {
-    this.selectedCategoryId = this.categories[0].categoryId;
+    this.selectedCategoryId = this.categories[0].categoryID;
     this.loadWorkitems();
   }
 
@@ -86,7 +86,7 @@ uploadedFilePath: string = '';
 
     // Keep selected items only if they exist in the new list
     this.selectedWorkitems = this.selectedWorkitems.filter(sw =>
-      this.workitems.some(w => w.id === sw.id)
+      this.workitems.some(w => w.workItemID === sw.workItemID)
     );
   });
 }
@@ -103,7 +103,7 @@ selectCategory(categoryId: string) {
     if (event.target.checked) {
       this.selectedWorkitems.push(item);
     } else {
-      this.selectedWorkitems = this.selectedWorkitems.filter(w => w.id !== item.id);
+      this.selectedWorkitems = this.selectedWorkitems.filter(w => w.workItemID !== item.workItemID);
     }
   }
 addMoreFiles() {
@@ -157,7 +157,7 @@ onSubmit() {
 
       // ✅ Send all selected work items as array
       subcontractorWorkItemMappings: this.selectedWorkitems.map(item => ({
-        workItemId: item.id,
+        workItemID: item.workItemID,
         categoryId: this.selectedCategoryId
       }))
     };
@@ -197,7 +197,7 @@ onSubmit() {
 
   // Helper function for template to check if a workitem is selected
   isSelected(w: Workitem): boolean {
-    return this.selectedWorkitems.some(sw => sw.id === w.id);
+    return this.selectedWorkitems.some(sw => sw.workItemID === w.workItemID);
   }
 
   showPopupMessage(message: string, isError: boolean = false) {
