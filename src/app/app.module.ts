@@ -1,4 +1,4 @@
-import { NgModule, provideBrowserGlobalErrorListeners } from '@angular/core';
+import { APP_INITIALIZER, NgModule, provideBrowserGlobalErrorListeners } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
@@ -37,11 +37,16 @@ import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { NgxIntlTelInputModule } from 'ngx-intl-tel-input';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations'; // ✅ ADD THIS
+import { AppConfigService } from './services/app.config.service';
 
 export function MSALInstanceFactory(): PublicClientApplication {
   return (window as any).msalInstance;
 }
-
+export function initConfig(appConfig: AppConfigService) {
+  return () => appConfig.loadConfig();
+}
 @NgModule({
   declarations: [
     App,
@@ -61,11 +66,13 @@ export function MSALInstanceFactory(): PublicClientApplication {
     BrowserModule,
     CommonModule,
     RouterModule,
+     BrowserAnimationsModule,
     AppRoutingModule,
     FormsModule,
     ReactiveFormsModule,
     HttpClientModule,
     SSOLogin,
+  NgxIntlTelInputModule,
 
     // Material
     MatTableModule,
@@ -91,6 +98,12 @@ MatTooltipModule,
     {
       provide: MSAL_INSTANCE,
       useFactory: MSALInstanceFactory
+    },
+    {
+            provide: APP_INITIALIZER,
+            useFactory: initConfig,
+            deps: [AppConfigService],
+            multi: true,
     },
     MsalService
   ],
