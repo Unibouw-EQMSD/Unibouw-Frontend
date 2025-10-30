@@ -8,8 +8,9 @@ export interface Subcontractors {
     id: string;
     name: string;
     category: string;
-    contactPerson: string;
-    emailId: string;
+    personName: string;
+    phoneNumber1:string;
+    emailID: string;
     isActive?: boolean;
     editItem?: boolean;
 }
@@ -32,6 +33,18 @@ export class SubcontractorService {
         });
     }
 
+  getSubcontractorWorkItemMappings(): Observable<any[]> {
+  return from(this.getHeaders()).pipe(
+    switchMap(headers =>
+      this.http.get<{ count: number; data: any[] }>(
+        `${environment.apiUrl}${environment.getWorkitemsForSubcontractor}`,
+        { headers }
+      )
+    ),
+    map(res => res.data || [])
+  );
+}
+
     getSubcontractors(): Observable<Subcontractors[]> {
         return from(this.getHeaders()).pipe(
             switchMap(headers =>
@@ -43,8 +56,9 @@ export class SubcontractorService {
                 id: it.id,
                 name: it.name || '',
                 category: it.category || '',
-                contactPerson: it.contactPerson || '',
-                emailId: it.emailId || '',
+                personName: it.personName || '',
+                phoneNumber1: it.phoneNumber1 || '',
+                emailID: it.emailID || '',
                 isActive: it.isActive,
                 editItem: false
             })))

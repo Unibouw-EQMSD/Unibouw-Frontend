@@ -7,11 +7,12 @@ export const environment = {
   tenantId: '2eb919ed-9c4c-4735-a084-8dd266d67044',       // your tenant
   backendClientId: '96b6d570-73e9-4669-98d6-745f22f4acc0', // API client ID
   scopes: ['api://96b6d570-73e9-4669-98d6-745f22f4acc0/Api.Read'], // API scope
-  getCategoryType: '/WorkItemCategoryType',
-  getCategoryTypeById: '/WorkItemCategoryType',
+  getCategoryType: '/Common/workitemcategorytype',
+  getCategoryTypeById: '/WorkItemByCategory',
   getWorkitems: '/WorkItems',
     getWorkitemsByCategory: '/WorkItems/WorkItemByCategory',
   getWorkitemsById: '/WorkItems',
   getSubcontractor: '/Subcontractor',
+  getWorkitemsForSubcontractor: '/Common/subcontractorworkitemmapping',
   postSubcontractor: '/Subcontractor'
 };
