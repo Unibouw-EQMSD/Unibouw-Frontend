@@ -8,6 +8,7 @@ import { AppConfigService } from './app.config.service';
 
 
 export interface projectdetails {
+    projectID: string; 
   number: string;
   name: string;
   customerName: string;
@@ -47,7 +48,14 @@ export class projectService {
             'Authorization': `Bearer ${result.accessToken}`
         });
     }
-
+getProjectById(id: string): Observable<projectdetails> {
+  return from(this.getHeaders()).pipe(
+    switchMap(headers =>
+      this.http.get<{ data: projectdetails }>(`${this.getprojectsurl}/${id}`, { headers })
+    ),
+    map(res => res.data) // ✅ extract data before returning
+  );
+}
 getProjects(): Observable<projectdetails[]> {
   return from(this.getHeaders()).pipe(
     switchMap(headers =>
@@ -57,6 +65,7 @@ getProjects(): Observable<projectdetails[]> {
       )
     ),
     map(res => (res.data || []).map(it => ({
+         projectID: it.projectID,
       number: it.number || '',
       name: it.name || '',
       customerName: it.customerName || '',

@@ -19,8 +19,9 @@ constructor(private router: Router,private projectService: projectService) {}
   projectdetails: projectdetails[] = [];
   filteredItems: projectdetails[] = [];
   pagedItems: projectdetails[] = [];
+  searchText = '';
 
-  pageSize = 5;
+  pageSize = 100;
     pageSizeOptions = [5, 10, 25, 50, 100];
 
   currentPage = 1;
@@ -39,20 +40,23 @@ constructor(private router: Router,private projectService: projectService) {}
   ];
 
   dataSource = new MatTableDataSource<projectdetails>([]);
-  searchText = '';
 
   // Loader flags
   isSkeletonLoading = true;
   isLoading = false;
-    @ViewChild(MatPaginator) paginator!: MatPaginator;
+  @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
-
 
     ngOnInit() {
    this.loadProjects();
 
     
 
+  }
+  ngAfterViewInit(): void {
+    // ✅ This ensures MatSort and MatPaginator are available
+    this.dataSource.sort = this.sort;
+    this.dataSource.paginator = this.paginator;
   }
 goToRFQ() {
   this.router.navigate(['/rfq']);
@@ -68,23 +72,13 @@ goToRFQ() {
         this.isLoading = false;
       },
     });
+          this.dataSource.sort = this.sort;
+
   }
 
-   applyFilter() {
-    const keyword = this.searchText.toLowerCase();
-    this.filteredItems = this.projectdetails.filter(item =>
-      item.number.toLowerCase().includes(keyword) ||
-      item.name.toLowerCase().includes(keyword) ||
-      item.customerName.toLowerCase().includes(keyword)||
-      item.projectManagerName.toLowerCase().includes(keyword)||
-      item.status.toLowerCase().includes(keyword)
-
-
-    );
-
-   this.currentPage = 1;
-  this.totalPages = Math.ceil(this.filteredItems.length / this.pageSize) || 1;
-  this.updatePagedItems();
+  applyFilter() {
+    this.dataSource.filter = this.searchText.trim().toLowerCase();
+    if (this.dataSource.paginator) this.dataSource.paginator.firstPage();
   }
 
  updatePagedItems() {
@@ -137,6 +131,8 @@ get paginationInfo(): string {
 
   return `Showing ${start} to ${end} of ${this.filteredItems.length} entries`;
 }
-
+logProjectId(projectID: string): void {
+  console.log('🧩 Project ID:', projectID);
+}
 
 }
