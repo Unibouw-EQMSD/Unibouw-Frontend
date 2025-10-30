@@ -4,7 +4,7 @@
 </header>
 <div class="form-card">
   <!-- Left side: the form -->
-  <form (ngSubmit)="onSubmit()" [formGroup]="subcontractorForm">
+  <form (ngSubmit)="onSubmit()" [formGroup]="subcontractorForm" enctype="multipart/form-data">
 
     <!-- First Row -->
     <div class="form-row">
@@ -71,32 +71,57 @@
       <label>Attachments</label>
       <div class="file-upload">
         <input type="file" (change)="onFileSelected($event)" />
-        <button type="button" class="btn small-btn">Add More</button>
+        <button type="button" class="btn small-btn" (click)="addMoreFiles()">Add More</button>
       </div>
     </div>
-
-
   </form>
 
   <!-- Right side: Workitems -->
   <div class="workitems-card">
     <h3>Workitems</h3>
+
+    <!-- Category Tabs -->
     <div class="tabs">
-      <button type="button" class="tab active">Standard</button>
-      <button type="button" class="tab">Unibouw</button>
+      <button 
+        *ngFor="let cat of categories" 
+        type="button" 
+        class="tab" 
+        [class.active]="selectedCategoryId === cat.categoryID"
+        (click)="selectCategory(cat.categoryID)"
+      >
+        {{ cat.categoryName }}
+      </button>
     </div>
+
+    <!-- Workitems List -->
     <div class="checkbox-list">
-      <label *ngFor="let w of workitems">
-        <input type="checkbox" [value]="w" (change)="toggleWorkitem($event)" checked />
-        {{ w }}
-      </label>
+      <ng-container *ngIf="workitems.length > 0; else noWorkitems">
+        <label *ngFor="let w of workitems">
+          <input 
+            type="checkbox" 
+            [checked]="isSelected(w)" 
+            (change)="toggleWorkitem($event, w)"
+          />
+          {{ w.name }}
+        </label>
+      </ng-container>
+
+      <ng-template #noWorkitems>
+        <div class="no-workitems">No workitems found</div>
+      </ng-template>
     </div>
   </div>
-      <!-- Actions -->
-    <div class="form-actions">
-      <button type="button" class="btn cancel-btn" (click)="onCancel()">Cancel</button>
-      <button type="submit" class="btn submit-btn">Submit</button>
-    </div>
-</div>
 
+  <!-- Actions -->
+  <div class="form-actions">
+    <button type="button" class="btn cancel-btn" (click)="onCancel()">Cancel</button>
+    <button type="submit" class="btn submit-btn" (click)="onSubmit()">Submit</button>
+  </div>
+</div>
+<!-- ✅ Success/Error Popup -->
+<div *ngIf="showPopup" [ngClass]="{ popup: true, error: popupError }">
+  <span *ngIf="!popupError">✅</span>
+  <span *ngIf="popupError">❌</span>
+  {{ popupMessage }}
+</div>
 <app-footer></app-footer>

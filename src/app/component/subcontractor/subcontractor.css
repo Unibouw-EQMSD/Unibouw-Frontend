@@ -6,3 +6,11 @@
   margin-right: 10px;
 }
 
+.truncate-text {
+  display: inline-block;
+  max-width: 150px;       /* adjust width as per your table layout */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  vertical-align: middle;
+}

@@ -5,7 +5,8 @@ import { environment } from '../../environments/environment';
 import { MsalService } from '@azure/msal-angular';
 
 export interface Workitem {
-  id: string;
+  workItemID: string;
+  categoryID?: any;
   number: string;
   name: string;
   description: string;
@@ -18,7 +19,7 @@ export interface Workitem {
 
 }
 export interface WorkitemCategory {
-  categoryId: string;
+  categoryID: string;
   categoryName: string;
 }
 export interface isActive{
@@ -75,7 +76,7 @@ getWorkitems(categoryId: string): Observable<Workitem[]> {
       )
     ),
     map(res => (res.data || []).map(it => ({
-      id: it.id || '',
+      workItemID: it.workItemID || '',
       number: it.number || '',
       name: it.name || '',
       description: it.description || '',
@@ -92,12 +93,12 @@ updateIsActive(workitemId: string, isActive: boolean): Observable<any> {
     )
   );
 }
-updateDescription(workitemId: string, description: string): Observable<any> {
+updateDescription(workItemID: string, description: string): Observable<any> {
   return from(this.getHeaders()).pipe(
     switchMap(headers => {
       const jsonHeaders = headers.set('Content-Type', 'application/json');
       return this.http.put(
-        `${environment.apiUrl}/WorkItems/${workitemId}/description`,
+        `${environment.apiUrl}/WorkItems/${workItemID}/description`,
         JSON.stringify(description), // raw string body
         { headers: jsonHeaders }
       );

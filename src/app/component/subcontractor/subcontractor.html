@@ -1,88 +1,98 @@
 <app-header></app-header>
+
 <div class="container">
-    <!-- Header -->
-<header class="page-header">
-  <h2>Subcontractors</h2>
-  <button type="button" [routerLink]="['/add-subcontractor']" style="color: white;background-color: #ff7f32;border: none;border-radius: 5px;"><b>Add Subcontractor</b></button>
-</header>
-<div class="table-container">
+  <header class="page-header">
+    <h2>Subcontractors</h2>
+    <button type="button" class="addbtn" [routerLink]="['/add-subcontractor']">
+      <b>Add Subcontractor</b>
+    </button>
+  </header>
 
-<div class="search-box">
-  <input 
-    type="text" 
-    placeholder="Search..." 
-    [(ngModel)]="searchText" 
-    (input)="applyFilter()" />
-</div>
- <div class="table-scroll-container">
-<table class="styled-table">
-    <thead>
-      <tr>
-        <th>Name</th>
-        <th>Category</th>
-        <th>Contact Person</th>
-        <th>E-Mail Id</th>
-        <th>Action</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr *ngFor="let item of pagedItems">
-        <td>{{ item.name }}</td>
-        <td>{{ item.category }}</td>
-        <td>{{ item.contact }}</td>
-        <td>{{item.email}}</td>
-        <td>
-          <label class="switch">
-            <input type="checkbox" [checked]="item.active" />
-            <span class="slider"></span>
-          </label>
-        </td>
-      </tr>
-    </tbody>
-  </table>
- </div>
-  
-
-  <div class="pagination-wrapper">
- <div >
-      
-      <!-- Left: Records per page -->
-      <div class="records-per-page">
-        <select id="pageSize" [(ngModel)]="pageSize" (change)="onPageSizeChange()">
-          <option *ngFor="let size of pageSizes" [value]="size">{{ size }}</option>
-        </select>
-         {{ paginationInfo }}
-      </div>
-
-      
-</div>
-<!-- Right: Pagination -->
-      <div class="pagination-container">
-        <button 
-          class="page-btn" 
-          [disabled]="currentPage === 1" 
-          (click)="prevPage()">
-          Previous
-        </button>
-
-        <!-- Page Numbers -->
-        <button 
-          class="page-btn" 
-          *ngFor="let page of [].constructor(totalPages); let i = index"
-          [class.active]="currentPage === (i + 1)"
-          (click)="goToPage(i + 1)">
-          {{ i + 1 }}
-        </button>
-
-        <button 
-          class="page-btn" 
-          [disabled]="currentPage === totalPages" 
-          (click)="nextPage()">
-          Next
-        </button>
-      </div>
+  <!-- 🦴 SKELETON LOADER (Initial full page load) -->
+  <div *ngIf="isSkeletonLoading" class="skeleton-container">
+    <div class="skeleton-box"></div>
   </div>
 
+  <!-- 📋 TABLE CONTAINER -->
+ <div class="table-container" *ngIf="!isSkeletonLoading">
+
+  <!-- 🔍 Search -->
+  <mat-form-field appearance="fill" class="search-box full-width">
+    <input matInput [(ngModel)]="searchText" (input)="applyFilter()" placeholder="Search..." />
+    <button matSuffix mat-icon-button *ngIf="searchText" (click)="searchText=''; applyFilter()">
+      <mat-icon>close</mat-icon>
+    </button>
+  </mat-form-field>
+
+  <!-- 🧾 Table -->
+  <div class="table-scroll">
+    <table mat-table [dataSource]="dataSource" matSort class="mat-elevation-z2 full-width-table">
+
+      <!-- ✅ Actual Data Columns -->
+      <ng-container matColumnDef="name">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>Name</th>
+        <td mat-cell *matCellDef="let item">{{ item.name }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="category">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>Category</th>
+        <td mat-cell *matCellDef="let item">
+          <span class="truncate-text" [matTooltip]="item.category">{{ item.category }}</span>
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="contactPerson">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>Contact Person</th>
+        <td mat-cell *matCellDef="let item">{{ item.contactPerson }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="emailId">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>Email</th>
+        <td mat-cell *matCellDef="let item">{{ item.emailId }}</td>
+      </ng-container>
+
+      <ng-container *ngIf="isAdmin" matColumnDef="action">
+        <th mat-header-cell *matHeaderCellDef>Action</th>
+        <td mat-cell *matCellDef="let item">
+          <mat-slide-toggle color="primary" class="toggle"
+            [checked]="item.isActive"
+            (change)="toggleIsActive(item)">
+          </mat-slide-toggle>
+        </td>
+      </ng-container>
+
+      <!-- ✅ Header and Data Rows (Hide during load or no data) -->
+      <tr mat-header-row *matHeaderRowDef="displayedColumns" [class.hidden]="isLoading || dataSource.data.length === 0"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns;" [class.hidden]="isLoading"></tr>
+
+      <!-- ✅ Loading or No Data Row -->
+      <tr *matNoDataRow>
+        <td [attr.colspan]="displayedColumns.length" class="table-spinner-cell">
+          <ng-container *ngIf="isLoading">
+            <mat-spinner diameter="40"></mat-spinner>
+          </ng-container>
+          <ng-container *ngIf="!isLoading">
+            <div class="no-data-message">No subcontractors found.</div>
+          </ng-container>
+        </td>
+      </tr>
+
+    </table>
+  </div>
+
+  <!-- 📄 Paginator -->
+  <mat-paginator
+    [pageSize]="pageSize"
+    [pageSizeOptions]="pageSizeOptions"
+    (page)="onPageSizeChange($event)"
+    showFirstLastButtons>
+  </mat-paginator>
+
+  <!-- <div class="record-count" *ngIf="!isLoading && dataSource.data.length > 0">
+    Showing {{ getStartIndex() }} – {{ getEndIndex() }} of {{ dataSource.data.length }} entries
+  </div> -->
 </div>
+
 </div>
+
 <app-footer></app-footer>

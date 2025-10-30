@@ -1,7 +1,10 @@
-import { Component, OnInit } from '@angular/core';
-import { WorkitemService, Workitem, WorkitemCategory, isActive } from '../../services/workitem.service';
+import { Component, OnInit, ViewChild, AfterViewInit } from '@angular/core';
+import { WorkitemService, Workitem, WorkitemCategory } from '../../services/workitem.service';
 import { MsalService } from '@azure/msal-angular';
 import { UserService } from '../../services/User.service.';
+import { MatTableDataSource } from '@angular/material/table';
+import { MatPaginator } from '@angular/material/paginator';
+import { MatSort, Sort } from '@angular/material/sort';
 
 @Component({
   selector: 'app-workitems',
@@ -9,231 +12,191 @@ import { UserService } from '../../services/User.service.';
   templateUrl: './workitems.html',
   styleUrls: ['./workitems.css']
 })
-export class Workitems implements OnInit {
-  workitems: Workitem[] = [];
-  filteredItems: Workitem[] = [];
-  pagedItems: Workitem[] = [];
-  pageSize = 5;
-  currentPage = 1;
-  totalPages = 1;
+export class Workitems implements OnInit, AfterViewInit {
+  displayedColumns: string[] = ['number', 'name', 'description', 'action'];
+  dataSource = new MatTableDataSource<Workitem>([]);
   activeTab: 'standard' | 'unibouw' = 'standard';
   searchText: string = '';
   categories: WorkitemCategory[] = [];
   categoryMap: { [key: string]: string } = {};
-  pageSizes: number[] = [5, 10, 25, 50];
-
-  userRoles: string[] = [];
+  pageSize = 100;
+  pageSizeOptions = [5, 10, 25, 50, 100, 200];
   isAdmin: boolean = false;
-  isLoading: boolean = false; // loading indicator
+  isLoading: boolean = false;
+  isSkeletonLoading: boolean = true;
+
   showPopup = false;
   popupMessage = '';
   popupError = false;
 
-  constructor(private workitemService: WorkitemService, private msalService: MsalService, private userService: UserService) { }
+  @ViewChild(MatPaginator) paginator!: MatPaginator;
+  @ViewChild(MatSort) sort!: MatSort;
+
+  constructor(
+    private workitemService: WorkitemService,
+    private msalService: MsalService,
+    private userService: UserService
+  ) {}
 
   ngOnInit() {
-    const user = this.userService.getUser();
-    this.userRoles = this.userService.getUserRoles();
     this.isAdmin = this.userService.isAdmin();
 
-    this.loadCategoriesAndWorkitems();
-  }
+     this.dataSource.filterPredicate = (data: Workitem, filter: string) => {
+    const f = filter.trim().toLowerCase();
+    return data.number.toString().includes(f)
+        || data.name.toLowerCase().includes(f)
+        || (data.description || '').toLowerCase().includes(f);
+  };
 
-  setUserRoles() {
-    const account = this.msalService.instance.getAllAccounts()[0];
-    if (!account) return;
-
-    const claims: any = account.idTokenClaims;
-
-    // Handle string or array for roles
-    let roles: string[] = [];
-
-    if (claims?.roles) {
-      if (Array.isArray(claims.roles)) {
-        roles = claims.roles;
-      } else if (typeof claims.roles === 'string') {
-        roles = claims.roles.split(',').map((r: string) => r.trim()); // in case multiple roles are comma-separated
-      }
+  this.dataSource.sortingDataAccessor = (item: Workitem, property: string) => {
+    switch (property) {
+      case 'number':
+        return typeof item.number === 'number' ? item.number : parseInt(item.number.toString()) || 0;
+      case 'name':
+        return item.name?.toLowerCase() || '';
+      case 'description':
+        return (item.description || '').toLowerCase();
+      default:
+        return (item as any)[property];
     }
+  };
 
-    this.userRoles = roles;
-    this.isAdmin = roles.some(r => r.toLowerCase() === 'admin');
-
-    console.log('Roles:', this.userRoles, 'isAdmin:', this.isAdmin);
-  }
-
-
-
-  loadCategoriesAndWorkitems() {
-    this.isLoading = true;
-    this.workitemService.getCategories().subscribe({
-      next: (categories: WorkitemCategory[]) => {
-        this.isLoading = false;
-        if (!categories || categories.length === 0) {
-          this.categories = [];
-          this.workitems = [];
-          this.applyFilter();
-          return;
-        }
-
-        this.categories = categories;
-        categories.forEach(cat => {
-          if (!cat?.categoryName) return;
-          const name = cat.categoryName.toLowerCase();
-          if (name === 'standard') this.categoryMap['standard'] = cat.categoryId;
-          if (name === 'unibouw') this.categoryMap['unibouw'] = cat.categoryId;
-        });
-
-        const categoryId = this.categoryMap[this.activeTab];
-        if (categoryId) this.loadWorkitems(categoryId);
-      },
-      error: (err) => {
-        this.isLoading = false;
-        console.error('Error fetching categories', err);
-        // alert(err?.error?.message || 'Error fetching categories. Please try again later.');
-        this.categories = [];
-        this.workitems = [];
-        this.applyFilter();
-      }
-    });
-  }
-
-  loadWorkitems(categoryId: string) {
-    this.isLoading = true;
-    this.workitemService.getWorkitems(categoryId).subscribe({
-      next: (workitems: Workitem[]) => {
-        this.isLoading = false;
-        this.workitems = (workitems || []).map(it => ({
-          ...it,
-          editItem: false,
-          isEditing: false
-        }));
-        this.applyFilter();
-      },
-      error: (err) => {
-        this.isLoading = false;
-        console.error('Error fetching workitems', err);
-        // alert(err?.error?.message || 'Error fetching workitems. Please try again later.');
-        this.workitems = [];
-        this.applyFilter();
-      }
-    });
-  }
-
-  descriptionEditItem(item: Workitem) {
-    if (item.editItem) {
-      // Save changes here
-      this.workitemService.updateDescription(item.id, item.description)
-        .subscribe({
-          next: () => alert('Description updated successfully'),
-          error: (err) => alert(err?.error?.message || 'Failed to update description')
-        });
-    }
-    item.editItem = !item.editItem;
-  }
-
- saveDescription(item: Workitem) {
-  item.isEditing = false;
-
-  this.workitemService.updateDescription(item.id, item.description).subscribe({
-    next: () => {
-      // show popup message on success
-      this.showPopupMessage('Description saved successfully!');
-    },
-    error: (err) => {
-      console.error('Error updating description', err);
-      this.showPopupMessage('Failed to save description. Please try again.', true);
-      item.isEditing = true; // revert back if update fails
-    }
-  });
+  // first page load
+  this.loadCategoriesAndWorkitems(true);
 }
-
+  ngAfterViewInit() {
+    // Initialize paginator and sort
+    setTimeout(() => {
+      this.dataSource.paginator = this.paginator;
+      this.dataSource.sort = this.sort;
+    });
+  }
 
   applyFilter() {
-    const keyword = this.searchText.toLowerCase().trim();
-
-    if (keyword.length >= 2) {
-      this.filteredItems = this.workitems.filter(item =>
-        (item.number || '').toLowerCase().includes(keyword) ||
-        (item.name || '').toLowerCase().includes(keyword) ||
-        (item.description || '').toLowerCase().includes(keyword)
-      );
-    } else {
-      this.filteredItems = [...this.workitems];
+    this.dataSource.filter = this.searchText.trim().toLowerCase();
+    if (this.dataSource.paginator) {
+      this.dataSource.paginator.firstPage();
     }
-
-    // Sort alphabetically by name
-    this.filteredItems.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
-
-    this.currentPage = 1;
-    this.totalPages = Math.ceil(this.filteredItems.length / this.pageSize) || 1;
-    this.updatePagedItems();
   }
 
-  updatePagedItems() {
-    const start = (this.currentPage - 1) * this.pageSize;
-    const end = start + this.pageSize;
-    this.pagedItems = this.filteredItems.slice(start, end);
+setTab(tab: 'standard' | 'unibouw') {
+  this.activeTab = tab;
+  this.searchText = '';
+  this.dataSource.filter = '';
+
+  // Clear existing data immediately
+  this.dataSource.data = [];
+  if (this.paginator) this.paginator.firstPage();
+
+  const categoryId = this.categoryMap[tab];
+  if (categoryId) {
+    this.loadWorkitems(categoryId);
+  } else {
+    console.warn(`Category ID not found for tab ${tab}.`);
+  }
+}
+
+loadCategoriesAndWorkitems(isFirstLoad = false) {
+  if (isFirstLoad) {
+    this.isSkeletonLoading = true;
+  } else {
+    this.isLoading = true;
   }
 
-  nextPage() { if (this.currentPage < this.totalPages) { this.currentPage++; this.updatePagedItems(); } }
-  prevPage() { if (this.currentPage > 1) { this.currentPage--; this.updatePagedItems(); } }
-  editItem(item: Workitem) { item.editItem = !item.editItem; }
-  goToPage(page: number) { if (page >= 1 && page <= this.totalPages) { this.currentPage = page; this.updatePagedItems(); } }
-  onPageSizeChange() { this.currentPage = 1; this.totalPages = Math.ceil(this.filteredItems.length / this.pageSize) || 1; this.updatePagedItems(); }
+  this.workitemService.getCategories().subscribe({
+    next: (categories) => {
+      this.isLoading = false;
+      if (isFirstLoad) this.isSkeletonLoading = false;
 
-  setTab(tab: 'standard' | 'unibouw') {
-    this.activeTab = tab;
-    this.currentPage = 1;
-    const categoryId = this.categoryMap[tab];
-    if (categoryId) this.loadWorkitems(categoryId);
-  }
+      this.categories = categories || [];
+      categories.forEach(cat => {
+        const name = cat.categoryName.toLowerCase();
+        if (name === 'standard') this.categoryMap['standard'] = cat.categoryID;
+        if (name === 'unibouw') this.categoryMap['unibouw'] = cat.categoryID;
+      });
 
-
-toggleIsActive(item: Workitem) {
-  if (!this.isAdmin) return;
-
-  const newStatus = !item.isActive;
-  item.isActive = newStatus;
-
-  this.workitemService.updateIsActive(item.id, newStatus).subscribe({
-    next: () => {
-      this.showPopupMessage('Status updated successfully!');
+      const categoryId = this.categoryMap[this.activeTab];
+      if (categoryId) this.loadWorkitems(categoryId);
     },
-    error: (err) => {
-      console.error('Error updating status', err);
-      item.isActive = !newStatus;
-      this.showPopupMessage('Failed to update status. Please try again.', true);
+    error: () => {
+      this.isLoading = false;
+      this.isSkeletonLoading = false;
+    }
+  });
+}
+
+loadWorkitems(categoryId: string) {
+  this.isLoading = true;
+
+  this.workitemService.getWorkitems(categoryId).subscribe({
+    next: (workitems) => {
+      this.isLoading = false;
+      this.isSkeletonLoading = false;
+
+      let mapped = (workitems || []).map(it => ({ ...it, isEditing: false }));
+      mapped = mapped.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+
+      this.dataSource.data = mapped;
+
+      setTimeout(() => {
+        if (this.paginator) {
+          this.dataSource.paginator = this.paginator;
+          this.paginator.firstPage();
+        }
+        if (this.sort) {
+          this.dataSource.sort = this.sort;
+          this.sort.active = 'name';
+          this.sort.direction = 'asc';
+          this.sort.sortChange.emit({ active: 'name', direction: 'asc' });
+        }
+      });
+    },
+    error: () => {
+      this.isLoading = false;
+      this.isSkeletonLoading = false;
     }
   });
 }
 
 
-showPopupMessage(message: string, isError: boolean = false) {
-  this.popupMessage = message;
-  this.showPopup = true;
-
-  // Change popup style dynamically if it's an error
-  const popupEl = document.querySelector('.popup');
-  if (popupEl) {
-    popupEl.classList.toggle('error', isError);
+  saveDescription(item: Workitem) {
+    item.isEditing = false;
+    this.workitemService.updateDescription(item.workItemID, item.description).subscribe({
+      next: () => this.showPopupMessage('Description saved successfully!'),
+      error: () => {
+        this.showPopupMessage('Failed to save description. Please try again.', true);
+        item.isEditing = true;
+      }
+    });
   }
 
-  // Hide after 3 seconds
-  setTimeout(() => {
-    this.showPopup = false;
-  }, 3000);
+  toggleIsActive(item: Workitem) {
+    if (!this.isAdmin) return;
+    const newStatus = !item.isActive;
+    item.isActive = newStatus;
+    this.workitemService.updateIsActive(item.workItemID, newStatus).subscribe({
+      next: () => this.showPopupMessage('Status updated successfully!'),
+      error: () => {
+        item.isActive = !newStatus;
+        this.showPopupMessage('Failed to update status. Please try again.', true);
+      }
+    });
+  }
+
+  showPopupMessage(message: string, isError: boolean = false) {
+    this.popupMessage = message;
+    this.popupError = isError;
+    this.showPopup = true;
+    setTimeout(() => (this.showPopup = false), 3000);
+  }
+  getStartIndex(): number {
+  if (!this.paginator) return 0;
+  return this.paginator.pageIndex * this.paginator.pageSize + 1;
 }
 
-
-  get paginationInfo(): string {
-    if (!this.filteredItems || this.filteredItems.length === 0) {
-      return 'Showing 0 to 0 of 0 entries';
-    }
-
-    const start = (this.currentPage - 1) * this.pageSize + 1;
-    let end = start + this.pagedItems.length - 1;
-
-    return `Showing ${start} to ${end} of ${this.filteredItems.length} entries`;
-  }
+getEndIndex(): number {
+  if (!this.paginator) return 0;
+  const end = (this.paginator.pageIndex + 1) * this.paginator.pageSize;
+  return end > this.dataSource.data.length ? this.dataSource.data.length : end;
+}
 }
