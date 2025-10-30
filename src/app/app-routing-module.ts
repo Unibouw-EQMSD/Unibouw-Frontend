@@ -27,7 +27,7 @@ const routes: Routes = [
   { path: 'add-workitem', component: AddWorkitem, canActivate: [AuthGuard] },
   { path: 'add-subcontractor', component: AddSubcontractor, canActivate: [AuthGuard] },
   { path: 'add-rfq', component: RfqAdd, canActivate: [AuthGuard] },
-  { path: 'view-projects/:projectID', component: ViewProjects, canActivate: [AuthGuard] },
+{ path: 'view-projects/:id', component: ViewProjects, canActivate: [AuthGuard] },
 
 { path: '**', redirectTo: 'login' }
 ];

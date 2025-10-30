@@ -3,6 +3,8 @@ import { MatPaginator } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
 import { MatTableDataSource } from '@angular/material/table';
 import { rfqService,Rfq} from '../../../services/rfq.service';
+import { ActivatedRoute } from '@angular/router';
+import { projectdetails, projectService } from '../../../services/project.service';
 
 interface RfqResponse {
   name: string;
@@ -41,6 +43,10 @@ interface WorkItem {
   styleUrls: ['./view-projects.css']   // ✅ fixed
 })
 export class ViewProjects {
+  projectId!: string;
+  projectDetails: any;
+    projectData?: projectdetails;
+
   groupBy = 'workItem';
   currentPage = 1;
   totalPages = 1;
@@ -58,7 +64,7 @@ displayedColumns: string[] = [
     'quoteRecieved',
     'actions'
   ];
-    dataSource = new MatTableDataSource<Rfq>([]);
+  dataSource = new MatTableDataSource<any>([]);
  isLoading = false;
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
@@ -88,23 +94,66 @@ displayedColumns: string[] = [
     }
   ];
 
-  constructor(private rfqService:rfqService){
+  constructor(private rfqService:rfqService,  private route: ActivatedRoute,private projectService: projectService){
 
   }
+  ngOnInit(): void {
+  // ✅ Capture the project ID from the route
+  this.projectId = this.route.snapshot.paramMap.get('id') || '';
+  console.log('📦 Captured Project ID:', this.projectId);
 
-  loadRfqData(): void {
-    this.rfqService.getRfq().subscribe({
-      next: (data) => {
-        this.dataSource.data = data;
-        this.isLoading = false;
-      },
-      error: (err) => {
-        console.error('❌ Failed to fetch projects:', err);
-        this.isLoading = false;
-      },
-    });
+  if (this.projectId) {
+    this.loadRfqData();
+          this.loadProjectDetails(this.projectId);
+
+  } else {
+    console.error('❌ Project ID not found in route');
   }
+}
 
+loadProjectDetails(id: string) {
+  console.log('🚀 Calling API for project:', id);
+  this.projectService.getProjectById(id).subscribe({
+    next: (res) => {
+      this.projectDetails = res;
+      console.log('✅ Project Details Loaded:', this.projectDetails);
+    },
+    error: (err) => {
+      console.error('❌ Error fetching project details:', err);
+    }
+  });
+}
+loadRfqData(): void {
+  this.isLoading = true;
+
+  this.rfqService.getRfqByProjectId(this.projectId).subscribe({
+    next: (res) => {
+      // Normalize the response (handles both single object or array)
+      const rfqs = Array.isArray(res) ? res : [res];
+
+      // Map backend fields → frontend display keys
+      this.dataSource.data = rfqs.map((item: any) => ({
+        customer: item.customerName || '—',
+        rfqSentDate: this.formatDate(item.sentDate),
+        dueDate: this.formatDate(item.dueDate),
+        rfqSent: item.rfqSent || 0,
+        quoteReceived: item.quoteReceived || 0
+      }));
+
+      this.isLoading = false;
+    },
+    error: (err) => {
+      console.error('❌ Failed to fetch RFQ:', err);
+      this.dataSource.data = [];
+      this.isLoading = false;
+    }
+  });
+}
+ formatDate(dateString: string): string {
+    if (!dateString) return '-';
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-GB'); // dd/MM/yyyy
+  }
   applyFilter(event: Event) {
     const filterValue = (event.target as HTMLInputElement).value.trim().toLowerCase();
     this.dataSource.filter = filterValue;

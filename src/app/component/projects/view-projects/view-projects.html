@@ -10,23 +10,27 @@
 <div class="project-details-container">
 
   <!-- LEFT: Project Details -->
-  <div class="details-card">
-    <h3>Details</h3>
-    <div class="detail-row"><span class="label">Project Code</span><span class="value">829474</span></div>
-    <div class="detail-row"><span class="label">Project</span><span class="value">Super Market</span></div>
-    <div class="detail-row"><span class="label">Customer</span><span class="value">Timothy Ronald</span></div>
-    <div class="detail-row"><span class="label">Project Manager</span><span class="value">David H</span></div>
-    <div class="detail-row"><span class="label">Start Date</span><span class="value">23-01-2025</span></div>
-    <div class="detail-row"><span class="label">Committed Date</span><span class="value">18-02-2026</span></div>
-    <div class="detail-row"><span class="label">Status</span><span class="value status">In Progress</span></div>
-    <div class="detail-row"><span class="label">Total Dimension</span><span class="value">5000 Sqft</span></div>
-    <div class="detail-row">
-      <span class="label">Specification</span>
-      <span class="value">
-        <a href="#">Flooring.pdf</a>, <a href="#">Glass.pdf</a>, <a href="#">Roofing.pdf</a>
-      </span>
-    </div>
+  <div class="details-card" *ngIf="projectDetails">
+  <h3>Details</h3>
+  <div class="detail-row"><span class="label">Project Code</span><span class="value">{{ projectDetails.number }}</span></div>
+  <div class="detail-row"><span class="label">Project</span><span class="value">{{ projectDetails.name }}</span></div>
+  <div class="detail-row"><span class="label">Customer</span><span class="value">{{ projectDetails.customerName }}</span></div>
+  <div class="detail-row"><span class="label">Project Manager</span><span class="value">{{ projectDetails.projectManagerName }}</span></div>
+  <div class="detail-row"><span class="label">Start Date</span><span class="value">{{ projectDetails.startDate | date:'dd-MM-yyyy' }}</span></div>
+  <div class="detail-row"><span class="label">Committed Date</span><span class="value">{{ projectDetails.completionDate | date:'dd-MM-yyyy' }}</span></div>
+  <div class="detail-row"><span class="label">Status</span><span class="value status">{{ projectDetails.status }}</span></div>
+  <div class="detail-row"><span class="label">Total Dimension</span><span class="value">{{ projectDetails.totalDimension }}</span></div>
+  <div class="detail-row">
+    <span class="label">Specification</span>
+    <span class="value">
+      <a [href]="projectDetails.sharepointURL" target="_blank">Project Files</a>
+    </span>
   </div>
+</div>
+
+<div *ngIf="isLoading" class="loading">
+  Loading project details...
+</div>
 
   <!-- RIGHT: TAB CONTENT -->
   <div class="rfq-card">
@@ -52,7 +56,7 @@
 </div>
     <!-- 🟢 TAB 1: RFQ RESPONSE (Accordion Section) -->
     <div *ngIf="selectedTab === 'response'">
-      <div class="rfq-header">
+      <!-- <div class="rfq-header">
         <h3>RFQ Responses</h3>
         <div class="group-options">
           <label><input type="radio" name="groupBy" [(ngModel)]="groupBy" value="workItem"> Group by Work Item</label>
@@ -114,12 +118,11 @@
             </table>
           </div>
         </div>
-      </div>
+      </div> -->
     </div>
 
     <!-- 🔵 TAB 2: RFQ (Mat Table Section) -->
     <div *ngIf="selectedTab === 'rfq'">
-      <h3>RFQ List</h3>
       <table mat-table [dataSource]="dataSource" class="mat-elevation-z8"
        matSort
         matSortActive="customer"
@@ -162,7 +165,7 @@
       </table>
     </div>
 
-    <mat-paginator
+    <mat-paginator *ngIf="selectedTab === 'rfq'"
       [pageSize]="pageSize"
       [pageSizeOptions]="pageSizeOptions"
       showFirstLastButtons
