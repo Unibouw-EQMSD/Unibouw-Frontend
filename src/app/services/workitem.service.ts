@@ -3,6 +3,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { map, switchMap, from, Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
 import { MsalService } from '@azure/msal-angular';
+import { AppConfigService } from './app.config.service';
 
 export interface Workitem {
   workItemID: string;
@@ -30,8 +31,11 @@ export interface isActive{
 }
 @Injectable({ providedIn: 'root' })
 export class WorkitemService {
-
-  constructor(private http: HttpClient, private msalService: MsalService) {}
+apiURL: string =''; 
+  constructor(private http: HttpClient, private msalService: MsalService,private appConfigService: AppConfigService
+ ) {
+  this.apiURL = this.appConfigService.getConfig().apiURL;
+ }
 
 
  private async getHeaders(): Promise<HttpHeaders> {

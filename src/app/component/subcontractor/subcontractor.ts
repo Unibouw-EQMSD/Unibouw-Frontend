@@ -4,6 +4,7 @@ import { UserService } from '../../services/User.service.';
 import { MatTableDataSource } from '@angular/material/table';
 import { MatPaginator, PageEvent } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
+import { forkJoin } from 'rxjs/internal/observable/forkJoin';
 
 @Component({
   selector: 'app-subcontractor',
@@ -12,7 +13,7 @@ import { MatSort } from '@angular/material/sort';
   styleUrl: './subcontractor.css',
 })
 export class Subcontractor implements OnInit, AfterViewInit {
- displayedColumns: string[] = ['name', 'category', 'contactPerson', 'emailId', 'action'];
+ displayedColumns: string[] = ['name', 'category','contactNumber', 'contactPerson', 'emailId', 'action'];
   dataSource = new MatTableDataSource<Subcontractors>([]);
   
   searchText = '';
@@ -54,27 +55,37 @@ export class Subcontractor implements OnInit, AfterViewInit {
     this.dataSource.sort = this.sort;
   }
 
-  loadSubcontractors() {
-    this.isLoading = true;
+loadSubcontractors() {
+  this.isLoading = true;
 
-    this.subcontractorService.getSubcontractors().subscribe({
-      next: (subcontractors: Subcontractors[]) => {
-        this.isLoading = false;
+  // Use forkJoin to call both APIs together
+  forkJoin({
+    subcontractors: this.subcontractorService.getSubcontractors(),
+    mappings: this.subcontractorService.getSubcontractorWorkItemMappings()
+  }).subscribe({
+    next: ({ subcontractors, mappings }) => {
+      // Merge work items into subcontractors
+      const merged = subcontractors.map(sub => {
+        const related = mappings
+          .filter(m => m.subcontractorName === sub.name) // match by name (since IDs differ)
+          .map(m => m.workItemName)
+          .join(', ');
+        return { ...sub, category: related || '-' };
+      });
 
-        const mapped = (subcontractors || []).map(it => ({ ...it, isEditing: false }));
-        mapped.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
-        this.dataSource.data = mapped;
+      this.dataSource.data = merged;
+      this.dataSource.paginator = this.paginator;
+      this.dataSource.sort = this.sort;
+      this.isLoading = false;
+    },
+    error: (err) => {
+      console.error('❌ API error:', err);
+      this.isLoading = false;
+    }
+  });
+}
 
-        if (this.paginator) this.dataSource.paginator = this.paginator;
-        if (this.sort) this.dataSource.sort = this.sort;
-      },
-      error: (err) => {
-        console.error('Error fetching subcontractors', err);
-        this.isLoading = false;
-        this.dataSource.data = [];
-      },
-    });
-  }
+
 
   applyFilter() {
     this.dataSource.filter = this.searchText.trim().toLowerCase();
