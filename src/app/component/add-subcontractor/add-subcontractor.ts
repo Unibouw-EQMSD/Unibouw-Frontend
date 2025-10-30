@@ -1,8 +1,9 @@
-import { Component } from '@angular/core';
+import { Component, HostListener } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { WorkitemService,Workitem, WorkitemCategory } from '../../services/workitem.service';
 import { SubcontractorService } from '../../services/subcontractor.service';
 import { Router } from '@angular/router';
+import { countryList } from '../../shared/countries';
 
 @Component({
   selector: 'app-add-subcontractor',
@@ -12,7 +13,10 @@ import { Router } from '@angular/router';
 })
 export class AddSubcontractor {
 subcontractorForm: FormGroup;
-  countries = ['Afghanistan', 'India', 'USA', 'Germany', 'Netherlands'];
+ countryList = countryList;
+  countries = countryList.map(c => c.name);
+isDropdownOpen = false;
+  selectedCountry = countryList.find(c => c.code === '+91') || countryList[0]; // Default to India or first country
  workitems: Workitem[] = [];
   selectedWorkitems: Workitem[] = [];
 categories: WorkitemCategory[] = [
@@ -38,6 +42,8 @@ uploadedFilePath: string = '';
       officeAddress: [''],
       billingAddress: [''],
       sameAsOffice: [false],
+countryCode: [this.selectedCountry.code], 
+      contactNumber: [''],
       attachments: [null]
     });
   }
@@ -72,6 +78,25 @@ uploadedFilePath: string = '';
   });
 }
 
+ toggleDropdown() {
+    this.isDropdownOpen = !this.isDropdownOpen;
+  }
+
+  // Select country from dropdown
+  selectCountry(country: any) {
+    this.selectedCountry = country;
+    this.subcontractorForm.patchValue({ countryCode: country.code });
+    this.isDropdownOpen = false;
+  }
+
+  // Close dropdown when clicking outside
+  @HostListener('document:click', ['$event'])
+  onClickOutside(event: Event) {
+    const target = event.target as HTMLElement;
+    if (!target.closest('.custom-select-wrapper')) {
+      this.isDropdownOpen = false;
+    }
+  }
 
   // Load workitems for selected category
    loadWorkitems() {

@@ -36,6 +36,9 @@
     "@fortawesome/fontawesome-svg-core": "^7.0.1",
     "@fortawesome/free-solid-svg-icons": "^7.0.1",
     "bootstrap": "^5.3.8",
+    "flag-icons": "^7.5.0",
+    "google-libphonenumber": "^3.2.43",
+    "ngx-intl-tel-input": "^17.0.0",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0",
     "zone.js": "~0.15.0"
