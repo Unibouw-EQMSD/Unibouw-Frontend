@@ -1,4 +1,9 @@
  {
 
-    "apiURL": "https://localhost:7143/api"
+ 
+
+       "apiURL": "https://unibouwqa.flatworldinfotech.com/api"
+
+   
+
  } 
