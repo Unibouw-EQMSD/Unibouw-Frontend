@@ -65,6 +65,44 @@
         </div>
       </div>
     </div>
+  <div class="form-row" style="width: 48%;">
+  <div class="form-group full-width">
+    <label>Contact Number</label>
+    <div class="contact-number-wrapper">
+      <!-- Custom dropdown with flag display -->
+      <div class="custom-select-wrapper">
+        <div class="selected-option" (click)="toggleDropdown()">
+          <span [class]="'fi fi-' + selectedCountry.flag"></span>
+          <span class="country-code">{{selectedCountry.code}}</span>
+          <span class="dropdown-arrow">▼</span>
+        </div>
+        
+        <div class="dropdown-list" *ngIf="isDropdownOpen">
+          <div 
+            *ngFor="let country of countryList" 
+            class="dropdown-item"
+            (click)="selectCountry(country)"
+            [class.selected]="country.code === selectedCountry.code">
+            
+            <span [class]="'fi fi-' + country.flag"></span>
+            
+            <span class="country-info">
+              <span class="country-code">{{country.code}}</span>
+              <span class="country-name">{{country.name}}</span>
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <input 
+        type="tel" 
+        formControlName="contactNumber" 
+        class="form-control phone-input" 
+        placeholder="Enter phone number"
+      />
+    </div>
+  </div>
+</div>
 
     <!-- Attachments -->
     <div class="form-group">

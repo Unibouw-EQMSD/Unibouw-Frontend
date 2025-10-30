@@ -1,6 +1,10 @@
-import { Component } from '@angular/core';
+import { Component, ViewChild } from '@angular/core';
+import { MatPaginator } from '@angular/material/paginator';
+import { MatSort } from '@angular/material/sort';
+import { MatTableDataSource } from '@angular/material/table';
+import { rfqService,Rfq} from '../../../services/rfq.service';
 
-interface Rfq {
+interface RfqResponse {
   name: string;
   rating: number;
   date: string;
@@ -26,7 +30,7 @@ interface WorkItem {
   totalPages: number;
   currentStart: number;
   currentEnd: number;
-  rfqs: Rfq[];
+  rfqs: RfqResponse[];
   
 }
 
@@ -38,14 +42,27 @@ interface WorkItem {
 })
 export class ViewProjects {
   groupBy = 'workItem';
-  pageSize = 5;
   currentPage = 1;
   totalPages = 1;
   searchText = '';
   filteredItems: any[] = [];
   pagedItems: any[] = [];
-  pageSizes: number[] = [5, 10, 25, 50]; // options for dropdown
+pageSize = 10;
+  pageSizeOptions = [5, 10, 25, 50, 100, 200];  selectedTab = 'response'; 
+displayedColumns: string[] = [
+   
+    'customer',
+    'rfqSentDate',
+    'dueDate',
+    'rfqSent',
+    'quoteRecieved',
+    'actions'
+  ];
+    dataSource = new MatTableDataSource<Rfq>([]);
+ isLoading = false;
 
+  @ViewChild(MatPaginator) paginator!: MatPaginator;
+  @ViewChild(MatSort) sort!: MatSort;
   workItems: WorkItem[] = [
     {
       name: 'Construction',
@@ -70,6 +87,36 @@ export class ViewProjects {
       ]
     }
   ];
+
+  constructor(private rfqService:rfqService){
+
+  }
+
+  loadRfqData(): void {
+    this.rfqService.getRfq().subscribe({
+      next: (data) => {
+        this.dataSource.data = data;
+        this.isLoading = false;
+      },
+      error: (err) => {
+        console.error('❌ Failed to fetch projects:', err);
+        this.isLoading = false;
+      },
+    });
+  }
+
+  applyFilter(event: Event) {
+    const filterValue = (event.target as HTMLInputElement).value.trim().toLowerCase();
+    this.dataSource.filter = filterValue;
+  }
+
+  onAction(action: string, element: Rfq) {
+    if (action === 'View') {
+      alert(`Viewing RFQ: ${element.customerName}`);
+    } else if (action === 'Download') {
+      alert(`Downloading RFQ: ${element.customerName}`);
+    }
+  }
 goToPage(page: number) {
   if (page >= 1 && page <= this.totalPages) {
     this.currentPage = page;

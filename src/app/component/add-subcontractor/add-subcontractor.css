@@ -138,3 +138,31 @@ textarea {
   margin: 0;
   font-weight: 200;
 }
+.fi {
+  margin-right: 8px;
+  width: 20px;
+  height: 15px;
+  background-size: cover;
+  vertical-align: middle;
+}
+.dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 8px;
+  cursor: pointer;
+}
+.dropdown-item:hover {
+  background-color: #f5f5f5;
+}
+
+.contact-number-wrapper{
+  display: flex;
+}
+.custom-select-wrapper{
+  width:25%;
+}
+
+.phone-input{
+  width:100%;
+}
