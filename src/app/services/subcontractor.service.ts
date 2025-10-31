@@ -1,84 +1,108 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { map, switchMap, from, Observable } from 'rxjs';
-import { environment } from '../../environments/environment';
 import { MsalService } from '@azure/msal-angular';
+import { AppConfigService } from './app.config.service';
 
 export interface Subcontractors {
-    id: string;
-    name: string;
-    category: string;
-    personName: string;
-    phoneNumber1:string;
-    emailID: string;
-    isActive?: boolean;
-    editItem?: boolean;
+  id: string;
+  name: string;
+  category: string;
+  personName: string;
+  phoneNumber1: string;
+  emailID: string;
+  isActive?: boolean;
+  editItem?: boolean;
 }
+
 @Injectable({ providedIn: 'root' })
 export class SubcontractorService {
-    constructor(private http: HttpClient, private msalService: MsalService) { }
+  private apiURL: string = '';
+  private subcontractorUrl: string = '';
+  private subcontractorWorkitemUrl: string = '';
 
-    private async getHeaders(): Promise<HttpHeaders> {
-        const accounts = this.msalService.instance.getAllAccounts();
-        if (!accounts.length) throw new Error('No MSAL account found');
+  constructor(
+    private http: HttpClient,
+    private msalService: MsalService,
+    private appConfigService: AppConfigService
+  ) {
+    this.apiURL = this.appConfigService.getConfig().apiURL;
+    this.subcontractorUrl = `${this.apiURL}/Subcontractor`;
+    this.subcontractorWorkitemUrl = `${this.apiURL}/Common/subcontractorworkitemmapping`;
+  }
 
-        const result = await this.msalService.instance.acquireTokenSilent({
-            account: accounts[0],
-            scopes: ['api://96b6d570-73e9-4669-98d6-745f22f4acc0/Api.Read']
-        });
+  /** 🔐 Get Authorization Headers */
+  private async getHeaders(): Promise<HttpHeaders> {
+    const accounts = this.msalService.instance.getAllAccounts();
+    if (!accounts.length) throw new Error('No MSAL account found');
 
-        return new HttpHeaders({
-            'Accept': '*/*',
-            'Authorization': `Bearer ${result.accessToken}`
-        });
-    }
+    const result = await this.msalService.instance.acquireTokenSilent({
+      account: accounts[0],
+      scopes: ['api://96b6d570-73e9-4669-98d6-745f22f4acc0/Api.Read'],
+    });
 
-  getSubcontractorWorkItemMappings(): Observable<any[]> {
-  return from(this.getHeaders()).pipe(
-    switchMap(headers =>
-      this.http.get<{ count: number; data: any[] }>(
-        `${environment.apiUrl}${environment.getWorkitemsForSubcontractor}`,
-        { headers }
-      )
-    ),
-    map(res => res.data || [])
-  );
-}
+    return new HttpHeaders({
+      Accept: '*/*',
+      Authorization: `Bearer ${result.accessToken}`,
+    });
+  }
 
-    getSubcontractors(): Observable<Subcontractors[]> {
-        return from(this.getHeaders()).pipe(
-            switchMap(headers =>
-                this.http.get<{ count: number; data: Subcontractors[] }>(
-                    `${environment.apiUrl}${environment.getSubcontractor}`, { headers }
-                )
-            ),
-            map(res => (res.data || []).map(it => ({
-                id: it.id,
-                name: it.name || '',
-                category: it.category || '',
-                personName: it.personName || '',
-                phoneNumber1: it.phoneNumber1 || '',
-                emailID: it.emailID || '',
-                isActive: it.isActive,
-                editItem: false
-            })))
-        )
-    }
-
-     createSubcontractor(payload: any): Observable<any> {
+  /** 📋 Get all subcontractors */
+  getSubcontractors(): Observable<Subcontractors[]> {
     return from(this.getHeaders()).pipe(
-      switchMap(headers =>
-        this.http.post(`${environment.apiUrl}${environment.postSubcontractor}`, payload, { headers })
+      switchMap((headers) =>
+        this.http.get<{ count: number; data: Subcontractors[] }>(
+          this.subcontractorUrl,
+          { headers }
+        )
+      ),
+      map((res) =>
+        (res.data || []).map((it) => ({
+          id: it.id,
+          name: it.name || '',
+          category: it.category || '',
+          personName: it.personName || '',
+          phoneNumber1: it.phoneNumber1 || '',
+          emailID: it.emailID || '',
+          isActive: it.isActive,
+          editItem: false,
+        }))
       )
     );
   }
 
-    updateIsActive(subcontractorId: string, isActive: boolean): Observable<any> {
-  return from(this.getHeaders()).pipe(
-    switchMap(headers =>
-      this.http.put(`${environment.apiUrl}${environment.getSubcontractor}/${subcontractorId}/${isActive}`, null, { headers })
-    )
-  );
-}
+  /** 🧩 Get Work Items mapped to Subcontractors */
+  getSubcontractorWorkItemMappings(): Observable<any[]> {
+    return from(this.getHeaders()).pipe(
+      switchMap((headers) =>
+        this.http.get<{ count: number; data: any[] }>(
+          this.subcontractorWorkitemUrl,
+          { headers }
+        )
+      ),
+      map((res) => res.data || [])
+    );
+  }
 
+  /** ➕ Create a new subcontractor */
+  createSubcontractor(payload: any): Observable<any> {
+    return from(this.getHeaders()).pipe(
+      switchMap((headers) =>
+        this.http.post(this.subcontractorUrl, payload, { headers })
+      )
+    );
+  }
+
+  /** 🔄 Update IsActive status */
+  updateIsActive(subcontractorId: string, isActive: boolean): Observable<any> {
+    return from(this.getHeaders()).pipe(
+      switchMap((headers) =>
+        this.http.put(
+          `${this.subcontractorUrl}/${subcontractorId}/${isActive}`,
+          null,
+          { headers }
+        )
+      )
+    );
+  }
 }

@@ -1,32 +1,42 @@
 import { platformBrowser } from '@angular/platform-browser';
 import { AppModule } from './app/app.module';
 import { PublicClientApplication } from '@azure/msal-browser';
-import { environment } from './environments/environment';
+import { AppConfigService, AppConfig } from './app/services/app.config.service';
 
 async function initializeApp() {
+  // 🧩 Step 1: Load config.json using fetch (not HttpClient)
+  const response = await fetch('assets/app.config.json');
+  const config: AppConfig = await response.json();
+
+  // 🧩 Step 2: Initialize MSAL with config values
   const msalInstance = new PublicClientApplication({
     auth: {
-      clientId: environment.clientId,
-      authority: `https://login.microsoftonline.com/${environment.tenantId}`,
-      redirectUri: environment.redirectUri,
+      clientId: config.clientId,
+      authority: `https://login.microsoftonline.com/${config.tenantId}`,
+      redirectUri: config.redirectUri,
     },
     cache: {
       cacheLocation: 'localStorage',
-      storeAuthStateInCookie: false
-    }
+      storeAuthStateInCookie: false,
+    },
   });
 
+  await msalInstance.initialize();
 
-    await msalInstance.initialize();
-
-
-  // Handle redirect response if coming from Microsoft login
+  // 🧩 Step 3: Handle redirect response
   await msalInstance.handleRedirectPromise();
 
+  // 🧩 Step 4: Expose globally
   (window as any).msalInstance = msalInstance;
+  (window as any).appConfig = config;
 
+  // 🧩 Step 5: Bootstrap Angular app and provide config
   platformBrowser()
-    .bootstrapModule(AppModule)
+    .bootstrapModule(AppModule, {
+      providers: [
+        { provide: AppConfigService, useValue: { getConfig: () => config } },
+      ],
+    })
     .catch((err: any) => console.error(err));
 }
 
