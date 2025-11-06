@@ -192,7 +192,7 @@ export class SSOLogin implements OnInit {
     console.log('Login button clicked — calling API...');
  
     //this.http.get('https://localhost:7143/api/test', { responseType: 'text' })
-    this.http.get('https://unibouwqa.flatworldinfotech.com/api/test', { responseType: 'text' })
+    this.http.get('https://unibouwqa.flatworldinfotech.com/api/api/test', { responseType: 'text' })
       .subscribe({
         next: (response) => {
           console.log('✅ API Response:', response);
