@@ -58,20 +58,24 @@ export class Subcontractor implements OnInit, AfterViewInit {
 loadSubcontractors() {
   this.isLoading = true;
 
-  // Use forkJoin to call both APIs together
   forkJoin({
     subcontractors: this.subcontractorService.getSubcontractors(),
-    mappings: this.subcontractorService.getSubcontractorWorkItemMappings()
+    mappings: this.subcontractorService.getSubcontractorWorkItemMappings(),
   }).subscribe({
     next: ({ subcontractors, mappings }) => {
-      // Merge work items into subcontractors
-      const merged = subcontractors.map(sub => {
+      console.log('📦 Subcontractors:', subcontractors);
+      console.log('🔗 Mappings:', mappings);
+
+      // Merge: attach work items to subcontractors
+      const merged = subcontractors.map((sub) => {
         const related = mappings
-          .filter(m => m.subcontractorName === sub.name) // match by name (since IDs differ)
-          .map(m => m.workItemName)
+          .filter((m) => m.subcontractorName?.trim() === sub.name?.trim())
+          .map((m) => m.workItemName)
           .join(', ');
         return { ...sub, category: related || '-' };
       });
+
+      console.log('✅ Merged Data:', merged);
 
       this.dataSource.data = merged;
       this.dataSource.paginator = this.paginator;
@@ -79,9 +83,9 @@ loadSubcontractors() {
       this.isLoading = false;
     },
     error: (err) => {
-      console.error('❌ API error:', err);
+      console.error('❌ API Error:', err);
       this.isLoading = false;
-    }
+    },
   });
 }
 
@@ -104,7 +108,7 @@ loadSubcontractors() {
     const newStatus = !item.isActive;
     item.isActive = newStatus;
 
-    this.subcontractorService.updateIsActive(item.id, newStatus).subscribe({
+    this.subcontractorService.updateIsActive(item.subcontractorID, newStatus).subscribe({
       next: () => console.log('Status updated'),
       error: () => {
         item.isActive = !newStatus;
