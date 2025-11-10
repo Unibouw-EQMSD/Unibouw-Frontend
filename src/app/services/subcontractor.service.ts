@@ -5,7 +5,7 @@ import { MsalService } from '@azure/msal-angular';
 import { AppConfigService } from './app.config.service';
 
 export interface Subcontractors {
-  id: string;
+  subcontractorID: string;
   name: string;
   category: string;
   personName: string;
@@ -20,6 +20,9 @@ export class SubcontractorService {
   private apiURL: string = '';
   private subcontractorUrl: string = '';
   private subcontractorWorkitemUrl: string = '';
+  private getsubcontractor : string = '';
+  private uploadAttachments : string = '';
+  private personsUrl: string = '';
 
   constructor(
     private http: HttpClient,
@@ -27,8 +30,11 @@ export class SubcontractorService {
     private appConfigService: AppConfigService
   ) {
     this.apiURL = this.appConfigService.getConfig().apiURL;
-    this.subcontractorUrl = `${this.apiURL}/Subcontractor`;
+    this.subcontractorUrl = `${this.apiURL}/Subcontractor/createSubcontractorWithMappings`;
     this.subcontractorWorkitemUrl = `${this.apiURL}/Common/subcontractorworkitemmapping`;
+    this.getsubcontractor = `${this.apiURL}/Subcontractor`
+    this.uploadAttachments = `${this.apiURL}/Common/subcontractorattachmentmapping/upload`;
+    this.personsUrl = `${this.apiURL}/Common/person`
   }
 
   /** 🔐 Get Authorization Headers */
@@ -52,13 +58,13 @@ export class SubcontractorService {
     return from(this.getHeaders()).pipe(
       switchMap((headers) =>
         this.http.get<{ count: number; data: Subcontractors[] }>(
-          this.subcontractorUrl,
+          this.getsubcontractor,
           { headers }
         )
       ),
       map((res) =>
         (res.data || []).map((it) => ({
-          id: it.id,
+          subcontractorID: it.subcontractorID,
           name: it.name || '',
           category: it.category || '',
           personName: it.personName || '',
@@ -93,16 +99,50 @@ export class SubcontractorService {
     );
   }
 
+  /** 📤 Upload attachments for a subcontractor */
+createAttachments(subcontractorID: string, files: File[]): Observable<any> {
+  const formData = new FormData();
+  formData.append('SubcontractorID', subcontractorID);
+
+  for (const file of files) {
+    formData.append('Files', file, file.name);
+  }
+
+  return from(this.getHeaders()).pipe(
+    switchMap((headers) =>
+      this.http.post(
+        `${this.uploadAttachments}`,
+        formData,
+        { headers }
+      )
+    )
+  );
+}
+
+
   /** 🔄 Update IsActive status */
   updateIsActive(subcontractorId: string, isActive: boolean): Observable<any> {
     return from(this.getHeaders()).pipe(
       switchMap((headers) =>
         this.http.put(
-          `${this.subcontractorUrl}/${subcontractorId}/${isActive}`,
+          `${this.getsubcontractor}/${subcontractorId}/${isActive}`,
           null,
           { headers }
         )
       )
     );
   }
+
+  getPersons(): Observable<any[]> {
+  const personUrl = `${this.personsUrl}`;
+
+  return from(this.getHeaders()).pipe(
+    switchMap((headers) =>
+      this.http.get<{ count: number; data: any[] }>(personUrl, { headers })
+    ),
+    map((res) => res.data || [])
+  );
+}
+
+
 }
