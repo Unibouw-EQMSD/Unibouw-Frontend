@@ -490,3 +490,6 @@ button.mat-raised-button {
   transform: scale(0.7); 
   transform-origin: left center;
 }
+.text-danger{
+  color: red;
+}

@@ -159,10 +159,14 @@ textarea {
 .contact-number-wrapper{
   display: flex;
 }
-.custom-select-wrapper{
+/* .custom-select-wrapper{
   width:25%;
-}
+} */
 
 .phone-input{
   width:100%;
+}
+
+.country-code{
+  padding-right: 7px;
 }
