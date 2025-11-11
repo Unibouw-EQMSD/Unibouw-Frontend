@@ -180,10 +180,10 @@ removeFile(index: number) {
 }
 loadPersons(): void {
     this.subcontractorService.getPersons().subscribe({
-      next: (res) => {
+      next: (res: any[]) => {
         this.persons = res;
       },
-      error: (err) => console.error('Error fetching persons:', err)
+      error: (err: any) => console.error('Error fetching persons:', err)
     });
   }
   onSubmit() {
@@ -224,12 +224,12 @@ loadPersons(): void {
 
         if (subcontractorID && files.length > 0) {
           this.subcontractorService.createAttachments(subcontractorID, files).subscribe({
-            next: uploadRes => {
+            next: (uploadRes: any) => {
               console.log("📁 Upload success:", uploadRes);
               this.showPopupMessage("Subcontractor and files uploaded successfully!");
                this.resetForm();
             },
-            error: uploadErr => {
+            error: (uploadErr: any) => {
               console.error("🚨 File upload failed:", uploadErr);
               this.showPopupMessage("File upload failed.");
             }
