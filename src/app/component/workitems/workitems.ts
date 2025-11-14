@@ -39,7 +39,7 @@ export class Workitems implements OnInit, AfterViewInit {
   ) {}
 
   ngOnInit() {
-
+  
     const showWelcome = localStorage.getItem('show_welcome');
 
   if (showWelcome === 'true') {
@@ -56,11 +56,8 @@ export class Workitems implements OnInit, AfterViewInit {
     localStorage.setItem('show_welcome', 'false');
   }
 
-  if (this.isAdmin) {
-    this.displayedColumns.push('action');
-  }
-
-    this.isAdmin = this.userService.isAdmin();
+ this.isAdmin = this.userService.isAdmin(); // Check role
+  this.updateDisplayedColumns();  
 
      this.dataSource.filterPredicate = (data: Workitem, filter: string) => {
     const f = filter.trim().toLowerCase();
@@ -85,6 +82,17 @@ export class Workitems implements OnInit, AfterViewInit {
   // first page load
   this.loadCategoriesAndWorkitems(true);
 }
+
+updateDisplayedColumns() {
+  if (this.isAdmin) {
+    if (!this.displayedColumns.includes('action')) {
+      this.displayedColumns.push('action');
+    }
+  } else {
+    this.displayedColumns = this.displayedColumns.filter(c => c !== 'action');
+  }
+}
+
   ngAfterViewInit() {
     // Initialize paginator and sort
     setTimeout(() => {

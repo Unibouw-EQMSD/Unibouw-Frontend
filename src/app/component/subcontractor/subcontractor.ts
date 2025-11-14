@@ -37,11 +37,8 @@ export class Subcontractor implements OnInit, AfterViewInit {
 
   ngOnInit() {
 
-     if (this.isAdmin) {
-    this.displayedColumns.push('action');
-  }
-
-    this.isAdmin = this.userService.isAdmin();
+     this.isAdmin = this.userService.isAdmin(); // Check role
+  this.updateDisplayedColumns();  
 
     // Show skeleton first, then load table
   this.isSkeletonLoading = true;
@@ -54,6 +51,15 @@ export class Subcontractor implements OnInit, AfterViewInit {
 }
 
   
+updateDisplayedColumns() {
+  if (this.isAdmin) {
+    if (!this.displayedColumns.includes('action')) {
+      this.displayedColumns.push('action');
+    }
+  } else {
+    this.displayedColumns = this.displayedColumns.filter(c => c !== 'action');
+  }
+}
 
   ngAfterViewInit() {
     this.dataSource.paginator = this.paginator;
