@@ -66,6 +66,7 @@ body {
 }
 /* Container */
 .container {
+  max-width: none !important;
   padding: 38px 36px 15px;
   background-color: #f5f5f9 !important;
 }
@@ -77,6 +78,7 @@ body {
   margin-bottom: 15px;
 }
 .page-header h2 {
+  padding-left: 5px;
   font-size: 1.5rem;
   font-weight: 400;
   color: #003042;
@@ -105,7 +107,7 @@ body {
   border: none;
   cursor: pointer;
   background: #e8eef3;
-  font-weight: 600;
+  font-weight: 400 !important;
   font-size: 16px;
   color: #ff7f32;
   transition: 0.2s;
@@ -124,7 +126,7 @@ body {
 
 /* Search box - fixed width */
 .search-box {
-  margin: 20px 0;
+  margin-top: 15px;
   width: 300px; /* fixed width */
   position: relative;
 }
@@ -154,6 +156,23 @@ body {
 
 .mdc-text-field--filled:not(.mdc-text-field--disabled){
   background-color: #ffffff !important;
+}
+
+
+mat-icon.notranslate.material-icons.mat-ligature-font.mat-icon-no-color {
+  font-size: 16px !important; /* Set your desired size */
+}
+.cdk-column-action {
+  text-align: center !important;
+}
+
+.custom-visibility-icon {
+  color: #f07e2a !important;      /* Default color */
+  transition: color 0.2s;
+}
+
+.custom-visibility-icon:hover {
+  filter: brightness(1.4);     /* Change to your desired hover color */
 }
 
 /* Table container */
@@ -213,6 +232,13 @@ table.mat-table {
   top: 0;
   background-color: #fff;  /* solid background for header */
   z-index: 20;
+}
+
+/* Reduce the height of the form field container */
+.mat-mdc-form-field-infix {
+  padding: 5px 0px !important;
+  min-height: 40px !important;
+  height: 35px !important;
 }
 
 .mat-header-cell {
@@ -381,7 +407,7 @@ button.mat-raised-button {
   background-color: #ff7f32;
   border: none;
   border-radius: 5px;
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 300;
   padding: 2px 12px;
 }

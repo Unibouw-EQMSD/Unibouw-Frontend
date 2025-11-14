@@ -13,7 +13,7 @@ import { MatSort, Sort } from '@angular/material/sort';
   styleUrls: ['./workitems.css']
 })
 export class Workitems implements OnInit, AfterViewInit {
-  displayedColumns: string[] = ['number', 'name', 'description', 'action'];
+  displayedColumns: string[] = ['number', 'name'];
   dataSource = new MatTableDataSource<Workitem>([]);
   activeTab: 'standard' | 'unibouw' = 'standard';
   searchText: string = '';
@@ -39,6 +39,27 @@ export class Workitems implements OnInit, AfterViewInit {
   ) {}
 
   ngOnInit() {
+
+    const showWelcome = localStorage.getItem('show_welcome');
+
+  if (showWelcome === 'true') {
+    // Fetch user data if needed
+    const userData = localStorage.getItem('user_data');
+    const user = userData ? JSON.parse(userData) : null;
+    const userName = user?.name || user?.email?.split('@')[0] || 'User';
+
+    // Show your welcome message (any style you want)
+    //alert(`Welcome ${userName}! 👋`);
+    this.showPopupMessage(`Welcome, ${userName}! You have successfully signed in to Unibouw.`);
+
+    // Mark as shown so it doesn’t show again
+    localStorage.setItem('show_welcome', 'false');
+  }
+
+  if (this.isAdmin) {
+    this.displayedColumns.push('action');
+  }
+
     this.isAdmin = this.userService.isAdmin();
 
      this.dataSource.filterPredicate = (data: Workitem, filter: string) => {
@@ -168,6 +189,7 @@ loadWorkitems(categoryId: string) {
         item.isEditing = true;
       }
     });
+    
   }
 
   toggleIsActive(item: Workitem) {

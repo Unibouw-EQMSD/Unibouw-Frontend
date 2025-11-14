@@ -1,27 +1,51 @@
 <app-header></app-header>
 
-<header class="page-header">
-  <h2>Add Subcontractor</h2>
+<header class="page-header" style="width: 95% !important; margin-top: 35px !important">
+  <h2>Add Subcontractors</h2>
 </header>
 
 <div class="form-card">
   <form (ngSubmit)="onSubmit()" [formGroup]="subcontractorForm" enctype="multipart/form-data">
-
-    <!-- 🧩 First Row -->
+    <!-- First Row -->
     <div class="form-row">
       <div class="form-group">
         <label>Subcontractor Name <span class="text-danger">*</span></label>
-        <input type="text" formControlName="name" class="form-control" />
-        <div *ngIf="subcontractorForm.get('name')?.touched && subcontractorForm.get('name')?.invalid" class="text-danger small">
-          Subcontractor name is required.
+        <input
+          type="text"
+          formControlName="name"
+          class="form-control"
+          [ngClass]="{
+            'is-invalid':
+              subcontractorForm.get('name')?.touched && subcontractorForm.get('name')?.invalid
+          }"
+        />
+        <div
+          *ngIf="subcontractorForm.get('name')?.touched && subcontractorForm.get('name')?.invalid"
+          class="text-danger small"
+        >
+          This field is required.
         </div>
       </div>
 
       <div class="form-group">
         <label>Location <span class="text-danger">*</span></label>
-        <input type="text" formControlName="location" class="form-control" />
-        <div *ngIf="subcontractorForm.get('location')?.touched && subcontractorForm.get('location')?.invalid" class="text-danger small">
-          Location is required.
+        <input
+          type="text"
+          formControlName="location"
+          class="form-control"
+          [ngClass]="{
+            'is-invalid':
+              subcontractorForm.get('location')?.touched &&
+              subcontractorForm.get('location')?.invalid
+          }"
+        />
+        <div
+          *ngIf="
+            subcontractorForm.get('location')?.touched && subcontractorForm.get('location')?.invalid
+          "
+          class="text-danger small"
+        >
+          This field is required.
         </div>
       </div>
     </div>
@@ -29,22 +53,33 @@
     <!-- 🌍 Second Row -->
     <div class="form-row">
       <div class="form-group">
-        <label>Country <span class="text-danger">*</span></label>
+        <label>Country</label>
         <select formControlName="country" class="form-control">
-          <option value="">-- Select Country --</option>
+          <option value="">-- Select --</option>
           <option *ngFor="let c of countries" [value]="c">{{ c }}</option>
         </select>
-        <div *ngIf="subcontractorForm.get('country')?.touched && subcontractorForm.get('country')?.invalid" class="text-danger small">
-          Country is required.
-        </div>
+        <!-- <div
+          *ngIf="
+            subcontractorForm.get('country')?.touched && subcontractorForm.get('country')?.invalid
+          "
+          class="text-danger small"
+        >
+          This field is required.
+        </div> -->
       </div>
 
       <div class="form-group">
-        <label>Registered Date <span class="text-danger">*</span></label>
+        <label>Registered Date</label>
         <input type="date" formControlName="registeredDate" class="form-control" />
-        <div *ngIf="subcontractorForm.get('registeredDate')?.touched && subcontractorForm.get('registeredDate')?.invalid" class="text-danger small">
-          Registered date is required.
-        </div>
+        <!-- <div
+          *ngIf="
+            subcontractorForm.get('registeredDate')?.touched &&
+            subcontractorForm.get('registeredDate')?.invalid
+          "
+          class="text-danger small"
+        >
+          This field is required.
+        </div> -->
       </div>
     </div>
 
@@ -52,10 +87,25 @@
     <div class="form-row">
       <div class="form-group">
         <label>Email ID <span class="text-danger">*</span></label>
-        <input type="email" formControlName="email" class="form-control" />
-        <div *ngIf="subcontractorForm.get('email')?.touched && subcontractorForm.get('email')?.invalid" class="text-danger small">
-          <div *ngIf="subcontractorForm.get('email')?.errors?.['required']">Email is required.</div>
-          <div *ngIf="subcontractorForm.get('email')?.errors?.['email']">Enter a valid email address.</div>
+        <input
+          type="email"
+          formControlName="email"
+          class="form-control"
+          [ngClass]="{
+            'is-invalid':
+              subcontractorForm.get('email')?.touched && subcontractorForm.get('email')?.invalid
+          }"
+        />
+        <div
+          *ngIf="subcontractorForm.get('email')?.touched && subcontractorForm.get('email')?.invalid"
+          class="text-danger small"
+        >
+          <div *ngIf="subcontractorForm.get('email')?.errors?.['required']">
+            This field is required.
+          </div>
+          <div *ngIf="subcontractorForm.get('email')?.errors?.['email']">
+            Enter a valid email address.
+          </div>
         </div>
       </div>
 
@@ -65,9 +115,14 @@
           <option value="Active">Active</option>
           <option value="Inactive">Inactive</option>
         </select>
-        <div *ngIf="subcontractorForm.get('status')?.touched && subcontractorForm.get('status')?.invalid" class="text-danger small">
-          Status is required.
-        </div>
+        <!-- <div
+          *ngIf="
+            subcontractorForm.get('status')?.touched && subcontractorForm.get('status')?.invalid
+          "
+          class="text-danger small"
+        >
+          This field is required.
+        </div> -->
       </div>
     </div>
 
@@ -75,18 +130,38 @@
     <div class="form-row">
       <div class="form-group full-width">
         <label>Office Address <span class="text-danger">*</span></label>
-        <textarea formControlName="officeAddress" class="form-control"></textarea>
-        <div *ngIf="subcontractorForm.get('officeAddress')?.touched && subcontractorForm.get('officeAddress')?.invalid" class="text-danger small">
-          Office address is required.
+        <textarea
+          formControlName="officeAddress"
+          class="form-control"
+          [ngClass]="{
+            'is-invalid':
+              subcontractorForm.get('officeAddress')?.touched &&
+              subcontractorForm.get('officeAddress')?.invalid
+          }"
+        ></textarea>
+        <div
+          *ngIf="
+            subcontractorForm.get('officeAddress')?.touched &&
+            subcontractorForm.get('officeAddress')?.invalid
+          "
+          class="text-danger small"
+        >
+          This field is required.
         </div>
       </div>
 
       <div class="form-group full-width">
-        <label>Billing Address <span class="text-danger">*</span></label>
+        <label>Billing Address</label>
         <textarea formControlName="billingAddress" class="form-control"></textarea>
-        <div *ngIf="subcontractorForm.get('billingAddress')?.touched && subcontractorForm.get('billingAddress')?.invalid" class="text-danger small">
-          Billing address is required.
-        </div>
+        <!-- <div
+          *ngIf="
+            subcontractorForm.get('billingAddress')?.touched &&
+            subcontractorForm.get('billingAddress')?.invalid
+          "
+          class="text-danger small"
+        >
+          This field is required.
+        </div> -->
 
         <div class="mt-1">
           <input type="checkbox" formControlName="sameAsOffice" /> Same as Office Address
@@ -103,7 +178,7 @@
           <div class="custom-select-wrapper">
             <div class="selected-option" (click)="toggleDropdown()">
               <span [class]="'fi fi-' + selectedCountry.flag"></span>
-              <span class="country-code">{{selectedCountry.code}}</span>
+              <span class="country-code">{{ selectedCountry.code }}</span>
               <span class="dropdown-arrow">▼</span>
             </div>
 
@@ -116,8 +191,8 @@
               >
                 <span [class]="'fi fi-' + country.flag"></span>
                 <span class="country-info">
-                  <span class="country-code">{{country.code}}</span>
-                  <span class="country-name">{{country.name}}</span>
+                  <span class="country-code">{{ country.code }}</span>
+                  <span class="country-name">{{ country.name }}</span>
                 </span>
               </div>
             </div>
@@ -128,22 +203,53 @@
             formControlName="contactNumber"
             class="form-control phone-input"
             placeholder="Enter phone number"
+            [ngClass]="{
+              'is-invalid':
+                subcontractorForm.get('contactNumber')?.touched &&
+                subcontractorForm.get('contactNumber')?.invalid
+            }"
           />
         </div>
-        <div *ngIf="subcontractorForm.get('contactNumber')?.touched && subcontractorForm.get('contactNumber')?.invalid" class="text-danger small">
-          <div *ngIf="subcontractorForm.get('contactNumber')?.errors?.['required']">Contact number is required.</div>
-          <div *ngIf="subcontractorForm.get('contactNumber')?.errors?.['pattern']">Enter a valid phone number (6–15 digits).</div>
+        <div
+          *ngIf="
+            subcontractorForm.get('contactNumber')?.touched &&
+            subcontractorForm.get('contactNumber')?.invalid
+          "
+          class="text-danger small"
+        >
+          <div *ngIf="subcontractorForm.get('contactNumber')?.errors?.['required']">
+            This field is required.
+          </div>
+          <div *ngIf="subcontractorForm.get('contactNumber')?.errors?.['pattern']">
+            Enter a valid phone number (6–15 digits).
+          </div>
         </div>
       </div>
 
       <div class="form-group">
         <label>Contact Person <span class="text-danger">*</span></label>
-        <select formControlName="contactPerson" class="form-control">
-          <option value="">-- Select Person --</option>
-          <option *ngFor="let person of persons" [value]="person.personID">{{ person.name }}</option>
+        <select
+          formControlName="contactPerson"
+          class="form-control"
+          [ngClass]="{
+            'is-invalid':
+              subcontractorForm.get('contactPerson')?.touched &&
+              subcontractorForm.get('contactPerson')?.invalid
+          }"
+        >
+          <option value="">-- Select --</option>
+          <option *ngFor="let person of persons" [value]="person.personID">
+            {{ person.name }}
+          </option>
         </select>
-        <div *ngIf="subcontractorForm.get('contactPerson')?.touched && subcontractorForm.get('contactPerson')?.invalid" class="text-danger small">
-          Contact person is required.
+        <div
+          *ngIf="
+            subcontractorForm.get('contactPerson')?.touched &&
+            subcontractorForm.get('contactPerson')?.invalid
+          "
+          class="text-danger small"
+        >
+          This field is required.
         </div>
       </div>
     </div>
@@ -157,7 +263,7 @@
       </div>
     </div>
 
-    <div *ngIf="uploadedFiles.length > 0" class="uploaded-files">
+    <!-- <div *ngIf="uploadedFiles.length > 0" class="uploaded-files">
       <label>Selected Files:</label>
       <ul>
         <li *ngFor="let file of uploadedFiles; let i = index">
@@ -165,15 +271,30 @@
           <button type="button" class="remove-btn" (click)="removeFile(i)">❌</button>
         </li>
       </ul>
+    </div> -->
+    <div *ngIf="uploadedFiles.length > 0" class="uploaded-files">
+      <label>Selected Files:</label>
+      <span>
+        <ng-container *ngFor="let file of uploadedFiles; let i = index">
+          📎 {{ file.name }}
+          <button type="button" class="remove-btn" (click)="removeFile(i)">❌</button>
+          <span *ngIf="i < uploadedFiles.length - 1">, </span>
+        </ng-container>
+      </span>
     </div>
   </form>
 
-  <!-- 🧱 Workitems Section -->
+  <!-- Workitems Section -->
   <div class="workitems-card">
-    <h3>Workitems</h3>
-
+    <label>Workitems</label> <span class="text-danger"> *</span>
+    <div
+      *ngIf="subcontractorForm.touched && selectedWorkitems.length === 0"
+      class="text-danger small p-3"
+    >
+      At least one workitem is required.
+    </div>
     <!-- Category Tabs -->
-    <div class="tabs">
+    <div class="tabs pt-3">
       <button
         *ngFor="let cat of categories"
         type="button"
@@ -186,9 +307,9 @@
     </div>
 
     <!-- Workitems List -->
-    <div class="checkbox-list">
+    <div class="checkbox-list pt-1">
       <ng-container *ngIf="workitems.length > 0; else noWorkitems">
-        <label *ngFor="let w of workitems">
+        <label *ngFor="let w of workitems" style="font-size: 15px">
           <input type="checkbox" [checked]="isSelected(w)" (change)="toggleWorkitem($event, w)" />
           {{ w.name }}
         </label>
@@ -203,7 +324,9 @@
   <!-- ✅ Form Actions -->
   <div class="form-actions">
     <button type="button" class="btn cancel-btn" (click)="onCancel()">Cancel</button>
-    <button type="submit" class="btn submit-btn" (click)="onSubmit()"  [disabled]="!subcontractorForm.valid">Submit</button>
+    <button type="button" class="btn reset-btn" (click)="onReset()">Reset</button>
+    <!-- <button type="submit" class="btn submit-btn" (click)="onSubmit()"  [disabled]="!subcontractorForm.valid">Submit</button> -->
+    <button type="submit" class="btn submit-btn" (click)="onSubmit()">Submit</button>
   </div>
 </div>
 

@@ -1,59 +1,70 @@
 <app-header></app-header>
 
-
-
 <!-- 🔹 Page Header -->
 <header class="page-header">
   <h2>Super Market Project Details</h2>
 </header>
 
 <div class="project-details-container">
-
   <!-- LEFT: Project Details -->
   <div class="details-card" *ngIf="projectDetails">
-  <h3>Details</h3>
-  <div class="detail-row"><span class="label">Project Code</span><span class="value">{{ projectDetails.number }}</span></div>
-  <div class="detail-row"><span class="label">Project</span><span class="value">{{ projectDetails.name }}</span></div>
-  <div class="detail-row"><span class="label">Customer</span><span class="value">{{ projectDetails.customerName }}</span></div>
-  <div class="detail-row"><span class="label">Project Manager</span><span class="value">{{ projectDetails.projectManagerName }}</span></div>
-  <div class="detail-row"><span class="label">Start Date</span><span class="value">{{ projectDetails.startDate | date:'dd-MM-yyyy' }}</span></div>
-  <div class="detail-row"><span class="label">Committed Date</span><span class="value">{{ projectDetails.completionDate | date:'dd-MM-yyyy' }}</span></div>
-  <div class="detail-row"><span class="label">Status</span><span class="value status">{{ projectDetails.status }}</span></div>
-  <div class="detail-row"><span class="label">Total Dimension</span><span class="value">{{ projectDetails.totalDimension }}</span></div>
-  <div class="detail-row">
-    <span class="label">Specification</span>
-    <span class="value">
-      <a [href]="projectDetails.sharepointURL" target="_blank">Project Files</a>
-    </span>
+    <h3>Details</h3>
+    <div class="detail-row">
+      <span class="label">Project Code</span><span class="value">{{ projectDetails.number }}</span>
+    </div>
+    <div class="detail-row">
+      <span class="label">Project</span><span class="value">{{ projectDetails.name }}</span>
+    </div>
+    <div class="detail-row">
+      <span class="label">Customer</span
+      ><span class="value">{{ projectDetails.customerName }}</span>
+    </div>
+    <div class="detail-row">
+      <span class="label">Project Manager</span
+      ><span class="value">{{ projectDetails.projectManagerName }}</span>
+    </div>
+    <div class="detail-row">
+      <span class="label">Start Date</span
+      ><span class="value">{{ projectDetails.startDate | date : 'dd-MM-yyyy' }}</span>
+    </div>
+    <div class="detail-row">
+      <span class="label">Committed Date</span
+      ><span class="value">{{ projectDetails.completionDate | date : 'dd-MM-yyyy' }}</span>
+    </div>
+    <div class="detail-row">
+      <span class="label">Status</span><span class="value status">{{ projectDetails.status }}</span>
+    </div>
+    <div class="detail-row">
+      <span class="label">Total Dimension</span
+      ><span class="value">{{ projectDetails.totalDimension }}</span>
+    </div>
+    <div class="detail-row">
+      <span class="label">Specification</span>
+      <span class="value">
+        <a [href]="projectDetails.sharepointURL" target="_blank">Project Files</a>
+      </span>
+    </div>
   </div>
-</div>
 
-<div *ngIf="isLoading" class="loading">
-  Loading project details...
-</div>
+  <div *ngIf="isLoading" class="loading">Loading project details...</div>
 
   <!-- RIGHT: TAB CONTENT -->
   <div class="rfq-card">
     <!-- 🔹 Tabs -->
-<div class="tabs">
-  <button 
-    [class.active]="selectedTab === 'response'"
-    (click)="selectedTab = 'response'">
-    RFQ Response
-  </button>
+    <div class="tabs">
+      <button [class.active]="selectedTab === 'response'" (click)="selectedTab = 'response'">
+        RFQ Response
+      </button>
 
-  <button 
-    [class.active]="selectedTab === 'rfq'"
-    (click)="selectedTab = 'rfq'">
-    RFQ
-  </button>
+      <button [class.active]="selectedTab === 'rfq'" (click)="selectedTab = 'rfq'">RFQ</button>
 
-  <button 
-    [class.active]="selectedTab === 'conversation'"
-    (click)="selectedTab = 'conversation'">
-    Conversation
-  </button>
-</div>
+      <button
+        [class.active]="selectedTab === 'conversation'"
+        (click)="selectedTab = 'conversation'"
+      >
+        Conversation
+      </button>
+    </div>
     <!-- 🟢 TAB 1: RFQ RESPONSE (Accordion Section) -->
     <div *ngIf="selectedTab === 'response'">
       <!-- <div class="rfq-header">
@@ -123,49 +134,51 @@
 
     <!-- 🔵 TAB 2: RFQ (Mat Table Section) -->
     <div *ngIf="selectedTab === 'rfq'">
-      <table mat-table [dataSource]="dataSource" class="mat-elevation-z8"
-       matSort
+      <table
+        mat-table
+        [dataSource]="dataSource"
+        class="mat-elevation-z8"
+        matSort
         matSortActive="customer"
-        matSortDirection="asc">
-
+        matSortDirection="asc"
+      >
         <ng-container matColumnDef="customer">
-          <th mat-header-cell *matHeaderCellDef mat-sort-header> Customer </th>
-          <td mat-cell *matCellDef="let row"> {{ row.customer }} </td>
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Customer</th>
+          <td mat-cell *matCellDef="let row">{{ row.customer }}</td>
         </ng-container>
 
         <ng-container matColumnDef="rfqSentDate">
-          <th mat-header-cell *matHeaderCellDef mat-sort-header> RFQ Sent </th>
-          <td mat-cell *matCellDef="let row"> {{ row.rfqSentDate }} </td>
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>RFQ Sent</th>
+          <td mat-cell *matCellDef="let row">{{ row.rfqSentDate }}</td>
         </ng-container>
 
         <ng-container matColumnDef="dueDate">
-          <th mat-header-cell *matHeaderCellDef mat-sort-header> Due Date</th>
-          <td mat-cell *matCellDef="let row"> {{ row.dueDate }} </td>
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Due Date</th>
+          <td mat-cell *matCellDef="let row">{{ row.dueDate }}</td>
         </ng-container>
         <ng-container matColumnDef="rfqSent">
-          <th mat-header-cell *matHeaderCellDef mat-sort-header> #RFQ Sent</th>
-          <td mat-cell *matCellDef="let row"> {{ row.rfqSent }} </td>
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>#RFQ Sent</th>
+          <td mat-cell *matCellDef="let row">{{ row.rfqSent }}</td>
         </ng-container>
         <ng-container matColumnDef="quoteRecieved">
-          <th mat-header-cell *matHeaderCellDef mat-sort-header> #Quote Recieved</th>
-          <td mat-cell *matCellDef="let row"> {{ row.quoteRecieved }} </td>
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>#Quote Recieved</th>
+          <td mat-cell *matCellDef="let row">{{ row.quoteRecieved }}</td>
         </ng-container>
 
-        
-
         <ng-container matColumnDef="actions">
-          <th mat-header-cell *matHeaderCellDef> Actions </th>
+          <th mat-header-cell *matHeaderCellDef>Actions</th>
           <td mat-cell *matCellDef="let row">
             <i class="fa-regular fa-pen-to-square edit-icon"></i>
           </td>
         </ng-container>
 
         <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-        <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
       </table>
     </div>
 
-    <mat-paginator *ngIf="selectedTab === 'rfq'"
+    <mat-paginator
+      *ngIf="selectedTab === 'rfq'"
       [pageSize]="pageSize"
       [pageSizeOptions]="pageSizeOptions"
       showFirstLastButtons
@@ -177,7 +190,6 @@
       <h3>Conversation</h3>
       <p>No messages yet.</p>
     </div>
-
   </div>
 </div>
 
