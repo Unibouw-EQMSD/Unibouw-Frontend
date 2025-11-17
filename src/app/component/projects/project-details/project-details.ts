@@ -135,4 +135,9 @@ logProjectId(projectID: string): void {
   console.log('🧩 Project ID:', projectID);
 }
 
+navigateToProject(item: any): void {
+  this.logProjectId(item.projectID); // your existing log function
+  this.router.navigate(['/view-projects', item.projectID]);
+}
+
 }
