@@ -81,8 +81,12 @@
 
         <!-- Header and Rows -->
         <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-        <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
-
+<tr
+  mat-row
+  *matRowDef="let item; columns: displayedColumns;"
+  (click)="navigateToProject(item)"
+  class="clickable-row">
+</tr>
         <!-- No Data -->
         <tr *matNoDataRow>
           <td [attr.colspan]="displayedColumns.length" class="table-spinner-cell">

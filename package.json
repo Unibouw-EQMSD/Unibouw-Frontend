@@ -22,6 +22,7 @@
   },
   "private": true,
   "dependencies": {
+    "@angular-material-components/datetime-picker": "^16.0.1",
     "@angular/cdk": "^20.2.9",
     "@angular/common": "^20.3.0",
     "@angular/compiler": "^20.3.0",
@@ -35,6 +36,7 @@
     "@fortawesome/angular-fontawesome": "^3.0.0",
     "@fortawesome/fontawesome-svg-core": "^7.0.1",
     "@fortawesome/free-solid-svg-icons": "^7.0.1",
+    "@material/snackbar": "^14.0.0",
     "bootstrap": "^5.3.8",
     "flag-icons": "^7.5.0",
     "google-libphonenumber": "^3.2.43",

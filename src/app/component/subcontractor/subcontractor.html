@@ -99,5 +99,10 @@
   </div>
 
 </div>
-
+<!-- ✅ Popup -->
+<div *ngIf="showPopup" [ngClass]="{ popup: true, error: popupError }">
+  <span *ngIf="!popupError">✅</span>
+  <span *ngIf="popupError">❌</span>
+  {{ popupMessage }}
+</div>
 <app-footer></app-footer>

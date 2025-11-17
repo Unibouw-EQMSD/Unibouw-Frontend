@@ -75,7 +75,10 @@ goToRFQ() {
           this.dataSource.sort = this.sort;
 
   }
-
+navigateToProject(item: any): void {
+  this.logProjectId(item.projectID); // your existing log function
+  this.router.navigate(['/view-projects', item.projectID]);
+}
   applyFilter() {
     this.dataSource.filter = this.searchText.trim().toLowerCase();
     if (this.dataSource.paginator) this.dataSource.paginator.firstPage();

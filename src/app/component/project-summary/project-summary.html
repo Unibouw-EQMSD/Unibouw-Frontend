@@ -1,0 +1,175 @@
+<div class="container" *ngIf="!isLoading; else loading">
+  <div class="page-header">
+    <h2>Quote Request (RFQ)</h2>
+  </div>
+
+  <div class="rfq-layout" *ngIf="project; else errorBlock">
+    <!-- LEFT CARD: Project Details -->
+    <aside class="left-card">
+      <div class="details-card">
+        <h3>Project Details</h3>
+
+        <div class="detail-row">
+          <span class="label">Project Code</span>
+          <span class="value">{{ project.number || '—' }}</span>
+        </div>
+
+        <div class="detail-row">
+          <span class="label">Project</span>
+          <span class="value">{{ project.name || '—' }}</span>
+        </div>
+
+        <div class="detail-row">
+          <span class="label">Customer</span>
+          <span class="value">{{ project.company || '—' }}</span>
+        </div>
+
+        <div class="detail-row">
+          <span class="label">Project Manager</span>
+          <span class="value">{{ project.projectManagerName || '—' }}</span>
+        </div>
+
+        <div class="detail-row">
+          <span class="label">Start Date</span>
+          <span class="value">{{ project.startDate | date: 'dd-MM-yyyy' }}</span>
+        </div>
+
+        <div class="detail-row">
+          <span class="label">Committed Date</span>
+          <span class="value">{{ project.completionDate | date: 'dd-MM-yyyy' }}</span>
+        </div>
+
+        <div class="detail-row">
+          <span class="label">Status</span>
+          <span class="value status {{ statusClass(project.status) }}">
+            {{ project.status || 'In Progress' }}
+          </span>
+        </div>
+
+        <div class="detail-row" *ngIf="project.totalDimension">
+          <span class="label">Total Dimension</span>
+          <span class="value">{{ project.totalDimension }}</span>
+        </div>
+
+        <div class="detail-row" *ngIf="project.sharepointURL">
+          <span class="label">Specification</span>
+          <span class="value">
+            <ng-container *ngFor="let file of project.sharepointURL.split(','); let last = last">
+              <a [href]="file" target="_blank">{{ file.split('/').pop() }}</a
+              ><span *ngIf="!last">, </span>
+            </ng-container>
+          </span>
+        </div>
+      </div>
+    </aside>
+
+    <!-- RIGHT CARD: RFQ Details -->
+    <section class="right-card">
+      <div class="panel">
+        <h3>RFQ Details</h3>
+
+        <div class="two-col">
+          <div class="rfq-field">
+            <label>Workitem Code</label>
+            <input type="text" [value]="selectedWorkItem?.workItemID || '—'" readonly />
+          </div>
+
+          <div class="rfq-field">
+            <label>Workitem</label>
+            <input type="text" [value]="selectedWorkItem?.name || '—'" readonly />
+          </div>
+        </div>
+
+        <div class="rfq-field">
+          <label>Description</label>
+          <div class="description-box">
+            {{ selectedWorkItem?.description || 'No description available.' }}
+          </div>
+        </div>
+
+        <!-- Attachments & Comments Section (Shown only when Interested is clicked) -->
+       <div class="two-col attachments-row" *ngIf="isInterested">
+  <div class="rfq-field attachments-field">
+    <label>Attachments</label>
+
+    <div class="attachments-container">
+      <!-- File input -->
+      <div class="attachment-line">
+        <input type="file" (change)="onFileSelected($event)" multiple />
+      </div>
+
+      <!-- Upload button -->
+      <button class="btn-secondary upload-btn" type="button" (click)="submitQuoteFile()">
+        Upload Quote and Submit
+      </button>
+    </div>
+
+    <!-- 📂 Uploaded files displayed below -->
+    <div class="uploaded-files" *ngIf="selectedFiles.length > 0">
+      <h4 class="uploaded-title">Selected Attachments</h4>
+      <div class="uploaded-file" *ngFor="let file of selectedFiles; let i = index">
+<span class="file-name">{{ file?.name }}</span>
+        <button type="button" class="delete-btn" (click)="removeFile(i)" title="Remove file">
+          ✖
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="rfq-field">
+    <label>Comments</label>
+    <textarea placeholder="Add Comments" rows="5" [formControl]="comments"></textarea>
+
+    <div class="field-hint text-danger" *ngIf="comments.touched && comments.invalid">
+      Comment is required
+    </div>
+  </div>
+</div>
+
+        <!-- Action Buttons -->
+        <div class="actions">
+          <button
+            class="btn-primary"
+            type="button"
+            (click)="submitInterest('Interested')"
+            [disabled]="buttonsDisabled"
+          >
+            Interested
+          </button>
+
+          <button
+            class="btn-ghost"
+            type="button"
+            (click)="submitInterest('Maybe Later')"
+            [disabled]="buttonsDisabled"
+          >
+            Maybe Later
+          </button>
+
+          <button
+            class="btn-ghost"
+            type="button"
+            (click)="submitInterest('Not Interested')"
+            [disabled]="buttonsDisabled"
+          >
+            Not Interested
+          </button>
+        </div>
+      </div>
+    </section>
+  </div>
+</div>
+
+<!-- Loading Template -->
+<ng-template #loading>
+  <div class="loading text-center p-5">
+    <h3>Loading project details...</h3>
+  </div>
+</ng-template>
+
+<!-- Error Template -->
+<ng-template #errorBlock>
+  <div class="error text-center p-5 text-danger">
+    <h3>{{ errorMsg || 'No data found for this RFQ.' }}</h3>
+  </div>
+</ng-template>

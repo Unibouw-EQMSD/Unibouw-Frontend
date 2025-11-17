@@ -40,7 +40,7 @@
       </div>
 
       <div class="form-group">
-        <label>Registered Date <span class="text-danger">*</span></label>
+        <label>Registered Date </label>
         <input type="date" formControlName="registeredDate" class="form-control" />
         <div *ngIf="subcontractorForm.get('registeredDate')?.touched && subcontractorForm.get('registeredDate')?.invalid" class="text-danger small">
           Registered date is required.
@@ -60,7 +60,7 @@
       </div>
 
       <div class="form-group">
-        <label>Status <span class="text-danger">*</span></label>
+        <label>Status </label>
         <select formControlName="status" class="form-control">
           <option value="Active">Active</option>
           <option value="Inactive">Inactive</option>
@@ -82,7 +82,7 @@
       </div>
 
       <div class="form-group full-width">
-        <label>Billing Address <span class="text-danger">*</span></label>
+        <label>Billing Address </label>
         <textarea formControlName="billingAddress" class="form-control"></textarea>
         <div *ngIf="subcontractorForm.get('billingAddress')?.touched && subcontractorForm.get('billingAddress')?.invalid" class="text-danger small">
           Billing address is required.
