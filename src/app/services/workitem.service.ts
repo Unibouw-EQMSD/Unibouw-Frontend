@@ -105,7 +105,7 @@ export class WorkitemService {
   updateIsActive(workitemId: string, isActive: boolean): Observable<any> {
     return from(this.getHeaders()).pipe(
       switchMap((headers) =>
-        this.http.put(`${this.workitemsUrl}/${workitemId}/${isActive}`, null, {
+        this.http.post(`${this.workitemsUrl}/${workitemId}/${isActive}`, null, {
           headers,
         })
       )
@@ -117,7 +117,7 @@ export class WorkitemService {
     return from(this.getHeaders()).pipe(
       switchMap((headers) => {
         const jsonHeaders = headers.set('Content-Type', 'application/json');
-        return this.http.put(
+        return this.http.post(
           `${this.workitemsUrl}/${workItemID}/description`,
           JSON.stringify(description),
           { headers: jsonHeaders }

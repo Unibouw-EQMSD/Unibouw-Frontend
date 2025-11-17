@@ -18,6 +18,7 @@
           name="email"
           #emailRef="ngModel"
           required
+          (keyup.enter)="onSubmit(emailRef)"
         />
         <div class="error-msg" *ngIf="emailRef.invalid && emailRef.touched" style="color: red">
           Email is required
@@ -35,8 +36,8 @@
       Sign in with Microsoft
     </button>
 
-    <button type="submit" (click)="onLoginClick()" style="background-color: grey; margin: 3px auto">
+    <!-- <button type="submit" (click)="onLoginClick()" style="background-color: grey; margin: 3px auto">
       Test Login
-    </button>
+    </button> -->
   </div>
 </div>

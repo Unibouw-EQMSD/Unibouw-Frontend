@@ -35,18 +35,8 @@
 
     <!-- 🔍 Search -->
     <mat-form-field appearance="fill" class="search-box full-width">
-      <input
-        matInput
-        [(ngModel)]="searchText"
-        (input)="applyFilter()"
-        placeholder="Search..."
-      />
-      <button
-        matSuffix
-        mat-icon-button
-        *ngIf="searchText"
-        (click)="searchText = ''; applyFilter()"
-      >
+      <input matInput [(ngModel)]="searchText" (input)="applyFilter()" placeholder="Search" />
+      <button matSuffix mat-icon-button *ngIf="searchText" (click)="searchText = ''; applyFilter()">
         <mat-icon>close</mat-icon>
       </button>
     </mat-form-field>
@@ -63,21 +53,19 @@
       >
         <!-- ✅ Number Column -->
         <ng-container matColumnDef="number">
-          <th mat-header-cell *matHeaderCellDef mat-sort-header> Code </th>
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Code</th>
           <td mat-cell *matCellDef="let item">{{ item.number }}</td>
         </ng-container>
 
         <!-- ✅ Workitem Name Column -->
         <ng-container matColumnDef="name">
-          <th mat-header-cell *matHeaderCellDef mat-sort-header> Workitem </th>
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Workitem</th>
           <td mat-cell *matCellDef="let item">{{ item.name }}</td>
         </ng-container>
 
         <!-- ✅ Description Column -->
-        <ng-container matColumnDef="description">
-          <th mat-header-cell *matHeaderCellDef mat-sort-header>
-            Description
-          </th>
+        <!-- <ng-container matColumnDef="description">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Description</th>
           <td mat-cell *matCellDef="let item">
             <div class="input-wrapper-absolute">
               <input
@@ -107,11 +95,11 @@
               </button>
             </div>
           </td>
-        </ng-container>
+        </ng-container> -->
 
         <!-- ✅ Action Column (Admin Only) -->
         <ng-container *ngIf="isAdmin" matColumnDef="action">
-          <th mat-header-cell *matHeaderCellDef> Action </th>
+          <th mat-header-cell *matHeaderCellDef>Action</th>
           <td mat-cell *matCellDef="let item">
             <mat-slide-toggle
               class="toggle"
@@ -140,11 +128,8 @@
 
         <!-- ✅ Loading or No Data Row -->
         <tr *matNoDataRow>
-          <td
-            [attr.colspan]="displayedColumns.length"
-            class="table-spinner-cell"
-          >
-            <ng-container *ngIf=" isLoading">
+          <td [attr.colspan]="displayedColumns.length" class="table-spinner-cell">
+            <ng-container *ngIf="isLoading">
               <mat-spinner diameter="40"></mat-spinner>
             </ng-container>
             <ng-container *ngIf="!isLoading">
@@ -156,11 +141,7 @@
     </div>
 
     <!-- 📄 Paginator -->
-    <mat-paginator
-      [pageSize]="pageSize"
-      [pageSizeOptions]="pageSizeOptions"
-      showFirstLastButtons
-    >
+    <mat-paginator [pageSize]="pageSize" [pageSizeOptions]="pageSizeOptions" showFirstLastButtons>
     </mat-paginator>
 
     <!-- <div

@@ -124,7 +124,7 @@ createAttachments(subcontractorID: string, files: File[]): Observable<any> {
   updateIsActive(subcontractorId: string, isActive: boolean): Observable<any> {
     return from(this.getHeaders()).pipe(
       switchMap((headers) =>
-        this.http.put(
+        this.http.post(
           `${this.getsubcontractor}/${subcontractorId}/${isActive}`,
           null,
           { headers }

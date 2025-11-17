@@ -13,7 +13,7 @@ import { MatSort, Sort } from '@angular/material/sort';
   styleUrls: ['./workitems.css']
 })
 export class Workitems implements OnInit, AfterViewInit {
-  displayedColumns: string[] = ['number', 'name', 'description', 'action'];
+  displayedColumns: string[] = ['number', 'name'];
   dataSource = new MatTableDataSource<Workitem>([]);
   activeTab: 'standard' | 'unibouw' = 'standard';
   searchText: string = '';
@@ -39,7 +39,25 @@ export class Workitems implements OnInit, AfterViewInit {
   ) {}
 
   ngOnInit() {
-    this.isAdmin = this.userService.isAdmin();
+  
+    const showWelcome = localStorage.getItem('show_welcome');
+
+  if (showWelcome === 'true') {
+    // Fetch user data if needed
+    const userData = localStorage.getItem('user_data');
+    const user = userData ? JSON.parse(userData) : null;
+    const userName = user?.name || user?.email?.split('@')[0] || 'User';
+
+    // Show your welcome message (any style you want)
+    //alert(`Welcome ${userName}! 👋`);
+    this.showPopupMessage(`Welcome, ${userName}! You have successfully signed in to Unibouw.`);
+
+    // Mark as shown so it doesn’t show again
+    localStorage.setItem('show_welcome', 'false');
+  }
+
+ this.isAdmin = this.userService.isAdmin(); // Check role
+  this.updateDisplayedColumns();  
 
      this.dataSource.filterPredicate = (data: Workitem, filter: string) => {
     const f = filter.trim().toLowerCase();
@@ -64,6 +82,17 @@ export class Workitems implements OnInit, AfterViewInit {
   // first page load
   this.loadCategoriesAndWorkitems(true);
 }
+
+updateDisplayedColumns() {
+  if (this.isAdmin) {
+    if (!this.displayedColumns.includes('action')) {
+      this.displayedColumns.push('action');
+    }
+  } else {
+    this.displayedColumns = this.displayedColumns.filter(c => c !== 'action');
+  }
+}
+
   ngAfterViewInit() {
     // Initialize paginator and sort
     setTimeout(() => {
@@ -168,6 +197,7 @@ loadWorkitems(categoryId: string) {
         item.isEditing = true;
       }
     });
+    
   }
 
   toggleIsActive(item: Workitem) {
