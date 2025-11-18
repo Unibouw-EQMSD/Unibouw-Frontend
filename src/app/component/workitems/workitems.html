@@ -99,13 +99,15 @@
 
         <!-- ✅ Action Column (Admin Only) -->
         <ng-container *ngIf="isAdmin" matColumnDef="action">
-          <th mat-header-cell *matHeaderCellDef>Action</th>
+          <th mat-header-cell *matHeaderCellDef>Active</th>
           <td mat-cell *matCellDef="let item">
             <mat-slide-toggle
               class="toggle"
               color="primary"
               [checked]="item.isActive"
               (change)="toggleIsActive(item)"
+              matTooltip="{{ item.isActive ? 'Active' : 'Inactive' }}"
+              matTooltipPosition="above"
             >
             </mat-slide-toggle>
           </td>

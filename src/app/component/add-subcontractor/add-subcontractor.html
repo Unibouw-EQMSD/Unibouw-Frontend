@@ -106,6 +106,9 @@
           <div *ngIf="subcontractorForm.get('email')?.errors?.['email']">
             Enter a valid email address.
           </div>
+          <div *ngIf="subcontractorForm.get('email')?.errors?.['emailExists']">
+            A subcontractor with this email address already exists
+          </div>
         </div>
       </div>
 
@@ -303,6 +306,9 @@
         (click)="selectCategory(cat.categoryID)"
       >
         {{ cat.categoryName }}
+        <!-- <span class="badge" *ngIf="getSelectedCount(cat.categoryID) > 0">
+          ({{ getSelectedCount(cat.categoryID) }})
+        </span> -->
       </button>
     </div>
 

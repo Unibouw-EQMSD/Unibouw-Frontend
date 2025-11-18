@@ -124,6 +124,7 @@ export class AddSubcontractor {
     });
   }
 
+//selectedCount: number = 0;
   selectCategory(categoryId: string) {
     this.selectedCategoryId = categoryId;
     this.selectedWorkitems = [];   // clear selected items for new category
@@ -138,6 +139,12 @@ export class AddSubcontractor {
       this.selectedWorkitems = this.selectedWorkitems.filter(w => w.workItemID !== item.workItemID);
     }
   }
+  
+
+// getSelectedCount(categoryID: string): number {
+//   return this.selectedWorkitems.filter(w => w.categoryID === categoryID).length;
+// }
+  
 onFileSelected(event: any) {
   const input = event.target as HTMLInputElement;
   const file = input.files && input.files.length > 0 ? input.files[0] : null;
@@ -249,16 +256,26 @@ onSubmit() {
       }
     },
     error: (err) => {
-      console.error("Backend error:", err);
-      // Safely extract backend error message
-  const errorMessage =
-    err?.error?.message ||    // Custom message from backend
-    err?.error?.error ||      // Detailed error if available
-    err?.message ||           // Generic message
-    'Failed to create Subcontractor. Please try again.'; // Fallback
+     console.error("Backend error:", err);
 
-      this.showPopupMessage(errorMessage, true);
-      //this.showPopupMessage("Failed to create Subcontractor. Please try again.", true);
+  const backendMessage =
+    err?.error?.message ||
+    err?.error?.error ||
+    err?.message ||
+    '';
+
+  // If email already exists, show error BELOW FIELD
+  if (backendMessage.toLowerCase().includes('email') &&
+      backendMessage.toLowerCase().includes('exist')) {
+    this.subcontractorForm.get('email')?.setErrors({ emailExists: true });
+    return; // Do NOT show popup
+  }
+
+  // Otherwise show popup for general error
+  this.showPopupMessage(
+    backendMessage || "Failed to create Subcontractor. Please try again.",
+    true
+  );
     },
   });
 }
@@ -282,7 +299,6 @@ onReset() {
   if (fileInput) fileInput.value = ''; // clear the file input
 }
 
-
   onCancel() {
     // this.subcontractorForm.reset({
     //   status: 'Active',
@@ -294,26 +310,10 @@ onReset() {
 
   }
 
-
-
   // Helper function for template to check if a workitem is selected
   isSelected(w: Workitem): boolean {
     return this.selectedWorkitems.some(sw => sw.workItemID === w.workItemID);
   }
-
-  // showPopupMessage(message: string, isError: boolean = false) {
-  //   this.popupMessage = message;
-  //   this.showPopup = true;
-  //   // Change popup style dynamically if it's an error
-  //   const popupEl = document.querySelector('.popup');
-  //   if (popupEl) {
-  //     popupEl.classList.toggle('error', isError);
-  //   }
-  //   // Hide after 3 seconds
-  //   setTimeout(() => {
-  //     this.showPopup = false;
-  //   }, 3000);
-  // }
 
    showPopupMessage(message: string, isError: boolean = false) {
     this.popupMessage = message;
