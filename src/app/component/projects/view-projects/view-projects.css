@@ -3,6 +3,7 @@
   grid-template-columns: 1fr 3fr;
   gap: 20px;
   padding: 15px;
+  margin-bottom: 25px;
 }
 
 .page-header {
@@ -13,7 +14,14 @@
   flex-direction: row;
   justify-content: space-between;
 }
+.fa-check-circle{
+  color:green;
+}
 
+.fa-bell{
+   color: #f97316; /* orange */
+ 
+}
 
 .page-header h2 {
   font-size: 1.5rem;
@@ -280,7 +288,7 @@ display: flex;
 
 .rfq-summary div {
   text-align: center;
-  flex: 1;
+  /* flex: 1; */
 }
 
 .rfq-summary .label {

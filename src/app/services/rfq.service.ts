@@ -81,14 +81,7 @@ export class RfqService {
     );
   }
 
-  /** Update RFQ due date */
-  updateDueDate(rfqId: string, dueDate: string | null): Observable<any> {
-    return from(this.getHeaders()).pipe(
-      switchMap(headers =>
-        this.http.put(`${this.rfqEndpoint}/${rfqId}/duedate`, { dueDate }, { headers })
-      )
-    );
-  }
+
 
   /** Create a new RFQ */
  createRfq(rfqPayload: any, subcontractorIds: string[], workItemIds: string[]): Observable<any> {

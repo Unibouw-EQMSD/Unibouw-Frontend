@@ -21,11 +21,14 @@ interface RfqResponse {
   viewed: boolean;
   quote: string;
   actions: string[];
+    subcontractorId: string;   // << ADD THIS
+      quoteAmount?: string;
+
+
 }
 
 interface WorkItem {
-    workItemID: string;
-
+  workItemId: string;   
   name: string;
   requestsSent: number;
   notResponded: number;
@@ -53,7 +56,10 @@ export class ViewProjects {
   projectId!: string;
   projectDetails: any;
     projectData?: projectdetails;
-
+selectedFile!: File;
+  rfqId!: string;
+  subId!: string;
+  quoteAmount: string = '';
   groupBy = 'workItem';
   currentPage = 1;
   totalPages = 1;
@@ -73,6 +79,7 @@ displayedColumns: string[] = [
   ];
   dataSource = new MatTableDataSource<any>([]);
  isLoading = false;
+  rfqs: Rfq[] = []; // <-- Add this line
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
@@ -108,7 +115,7 @@ loadProjectDetails(id: string) {
 }
 
 loadRfqResponseSummary(projectId: string) {
-   this.rfqResponseService.getResponsesByProjectId(projectId).subscribe({
+  this.rfqResponseService.getResponsesByProjectId(projectId).subscribe({
     next: (res: any) => {
       console.log("📌 RFQ RESPONSES", res);
 
@@ -116,7 +123,6 @@ loadRfqResponseSummary(projectId: string) {
         workItemId: w.workItemId,
         name: w.workItemName,
 
-        // 🔥 Compute totals here
         requestsSent: w.subcontractors.length,
         notResponded: w.subcontractors.filter((s: any) => !s.responded).length,
         interested: w.subcontractors.filter((s: any) => s.interested).length,
@@ -132,20 +138,26 @@ loadRfqResponseSummary(projectId: string) {
         currentEnd: 1,
 
         rfqs: w.subcontractors.map((s: any) => ({
-          subcontractorId: s.subcontractorId,
+          subcontractorId: s.subcontractorId, // ✅ must exist
+          rfqId: s.rfqId,                     // ✅ must exist
           name: s.name,
           rating: s.rating || 0,
           date: s.date || '—',
-          rfqId: s.rfqId,                // backend returns real RFQ ID
           responded: s.responded,
           interested: s.interested,
           viewed: s.viewed,
           quote: s.quote || '—',
-          actions: ['pdf', 'chat']
+          actions: ['pdf', 'chat'],
+          quoteAmount: '-'                     // initialize
         }))
       }));
-    },
 
+      // After mapping, load quote amounts for all RFQs
+      this.workItems.forEach(work => {
+        work.rfqs.forEach(rfq => this.loadQuoteAmount(rfq));
+      });
+
+    },
     error: (err: any) => {
       console.error("❌ Error loading responses", err);
       this.snackBar.open("Unable to load RFQ responses", "Close", { duration: 3000 });
@@ -158,10 +170,35 @@ markViewed(work: WorkItem, rfq: any) {
   this.rfqResponseService.markAsViewed(
     rfq.rfqId,
     rfq.subcontractorId,
-    work.workItemID
-  ).subscribe();
+ work.workItemId 
+  ).subscribe(() => {
+  rfq.viewed = true;
+ work.viewed++;
+
+    // 🔥 Recalculate totals so UI updates correctly
+    this.refreshWorkItemCounts(work);});
+        this.cdr.detectChanges();  
+
 
   rfq.viewed = true;
+}
+refreshWorkItemCounts(work: WorkItem) {
+  work.requestsSent   = work.rfqs.length;
+  work.notResponded   = work.rfqs.filter(r => !r.responded).length;
+  work.interested     = work.rfqs.filter(r => r.interested).length;
+  work.notInterested  = work.rfqs.filter(r => r.responded && !r.interested).length;
+
+  // 🔥 Keep this ALWAYS correct
+  work.viewed         = work.rfqs.filter(r => r.viewed).length;
+}
+triggerViewOnLoad() {
+  if (!this.workItems?.length) return;
+
+  this.workItems.forEach(work => {
+    work.rfqs.forEach(rfq => {
+      this.markViewed(work, rfq);   // 🔥 calling your existing method
+    });
+  });
 }
 
 loadRfqData(): void {
@@ -173,19 +210,26 @@ loadRfqData(): void {
       this.rfqList = rfqs;
 
       if (rfqs.length > 0) {
-        this.selectedRfqId = rfqs[0].rfqID;   // ⬅ Store RFQ ID
+        this.selectedRfqId = rfqs[0].rfqID;
         console.log("📌 Selected RFQ ID:", this.selectedRfqId);
 
         this.loadRfqResponseSummary(this.projectId);
       }
 
+     
+
+
+      // ------------------------------
+      // 2️⃣ Map data for MatTable
+      // ------------------------------
       this.dataSource.data = rfqs.map((item: any) => ({
         id: item.rfqID,
         customer: item.customerName || '—',
         rfqSentDate: this.formatDate(item.sentDate),
-        dueDate: item.dueDate ? new Date(item.dueDate) : null,
+        dueDate: this.formatDate(item.dueDate),
         rfqSent: item.rfqSent || 0,
-        quoteReceived: item.quoteReceived || 0
+        quoteReceived: item.quoteReceived || 0,
+        quoteAmount: item.quoteAmount || '-'   // ✅ display quote amount
       }));
 
       this.isLoading = false;
@@ -283,25 +327,52 @@ onDateChange(item: any, newDate: Date) {
   item.dueDate = newDate;
 }
 
-// saveDueDate(item: Rfq): void {
-//   if (!item.id) {
-//     console.error('❌ Missing RFQ ID for due date update:', item);
-//     return;
-//   }
+loadQuoteAmount(rfq: any) {
+  if (!rfq.subcontractorId) {
+    console.warn('⚠ Missing subcontractorId for RFQ:', rfq.rfqId);
+    rfq.quoteAmount = '-';
+    return;
+  }
 
-//   const formattedDate = this.formatDateForApi(item.dueDate);
+  this.rfqResponseService.getQuoteAmount(rfq.rfqId, rfq.subcontractorId)
+    .subscribe({
+      next: (res: any) => {
+        rfq.quoteAmount = res.quoteAmount || '-';
+        const index = this.dataSource.data.findIndex(d => d.id === rfq.rfqId);
+        if (index >= 0) {
+          this.dataSource.data[index].quoteAmount = rfq.quoteAmount;
+          this.dataSource._updateChangeSubscription();
+        }
+      },
+      error: (err) => {
+        console.error('❌ Error fetching quote amount:', err);
+        rfq.quoteAmount = '-';
+      }
+    });
+}
+downloadQuote(event: Event, rfqId: string, subcontractorId: string) {
+  event.stopPropagation(); // << prevent triggering row click
 
-//   this.rfqService.updateDueDate(item.id, formattedDate).subscribe({
-//     next: () => {
-//       this.snackBar.open('✅ Due date updated successfully!', 'Close', { duration: 3000 });
-//       item.isEditingDueDate = false;
-//     },
-//     error: (err: any) => {
-//       console.error('❌ Failed to update due date:', err);
-//       this.snackBar.open('❌ Failed to update due date.', 'Close', { duration: 3000 });
-//     }
-//   });
-// }
+  this.rfqResponseService.downloadQuote(rfqId, subcontractorId).subscribe({
+    next: (blob: Blob) => {
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+
+      // OPTIONAL: if your backend provides filename in headers, use it.
+      a.download = `Quote_Document.pdf`;
+      a.click();
+
+      window.URL.revokeObjectURL(url);
+    },
+    error: (err) => {
+      console.error("Download error:", err);
+      alert("No file uploaded for this subcontractor.");
+    }
+  });
+}
+
+
 formatDateForApi(date: any): string {
   if (!date) return '';
   const d = new Date(date);

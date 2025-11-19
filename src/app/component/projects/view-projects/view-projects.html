@@ -92,13 +92,15 @@
                   <th>Responded</th>
                   <th>Interested</th>
                   <th>Viewed</th>
-                  <th>Quote</th>
+                  <th>Quote Status</th>
+                  <th>Quote Amount</th>
                   <th>Actions</th>
                 </tr>
               </thead>
               <tbody>
 <tr *ngFor="let rfq of getFilteredRfqs(work)"
-    (click)="markViewed(work, rfq)">                  <td>
+    (click)="markViewed(work, rfq)"
+>                  <td>
                     {{ rfq.name }}
                     <div class="rating">★ {{ rfq.rating }}</div>
                   </td>
@@ -107,11 +109,16 @@
                   <td><i class="fa fa-check-circle success" *ngIf="rfq.responded"></i></td>
                   <td><i class="fa fa-check-circle success" *ngIf="rfq.interested"></i></td>
                   <td><i class="fa fa-check-circle success" *ngIf="rfq.viewed"></i></td>
-                  <td>{{ rfq.quote }}</td>
-                  <td>
-                    <i *ngIf="rfq.actions?.includes('pdf')" class="fa fa-file-pdf action-icon"></i>
-                    <i *ngIf="rfq.actions?.includes('chat')" class="fa fa-comment action-icon"></i>
-                    <i *ngIf="rfq.actions?.includes('lock')" class="fa fa-lock action-icon"></i>
+<td>{{ rfq.responded ? 'Uploaded' : 'Not Uploaded' }}</td>  
+    <td>{{ rfq.quoteAmount || '-' }}</td>
+ 
+              <td>
+<i
+  *ngIf="rfq.actions?.includes('pdf')"
+  class="fa fa-file-pdf action-icon download-icon"
+  (click)="downloadQuote($event, rfq.rfqId, rfq.subcontractorId)"
+></i>                    <i *ngIf="rfq.actions?.includes('lock')" class="fa fa-lock action-icon"></i>
+<i class="fa fa-bell" ></i>
                   </td>
                 </tr>
               </tbody>
@@ -143,47 +150,8 @@
 <ng-container matColumnDef="dueDate">
   <th mat-header-cell *matHeaderCellDef mat-sort-header>Due Date</th>
 
-  <td mat-cell *matCellDef="let item">
-    <div class="input-wrapper-absolute">
+           <td mat-cell *matCellDef="let row"> {{ row.dueDate }} </td>
 
-      <!-- 📅 Date Input -->
-      <input
-        matInput
-        [matDatepicker]="picker"
-        [(ngModel)]="item.dueDate"
-        [readonly]="!item.isEditingDueDate"
-        placeholder="Due Date"
-        (dateChange)="onDateChange(item, $event.value)"
-      />
-
-      <!-- 📅 Calendar icon (only visible in edit mode) -->
-      <mat-datepicker-toggle
-        *ngIf="item.isEditingDueDate"
-        matSuffix
-        [for]="picker"
-      ></mat-datepicker-toggle>
-
-      <mat-datepicker #picker></mat-datepicker>
-
-      <!-- ✏️ Edit button -->
-      <button
-        *ngIf="!item.isEditingDueDate"
-        mat-icon-button
-        (click)="enableEdit(item)"
-      >
-        <mat-icon>edit</mat-icon>
-      </button>
-
-      <!-- ✅ Save button -->
-      <button
-        *ngIf="item.isEditingDueDate"
-        mat-icon-button
-        
-      >
-        <mat-icon>check</mat-icon>
-      </button>
-    </div>
-  </td>
 </ng-container>
 
 

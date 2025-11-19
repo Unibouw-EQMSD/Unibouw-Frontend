@@ -121,6 +121,11 @@ uploadQuoteFile(rfqId: string, subId: string, file: File): Observable<any> {
 
 }
 
+getQuoteAmount(rfqId: string, subId: string): Observable<any> {
+  return this.http.get<any>(
+    `${this.apiURL}/RfqResponse/GetQuoteAmount?rfqId=${rfqId}&subcontractorId=${subId}`
+  );
+}
 markAsViewed(rfqId: string, subcontractorId: string, workItemId: string): Observable<any> {
   return this.http.post(
     `${this.apiURL}/RfqResponse/mark-viewed`,
@@ -134,4 +139,11 @@ markAsViewed(rfqId: string, subcontractorId: string, workItemId: string): Observ
     }
   );
 }
+
+  downloadQuote(rfqId: string, subId: string): Observable<Blob> {
+    return this.http.get(
+      `${this.apiURL}/RfqResponse/DownloadQuote?rfqId=${rfqId}&subcontractorId=${subId}`,
+      { responseType: 'blob' }
+    );
+  }
 }
