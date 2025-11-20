@@ -10,6 +10,7 @@ import { MatDatepicker } from '@angular/material/datepicker';
 import { RfqResponseService } from '../../../services/rfq-response.service';
 import { Workitem } from '../../../services/workitem.service';
 import { Router } from '@angular/router';
+import { forkJoin } from 'rxjs';
 
 interface RfqResponse {
   name: string;
@@ -71,11 +72,10 @@ pageSize = 10;
   rfqList: any[] = [];
 selectedRfqId: string = '';
 displayedColumns: string[] = [
-   
+   'workitem',
     'rfqSentDate',
     'dueDate',
-    'rfqSent',
-    'quoteRecieved',
+    'totalSubcontractors'
   ];
   dataSource = new MatTableDataSource<any>([]);
  isLoading = false;
@@ -160,28 +160,39 @@ loadRfqResponseSummary(projectId: string) {
     },
     error: (err: any) => {
       console.error("❌ Error loading responses", err);
-      this.snackBar.open("Unable to load RFQ responses", "Close", { duration: 3000 });
+      this.snackBar.open("No Records Found for this RFQ", "Close", { duration: 3000 });
     }
   });
 }
 
 
+
+
 markViewed(work: WorkItem, rfq: any) {
+
+  // ❌ If already viewed, do nothing (prevents double counting)
+  if (rfq.viewed) return;
+
   this.rfqResponseService.markAsViewed(
     rfq.rfqId,
     rfq.subcontractorId,
- work.workItemId 
-  ).subscribe(() => {
-  rfq.viewed = true;
- work.viewed++;
+    work.workItemId
+  ).subscribe({
+    next: () => {
 
-    // 🔥 Recalculate totals so UI updates correctly
-    this.refreshWorkItemCounts(work);});
-        this.cdr.detectChanges();  
+      // 🔥 Update this RFQ row
+      rfq.viewed = true;
 
+      // 🔥 Recalculate summary counts
+      this.refreshWorkItemCounts(work);
 
-  rfq.viewed = true;
+      // 🔥 Force UI refresh
+      this.cdr.detectChanges();
+    },
+    error: () => console.error("Failed to mark viewed")
+  });
 }
+
 refreshWorkItemCounts(work: WorkItem) {
   work.requestsSent   = work.rfqs.length;
   work.notResponded   = work.rfqs.filter(r => !r.responded).length;
@@ -211,36 +222,44 @@ loadRfqData(): void {
 
       if (rfqs.length > 0) {
         this.selectedRfqId = rfqs[0].rfqID;
-        console.log("📌 Selected RFQ ID:", this.selectedRfqId);
-
         this.loadRfqResponseSummary(this.projectId);
       }
 
-     
+      // 🔥 Fetch workitem-info for each RFQ
+      const infoRequests = rfqs.map(r => 
+        this.rfqService.getWorkItemInfo(r.rfqID)
+      );
 
+      forkJoin(infoRequests).subscribe((infoResults: any[]) => {
+        this.dataSource.data = rfqs.map((item, index) => {
+          const info = infoResults[index] || {};
 
-      // ------------------------------
-      // 2️⃣ Map data for MatTable
-      // ------------------------------
-      this.dataSource.data = rfqs.map((item: any) => ({
-        id: item.rfqID,
-        customer: item.customerName || '—',
-        rfqSentDate: this.formatDate(item.sentDate),
-        dueDate: this.formatDate(item.dueDate),
-        rfqSent: item.rfqSent || 0,
-        quoteReceived: item.quoteReceived || 0,
-        quoteAmount: item.quoteAmount || '-'   // ✅ display quote amount
-      }));
+          return {
+            id: item.rfqID,
+            customer: item.customerName || '—',
+            rfqSentDate: this.formatDate(item.sentDate),
+            dueDate: this.formatDate(item.dueDate),
+            rfqSent: item.rfqSent || 0,
+            quoteReceived: item.quoteReceived || 0,
+            quoteAmount: item.quoteAmount || '-',
 
-      this.isLoading = false;
+            // 🔥 Use EXACT swagger response
+            workItem: info.workItem || '-',
+            subcontractorCount: info.subcontractorCount ?? 0
+          };
+        });
+
+        this.isLoading = false;
+      });
     },
-    error: (err: any) => {
-      console.error('❌ Failed to fetch RFQ:', err);
+
+    error: () => {
       this.dataSource.data = [];
       this.isLoading = false;
     }
   });
 }
+
  formatDate(dateString: string): string {
     if (!dateString) return '-';
     const date = new Date(dateString);

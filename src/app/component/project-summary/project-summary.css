@@ -160,6 +160,40 @@
   border-color: #f97316;
 }
 
+.btn-primary:disabled,
+.btn-primary[disabled],
+.btn-ghost:disabled,
+.btn-ghost[disabled] {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background: #f1f5f9 !important;
+  color: #94a3b8 !important;
+  border-color: #cfd8e3 !important;
+  pointer-events: none !important;
+}
+
+/* Prevent hover effects when disabled */
+.btn-primary:disabled:hover,
+.btn-primary[disabled]:hover,
+.btn-ghost:disabled:hover,
+.btn-ghost[disabled]:hover {
+  background: #f1f5f9 !important;
+  color: #94a3b8 !important;
+  border-color: #cfd8e3 !important;
+  
+}
+
+.disabled-wrapper.is-disabled {
+  cursor: not-allowed !important;
+  display: inline-block;
+}
+
+/* Prevent click on wrapper */
+.disabled-wrapper.is-disabled * {
+  pointer-events: none;
+}
+
+
 /* 🔹 Small screens */
 @media (max-width: 768px) {
   .rfq-layout { grid-template-columns: 1fr; }

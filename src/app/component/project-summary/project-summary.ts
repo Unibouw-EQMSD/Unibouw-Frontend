@@ -45,7 +45,7 @@ buttonsDisabled = false;
     });
   }
 
- ngOnInit(): void {
+ngOnInit(): void {
   this.route.queryParams.subscribe(params => {
     this.rfqId = params['rfqId'];
     this.subId = params['subId'];
@@ -53,14 +53,34 @@ buttonsDisabled = false;
 
     if (this.rfqId && this.subId) {
 
-      // 👇 NEW — mark subcontractor as "viewed"
+      // ⭐ STEP 1 — RESTORE STATE BEFORE LOADING API
+      const stateKey = `rfq_state_${this.rfqId}_${this.subId}_${this.workItemId}`;
+      const savedState = localStorage.getItem(stateKey);
+
+      if (savedState) {
+        const state = JSON.parse(savedState);
+
+        this.buttonsDisabled = state.buttonsDisabled ?? false;
+        this.isInterested = state.isInterested ?? false;
+
+        // Restore file names (cannot restore actual File object)
+        if (state.selectedFileNames?.length > 0) {
+          this.selectedFiles = state.selectedFileNames.map(
+            (name: string) => ({ name } as File)
+          );
+        }
+      }
+
+      // 👇 Existing logic — mark as viewed
       if (this.workItemId) {
         this.rfqResponseService
           .markAsViewed(this.rfqId, this.subId, this.workItemId)
           .subscribe();
       }
 
+      // 👇 Load project details
       this.loadProjectSummary(this.rfqId);
+
     } else {
       this.isLoading = false;
       this.errorMsg = 'Missing required parameters (rfqId or subId).';
@@ -118,25 +138,43 @@ submitQuoteFile() {
   const file = this.selectedFiles[0];
   if (!file) return;
 
+  const key = `rfq_state_${this.rfqId}_${this.subId}_${this.selectedWorkItem.workItemID}`;
+  const saved = JSON.parse(localStorage.getItem(key) || '{}');
+
   this.rfqResponseService
     .uploadQuoteFile(this.rfqId, this.subId, file)
     .subscribe({
       next: res => {
-        console.log('File uploaded successfully', res);
         alert('Quote uploaded successfully!');
+
+        saved.selectedFileNames = this.selectedFiles.map(f => f?.name);
+        saved.buttonsDisabled = true;      // keep buttons disabled
+        saved.isInterested = true;         // keep UI state
+        saved.viewed = true;
+
+        localStorage.setItem(key, JSON.stringify(saved));
       },
       error: err => {
-        console.error('Error uploading file', err);
         alert('Failed to upload quote!');
       }
     });
 }
 
 
+
 submitInterest(status: string) {
   if (!this.selectedWorkItem) return;
 
-  this.buttonsDisabled = true; // disable buttons immediately
+  const key = `rfq_state_${this.rfqId}_${this.subId}_${this.selectedWorkItem.workItemID}`;
+  const saved = JSON.parse(localStorage.getItem(key) || '{}');
+
+  // mark viewed in backend
+  this.rfqResponseService
+    .markAsViewed(this.rfqId, this.subId, this.selectedWorkItem.workItemID)
+    .subscribe();
+
+  // button disable only for Interested
+  this.buttonsDisabled = status === 'Interested';
 
   this.rfqResponseService
     .submitRfqResponse(
@@ -147,23 +185,28 @@ submitInterest(status: string) {
     )
     .subscribe({
       next: res => {
-        console.log('Response saved successfully', res);
         alert(`Your response "${status}" was recorded successfully!`);
 
-        // show attachment section only if user clicked "Interested"
-        if (status === 'Interested') {
-          this.isInterested = true;
-        } else {
-          this.isInterested = false;
-        }
+        this.isInterested = status === 'Interested';
+        this.selectedWorkItem.viewed = true;
+
+        // 🔥 Save state to localStorage
+        saved.status = status;
+        saved.viewed = true;
+        saved.isInterested = this.isInterested;
+        saved.buttonsDisabled = this.buttonsDisabled;
+
+        localStorage.setItem(key, JSON.stringify(saved));
       },
       error: err => {
-        console.error('Error saving response', err);
         alert('Failed to submit response.');
-        this.buttonsDisabled = false; // re-enable if failed
+        if (status === 'Interested') {
+          this.buttonsDisabled = false;
+        }
       }
     });
 }
+
 
 
   statusClass(status?: string) {

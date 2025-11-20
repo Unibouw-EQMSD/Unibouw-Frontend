@@ -81,7 +81,16 @@ export class RfqService {
     );
   }
 
-
+getWorkItemInfo(rfqId: string): Observable<any> {
+  return from(this.getHeaders()).pipe(
+    switchMap((headers) =>
+      this.http.get<any>(
+        `${this.apiURL}/Rfq/${rfqId}/workitem-info`,
+        { headers }
+      )
+    )
+  );
+}
 
   /** Create a new RFQ */
  createRfq(rfqPayload: any, subcontractorIds: string[], workItemIds: string[]): Observable<any> {

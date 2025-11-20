@@ -1,8 +1,9 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Observable, from } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
 import { AppConfigService } from './app.config.service';
+import { MsalService } from '@azure/msal-angular';
 
 @Injectable({
   providedIn: 'root'
@@ -12,11 +13,26 @@ export class RfqResponseService {
 
   constructor(
     private http: HttpClient,
+        private msalService: MsalService,
+    
     private appConfigService: AppConfigService
   ) {
     this.apiURL = this.appConfigService.getConfig().apiURL;
   }
+private async getHeaders(): Promise<HttpHeaders> {
+    const accounts = this.msalService.instance.getAllAccounts();
+    if (!accounts.length) throw new Error('No MSAL account found');
 
+    const result = await this.msalService.instance.acquireTokenSilent({
+      account: accounts[0],
+      scopes: ['api://96b6d570-73e9-4669-98d6-745f22f4acc0/Api.Read'],
+    });
+
+    return new HttpHeaders({
+      Accept: '*/*',
+      Authorization: `Bearer ${result.accessToken}`,
+    });
+  }
   /**
    * ✅ Fetch Project Summary
    */
@@ -120,7 +136,16 @@ uploadQuoteFile(rfqId: string, subId: string, file: File): Observable<any> {
 
 
 }
-
+getResponsesByProjectSubcontractors(projectId: string): Observable<any> {
+  return from(this.getHeaders()).pipe(
+    switchMap((headers) =>
+      this.http.get<any>(
+        `${this.apiURL}/RfqResponse/responses/project/${projectId}/subcontractors`,
+        { headers }
+      )
+    )
+  );
+}
 getQuoteAmount(rfqId: string, subId: string): Observable<any> {
   return this.http.get<any>(
     `${this.apiURL}/RfqResponse/GetQuoteAmount?rfqId=${rfqId}&subcontractorId=${subId}`

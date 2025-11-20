@@ -126,36 +126,44 @@
   </div>
 </div>
 
-        <!-- Action Buttons -->
-        <div class="actions">
-          <button
-            class="btn-primary"
-            type="button"
-            (click)="submitInterest('Interested')"
-            [disabled]="buttonsDisabled"
-          >
-            Interested
-          </button>
+       <!-- Action Buttons -->
+<div class="actions">
 
-          <button
-            class="btn-ghost"
-            type="button"
-            (click)="submitInterest('Maybe Later')"
-            [disabled]="buttonsDisabled"
-          >
-            Maybe Later
-          </button>
+  <span class="disabled-wrapper" [class.is-disabled]="buttonsDisabled">
+    <button
+      class="btn-primary"
+      type="button"
+      (click)="submitInterest('Interested')"
+      [disabled]="buttonsDisabled"
+    >
+      Interested
+    </button>
+  </span>
 
-          <button
-            class="btn-ghost"
-            type="button"
-            (click)="submitInterest('Not Interested')"
-            [disabled]="buttonsDisabled"
-          >
-            Not Interested
-          </button>
-        </div>
-      </div>
+  <span class="disabled-wrapper" [class.is-disabled]="buttonsDisabled">
+    <button
+      class="btn-ghost"
+      type="button"
+      (click)="submitInterest('Maybe Later')"
+      [disabled]="buttonsDisabled"
+    >
+      Maybe Later
+    </button>
+  </span>
+
+  <span class="disabled-wrapper" [class.is-disabled]="buttonsDisabled">
+    <button
+      class="btn-ghost"
+      type="button"
+      (click)="submitInterest('Not Interested')"
+      [disabled]="buttonsDisabled"
+    >
+      Not Interested
+    </button>
+  </span>
+
+</div>
+</div>
     </section>
   </div>
 </div>
