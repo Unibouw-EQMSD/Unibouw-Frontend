@@ -47,29 +47,11 @@ getProjectSummary(rfqId: string, workItemIds?: string[]) {
 }
 
 getResponsesByProjectId(projectId: string) {
-  return this.http.get(`${this.apiURL}/RfqResponse/responses/project/${projectId}`);
+  return from(this.getHeaders()).pipe(
+    switchMap((headers) =>
+      this.http.get<any>(`${this.apiURL}/RfqResponse/responses/project/${projectId}`,{headers})));
 }
-  /**
-   * ✅ Submit response without file
-   */
-  // submitRfqResponse(
-  //   rfqId: string,
-  //   subcontractorId: string,
-  //   workItemId: string,
-  //   status: string
-  // ): Observable<any> {
-  //   const formData = new FormData();
-  //   formData.append('rfqId', rfqId);
-  //   formData.append('subcontractorId', subcontractorId);
-  //   formData.append('workItemId', workItemId);
-  //   formData.append('status', status);
-
-  //   return this.http.post(`${this.apiURL}/RfqResponse/submit`, formData);
-  // }
-
-  /**
-   * ✅ Submit response with file (auto base64 conversion)
-   */
+  
  submitRfqResponseWithFile(
   rfqId: string,
   subcontractorId: string,
@@ -147,9 +129,11 @@ getResponsesByProjectSubcontractors(projectId: string): Observable<any> {
   );
 }
 getQuoteAmount(rfqId: string, subId: string): Observable<any> {
-  return this.http.get<any>(
-    `${this.apiURL}/RfqResponse/GetQuoteAmount?rfqId=${rfqId}&subcontractorId=${subId}`
-  );
+   return from(this.getHeaders()).pipe(
+    switchMap((headers) =>
+      this.http.get<any>(
+    `${this.apiURL}/RfqResponse/GetQuoteAmount?rfqId=${rfqId}&subcontractorId=${subId}`, { headers }
+  )));
 }
 markAsViewed(rfqId: string, subcontractorId: string, workItemId: string): Observable<any> {
   return this.http.post(
@@ -164,11 +148,22 @@ markAsViewed(rfqId: string, subcontractorId: string, workItemId: string): Observ
     }
   );
 }
+downloadQuote(rfqId: string, subId: string): Observable<Blob> {
+  return from(this.getHeaders()).pipe(
+    switchMap((headers) =>
+      this.http.get(
+        `${this.apiURL}/RfqResponse/DownloadQuote`,
+        {
+          params: {
+            rfqId: rfqId,
+            subcontractorId: subId
+          },
+          headers,
+          responseType: 'blob'
+        }
+      )
+    )
+  );
+}
 
-  downloadQuote(rfqId: string, subId: string): Observable<Blob> {
-    return this.http.get(
-      `${this.apiURL}/RfqResponse/DownloadQuote?rfqId=${rfqId}&subcontractorId=${subId}`,
-      { responseType: 'blob' }
-    );
-  }
 }
