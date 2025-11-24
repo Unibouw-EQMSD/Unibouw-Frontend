@@ -1,15 +1,22 @@
-.project-details-container {
-  display: flex;
-  grid-template-columns: 1fr 3fr;
+/* .project-details-container {
+  display: grid;
   gap: 20px;
   padding: 15px;
   margin-bottom: 25px;
+} */
+
+.project-details-container {
+  display: grid;
+  grid-template-columns: 0.2fr 1fr; /* Two equal columns */
+  gap: 20px;
+  padding: 15px;
+  margin: 0px 18px 45px;
 }
- 
+
 .page-header {
   text-align: left;
-  margin: 30px auto 0px;
-  width: 90%;
+  margin: 35px auto 0px;
+  width: 96%;
   display: flex;
   flex-direction: row;
   justify-content: space-between;
@@ -17,60 +24,81 @@
 .fa-check-circle{
   color:green;
 }
- 
+
 .fa-bell{
+  font-size: 18px;
+  margin-right: 9px;
+  cursor: pointer;
    color: #f97316; /* orange */
  
 }
- 
+
 .page-header h2 {
   font-size: 1.5rem;
   color: #003042;
   margin: 0;
-  font-weight: 200;
+  font-weight: 400;
 }
- 
- 
+
+
 .details-card {
   background: #fff;
   border-radius: 8px;
   box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-  padding: 15px;
+  /* padding: 15px; */
   font-size: 14px;
 }
- 
-.details-card h3 {
+
+.details-header {
+  background-color: #f8f8f8;
+  padding: 14px 18px;
+  border-bottom: 1px solid #eee;
+  border-top-left-radius: 8px;
+  border-top-right-radius: 8px;
+}
+
+.details-header h3 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.details-content{
+  padding: 15px 18px;
+}
+
+/* .details-card h3 {
   margin-bottom: 12px;
   font-size: 16px;
   font-weight: 600;
-}
- 
+} */
+
 .detail-row {
   margin-bottom: 10px;
 }
- 
+
 .detail-row .label {
   display: block;
   font-weight: 500;
   color: #6a5acd; /* purple */
   margin-bottom: 2px;
 }
- 
+
 .detail-row .value {
   display: block;
   color: #000;
 }
- 
+
 .detail-row .status {
   font-weight: 600;
   color: green;
 }
- 
+
 .detail-row .value a {
   color: #f97316; /* orange */
   text-decoration: none;
 }
- 
+
 .detail-row .value a:hover {
   text-decoration: underline;
 }
@@ -78,59 +106,60 @@
   color: green;
   font-weight: bold;
 }
- 
+
 .search-box {
-  margin: 20px 0;
+  margin: 18px 0;
   width: 100%;
    display: flex;
   flex-direction: row;
   justify-content: flex-start;
  
 }
- 
+
 .search-box input {
   width: 250px;
   padding: 6px 10px;
-  border: none;          
-  border-bottom: 2px solid #ccc;
+  border: none;           
+  border-bottom: 2px solid #ccc; 
   font-size: 17px;
   outline: none;          
   transition: border-color 0.3s;
 }
- 
- 
+
+
 .search-box input:focus {
-  border-bottom: 2px solid #905f33;
+  border-bottom: 2px solid #905f33; 
 }
- 
+
 /* === RFQ SECTION === */
- 
+
 .rfq-card{
     background-color: #ffffff;
-    padding: 5px;
+    padding: 8px;
     border-radius: 10px;
 }
- 
+
 .rfq-header {
   display: flex;
   justify-content: flex-start;
   align-items: center;
-  margin-bottom: 12px;
   background-color: #f8f8f8;
+  border-bottom: 1px solid #eee;
+  padding: 8px 0px 18px;
 }
- 
+
 .group-options label {
   margin-left: 10px;
-  font-size: 14px;
+  font-size: 16px;
 }
- 
+
 /* Dropdown for Work Item (like Construction) */
 .work-item-header {
 display: flex;
     justify-content: space-between;
     align-items: center;
     cursor: pointer;
-    padding: 5px 0;
+    padding: 5px 10px 5px 0px;
     margin: 10px auto;
     border-bottom: 1px solid #eee;
     font-size: 15px;
@@ -139,104 +168,104 @@ display: flex;
     background-color: #f8f8f8;
     height: 45px;
 }
- 
+
 .work-item-header span {
   color: #f97316; /* orange highlight for work item name */
 }
- 
+
 .rfq-summary {
   display: flex;
   justify-content: space-between;
   margin: 10px 0;
   font-size: 14px;
 }
- 
+
 .rfq-summary .highlight {
   color: #f97316;
   font-weight: bold;
 }
- 
+
 .rfq-table-wrapper {
   overflow-x: auto;
 }
- 
+
 .rfq-table {
   width: 100%;
   border-collapse: collapse;
-  margin-top: 10px;
+  margin-top: 5px;
 }
- 
+
 .rfq-table th, .rfq-table td {
   padding: 10px;
   border-bottom: 1px solid #eee;
   text-align: left;
   font-size: 14px;
 }
- 
+
 .rfq-table th {
   font-weight: 600;
 }
- 
+
 /* Rating styling (orange stars + value) */
 .rating {
   color: orange;
-  font-size: 13px;
+  font-size: 14px;
   margin-left: 5px;
 }
- 
+
 .rating span {
   margin-left: 3px;
   font-size: 12px;
   color: #333;
 }
- 
+
 /* Action icons (consistent orange/grey look) */
 .action-icon {
-  font-size: 16px;
-  margin: 0 5px;
+  font-size: 18px;
+  margin-right: 9px;
   cursor: pointer;
   color: #f97316;
 }
- 
+
 .action-icon.disabled {
   color: #ccc;
   cursor: not-allowed;
 }
- 
+
 /* Status check/cross icons */
 .status-icon {
   font-size: 16px;
 }
- 
+
 .status-icon.success {
   color: green;
 }
- 
+
 .status-icon.error {
   color: red;
 }
- 
+
 /* Pagination */
- 
+
 .pagination-wrapper {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-top: 15px;
 }
- 
+
 .records-per-page {
   display: flex;
   align-items: center;
   gap: 8px;
   font-size: 14px;
 }
- 
+
 .records-per-page select {
   padding: 2px 6px;
   font-size: 14px;
 }
- 
+
 .pagination-container {
   display: flex;
   justify-content: center;
@@ -244,7 +273,7 @@ display: flex;
   margin-top: 15px;
   gap: 5px;
 }
- 
+
 .page-btn {
   border: none;
   background: #f5f7f9;
@@ -256,23 +285,23 @@ display: flex;
   font-weight: 500;
   transition: 0.2s;
 }
- 
+
 .page-btn:hover:not(:disabled) {
   background: #e1e6eb;
 }
- 
+
 .page-btn.active {
   background: #003042;  /* dark blue */
   color: #fff;
   font-weight: 600;
 }
- 
+
 .page-btn:disabled {
   background: #f5f7f9;
   color: #ccc;
   cursor: not-allowed;
 }
- 
+
 .pagination span {
   font-size: 0.9rem;
 }
@@ -285,22 +314,21 @@ display: flex;
   margin-bottom: 10px;
   font-size: 14px;
 }
- 
+
 .rfq-summary div {
   text-align: center;
-  /* flex: 1; */
+  color: black;
+    font-weight: 400;
 }
- 
+
 .rfq-summary .label {
   display: block;
-  font-weight: 200;
-  color: #6a5acd; /* purple like screenshot */
-  margin-bottom: 4px;
+    font-weight: 400;
+    color: #695bbb;
+    margin-bottom: 4px;
 }
- 
+
 .rfq-summary .highlight {
   color: #f97316; /* orange */
-  font-weight: 200;
+  font-weight: 400;
 }
- 
- 

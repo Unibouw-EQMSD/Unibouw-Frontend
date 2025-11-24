@@ -8,41 +8,48 @@
 <div class="project-details-container">
   <!-- LEFT: Project Details -->
   <div class="details-card" *ngIf="projectDetails">
-    <h3>Details</h3>
-    <div class="detail-row">
-      <span class="label">Project Code</span><span class="value">{{ projectDetails.number }}</span>
+    <div class="details-header">
+      <h3>Details</h3>
     </div>
-    <div class="detail-row">
-      <span class="label">Project</span><span class="value">{{ projectDetails.name }}</span>
-    </div>
-    <div class="detail-row">
-      <span class="label">Customer</span
-      ><span class="value">{{ projectDetails.customerName }}</span>
-    </div>
-    <div class="detail-row">
-      <span class="label">Project Manager</span
-      ><span class="value">{{ projectDetails.projectManagerName }}</span>
-    </div>
-    <div class="detail-row">
-      <span class="label">Start Date</span
-      ><span class="value">{{ projectDetails.startDate | date : 'dd-MM-yyyy' }}</span>
-    </div>
-    <div class="detail-row">
-      <span class="label">Committed Date</span
-      ><span class="value">{{ projectDetails.completionDate | date : 'dd-MM-yyyy' }}</span>
-    </div>
-    <div class="detail-row">
-      <span class="label">Status</span><span class="value status">{{ projectDetails.status }}</span>
-    </div>
-    <div class="detail-row">
-      <span class="label">Total Dimension</span
-      ><span class="value">{{ projectDetails.totalDimension }}</span>
-    </div>
-    <div class="detail-row">
-      <span class="label">Specification</span>
-      <span class="value">
-        <a [href]="projectDetails.sharepointURL" target="_blank">Project Files</a>
-      </span>
+
+    <div class="details-content">
+      <div class="detail-row">
+        <span class="label">Project Code</span
+        ><span class="value">{{ projectDetails.number }}</span>
+      </div>
+      <div class="detail-row">
+        <span class="label">Project</span><span class="value">{{ projectDetails.name }}</span>
+      </div>
+      <div class="detail-row">
+        <span class="label">Customer</span
+        ><span class="value">{{ projectDetails.customerName }}</span>
+      </div>
+      <div class="detail-row">
+        <span class="label">Project Manager</span
+        ><span class="value">{{ projectDetails.projectManagerName }}</span>
+      </div>
+      <div class="detail-row">
+        <span class="label">Start Date</span
+        ><span class="value">{{ projectDetails.startDate | date : 'dd-MM-yyyy' }}</span>
+      </div>
+      <div class="detail-row">
+        <span class="label">Committed Date</span
+        ><span class="value">{{ projectDetails.completionDate | date : 'dd-MM-yyyy' }}</span>
+      </div>
+      <div class="detail-row">
+        <span class="label">Status</span
+        ><span class="value status">{{ projectDetails.status }}</span>
+      </div>
+      <div class="detail-row">
+        <span class="label">Total Dimension</span
+        ><span class="value">{{ projectDetails.totalDimension }}</span>
+      </div>
+      <div class="detail-row">
+        <span class="label">Specification</span>
+        <span class="value">
+          <a [href]="projectDetails.sharepointURL" target="_blank">Project Files</a>
+        </span>
+      </div>
     </div>
   </div>
 
@@ -69,7 +76,7 @@
     <!-- 🟢 TAB 1: RFQ RESPONSE (Accordion Section) -->
     <div *ngIf="selectedTab === 'response'">
       <div class="rfq-header">
-        <h3>RFQ Responses</h3>
+        <!-- <h3>RFQ Responses</h3> -->
         <div class="group-options">
           <label
             ><input type="radio" name="groupBy" [(ngModel)]="groupBy" value="workItem" /> Group by
@@ -152,6 +159,7 @@
                       *ngIf="rfq.actions?.includes('pdf')"
                       class="fa fa-file-pdf action-icon download-icon"
                       (click)="downloadQuote($event, rfq.rfqId, rfq.subcontractorId)"
+                      title="Download"
                     ></i>
                     <i *ngIf="rfq.actions?.includes('lock')" class="fa fa-lock action-icon"></i>
                     <i class="fa fa-bell"></i>
