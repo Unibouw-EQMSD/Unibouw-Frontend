@@ -12,21 +12,24 @@
 
   <!-- 📋 Table Section -->
   <div class="table-container" *ngIf="isSkeletonLoading">
-
     <!-- 🔍 Search -->
     <mat-form-field appearance="fill" class="search-box full-width">
-      <input matInput [(ngModel)]="searchText" (input)="applyFilter()" placeholder="Search..." />
-      <button matSuffix mat-icon-button *ngIf="searchText" (click)="searchText=''; applyFilter()">
+      <input matInput [(ngModel)]="searchText" (input)="applyFilter()" placeholder="Search" />
+      <button matSuffix mat-icon-button *ngIf="searchText" (click)="searchText = ''; applyFilter()">
         <mat-icon>close</mat-icon>
       </button>
     </mat-form-field>
 
     <!-- 🧾 Table -->
     <div class="table-scroll">
-      <table mat-table [dataSource]="dataSource" class="mat-elevation-z2 full-width-table"  matSort
+      <table
+        mat-table
+        [dataSource]="dataSource"
+        class="mat-elevation-z2 full-width-table"
+        matSort
         matSortActive="name"
-        matSortDirection="asc">
-
+        matSortDirection="asc"
+      >
         <!-- Code -->
         <ng-container matColumnDef="number">
           <th mat-header-cell *matHeaderCellDef mat-sort-header>Code</th>
@@ -54,13 +57,13 @@
         <!-- Start Date -->
         <ng-container matColumnDef="startDate">
           <th mat-header-cell *matHeaderCellDef mat-sort-header>Start Date</th>
-          <td mat-cell *matCellDef="let item">{{ item.startDate | date }}</td>
+          <td mat-cell *matCellDef="let item">{{ item.startDate | date : 'dd-MM-yyyy' }}</td>
         </ng-container>
 
         <!-- Committed Date -->
         <ng-container matColumnDef="completionDate">
           <th mat-header-cell *matHeaderCellDef mat-sort-header>Committed Date</th>
-          <td mat-cell *matCellDef="let item">{{ item.completionDate | date }}</td>
+          <td mat-cell *matCellDef="let item">{{ item.completionDate | date : 'dd-MM-yyyy' }}</td>
         </ng-container>
 
         <!-- Status -->
@@ -73,8 +76,14 @@
         <ng-container matColumnDef="action">
           <th mat-header-cell *matHeaderCellDef>Action</th>
           <td mat-cell *matCellDef="let item">
-            <a [routerLink]="['/view-projects', item.projectID]" matTooltip="View Details" (click)="logProjectId(item.projectID)">
-              <mat-icon color="primary">visibility</mat-icon>
+            <a
+              [routerLink]="['/view-projects', item.projectID]"
+              matTooltip="View Details"
+              (click)="logProjectId(item.projectID)"
+            >
+              <mat-icon class="custom-visibility-icon" style="font-size: 20px !important"
+                >visibility</mat-icon
+              >
             </a>
           </td>
         </ng-container>
@@ -98,7 +107,6 @@
             </ng-container>
           </td>
         </tr>
-
       </table>
     </div>
 
@@ -107,7 +115,8 @@
       [pageSize]="pageSize"
       [pageSizeOptions]="pageSizeOptions"
       (page)="onPageSizeChange($event)"
-      showFirstLastButtons>
+      showFirstLastButtons
+    >
     </mat-paginator>
   </div>
 </div>

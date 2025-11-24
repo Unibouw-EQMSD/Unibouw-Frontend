@@ -2,11 +2,11 @@
   <div class="login-card">
     <div class="logo-section">
       <h1 class="logo">
-        <img src="assets/images/unibouw.png" alt="unibouw" style="height:37px">
+        <img src="assets/images/unibouw.png" alt="unibouw" style="height: 37px" />
       </h1>
     </div>
 
-    <div class="form-section" style="padding: 10px 35px 25px;">
+    <div class="form-section" style="padding: 10px 35px 25px">
       <h2 class="form-title">Login with SSO</h2>
 
       <div class="input-group">
@@ -18,18 +18,15 @@
           name="email"
           #emailRef="ngModel"
           required
+          (keyup.enter)="onSubmit(emailRef)"
         />
-        <div class="error-msg" *ngIf="emailRef.invalid && emailRef.touched" style="color: red;">
+        <div class="error-msg" *ngIf="emailRef.invalid && emailRef.touched" style="color: red">
           Email is required
         </div>
       </div>
     </div>
 
-    <button 
-      class="microsoft-btn" 
-      (click)="onSubmit(emailRef)" 
-      type="submit"
-    >
+    <button class="microsoft-btn" (click)="onSubmit(emailRef)" type="submit">
       <div class="microsoft-logo">
         <div class="logo-square red"></div>
         <div class="logo-square green"></div>
@@ -38,5 +35,9 @@
       </div>
       Sign in with Microsoft
     </button>
+
+    <!-- <button type="submit" (click)="onLoginClick()" style="background-color: grey; margin: 3px auto">
+      Test Login
+    </button> -->
   </div>
 </div>

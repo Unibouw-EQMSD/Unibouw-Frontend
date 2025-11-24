@@ -15,21 +15,23 @@
 
   <!-- 📋 TABLE CONTAINER -->
   <div class="table-container" *ngIf="!isSkeletonLoading">
-
     <!-- 🔍 Search -->
     <mat-form-field appearance="fill" class="search-box full-width">
-      <input matInput [(ngModel)]="searchText" (input)="applyFilter()" placeholder="Search..." />
-      <button matSuffix mat-icon-button *ngIf="searchText" (click)="searchText=''; applyFilter()">
+      <input matInput [(ngModel)]="searchText" (input)="applyFilter()" placeholder="Search" />
+      <button matSuffix mat-icon-button *ngIf="searchText" (click)="searchText = ''; applyFilter()">
         <mat-icon>close</mat-icon>
       </button>
     </mat-form-field>
 
     <!-- 🧾 Table -->
     <div class="table-scroll">
-      <table mat-table [dataSource]="dataSource"  matSort
+      <table
+        mat-table
+        [dataSource]="dataSource"
+        matSort
         matSortActive="name"
-         class="mat-elevation-z2 full-width-table">
-
+        class="mat-elevation-z2 full-width-table"
+      >
         <!-- ✅ Actual Data Columns -->
         <ng-container matColumnDef="name">
           <th mat-header-cell *matHeaderCellDef mat-sort-header>Name</th>
@@ -48,7 +50,6 @@
           <td mat-cell *matCellDef="let item">{{ item.phoneNumber1 }}</td>
         </ng-container>
 
-
         <ng-container matColumnDef="contactPerson">
           <th mat-header-cell *matHeaderCellDef mat-sort-header>Contact Person</th>
           <td mat-cell *matCellDef="let item">{{ item.personName }}</td>
@@ -62,16 +63,29 @@
         <ng-container *ngIf="isAdmin" matColumnDef="action">
           <th mat-header-cell *matHeaderCellDef>Action</th>
           <td mat-cell *matCellDef="let item">
-            <mat-slide-toggle color="primary" class="toggle" [checked]="item.isActive" (change)="toggleIsActive(item)">
+            <mat-slide-toggle
+              color="primary"
+              class="toggle"
+              [checked]="item.isActive"
+              (change)="toggleIsActive(item)"
+            >
             </mat-slide-toggle>
           </td>
         </ng-container>
 
         <!-- ✅ Header and Data Rows (Hide during load or no data) -->
-        <tr mat-header-row *matHeaderRowDef="displayedColumns"
-          [class.hidden]="isLoading || dataSource.data.length === 0" class="sticky-header"></tr>
-        <tr mat-row *matRowDef="let row; columns: displayedColumns;" [class.hidden]="isLoading"
-          [class.inactive]="!row.isActive"></tr>
+        <tr
+          mat-header-row
+          *matHeaderRowDef="displayedColumns"
+          [class.hidden]="isLoading || dataSource.data.length === 0"
+          class="sticky-header"
+        ></tr>
+        <tr
+          mat-row
+          *matRowDef="let row; columns: displayedColumns"
+          [class.hidden]="isLoading"
+          [class.inactive]="!row.isActive"
+        ></tr>
 
         <!-- ✅ Loading or No Data Row -->
         <tr *matNoDataRow>
@@ -84,13 +98,16 @@
             </ng-container>
           </td>
         </tr>
-
       </table>
     </div>
 
     <!-- 📄 Paginator -->
-    <mat-paginator [pageSize]="pageSize" [pageSizeOptions]="pageSizeOptions" (page)="onPageSizeChange($event)"
-      showFirstLastButtons>
+    <mat-paginator
+      [pageSize]="pageSize"
+      [pageSizeOptions]="pageSizeOptions"
+      (page)="onPageSizeChange($event)"
+      showFirstLastButtons
+    >
     </mat-paginator>
 
     <!-- <div class="record-count" *ngIf="!isLoading && dataSource.data.length > 0">

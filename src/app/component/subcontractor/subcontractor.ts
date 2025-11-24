@@ -13,7 +13,7 @@ import { forkJoin } from 'rxjs/internal/observable/forkJoin';
   styleUrl: './subcontractor.css',
 })
 export class Subcontractor implements OnInit, AfterViewInit {
- displayedColumns: string[] = ['name', 'category','contactNumber', 'contactPerson', 'emailId', 'action'];
+ displayedColumns: string[] = ['name', 'category','contactNumber', 'contactPerson', 'emailId'];
   dataSource = new MatTableDataSource<Subcontractors>([]);
   
   searchText = '';
@@ -38,7 +38,9 @@ showPopup = false;
   ) {}
 
   ngOnInit() {
-    this.isAdmin = this.userService.isAdmin();
+
+     this.isAdmin = this.userService.isAdmin(); // Check role
+  this.updateDisplayedColumns();  
 
     // Show skeleton first, then load table
   this.isSkeletonLoading = true;
@@ -51,6 +53,15 @@ showPopup = false;
 }
 
   
+updateDisplayedColumns() {
+  if (this.isAdmin) {
+    if (!this.displayedColumns.includes('action')) {
+      this.displayedColumns.push('action');
+    }
+  } else {
+    this.displayedColumns = this.displayedColumns.filter(c => c !== 'action');
+  }
+}
 
   ngAfterViewInit() {
     this.dataSource.paginator = this.paginator;

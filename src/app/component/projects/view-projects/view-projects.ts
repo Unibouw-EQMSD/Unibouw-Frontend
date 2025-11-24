@@ -102,14 +102,16 @@ displayedColumns: string[] = [
 }
 
 loadProjectDetails(id: string) {
-  console.log('🚀 Calling API for project:', id);
+  this.isLoading = true;
   this.projectService.getProjectById(id).subscribe({
     next: (res) => {
       this.projectDetails = res;
-      console.log('✅ Project Details Loaded:', this.projectDetails);
+      this.isLoading = false;
+      console.log('■ Project Details Loaded:', this.projectDetails);
     },
     error: (err) => {
-      console.error('❌ Error fetching project details:', err);
+      console.error('■ Error fetching project details:', err);
+      this.isLoading = false;
     }
   });
 }

@@ -122,15 +122,12 @@ header {
 .navbar {
   background: #003042;
   border-radius: 6px;
- /* width: 100%;
-   margin: -30px auto 20px; */
-  padding: 18px 18px;
+  padding: 16px 20px;
   display: flex;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
   position: relative;
   z-index: 5;
-    width: 100%;
-
+  width: 100%;
 }
 
 .navbar ul {
@@ -144,7 +141,8 @@ header {
 .navbar li a {
   text-decoration: none;
   color: white;
-  font-weight: 500;
+  font-size: 16px;
+  font-weight: 400;
   transition: color 0.3s ease;
 }
 

@@ -19,13 +19,13 @@ export class AddSubcontractor {
   selectedCountry = countryList.find(c => c.code === '+31') || countryList[0]; // Default to Netherland or first country
   workitems: Workitem[] = [];
   selectedWorkitems: Workitem[] = [];
-   persons: any[] = [];
+  persons: any[] = [];
   categories: WorkitemCategory[] = [
     { categoryID: '60a1a614-05fd-402d-81b3-3ba05fdd2d8a', categoryName: 'Standard' },
     { categoryID: '213cf69b-627e-4962-83ec-53463c8664d2', categoryName: 'Unibouw' }
   ];
   attachments: File[] = [];
-uploadedFiles: { name: string; type: string; path: string }[] = [];
+  uploadedFiles: { name: string; type: string; path: string }[] = [];
   uploadedFileType: string = '';
   uploadedFilePath: string = '';
   showPopup = false;
@@ -114,7 +114,8 @@ uploadedFiles: { name: string; type: string; path: string }[] = [];
     }
 
     this.workItemService.getWorkitems(this.selectedCategoryId).subscribe(items => {
-      this.workitems = items || [];
+      // Only keep items where isActive is true
+      this.workitems = (items || []).filter(w => w.isActive !== false).sort((a, b) => a.name.localeCompare(b.name));
 
       // Keep selected items only if they exist in the new list
       this.selectedWorkitems = this.selectedWorkitems.filter(sw =>
@@ -122,7 +123,6 @@ uploadedFiles: { name: string; type: string; path: string }[] = [];
       );
     });
   }
-
 
   selectCategory(categoryId: string) {
     this.selectedCategoryId = categoryId;
@@ -180,86 +180,107 @@ removeFile(index: number) {
 }
 loadPersons(): void {
     this.subcontractorService.getPersons().subscribe({
-      next: (res) => {
+      next: (res: any[]) => {
         this.persons = res;
       },
-      error: (err) => console.error('Error fetching persons:', err)
+      error: (err: any) => console.error('Error fetching persons:', err)
     });
   }
-  onSubmit() {
-  if (this.subcontractorForm.valid) {
-    const formValue = this.subcontractorForm.value;
 
-    const payload = {
-      erP_ID: formValue.erpId || " ",
-      name: formValue.name,
-      rating: formValue.rating || 0,
-      contactPerson: formValue.contactPerson || "",
-      emailID: formValue.email,
-      phoneNumber1: formValue.contactNumber
-        ? this.selectedCountry.code + formValue.contactNumber
-        : "",
-        personID: formValue.contactPerson,
-      location: formValue.location,
-      country: formValue.country,
-      officeAdress: formValue.officeAddress,
-      billingAddress: formValue.sameAsOffice
-        ? formValue.officeAddress
-        : formValue.billingAddress,
-      registeredDate: formValue.registeredDate,
-      isActive: formValue.status === "Active",
-      createdBy: "nitish.ra@flatworldsolutions.com",
-      workItemIDs: this.selectedWorkitems.map(item => item.workItemID)
-    };
+  
+onSubmit() {
+  // Mark all form fields as touched to show validation errors
+  this.subcontractorForm.markAllAsTouched();
 
-    console.log("✅ Final payload to backend:", payload);
+  // Validate that at least one work item is selected
+  if (this.selectedWorkitems.length === 0) {
+   return;
+  }
 
-    this.subcontractorService.createSubcontractor(payload).subscribe({
-      next: res => {
-        console.log("✅ Subcontractor created:", res);
+  // Proceed only if the form is valid
+  if (!this.subcontractorForm.valid) {
+    return;
+  }
 
-        // Assuming backend returns subcontractorID in response
-        const subcontractorID = res?.subcontractorID || res?.id;
-        const files: File[] = formValue.attachments || [];
+  const formValue = this.subcontractorForm.value;
 
-        if (subcontractorID && files.length > 0) {
-          this.subcontractorService.createAttachments(subcontractorID, files).subscribe({
-            next: uploadRes => {
-              console.log("📁 Upload success:", uploadRes);
-              this.showPopupMessage("Subcontractor and files uploaded successfully!");
-               this.resetForm();
-            },
-            error: uploadErr => {
-              console.error("🚨 File upload failed:", uploadErr);
-              this.showPopupMessage("File upload failed.");
-            }
-          });
-        } else {
-          this.showPopupMessage("Subcontractor created successfully!");
-                this.resetForm();
-        }
-      },
-      error: err => {
-        console.error("🚨 Backend error:", err);
-        this.showPopupMessage("Failed to create Subcontractor. Please try again.", true);
-              this.resetForm();
+  // Prepare the payload for API call
+  const payload = {
+    erP_ID: formValue.erpId?.trim() || "",
+    name: formValue.name?.trim(),
+    rating: formValue.rating || 0,
+    contactPerson: formValue.contactPerson || "",
+    emailID: formValue.email,
+    phoneNumber1: formValue.contactNumber? this.selectedCountry.code + formValue.contactNumber: "",
+    personID: formValue.contactPerson,
+    location: formValue.location,
+    country: formValue.country ? formValue.country : null,
+    officeAddress: formValue.officeAddress ? formValue.officeAddress : null,
+    billingAddress: formValue.sameAsOffice? formValue.officeAddress: formValue.billingAddress,
+    registeredDate: formValue.registeredDate ? formValue.registeredDate : null,
+    isActive: formValue.status === "Active",
+    createdBy: "nitish.ra@flatworldsolutions.com",
+    workItemIDs: this.selectedWorkitems.map(item => item.workItemID),
+  };
+
+  // Call API to create subcontractor
+  this.subcontractorService.createSubcontractor(payload).subscribe({
+    next: (res) => {
+      const subcontractorID = res?.subcontractorID || res?.id;
+      const files: File[] = formValue.attachments || [];
+
+      // If subcontractor created and attachments exist, upload them
+      if (subcontractorID && files.length > 0) {
+        this.subcontractorService.createAttachments(subcontractorID, files).subscribe({
+          next: () => {
+            this.showPopupMessage("Subcontractor and files uploaded successfully!");
+            this.handleFormResetAndRedirect();
+          },
+          error: (uploadErr) => {
+            console.error("File upload failed:", uploadErr);
+            this.showPopupMessage("File upload failed.", true);
+          },
+        });
+      } 
+      // If no attachments, just show success message
+      else {
+        this.showPopupMessage("Subcontractor created successfully!");
+        this.handleFormResetAndRedirect();
       }
-    });
-  } else {
-    alert("Please fill in all required fields before submitting.");
-  }
+    },
+    error: (err) => {
+      console.error("Backend error:", err);
+      // Safely extract backend error message
+  const errorMessage =
+    err?.error?.message ||    // Custom message from backend
+    err?.error?.error ||      // Detailed error if available
+    err?.message ||           // Generic message
+    'Failed to create Subcontractor. Please try again.'; // Fallback
+
+      this.showPopupMessage(errorMessage, true);
+      //this.showPopupMessage("Failed to create Subcontractor. Please try again.", true);
+    },
+  });
+}
+
+/** method to reset the form and navigate back to the Subcontractor list*/
+private handleFormResetAndRedirect(): void {
+  this.onReset();
+  setTimeout(() => this.router.navigate(['/subcontractor']), 1000);
 }
 
 
-resetForm() {
+onReset() {
   this.subcontractorForm.reset();
+    this.subcontractorForm.markAsPristine(); // Optional: marks form as pristine
+  this.subcontractorForm.markAsUntouched(); // Optional: marks form as untouched
   this.selectedWorkitems = [];
-  this.selectedCountry = { name: 'India', code: '+91', flag: 'in' }; // or default country
+  //this.selectedCountry = { name: 'India', code: '+91', flag: 'in' }; // or default country
+  this.selectedCountry = { name: 'France', code: '+31', flag: 'fr' }; // default country set to France
   this.uploadedFiles = []; // clear uploaded file preview list if any
   const fileInput = document.querySelector<HTMLInputElement>('#fileInput');
   if (fileInput) fileInput.value = ''; // clear the file input
 }
-
 
 
   onCancel() {
@@ -273,24 +294,31 @@ resetForm() {
 
   }
 
+
+
   // Helper function for template to check if a workitem is selected
   isSelected(w: Workitem): boolean {
     return this.selectedWorkitems.some(sw => sw.workItemID === w.workItemID);
   }
 
-  showPopupMessage(message: string, isError: boolean = false) {
+  // showPopupMessage(message: string, isError: boolean = false) {
+  //   this.popupMessage = message;
+  //   this.showPopup = true;
+  //   // Change popup style dynamically if it's an error
+  //   const popupEl = document.querySelector('.popup');
+  //   if (popupEl) {
+  //     popupEl.classList.toggle('error', isError);
+  //   }
+  //   // Hide after 3 seconds
+  //   setTimeout(() => {
+  //     this.showPopup = false;
+  //   }, 3000);
+  // }
+
+   showPopupMessage(message: string, isError: boolean = false) {
     this.popupMessage = message;
+    this.popupError = isError;
     this.showPopup = true;
-
-    // Change popup style dynamically if it's an error
-    const popupEl = document.querySelector('.popup');
-    if (popupEl) {
-      popupEl.classList.toggle('error', isError);
-    }
-
-    // Hide after 3 seconds
-    setTimeout(() => {
-      this.showPopup = false;
-    }, 3000);
+    setTimeout(() => (this.showPopup = false), 3000);
   }
 }
