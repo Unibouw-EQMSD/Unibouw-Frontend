@@ -1,5 +1,5 @@
 import { HttpClient } from '@angular/common/http';
-import { Component } from '@angular/core';
+import { Component, HostListener } from '@angular/core';
 import { forkJoin, lastValueFrom } from 'rxjs';
 import { Subcontractors, SubcontractorService } from '../../../services/subcontractor.service';
 import { Workitem, WorkitemCategory, WorkitemService } from '../../../services/workitem.service';
@@ -26,6 +26,9 @@ export class RfqAdd {
   customerNote: string = '';
 projectId!: string;
 projectDetails: any;
+  showPreview = false;
+previewData: any = null;
+
   constructor(
     private workitemService: WorkitemService,
     private subcontractorService: SubcontractorService,
@@ -54,6 +57,58 @@ this.projectId = this.route.snapshot.paramMap.get('projectId') || '';
     this.selectedProject = this.projectId;
   }
 }
+
+get selectedSubcontractors() {
+    return (this.subcontractors || []).filter((s: any) => s.selected);
+  }
+
+openPreview() {
+  if (!this.selectedProject) return alert("Select a project");
+  if (!this.selectedWorkItems.length) return alert("Select work item");
+  if (!this.selectedSubcontractors.length) return alert("Select subcontractors");
+
+  const selectedProject = this.projects.find(p => p.projectID === this.selectedProject);
+
+  // Workitem → you force only one in the API
+  const workItem = this.selectedWorkItems[0];
+
+  // Store preview fields
+  this.previewData = {
+    rfqId: 'RFQ will be generated on save',     // will update after save
+    projectName: selectedProject?.name ?? '',
+    workItemName: workItem.name,
+    dueDate: this.selectedDueDate,
+    subcontractors: this.selectedSubcontractors.map(s => s.name),
+    emailBody: `
+      Dear {{name}},
+
+      You have been invited to participate in a Quote Request (RFQ).
+
+      Please click the link below to view project details and respond:
+
+      Thank you,
+      Unibouw Team
+    `
+  };
+
+  this.showPreview = true;
+  document.body.style.overflow = "hidden";
+}
+
+closePreview() {
+    this.showPreview = false;
+    document.body.style.overflow = '';
+  }
+
+@HostListener('document:keydown.escape')
+  onEsc() {
+    if (this.showPreview) this.closePreview();
+  }
+
+confirmAndSend() {
+    // your submit/send logic
+    this.closePreview();
+  }
 
 loadProjectDetails(id: string) {
   this.projectService.getProjectById(id).subscribe({
