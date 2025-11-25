@@ -2,7 +2,7 @@
 
 <!-- 🔹 Page Header -->
 <header class="page-header">
-  <h2>Super Market Project Details</h2>
+  <h2>{{ projectDetails.name }}</h2>
 </header>
 
 <div class="project-details-container">
@@ -36,10 +36,24 @@
         <span class="label">Committed Date</span
         ><span class="value">{{ projectDetails.completionDate | date : 'dd-MM-yyyy' }}</span>
       </div>
+      <!-- <div class="detail-row">
+        <span class="label">Status</span>
+        <span class="value status">{{ projectDetails.status }}</span>
+      </div> -->
       <div class="detail-row">
-        <span class="label">Status</span
-        ><span class="value status">{{ projectDetails.status }}</span>
+        <span class="label">Status</span>
+        <span
+          class="value status"
+          [ngClass]="{
+            'status-started': projectDetails.status === 'Started',
+            'status-inprogress': projectDetails.status === 'In Progress',
+            'status-completed': projectDetails.status === 'Completed'
+          }"
+        >
+          {{ projectDetails.status }}
+        </span>
       </div>
+
       <div class="detail-row">
         <span class="label">Total Dimension</span
         ><span class="value">{{ projectDetails.totalDimension }}</span>

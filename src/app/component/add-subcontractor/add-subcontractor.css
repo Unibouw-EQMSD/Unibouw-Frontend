@@ -28,6 +28,23 @@ form {
 
 .form-row {
   display: flex;
+  flex-wrap: wrap;
+  gap: 24px; /* Adjust spacing between fields */
+}
+
+.form-group {
+  flex: 1 1 0;
+  min-width: 250px; /* Optional: for minimum responsive width */
+  margin-bottom: 24px;
+}
+
+.full-width {
+  flex-basis: 100% !important;
+}
+
+
+/* .form-row {
+  display: flex;
   gap: 20px;
   margin-bottom: 20px;
 }
@@ -37,6 +54,72 @@ form {
   display: flex;
   flex-direction: column;
   margin-bottom: 20px;
+} */
+
+.form-row {
+  display: flex;
+  gap: 24px;
+  margin-bottom: 30px;
+  align-items: flex-end; /* aligns bottom edges */
+}
+.form-group {
+  flex: 1 1 0;
+  min-width: 250px;
+  margin-bottom: 0;
+  display: flex;
+  flex-direction: column;
+}
+.contact-number-wrapper {
+  display: flex;
+}
+.custom-select-wrapper {
+  width: 80px;
+  margin-right: 8px;
+  position: relative;
+}
+.selected-option {
+  cursor: pointer;
+  border-bottom: 1px solid #ddd;
+  padding: 6px 4px 6px 0px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: #fff;
+}
+.dropdown-arrow {
+  margin-left: 2px;
+}
+.dropdown-list {
+  position: absolute;
+  background: #fff;
+  top: 100%;
+  left: 0;
+  width: 180px;
+  z-index: 99;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  max-height: 200px;
+  overflow-y: auto;
+}
+.phone-input {
+  width: 100%;
+}
+.is-invalid {
+  border: none;
+  border-bottom: 1px solid rgb(255, 0, 0) !important;
+}
+.checkbox-inline {
+  display: flex;
+  align-items: center;
+}
+@media (max-width: 900px) {
+  .form-row {
+    flex-direction: column;
+    gap: 8px;
+  }
+  .form-group {
+    min-width: 0;
+  }
 }
 
 input::placeholder {
@@ -51,6 +134,12 @@ label {
   color: #444;
 
 }
+
+.reset-btn {
+  border: 1px solid #b5b5b5 !important;
+  background-color: #e5e7eb !important;
+}
+
 
 .form-control {
   border: none;
@@ -120,15 +209,15 @@ textarea {
   color: white;
 }
 
-.submit-btn {
+.submit-btn, .small-btn {
   background: #f97316;
   color: white;
 }
 
-.small-btn {
+/* .small-btn {
   background: #e5e7eb;
   font-size: 12px;
-}
+} */
 
 
 .page-header {
@@ -182,5 +271,21 @@ textarea {
 .is-invalid {
    border: none;
   border-bottom: 1px solid rgb(255, 0, 0) !important;
+}
+
+.dropdown-list {
+  max-height: 400px;       /* adjust height as you want */
+  overflow-y: auto;        /* enables vertical scrolling */
+  overflow-x: hidden;
+  border: 1px solid #ddd;  /* optional */
+  border-radius: 4px;      /* optional */
+}
+
+.selected-option{
+  width: 80px;
+}
+
+.selected-option, .dropdown-arrow{
+  cursor:  pointer !important;
 }
 

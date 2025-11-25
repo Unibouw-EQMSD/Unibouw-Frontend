@@ -34,11 +34,15 @@ export class AddSubcontractor {
   selectedCategoryId: string = '';
   constructor(private fb: FormBuilder, private router: Router, private workItemService: WorkitemService, private subcontractorService: SubcontractorService) {
     this.subcontractorForm = this.fb.group({
-      name: ['', Validators.required],
+      name: ['', Validators.required, 
+        Validators.pattern(/^[a-zA-Z0-9 ]+$/) // no special characters
+      ],
     location: ['', Validators.required],
     country: ['', Validators.required],
     registeredDate: [''],
-    email: ['', [Validators.required, Validators.email]],
+    email: ['', [Validators.required, 
+       Validators.pattern(/^[a-zA-Z0-9]+([._%+-]?[a-zA-Z0-9]+)*@[a-zA-Z0-9-]+(\.[a-zA-Z]{2,})+$/)]
+      ],
     status: ['Active'],
     officeAddress: ['', Validators.required],
     billingAddress: [''],
@@ -53,37 +57,46 @@ export class AddSubcontractor {
     });
   }
 
-  ngOnInit() {
-        this.loadPersons();
+officeSub: any;
 
-    if (this.categories.length > 0) {
-      this.selectedCategoryId = this.categories[0].categoryID;
-      this.loadWorkitems();
-    }
+ngOnInit() {
+  this.loadPersons();
 
-    const officeCtrl = this.subcontractorForm.get('officeAddress');
-    const billingCtrl = this.subcontractorForm.get('billingAddress');
-    const sameAsCtrl = this.subcontractorForm.get('sameAsOffice');
-
-    // Whenever checkbox changes
-    sameAsCtrl?.valueChanges.subscribe((checked) => {
-      if (checked) {
-        // Set billingAddress to officeAddress and disable editing
-        billingCtrl?.setValue(officeCtrl?.value);
-        billingCtrl?.disable();
-
-        // Subscribe to officeAddress changes
-        officeCtrl?.valueChanges.subscribe((val) => {
-          if (sameAsCtrl?.value) {
-            billingCtrl?.setValue(val, { emitEvent: false }); // avoid circular updates
-          }
-        });
-      } else {
-        // Enable billingAddress for manual editing
-        billingCtrl?.enable();
-      }
-    });
+  if (this.categories.length > 0) {
+    this.selectedCategoryId = this.categories[0].categoryID;
+    this.loadWorkitems();
   }
+
+  const officeCtrl = this.subcontractorForm.get('officeAddress');
+  const billingCtrl = this.subcontractorForm.get('billingAddress');
+  const sameAsCtrl = this.subcontractorForm.get('sameAsOffice');
+
+  sameAsCtrl?.valueChanges.subscribe((checked) => {
+    if (checked) {
+      // Copy office → billing
+      billingCtrl?.setValue(officeCtrl?.value);
+      billingCtrl?.disable();
+
+      // If previously subscribed, unsubscribe first
+      if (this.officeSub) {
+        this.officeSub.unsubscribe();
+      }
+
+      // Sync office → billing continuously
+      this.officeSub = officeCtrl?.valueChanges.subscribe((val) => {
+        billingCtrl?.setValue(val, { emitEvent: false });
+      });
+    } else {
+      // Unchecked → stop syncing
+      if (this.officeSub) {
+        this.officeSub.unsubscribe();
+      }
+
+      billingCtrl?.enable();
+      billingCtrl?.setValue(''); // Clear billing address
+    }
+  });
+}
 
   toggleDropdown() {
     this.isDropdownOpen = !this.isDropdownOpen;

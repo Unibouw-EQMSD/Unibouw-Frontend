@@ -332,3 +332,18 @@ display: flex;
   color: #f97316; /* orange */
   font-weight: 400;
 }
+
+.status-started {
+  color: blue !important;
+  font-weight: 600;
+}
+
+.status-inprogress {
+  color: orange !important;
+  font-weight: 600;
+}
+
+.status-completed {
+  color: green !important;
+  font-weight: 600;
+}
