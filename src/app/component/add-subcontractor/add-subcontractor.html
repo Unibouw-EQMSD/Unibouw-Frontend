@@ -36,64 +36,6 @@
       </div>
 
       <div class="form-group">
-        <label>Location <span class="text-danger">*</span></label>
-        <input
-          type="text"
-          formControlName="location"
-          class="form-control"
-          [ngClass]="{
-            'is-invalid':
-              subcontractorForm.get('location')?.touched &&
-              subcontractorForm.get('location')?.invalid
-          }"
-        />
-        <div
-          *ngIf="
-            subcontractorForm.get('location')?.touched && subcontractorForm.get('location')?.invalid
-          "
-          class="text-danger small"
-        >
-          This field is required.
-        </div>
-      </div>
-    </div>
-
-    <!-- 🌍 Second Row -->
-    <div class="form-row">
-      <div class="form-group">
-        <label>Country</label>
-        <select formControlName="country" class="form-control">
-          <option value="">-- Select --</option>
-          <option *ngFor="let c of countries" [value]="c">{{ c }}</option>
-        </select>
-        <!-- <div
-          *ngIf="
-            subcontractorForm.get('country')?.touched && subcontractorForm.get('country')?.invalid
-          "
-          class="text-danger small"
-        >
-          This field is required.
-        </div> -->
-      </div>
-
-      <div class="form-group">
-        <label>Registered Date </label>
-        <input type="date" formControlName="registeredDate" class="form-control" />
-        <!-- <div
-          *ngIf="
-            subcontractorForm.get('registeredDate')?.touched &&
-            subcontractorForm.get('registeredDate')?.invalid
-          "
-          class="text-danger small"
-        >
-          This field is required.
-        </div> -->
-      </div>
-    </div>
-
-    <!-- ✉️ Third Row -->
-    <div class="form-row">
-      <div class="form-group">
         <label>Email ID <span class="text-danger">*</span></label>
         <input
           type="email"
@@ -116,21 +58,38 @@
           </div>
         </div>
       </div>
+    </div>
 
+    <!-- 🌍 Second Row -->
+    <div class="form-row">
       <div class="form-group">
-        <label>Status </label>
-        <select formControlName="status" class="form-control">
-          <option value="Active">Active</option>
-          <option value="Inactive">Inactive</option>
-        </select>
-        <!-- <div
+        <label>Location <span class="text-danger">*</span></label>
+        <input
+          type="text"
+          formControlName="location"
+          class="form-control"
+          [ngClass]="{
+            'is-invalid':
+              subcontractorForm.get('location')?.touched &&
+              subcontractorForm.get('location')?.invalid
+          }"
+        />
+        <div
           *ngIf="
-            subcontractorForm.get('status')?.touched && subcontractorForm.get('status')?.invalid
+            subcontractorForm.get('location')?.touched && subcontractorForm.get('location')?.invalid
           "
           class="text-danger small"
         >
           This field is required.
-        </div> -->
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Country</label>
+        <select formControlName="country" class="form-control">
+          <option value="">-- Select --</option>
+          <option *ngFor="let c of countries" [value]="c">{{ c }}</option>
+        </select>
       </div>
     </div>
 
@@ -238,23 +197,38 @@
       </div>
     </div>
 
-    <!-- 📎 Attachments -->
-    <div class="form-group">
-      <label>Attachments</label>
-      <div class="file-upload">
-        <input type="file" (change)="onFileSelected($event)" />
-        <button type="button" class="btn small-btn" (click)="addMoreFiles()">Add More</button>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Status </label>
+        <select formControlName="status" class="form-control">
+          <option value="Active">Active</option>
+          <option value="Inactive">Inactive</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label></label>
       </div>
     </div>
-    <div *ngIf="uploadedFiles.length > 0" class="uploaded-files">
-      <label>Selected Files:</label>
-      <span>
-        <ng-container *ngFor="let file of uploadedFiles; let i = index">
-          📎 {{ file.name }}
-          <button type="button" class="remove-btn" (click)="removeFile(i)">❌</button>
-          <span *ngIf="i < uploadedFiles.length - 1">, </span>
-        </ng-container>
-      </span>
+
+    <!-- 📎 Attachments -->
+    <div class="hidden">
+      <div class="form-group" hidden>
+        <label>Attachments</label>
+        <div class="file-upload">
+          <input type="file" (change)="onFileSelected($event)" />
+          <button type="button" class="btn small-btn" (click)="addMoreFiles()">Add More</button>
+        </div>
+      </div>
+      <div *ngIf="uploadedFiles.length > 0" class="uploaded-files">
+        <label>Selected Files:</label>
+        <span>
+          <ng-container *ngFor="let file of uploadedFiles; let i = index">
+            📎 {{ file.name }}
+            <button type="button" class="remove-btn" (click)="removeFile(i)">❌</button>
+            <span *ngIf="i < uploadedFiles.length - 1">, </span>
+          </ng-container>
+        </span>
+      </div>
     </div>
   </form>
 
