@@ -392,7 +392,7 @@ td.inactive {
   height: 20px;
 }
 .mat-slide-toggle.mat-checked .mat-slide-toggle-bar {
-  background-color: #007bff !important;
+  background-color: #0d6efd !important;
 }
 
 .small-toggle {
@@ -409,7 +409,7 @@ button.mat-raised-button {
   border-radius: 5px;
   font-size: 15px;
   font-weight: 300;
-  padding: 2px 12px;
+  padding: 6px 20px;
 }
 
 /* Loader */
@@ -519,3 +519,17 @@ button.mat-raised-button {
 .text-danger{
   color: red;
 }
+
+.mat-mdc-paginator-page-size-label, .mat-mdc-paginator-range-label{
+  font-size: 14px !important;
+}
+
+.mat-mdc-select-value, .mdc-list-item__primary-text{
+  font-size: .875rem !important;
+}
+
+.mat-mdc-paginator-range-actions button{
+  font-size: 14px !important;
+}
+
+

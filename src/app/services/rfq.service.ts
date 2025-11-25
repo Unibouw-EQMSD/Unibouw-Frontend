@@ -1,26 +1,29 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { map, switchMap, from, Observable } from 'rxjs';
-import { environment } from '../../environments/environment';
+import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
+import { from, Observable, switchMap, map } from 'rxjs';
 import { MsalService } from '@azure/msal-angular';
 import { AppConfigService } from './app.config.service';
 
-
-
 export interface Rfq {
   id?: string;
-  customerName: string;
+  customerID: string;        // required by backend
+  projectID: string;         // required by backend
+  customerName?: string;
   sentDate: string;
   dueDate: string;
   rfqSent: number;
   quoteReceived: number;
+  customerNote?: string;
+  deadLine?: string;         // optional, can set same as dueDate
+  createdBy?: string;
   actions?: string[];
+  isEditingDueDate?: boolean; // for inline editing
 }
-@Injectable({ providedIn: 'root' })
 
-export class rfqService {
-  apiURL: string = '';
-  rfq: string = '';
+@Injectable({ providedIn: 'root' })
+export class RfqService {
+  private apiURL: string = '';
+  private rfqEndpoint: string = '';
 
   constructor(
     private http: HttpClient,
@@ -28,10 +31,10 @@ export class rfqService {
     private appConfigService: AppConfigService
   ) {
     this.apiURL = this.appConfigService.getConfig().apiURL;
-    this.rfq = `${this.apiURL}/Rfq/byProject`;
+    this.rfqEndpoint = `${this.apiURL}/Rfq`;
   }
 
-  /** 🧠 Generate Azure AD headers */
+  /** Generate headers with Azure AD token */
   private async getHeaders(): Promise<HttpHeaders> {
     const accounts = this.msalService.instance.getAllAccounts();
     if (!accounts.length) throw new Error('No MSAL account found');
@@ -42,36 +45,66 @@ export class rfqService {
     });
 
     return new HttpHeaders({
-      Accept: '*/*',
+      Accept: 'application/json',
       Authorization: `Bearer ${result.accessToken}`,
     });
   }
 
-  /** ✅ Fetch all RFQs */
-  getRfq(): Observable<Rfq[]> {
+  /** Fetch all RFQs */
+  getAllRfq(): Observable<Rfq[]> {
     return from(this.getHeaders()).pipe(
-      switchMap((headers) =>
-        this.http.get<{ count: number; data: Rfq[] }>(this.rfq, { headers })
+      switchMap(headers =>
+        this.http.get<{ count: number; data: Rfq[] }>(`${this.rfqEndpoint}/byProject`, { headers })
       ),
-      map((res) =>
-        (res.data || []).map((it) => ({
-          customerName: it.customerName || '',
-          sentDate: it.sentDate || '',
-          dueDate: it.dueDate || '',
-          rfqSent: it.rfqSent || 0,
-          quoteReceived: it.quoteReceived || 0,
-        }))
-      )
+      map(res => (res.data || []).map(it => ({
+        id: it.id,
+        sentDate: it.sentDate,
+        dueDate: it.dueDate,
+        rfqSent: it.rfqSent,
+        quoteReceived: it.quoteReceived,
+        customerID: it.customerID,
+        projectID: it.projectID,
+        customerNote: it.customerNote,
+        deadLine: it.deadLine,
+        customerName: it.customerName,
+      })))
     );
   }
 
-  /** ✅ Fetch RFQs by projectId */
+  /** Fetch RFQs by project ID */
   getRfqByProjectId(projectId: string): Observable<Rfq[]> {
     return from(this.getHeaders()).pipe(
-      switchMap((headers) =>
-        this.http.get<{ data: Rfq[] }>(`${this.rfq}/${projectId}`, { headers })
+      switchMap(headers =>
+        this.http.get<{ data: Rfq[] }>(`${this.rfqEndpoint}/byProject/${projectId}`, { headers })
       ),
-      map((res) => res.data || [])
+      map(res => res.data || [])
     );
   }
+
+getWorkItemInfo(rfqId: string): Observable<any> {
+  return from(this.getHeaders()).pipe(
+    switchMap((headers) =>
+      this.http.get<any>(
+        `${this.apiURL}/Rfq/${rfqId}/workitem-info`,
+        { headers }
+      )
+    )
+  );
+}
+
+  /** Create a new RFQ */
+ createRfq(rfqPayload: any, subcontractorIds: string[], workItemIds: string[]): Observable<any> {
+  const params = new HttpParams({
+    fromObject: {
+      subcontractorIds: subcontractorIds,
+      workItems: workItemIds
+    }
+  });
+
+  return from(this.getHeaders()).pipe(
+    switchMap(headers =>
+      this.http.post(`${this.apiURL}/Rfq/create-simple`, rfqPayload, { headers, params })
+    )
+  );
+}
 }

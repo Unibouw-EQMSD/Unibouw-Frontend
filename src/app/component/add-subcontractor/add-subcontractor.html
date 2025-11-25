@@ -5,7 +5,12 @@
 </header>
 
 <div class="form-card">
-  <form (ngSubmit)="onSubmit()" [formGroup]="subcontractorForm" enctype="multipart/form-data">
+  <form
+    (ngSubmit)="onSubmit()"
+    [formGroup]="subcontractorForm"
+    enctype="multipart/form-data"
+    class="pt-5"
+  >
     <!-- First Row -->
     <div class="form-row">
       <div class="form-group">
@@ -24,6 +29,9 @@
           class="text-danger small"
         >
           This field is required.
+        </div>
+        <div *ngIf="subcontractorForm.get('name')?.errors?.['pattern']" class="text-danger small">
+          Special characters are not allowed.
         </div>
       </div>
 
@@ -69,7 +77,7 @@
       </div>
 
       <div class="form-group">
-        <label>Registered Date</label>
+        <label>Registered Date </label>
         <input type="date" formControlName="registeredDate" class="form-control" />
         <!-- <div
           *ngIf="
@@ -110,7 +118,7 @@
       </div>
 
       <div class="form-group">
-        <label>Status <span class="text-danger">*</span></label>
+        <label>Status </label>
         <select formControlName="status" class="form-control">
           <option value="Active">Active</option>
           <option value="Inactive">Inactive</option>
@@ -127,61 +135,39 @@
     </div>
 
     <!-- 🏢 Fourth Row -->
-    <div class="form-row">
-      <div class="form-group full-width">
+    <div class="form-row" style="margin-bottom: 0px !important">
+      <div class="form-group">
         <label>Office Address <span class="text-danger">*</span></label>
-        <textarea
-          formControlName="officeAddress"
-          class="form-control"
-          [ngClass]="{
-            'is-invalid':
-              subcontractorForm.get('officeAddress')?.touched &&
-              subcontractorForm.get('officeAddress')?.invalid
-          }"
-        ></textarea>
-        <div
-          *ngIf="
-            subcontractorForm.get('officeAddress')?.touched &&
-            subcontractorForm.get('officeAddress')?.invalid
-          "
-          class="text-danger small"
-        >
-          This field is required.
-        </div>
+        <textarea formControlName="officeAddress" class="form-control"></textarea>
       </div>
-
-      <div class="form-group full-width">
+      <div class="form-group">
         <label>Billing Address</label>
         <textarea formControlName="billingAddress" class="form-control"></textarea>
-        <!-- <div
-          *ngIf="
-            subcontractorForm.get('billingAddress')?.touched &&
-            subcontractorForm.get('billingAddress')?.invalid
-          "
-          class="text-danger small"
-        >
-          This field is required.
-        </div> -->
+        <!-- <div><input type="checkbox" formControlName="sameAsOffice" /> Same as Office Address</div> -->
+      </div>
+    </div>
 
-        <div class="mt-1">
-          <input type="checkbox" formControlName="sameAsOffice" /> Same as Office Address
+    <div class="form-row">
+      <div class="form-group" style="flex: 0.7"></div>
+      <div class="form-group" style="flex: none">
+        <div class="checkbox-inline">
+          <input type="checkbox" formControlName="sameAsOffice" id="sameAsOffice" />
+          <label for="sameAsOffice" style="margin-left: 6px">Same as Office Address</label>
         </div>
       </div>
     </div>
 
     <!-- 📞 Fifth Row -->
     <div class="form-row">
-      <div class="form-group full-width">
+      <div class="form-group">
         <label>Contact Number <span class="text-danger">*</span></label>
         <div class="contact-number-wrapper">
-          <!-- Country Code Dropdown -->
           <div class="custom-select-wrapper">
             <div class="selected-option" (click)="toggleDropdown()">
               <span [class]="'fi fi-' + selectedCountry.flag"></span>
               <span class="country-code">{{ selectedCountry.code }}</span>
               <span class="dropdown-arrow">▼</span>
             </div>
-
             <div class="dropdown-list" *ngIf="isDropdownOpen">
               <div
                 *ngFor="let country of countryList"
@@ -197,7 +183,6 @@
               </div>
             </div>
           </div>
-
           <input
             type="tel"
             formControlName="contactNumber"
@@ -221,11 +206,10 @@
             This field is required.
           </div>
           <div *ngIf="subcontractorForm.get('contactNumber')?.errors?.['pattern']">
-            Enter a valid phone number (6–15 digits).
+            Enter a valid phone number (10–15 digits).
           </div>
         </div>
       </div>
-
       <div class="form-group">
         <label>Contact Person <span class="text-danger">*</span></label>
         <select
@@ -237,7 +221,7 @@
               subcontractorForm.get('contactPerson')?.invalid
           }"
         >
-          <option value="">-- Select --</option>
+          <option value="">- - Select --</option>
           <option *ngFor="let person of persons" [value]="person.personID">
             {{ person.name }}
           </option>
@@ -262,16 +246,6 @@
         <button type="button" class="btn small-btn" (click)="addMoreFiles()">Add More</button>
       </div>
     </div>
-
-    <!-- <div *ngIf="uploadedFiles.length > 0" class="uploaded-files">
-      <label>Selected Files:</label>
-      <ul>
-        <li *ngFor="let file of uploadedFiles; let i = index">
-          📎 {{ file.name }}
-          <button type="button" class="remove-btn" (click)="removeFile(i)">❌</button>
-        </li>
-      </ul>
-    </div> -->
     <div *ngIf="uploadedFiles.length > 0" class="uploaded-files">
       <label>Selected Files:</label>
       <span>

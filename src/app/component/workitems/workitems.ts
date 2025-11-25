@@ -15,7 +15,7 @@ import { MatSort, Sort } from '@angular/material/sort';
 export class Workitems implements OnInit, AfterViewInit {
   displayedColumns: string[] = ['number', 'name'];
   dataSource = new MatTableDataSource<Workitem>([]);
-  activeTab: 'standard' | 'unibouw' = 'standard';
+  activeTab: 'standard' | 'unibouw' = 'unibouw';
   searchText: string = '';
   categories: WorkitemCategory[] = [];
   categoryMap: { [key: string]: string } = {};

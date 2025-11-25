@@ -26,9 +26,9 @@ const routes: Routes = [
   { path: 'rfq', component: Rfq, canActivate: [AuthGuard] },
   { path: 'add-workitem', component: AddWorkitem, canActivate: [AuthGuard] },
   { path: 'add-subcontractor', component: AddSubcontractor, canActivate: [AuthGuard] },
-  { path: 'add-rfq', component: RfqAdd, canActivate: [AuthGuard] },
+{ path: 'add-rfq/:projectId', component: RfqAdd, canActivate: [AuthGuard] },
 { path: 'view-projects/:id', component: ViewProjects, canActivate: [AuthGuard] },
-
+{ path: 'project-summary', loadComponent: () => import('./component/project-summary/project-summary').then(m => m.ProjectSummary) },
 { path: '**', redirectTo: 'login' }
 ];
 

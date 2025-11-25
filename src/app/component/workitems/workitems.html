@@ -17,19 +17,19 @@
     <div class="tabs">
       <button
         mat-button
-        [ngClass]="{ active: activeTab === 'standard' }"
-        (click)="setTab('standard')"
-        class="standardLabel"
-      >
-        Standard
-      </button>
-      <button
-        mat-button
         [ngClass]="{ active: activeTab === 'unibouw' }"
         (click)="setTab('unibouw')"
         class="unibouwLabel"
       >
         Unibouw
+      </button>
+      <button
+        mat-button
+        [ngClass]="{ active: activeTab === 'standard' }"
+        (click)="setTab('standard')"
+        class="standardLabel"
+      >
+        Standard
       </button>
     </div>
 
@@ -115,7 +115,7 @@
         <tr
           mat-header-row
           *matHeaderRowDef="displayedColumns"
-          [class.hidden]="isLoading || dataSource.data.length === 0"
+          [class.hidden]="isLoading"
           class="sticky-header"
         ></tr>
 

@@ -40,6 +40,9 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { NgxIntlTelInputModule } from 'ngx-intl-tel-input';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations'; // ✅ ADD THIS
 import { AppConfigService } from './services/app.config.service';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { MatNativeDateModule } from '@angular/material/core';
+import { ProjectSummary } from './component/project-summary/project-summary';
 
 export function MSALInstanceFactory(): PublicClientApplication {
   return (window as any).msalInstance;
@@ -61,6 +64,7 @@ export function initConfig(appConfig: AppConfigService) {
     AddWorkitem,
     AddSubcontractor,
     ViewProjects,
+    // ProjectSummary,
   ],
   imports: [
     BrowserModule,
@@ -73,6 +77,9 @@ export function initConfig(appConfig: AppConfigService) {
     HttpClientModule,
     SSOLogin,
   NgxIntlTelInputModule,
+      MatDatepickerModule,
+      MatNativeDateModule,
+
 
     // Material
     MatTableModule,

@@ -1,10 +1,16 @@
-import { Component, ViewChild } from '@angular/core';
+import { ChangeDetectorRef, Component, ViewChild } from '@angular/core';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
 import { MatTableDataSource } from '@angular/material/table';
-import { rfqService,Rfq} from '../../../services/rfq.service';
+import { RfqService,Rfq} from '../../../services/rfq.service';
 import { ActivatedRoute } from '@angular/router';
 import { projectdetails, projectService } from '../../../services/project.service';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatDatepicker } from '@angular/material/datepicker';
+import { RfqResponseService } from '../../../services/rfq-response.service';
+import { Workitem } from '../../../services/workitem.service';
+import { Router } from '@angular/router';
+import { forkJoin } from 'rxjs';
 
 interface RfqResponse {
   name: string;
@@ -16,9 +22,14 @@ interface RfqResponse {
   viewed: boolean;
   quote: string;
   actions: string[];
+    subcontractorId: string;   // << ADD THIS
+      quoteAmount?: string;
+
+
 }
 
 interface WorkItem {
+  workItemId: string;   
   name: string;
   requestsSent: number;
   notResponded: number;
@@ -46,7 +57,10 @@ export class ViewProjects {
   projectId!: string;
   projectDetails: any;
     projectData?: projectdetails;
-
+selectedFile!: File;
+  rfqId!: string;
+  subId!: string;
+  quoteAmount: string = '';
   groupBy = 'workItem';
   currentPage = 1;
   totalPages = 1;
@@ -55,46 +69,24 @@ export class ViewProjects {
   pagedItems: any[] = [];
 pageSize = 10;
   pageSizeOptions = [5, 10, 25, 50, 100, 200];  selectedTab = 'response'; 
+  rfqList: any[] = [];
+selectedRfqId: string = '';
 displayedColumns: string[] = [
-   
-    'customer',
+   'workitem',
     'rfqSentDate',
     'dueDate',
-    'rfqSent',
-    'quoteRecieved',
-    'actions'
+    'totalSubcontractors'
   ];
   dataSource = new MatTableDataSource<any>([]);
  isLoading = false;
+  rfqs: Rfq[] = []; // <-- Add this line
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
-  workItems: WorkItem[] = [
-    {
-      name: 'Construction',
-      requestsSent: 25,
-      notResponded: 5,
-      interested: 5,
-      notInterested: 5,
-      viewed: 10,
-      open: true,
-      searchText: '',
-      pageSize: 10,
-      currentPage: 1,
-      totalPages: 1,
-      currentStart: 1,
-      currentEnd: 1,
-      rfqs: [
-        { name: 'Bacany', rating: 4.5, date: '02/04/2025', rfqId: '134354', responded: true, interested: true, viewed: true, quote: '$1.200.000', actions: ['pdf','chat'] },
-        { name: 'Contrutiec & Co', rating: 5, date: '02/04/2025', rfqId: '2345645', responded: true, interested: true, viewed: true, quote: '$1.400.000', actions: ['pdf'] },
-        { name: 'Sam Constructions', rating: 3.5, date: '02/04/2025', rfqId: '235344', responded: true, interested: true, viewed: true, quote: '—', actions: ['lock'] },
-        { name: 'Sowedane', rating: 3.5, date: '02/04/2025', rfqId: '234564', responded: true, interested: false, viewed: true, quote: '$1.500.000,50', actions: ['pdf','chat'] },
-        { name: 'Talent Bouw', rating: 3.5, date: '02/04/2025', rfqId: '342524', responded: false, interested: false, viewed: false, quote: '—', actions: ['pdf','chat','lock'] }
-      ]
-    }
-  ];
+ workItems: WorkItem[] = [];
 
-  constructor(private rfqService:rfqService,  private route: ActivatedRoute,private projectService: projectService){
+
+  constructor(private rfqService:RfqService,private router:Router,private rfqResponseService: RfqResponseService, private cdr: ChangeDetectorRef, private snackBar: MatSnackBar, private route: ActivatedRoute,private projectService: projectService){
 
   }
   ngOnInit(): void {
@@ -102,53 +94,174 @@ displayedColumns: string[] = [
   this.projectId = this.route.snapshot.paramMap.get('id') || '';
   console.log('📦 Captured Project ID:', this.projectId);
 
+ this.projectId = this.route.snapshot.paramMap.get('id') || '';
   if (this.projectId) {
     this.loadRfqData();
-          this.loadProjectDetails(this.projectId);
-
-  } else {
-    console.error('❌ Project ID not found in route');
+    this.loadProjectDetails(this.projectId);
   }
 }
 
 loadProjectDetails(id: string) {
-  console.log('🚀 Calling API for project:', id);
+  this.isLoading = true;
   this.projectService.getProjectById(id).subscribe({
     next: (res) => {
       this.projectDetails = res;
-      console.log('✅ Project Details Loaded:', this.projectDetails);
+      this.isLoading = false;
+      console.log('■ Project Details Loaded:', this.projectDetails);
     },
     error: (err) => {
-      console.error('❌ Error fetching project details:', err);
+      console.error('■ Error fetching project details:', err);
+      this.isLoading = false;
     }
   });
 }
+
+loadRfqResponseSummary(projectId: string) {
+  this.rfqResponseService.getResponsesByProjectId(projectId).subscribe({
+    next: (res: any) => {
+      console.log("📌 RFQ RESPONSES", res);
+
+      this.workItems = res.map((w: any) => ({
+        workItemId: w.workItemId,
+        name: w.workItemName,
+
+        requestsSent: w.subcontractors.length,
+        notResponded: w.subcontractors.filter((s: any) => !s.responded).length,
+        interested: w.subcontractors.filter((s: any) => s.interested).length,
+        notInterested: w.subcontractors.filter((s: any) => !s.interested && s.responded).length,
+        viewed: w.subcontractors.filter((s: any) => s.viewed).length,
+
+        open: false,
+        searchText: '',
+        pageSize: 10,
+        currentPage: 1,
+        totalPages: 1,
+        currentStart: 1,
+        currentEnd: 1,
+
+        rfqs: w.subcontractors.map((s: any) => ({
+          subcontractorId: s.subcontractorId, // ✅ must exist
+          rfqId: s.rfqId,                     // ✅ must exist
+          name: s.name,
+          rating: s.rating || 0,
+          date: s.date || '—',
+          responded: s.responded,
+          interested: s.interested,
+          viewed: s.viewed,
+          quote: s.quote || '—',
+          actions: ['pdf', 'chat'],
+          quoteAmount: '-'                     // initialize
+        }))
+      }));
+
+      // After mapping, load quote amounts for all RFQs
+      this.workItems.forEach(work => {
+        work.rfqs.forEach(rfq => this.loadQuoteAmount(rfq));
+      });
+
+    },
+    error: (err: any) => {
+      console.error("❌ Error loading responses", err);
+      this.snackBar.open("No Records Found for this RFQ", "Close", { duration: 3000 });
+    }
+  });
+}
+
+
+
+
+markViewed(work: WorkItem, rfq: any) {
+
+  // ❌ If already viewed, do nothing (prevents double counting)
+  if (rfq.viewed) return;
+
+  this.rfqResponseService.markAsViewed(
+    rfq.rfqId,
+    rfq.subcontractorId,
+    work.workItemId
+  ).subscribe({
+    next: () => {
+
+      // 🔥 Update this RFQ row
+      rfq.viewed = true;
+
+      // 🔥 Recalculate summary counts
+      this.refreshWorkItemCounts(work);
+
+      // 🔥 Force UI refresh
+      this.cdr.detectChanges();
+    },
+    error: () => console.error("Failed to mark viewed")
+  });
+}
+
+refreshWorkItemCounts(work: WorkItem) {
+  work.requestsSent   = work.rfqs.length;
+  work.notResponded   = work.rfqs.filter(r => !r.responded).length;
+  work.interested     = work.rfqs.filter(r => r.interested).length;
+  work.notInterested  = work.rfqs.filter(r => r.responded && !r.interested).length;
+
+  // 🔥 Keep this ALWAYS correct
+  work.viewed         = work.rfqs.filter(r => r.viewed).length;
+}
+triggerViewOnLoad() {
+  if (!this.workItems?.length) return;
+
+  this.workItems.forEach(work => {
+    work.rfqs.forEach(rfq => {
+      this.markViewed(work, rfq);   // 🔥 calling your existing method
+    });
+  });
+}
+
 loadRfqData(): void {
   this.isLoading = true;
 
   this.rfqService.getRfqByProjectId(this.projectId).subscribe({
-    next: (res) => {
-      // Normalize the response (handles both single object or array)
+    next: (res: any) => {
       const rfqs = Array.isArray(res) ? res : [res];
+      this.rfqList = rfqs;
 
-      // Map backend fields → frontend display keys
-      this.dataSource.data = rfqs.map((item: any) => ({
-        customer: item.customerName || '—',
-        rfqSentDate: this.formatDate(item.sentDate),
-        dueDate: this.formatDate(item.dueDate),
-        rfqSent: item.rfqSent || 0,
-        quoteReceived: item.quoteReceived || 0
-      }));
+      if (rfqs.length > 0) {
+        this.selectedRfqId = rfqs[0].rfqID;
+        this.loadRfqResponseSummary(this.projectId);
+      }
 
-      this.isLoading = false;
+      // 🔥 Fetch workitem-info for each RFQ
+      const infoRequests = rfqs.map(r => 
+        this.rfqService.getWorkItemInfo(r.rfqID)
+      );
+
+      forkJoin(infoRequests).subscribe((infoResults: any[]) => {
+        this.dataSource.data = rfqs.map((item, index) => {
+          const info = infoResults[index] || {};
+
+          return {
+            id: item.rfqID,
+            customer: item.customerName || '—',
+            rfqSentDate: this.formatDate(item.sentDate),
+            dueDate: this.formatDate(item.dueDate),
+            rfqSent: item.rfqSent || 0,
+            quoteReceived: item.quoteReceived || 0,
+            quoteAmount: item.quoteAmount || '-',
+
+            // 🔥 Use EXACT swagger response
+            workItem: info.workItem || '-',
+            subcontractorCount: info.subcontractorCount ?? 0
+          };
+        });
+
+        this.isLoading = false;
+      });
     },
-    error: (err) => {
-      console.error('❌ Failed to fetch RFQ:', err);
+
+    error: () => {
       this.dataSource.data = [];
       this.isLoading = false;
     }
   });
 }
+
  formatDate(dateString: string): string {
     if (!dateString) return '-';
     const date = new Date(dateString);
@@ -227,4 +340,72 @@ onPageSizeChange() {
       this.updatePagedItems();
     }
   }
+enableEdit(item: any) {
+  item.isEditingDueDate = true;
+}
+
+onDateChange(item: any, newDate: Date) {
+  item.dueDate = newDate;
+}
+
+loadQuoteAmount(rfq: any) {
+  if (!rfq.subcontractorId) {
+    console.warn('⚠ Missing subcontractorId for RFQ:', rfq.rfqId);
+    rfq.quoteAmount = '-';
+    return;
+  }
+
+  this.rfqResponseService.getQuoteAmount(rfq.rfqId, rfq.subcontractorId)
+    .subscribe({
+      next: (res: any) => {
+        rfq.quoteAmount = res.quoteAmount || '-';
+        const index = this.dataSource.data.findIndex(d => d.id === rfq.rfqId);
+        if (index >= 0) {
+          this.dataSource.data[index].quoteAmount = rfq.quoteAmount;
+          this.dataSource._updateChangeSubscription();
+        }
+      },
+      error: (err) => {
+        console.error('❌ Error fetching quote amount:', err);
+        rfq.quoteAmount = '-';
+      }
+    });
+}
+downloadQuote(event: Event, rfqId: string, subcontractorId: string) {
+  event.stopPropagation(); // << prevent triggering row click
+
+  this.rfqResponseService.downloadQuote(rfqId, subcontractorId).subscribe({
+    next: (blob: Blob) => {
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+
+      // OPTIONAL: if your backend provides filename in headers, use it.
+      a.download = `Quote_Document.pdf`;
+      a.click();
+
+      window.URL.revokeObjectURL(url);
+    },
+    error: (err) => {
+      console.error("Download error:", err);
+      alert("No file uploaded for this subcontractor.");
+    }
+  });
+}
+
+
+formatDateForApi(date: any): string {
+  if (!date) return '';
+  const d = new Date(date);
+  const localISOTime = new Date(
+    d.getTime() - d.getTimezoneOffset() * 60000
+  ).toISOString();
+  return localISOTime;
+}
+
+addRfq(){
+  this.router.navigate(['/add-rfq', this.projectId]);
+  console.log(this.projectId,'project id')
+
+}
 }

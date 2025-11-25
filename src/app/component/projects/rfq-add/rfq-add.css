@@ -11,6 +11,12 @@
   gap: 20px;
   
 }
+.custom-dropdown {
+  width: 100%;
+  max-height: 150px !important; /* adjust height as needed */
+  overflow-y: auto !important;
+  display: block !important; /* ensures height works correctly */
+}
 
 .project-name {
   margin-bottom: 15px;
@@ -42,6 +48,47 @@
 .workitems-table th {
   font-weight: 600;
 }
+.workitems-section,
+.subcontractors-card {
+  min-height: 350px; /* You can tweak height */
+  max-height: 450px;
+  overflow-y: auto;
+  padding-right: 8px;
+  box-sizing: border-box;
+}
+
+/* Optional: give workitems a light border for clarity */
+.workitems-section {
+  border: 1px solid #eee;
+  border-radius: 8px;
+  padding: 10px;
+  background: #fff;
+}
+
+.subcontractors-card {
+  background: #fafafa;
+  border-radius: 10px;
+  padding: 15px;
+  box-shadow: inset 0 0 4px rgba(0, 0, 0, 0.05);
+}
+
+/* Scrollbar styling (optional, looks cleaner) */
+.workitems-section::-webkit-scrollbar,
+.subcontractors-card::-webkit-scrollbar {
+  width: 6px;
+}
+
+.workitems-section::-webkit-scrollbar-thumb,
+.subcontractors-card::-webkit-scrollbar-thumb {
+  background: #ccc;
+  border-radius: 4px;
+}
+
+.workitems-section::-webkit-scrollbar-thumb:hover,
+.subcontractors-card::-webkit-scrollbar-thumb:hover {
+  background: #aaa;
+}
+
 
 .subcontractors-card {
   background: #fafafa;
@@ -143,4 +190,31 @@
   font-size: 14px;
   color: #6c757d;
   margin-bottom: 5px;
+}
+
+.left-section {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.tabs {
+  display: flex;
+  margin-top: 10px;
+}
+
+.tabs button {
+  padding: 6px 16px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  background: #f5f5f5;
+  cursor: pointer;
+  font-weight: 500;
+  color: #333;
+}
+
+.tabs button.active {
+  background: #003042;
+  color: white;
+  border-color: #003042;
 }

@@ -77,7 +77,7 @@
         <tr
           mat-header-row
           *matHeaderRowDef="displayedColumns"
-          [class.hidden]="isLoading || dataSource.data.length === 0"
+          [class.hidden]="isLoading"
           class="sticky-header"
         ></tr>
         <tr
@@ -115,5 +115,10 @@
   </div> -->
   </div>
 </div>
-
+<!-- ✅ Popup -->
+<div *ngIf="showPopup" [ngClass]="{ popup: true, error: popupError }">
+  <span *ngIf="!popupError">✅</span>
+  <span *ngIf="popupError">❌</span>
+  {{ popupMessage }}
+</div>
 <app-footer></app-footer>

@@ -12,6 +12,7 @@ export interface projectdetails {
   number: string;
   name: string;
   customerName: string;
+  customerID?: string; 
   projectManagerName: string;
   startDate?: string;
   completionDate?:string;
@@ -69,6 +70,7 @@ getProjects(): Observable<projectdetails[]> {
       number: it.number || '',
       name: it.name || '',
       customerName: it.customerName || '',
+       customerID: it.customerID || '',
       projectManagerName: it.projectManagerName || '',
       startDate: it.startDate || '',
       completionDate: it.completionDate || '',

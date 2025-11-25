@@ -29,7 +29,9 @@ export class Subcontractor implements OnInit, AfterViewInit {
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
-
+showPopup = false;
+  popupMessage = '';
+  popupError = false;
   constructor(
     private subcontractorService: SubcontractorService,
     private userService: UserService
@@ -120,12 +122,18 @@ loadSubcontractors() {
     item.isActive = newStatus;
 
     this.subcontractorService.updateIsActive(item.subcontractorID, newStatus).subscribe({
-      next: () => console.log('Status updated'),
+      next: () => this.showPopupMessage('Status updated successfully!'),
       error: () => {
         item.isActive = !newStatus;
-        console.error('Failed to update status');
+       this.showPopupMessage('Failed to update status. Please try again.', true);
       },
     });
+  }
+    showPopupMessage(message: string, isError: boolean = false) {
+    this.popupMessage = message;
+    this.popupError = isError;
+    this.showPopup = true;
+    setTimeout(() => (this.showPopup = false), 3000);
   }
 
   getStartIndex(): number {
