@@ -15,7 +15,6 @@
   <div class="table-container" *ngIf="!isSkeletonLoading">
     <!-- 🧭 Tabs -->
     <div class="tabs">
-     
       <button
         mat-button
         [ngClass]="{ active: activeTab === 'unibouw' }"
@@ -24,7 +23,7 @@
       >
         Unibouw
       </button>
-       <button
+      <button
         mat-button
         [ngClass]="{ active: activeTab === 'standard' }"
         (click)="setTab('standard')"
@@ -116,7 +115,7 @@
         <tr
           mat-header-row
           *matHeaderRowDef="displayedColumns"
-          [class.hidden]="isLoading || dataSource.data.length === 0"
+          [class.hidden]="isLoading"
           class="sticky-header"
         ></tr>
 

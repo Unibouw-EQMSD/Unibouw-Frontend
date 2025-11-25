@@ -34,9 +34,13 @@ export class AddSubcontractor {
   selectedCategoryId: string = '';
   constructor(private fb: FormBuilder, private router: Router, private workItemService: WorkitemService, private subcontractorService: SubcontractorService) {
     this.subcontractorForm = this.fb.group({
-      name: ['', Validators.required, 
-        Validators.pattern(/^[a-zA-Z0-9 ]+$/) // no special characters
-      ],
+      name: [
+  '',
+  [
+    Validators.required,
+    Validators.pattern(/^[a-zA-Z0-9 ]+$/)
+  ]
+],
     location: ['', Validators.required],
     country: ['', Validators.required],
     registeredDate: [''],
@@ -50,7 +54,7 @@ export class AddSubcontractor {
     countryCode: [this.selectedCountry.code],
     contactNumber: [
       '',
-      [Validators.required, Validators.pattern(/^[0-9]{6,15}$/)]
+      [Validators.required, Validators.pattern(/^[0-9]{10,15}$/)]
     ],
     contactPerson: ['', Validators.required],
     attachments: [null]

@@ -30,6 +30,9 @@
         >
           This field is required.
         </div>
+        <div *ngIf="subcontractorForm.get('name')?.errors?.['pattern']" class="text-danger small">
+          Special characters are not allowed.
+        </div>
       </div>
 
       <div class="form-group">

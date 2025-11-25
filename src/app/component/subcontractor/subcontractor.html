@@ -77,7 +77,7 @@
         <tr
           mat-header-row
           *matHeaderRowDef="displayedColumns"
-          [class.hidden]="isLoading || dataSource.data.length === 0"
+          [class.hidden]="isLoading"
           class="sticky-header"
         ></tr>
         <tr
@@ -114,7 +114,6 @@
     Showing {{ getStartIndex() }} – {{ getEndIndex() }} of {{ dataSource.data.length }} entries
   </div> -->
   </div>
-
 </div>
 <!-- ✅ Popup -->
 <div *ngIf="showPopup" [ngClass]="{ popup: true, error: popupError }">
