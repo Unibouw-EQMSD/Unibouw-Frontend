@@ -1,43 +1,43 @@
-<div class="login-container">
-  <div class="login-card">
-    <div class="logo-section">
-      <h1 class="logo">
-        <img src="assets/images/unibouw.png" alt="unibouw" style="height: 37px" />
-      </h1>
-    </div>
+<div class="body-loginBG min-h-screen flex flex-col items-center justify-center">
+  <div class="w-full max-w-md">
+    <div class="login-wrapper">
+      <div class="login-inner row m-0">
+        <div class="d-none d-lg-flex col-12 align-items-center">
+          <div class="divloginContainer">
+            <div class="loginContainer">
+              <div class="divLogo">
+                <img src="assets/images/unibouw.png" class="img-fluid" alt="unibouq">
+              </div>
+              <div class="logintxt mt-4">Login with SSO</div>
 
-    <div class="form-section" style="padding: 10px 35px 25px">
-      <h2 class="form-title">Login with SSO</h2>
+              <!-- Form -->
 
-      <div class="input-group">
-        <label for="email" class="input-label">Email ID</label>
-        <input
-          id="email"
-          type="email"
-          [(ngModel)]="email"
-          name="email"
-          #emailRef="ngModel"
-          required
-          (keyup.enter)="onSubmit(emailRef)"
-        />
-        <div class="error-msg" *ngIf="emailRef.invalid && emailRef.touched" style="color: red">
-          Email is required
+              <div class="input-group">
+                <label for="email" class="input-label">Email ID</label>
+                <input id="email" type="email" [(ngModel)]="email" name="email" #emailRef="ngModel" required
+                  (keyup.enter)="onSubmit(emailRef)" />
+                <div class="error-msg" *ngIf="emailRef.invalid && emailRef.touched" style="color: red">
+                  Email is required
+                </div>
+              </div>
+
+              <button class="microsoft-btn" (click)="onSubmit(emailRef)" type="submit">
+                <div class="microsoft-logo">
+                  <div class="logo-square red"></div>
+                  <div class="logo-square green"></div>
+                  <div class="logo-square blue"></div>
+                  <div class="logo-square yellow"></div>
+                </div>
+                Sign in with Microsoft
+              </button>
+              <!-- Form -->
+
+            </div>
+          </div>
         </div>
       </div>
     </div>
-
-    <button class="microsoft-btn" (click)="onSubmit(emailRef)" type="submit">
-      <div class="microsoft-logo">
-        <div class="logo-square red"></div>
-        <div class="logo-square green"></div>
-        <div class="logo-square blue"></div>
-        <div class="logo-square yellow"></div>
-      </div>
-      Sign in with Microsoft
-    </button>
-
-    <!-- <button type="submit" (click)="onLoginClick()" style="background-color: grey; margin: 3px auto">
+  </div>
+  <!-- <button type="submit" (click)="onLoginClick()" style="background-color: grey; margin: 3px auto">
       Test Login
     </button> -->
-  </div>
-</div>

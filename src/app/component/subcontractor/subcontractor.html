@@ -1,12 +1,12 @@
 <app-header></app-header>
-
+<main id="main">
 <div class="container">
-  <header class="page-header">
-    <h2>Subcontractors</h2>
+  <div class="pagetitle">
+    <h1>Subcontractors</h1>
     <button type="button" class="addbtn" [routerLink]="['/add-subcontractor']">
       <b>Add Subcontractor</b>
     </button>
-  </header>
+  </div>
 
   <!-- 🦴 SKELETON LOADER (Initial full page load) -->
   <div *ngIf="isSkeletonLoading" class="skeleton-container">
@@ -115,6 +115,7 @@
   </div> -->
   </div>
 </div>
+</main>
 <!-- ✅ Popup -->
 <div *ngIf="showPopup" [ngClass]="{ popup: true, error: popupError }">
   <span *ngIf="!popupError">✅</span>

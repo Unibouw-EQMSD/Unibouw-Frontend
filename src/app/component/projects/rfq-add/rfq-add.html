@@ -1,89 +1,79 @@
 <app-header></app-header>
-
-<header class="page-header">
-  <h2>Add RFQ</h2>
-</header>
-
-<div class="form-card">
-  <!-- Left column: Workitems + Tabs -->
-  <div class="left-section">
-    <!-- Project Dropdown -->
-  <div class="project-dropdown">
-  <label>Project Name</label><br />
-
-  <!-- Show input only when projectDetails is loaded -->
-  <input  
-    *ngIf="projectDetails"
-    type="text"
-    class="custom-dropdown"
-    [value]="projectDetails.name"
-    disabled
-  />
-
-  <!-- Optional loading indicator -->
-  <span *ngIf="!projectDetails">Loading project...</span>
-</div>
-
-
-    <!-- Tabs (now above workitems) -->
-    <div class="tabs">
-      <button (click)="selectedTab = 'standard'" [class.active]="selectedTab === 'standard'">Standard</button>
-      <button (click)="selectedTab = 'unibouw'" [class.active]="selectedTab === 'unibouw'">Unibouw</button>
+<main id="main">
+  <div class="container">
+    <div class="pagetitle">
+      <h1>Add RFQ</h1>
     </div>
 
-    <!-- Workitems Table -->
-    <div class="workitems-section">
-      <table class="workitems-table">
-        <thead>
-          <tr>
-            <th>Select</th>
-            <th>Work Item</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr
-            *ngFor="let item of (selectedTab === 'standard' ? standardWorkitems : unibouwWorkitems)"
-            [class.selected]="isWorkItemSelected(item)"
-          >
-            <td>
-             <input
-            type="radio"
-            name="workitem"
-            [value]="item"
-            [checked]="isWorkItemSelected(item)"
-            (change)="onWorkitemSelect(item)"
-          />
-            </td>
-            <td>{{ item.name }}</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-  </div>
+    <div class="form-card scroll">
+      <!-- Left column: Workitems + Tabs -->
+      <div class="left-section">
+        <!-- Project Dropdown -->
+        <div class="project-dropdown">
+          <label>Project Name</label><br />
 
-  <!-- Right column: Subcontractors -->
-  <div class="subcontractors-card">
-    <div class="card-header">
-      <h3>Subcontractors</h3>
-      <button type="button" (click)="addSubcontractor()" class="add-btn">+</button>
-      <label class="show-all">
-        <input type="checkbox" [(ngModel)]="showAll" /> Show all
-      </label>
-    </div>
+          <!-- Show input only when projectDetails is loaded -->
+          <input *ngIf="projectDetails" type="text" class="custom-dropdown" [value]="projectDetails.name" disabled />
 
-    <div class="checkbox-list">
-      <label *ngFor="let sub of subcontractors">
-        <input type="checkbox" [(ngModel)]="sub.selected" />
-        {{ sub.name }}
-      </label>
+          <!-- Optional loading indicator -->
+          <span *ngIf="!projectDetails">Loading project...</span>
+        </div>
+
+
+
+        <!-- Tabs (now above workitems) -->
+        <div class="tabs">
+          <button mat-button (click)="selectedTab = 'standard'" [class.active]="selectedTab === 'standard'">Standard</button>
+          <button mat-button (click)="selectedTab = 'unibouw'" [class.active]="selectedTab === 'unibouw'">Unibouw</button>
+        </div>
+
+        <!-- Workitems Table -->
+        <div class="workitems-section">
+          <table class="workitems-table">
+            <thead>
+              <tr>
+                <th>Select</th>
+                <th>Work Item</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let item of (selectedTab === 'standard' ? standardWorkitems : unibouwWorkitems)"
+                [class.selected]="isWorkItemSelected(item)">
+                <td>
+                  <input type="radio" name="workitem" [value]="item" [checked]="isWorkItemSelected(item)"
+                    (change)="onWorkitemSelect(item)" />
+                </td>
+                <td>{{ item.name }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Right column: Subcontractors -->
+      <div class="subcontractors-card">
+        <div class="card-header">
+          <h3>Subcontractors</h3>
+          <button type="button" (click)="addSubcontractor()" class="add-btn">+</button>
+          <label class="show-all">
+            <input type="checkbox" [(ngModel)]="showAll" /> Show all
+          </label>
+        </div>
+
+        <div class="checkbox-list">
+          <label *ngFor="let sub of subcontractors">
+            <input type="checkbox" [(ngModel)]="sub.selected" />
+            {{ sub.name }}
+          </label>
+        </div>
+      </div>
+
+      <!-- Footer -->
+      <div class="form-actions main-actions">
+        <button type="button" class="btn cancel-btn" (click)="onCancel()">Cancel</button>
+        <button type="button" class="btn submit-btn" (click)="onSubmit()">Submit</button>
+      </div>
     </div>
   </div>
-
-  <!-- Footer -->
-  <div class="form-actions main-actions">
-    <button type="button" class="btn cancel-btn" (click)="onCancel()">Cancel</button>
-    <button type="button" class="btn submit-btn" (click)="onSubmit()">Submit</button>
-  </div>
-</div>
-
+</main>
 <app-footer></app-footer>
