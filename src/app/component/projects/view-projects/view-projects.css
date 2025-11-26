@@ -9,17 +9,6 @@
   display: grid;
   grid-template-columns: 0.2fr 1fr; /* Two equal columns */
   gap: 20px;
-  padding: 15px;
-  margin: 0px 18px 45px;
-}
-
-.page-header {
-  text-align: left;
-  margin: 35px auto 0px;
-  width: 96%;
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
 }
 .fa-check-circle{
   color:green;
@@ -32,14 +21,6 @@
    color: #f97316; /* orange */
  
 }
-
-.page-header h2 {
-  font-size: 1.5rem;
-  color: #003042;
-  margin: 0;
-  font-weight: 400;
-}
-
 
 .details-card {
   background: #fff;
