@@ -1,6 +1,20 @@
 <app-header></app-header>
+
 <main id="main">
   <div class="container">
+    <!-- 🦴 Skeleton Loader -->
+    <div *ngIf="isLoader" class="skeleton-wrapper">
+      <div class="skeleton skeleton-box"></div>
+      <br />
+      <br />
+      <div class="skeleton skeleton-box"></div>
+      <br />
+      <br />
+      <div class="skeleton skeleton-box"></div>
+      <br />
+      <br />
+    </div>
+
     <div class="pagetitle">
       <h1>Add RFQ</h1>
     </div>
@@ -13,18 +27,34 @@
           <label>Project Name</label><br />
 
           <!-- Show input only when projectDetails is loaded -->
-          <input *ngIf="projectDetails" type="text" class="custom-dropdown" [value]="projectDetails.name" disabled />
+          <input
+            *ngIf="projectDetails"
+            type="text"
+            class="custom-dropdown"
+            [value]="projectDetails.name"
+            disabled
+          />
 
           <!-- Optional loading indicator -->
           <span *ngIf="!projectDetails">Loading project...</span>
         </div>
 
-
-
         <!-- Tabs (now above workitems) -->
         <div class="tabs">
-          <button mat-button (click)="selectedTab = 'standard'" [class.active]="selectedTab === 'standard'">Standard</button>
-          <button mat-button (click)="selectedTab = 'unibouw'" [class.active]="selectedTab === 'unibouw'">Unibouw</button>
+          <button
+            mat-button
+            (click)="selectedTab = 'standard'"
+            [class.active]="selectedTab === 'standard'"
+          >
+            Standard
+          </button>
+          <button
+            mat-button
+            (click)="selectedTab = 'unibouw'"
+            [class.active]="selectedTab === 'unibouw'"
+          >
+            Unibouw
+          </button>
         </div>
 
         <!-- Workitems Table -->
@@ -37,11 +67,20 @@
               </tr>
             </thead>
             <tbody>
-              <tr *ngFor="let item of (selectedTab === 'standard' ? standardWorkitems : unibouwWorkitems)"
-                [class.selected]="isWorkItemSelected(item)">
+              <tr
+                *ngFor="
+                  let item of selectedTab === 'standard' ? standardWorkitems : unibouwWorkitems
+                "
+                [class.selected]="isWorkItemSelected(item)"
+              >
                 <td>
-                  <input type="radio" name="workitem" [value]="item" [checked]="isWorkItemSelected(item)"
-                    (change)="onWorkitemSelect(item)" />
+                  <input
+                    type="radio"
+                    name="workitem"
+                    [value]="item"
+                    [checked]="isWorkItemSelected(item)"
+                    (change)="onWorkitemSelect(item)"
+                  />
                 </td>
                 <td>{{ item.name }}</td>
               </tr>
@@ -55,9 +94,7 @@
         <div class="card-header">
           <h3>Subcontractors</h3>
           <button type="button" (click)="addSubcontractor()" class="add-btn">+</button>
-          <label class="show-all">
-            <input type="checkbox" [(ngModel)]="showAll" /> Show all
-          </label>
+          <label class="show-all"> <input type="checkbox" [(ngModel)]="showAll" /> Show all </label>
         </div>
 
         <div class="checkbox-list">

@@ -704,3 +704,14 @@ tbody tr:nth-of-type(odd) {
   border-bottom: 1px solid #ddd !important;
 }
 .mdc-notched-outline__leading, .mat-mdc-notch-piece {border: 0 !important;}
+
+
+    .cdk-global-overlay-wrapper{
+      justify-content: right !important;
+        align-items: flex-start !important;
+    }
+  
+
+
+
+    

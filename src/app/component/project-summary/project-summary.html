@@ -31,12 +31,12 @@
 
         <div class="detail-row">
           <span class="label">Start Date</span>
-          <span class="value">{{ project.startDate | date: 'dd-MM-yyyy' }}</span>
+          <span class="value">{{ project.startDate | date : 'dd-MM-yyyy' }}</span>
         </div>
 
         <div class="detail-row">
           <span class="label">Committed Date</span>
-          <span class="value">{{ project.completionDate | date: 'dd-MM-yyyy' }}</span>
+          <span class="value">{{ project.completionDate | date : 'dd-MM-yyyy' }}</span>
         </div>
 
         <div class="detail-row">
@@ -88,82 +88,90 @@
         </div>
 
         <!-- Attachments & Comments Section (Shown only when Interested is clicked) -->
-       <div class="two-col attachments-row" *ngIf="isInterested">
-  <div class="rfq-field attachments-field">
-    <label>Attachments</label>
+        <div class="two-col attachments-row" *ngIf="isInterested">
+          <div class="rfq-field attachments-field">
+            <label>Attachments</label>
 
-    <div class="attachments-container">
-      <!-- File input -->
-      <div class="attachment-line">
-        <input type="file" (change)="onFileSelected($event)" multiple />
+            <div class="attachments-container">
+              <!-- File input -->
+              <div class="attachment-line">
+                <input type="file" (change)="onFileSelected($event)" multiple />
+              </div>
+
+              <!-- Upload button -->
+              <button
+                class="btn-secondary upload-btn"
+                type="button"
+                (click)="submitQuoteFile()"
+                [disabled]="isQuoteSubmitted"
+              >
+                Submit Quote
+              </button>
+            </div>
+
+            <!-- 📂 Uploaded files displayed below -->
+            <div class="uploaded-files" *ngIf="selectedFiles.length > 0">
+              <h4 class="uploaded-title">Selected Attachments</h4>
+              <div class="uploaded-file" *ngFor="let file of selectedFiles; let i = index">
+                <span class="file-name">{{ file?.name }}</span>
+                <button
+                  type="button"
+                  class="delete-btn"
+                  (click)="removeFile(i)"
+                  title="Remove file"
+                >
+                  ✖
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="rfq-field">
+            <label>Comments</label>
+            <textarea placeholder="Add Comments" rows="5" [formControl]="comments"></textarea>
+
+            <div class="field-hint text-danger" *ngIf="comments.touched && comments.invalid">
+              Comment is required
+            </div>
+          </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="actions">
+          <span class="disabled-wrapper" [class.is-disabled]="buttonsDisabled">
+            <button
+              class="btn-primary"
+              type="button"
+              (click)="submitInterest('Interested')"
+              [disabled]="buttonsDisabled"
+            >
+              Interested
+            </button>
+          </span>
+
+          <span class="disabled-wrapper" [class.is-disabled]="buttonsDisabled">
+            <button
+              class="btn-ghost"
+              type="button"
+              (click)="submitInterest('Maybe Later')"
+              [disabled]="buttonsDisabled"
+            >
+              Maybe Later
+            </button>
+          </span>
+
+          <span class="disabled-wrapper" [class.is-disabled]="buttonsDisabled">
+            <button
+              class="btn-ghost"
+              type="button"
+              (click)="submitInterest('Not Interested')"
+              [disabled]="buttonsDisabled"
+            >
+              Not Interested
+            </button>
+          </span>
+        </div>
       </div>
-
-      <!-- Upload button -->
-      <button class="btn-secondary upload-btn" type="button" (click)="submitQuoteFile()">
-        Upload Quote and Submit
-      </button>
-    </div>
-
-    <!-- 📂 Uploaded files displayed below -->
-    <div class="uploaded-files" *ngIf="selectedFiles.length > 0">
-      <h4 class="uploaded-title">Selected Attachments</h4>
-      <div class="uploaded-file" *ngFor="let file of selectedFiles; let i = index">
-<span class="file-name">{{ file?.name }}</span>
-        <button type="button" class="delete-btn" (click)="removeFile(i)" title="Remove file">
-          ✖
-        </button>
-      </div>
-    </div>
-  </div>
-
-  <div class="rfq-field">
-    <label>Comments</label>
-    <textarea placeholder="Add Comments" rows="5" [formControl]="comments"></textarea>
-
-    <div class="field-hint text-danger" *ngIf="comments.touched && comments.invalid">
-      Comment is required
-    </div>
-  </div>
-</div>
-
-       <!-- Action Buttons -->
-<div class="actions">
-
-  <span class="disabled-wrapper" [class.is-disabled]="buttonsDisabled">
-    <button
-      class="btn-primary"
-      type="button"
-      (click)="submitInterest('Interested')"
-      [disabled]="buttonsDisabled"
-    >
-      Interested
-    </button>
-  </span>
-
-  <span class="disabled-wrapper" [class.is-disabled]="buttonsDisabled">
-    <button
-      class="btn-ghost"
-      type="button"
-      (click)="submitInterest('Maybe Later')"
-      [disabled]="buttonsDisabled"
-    >
-      Maybe Later
-    </button>
-  </span>
-
-  <span class="disabled-wrapper" [class.is-disabled]="buttonsDisabled">
-    <button
-      class="btn-ghost"
-      type="button"
-      (click)="submitInterest('Not Interested')"
-      [disabled]="buttonsDisabled"
-    >
-      Not Interested
-    </button>
-  </span>
-
-</div>
-</div>
     </section>
   </div>
 </div>

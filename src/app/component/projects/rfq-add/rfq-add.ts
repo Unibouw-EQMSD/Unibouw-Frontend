@@ -36,6 +36,8 @@ projectDetails: any;
 
   ) {}
 
+  isLoader: boolean = false;
+
 ngOnInit() {
   // Load dropdown projects (in case user opens page without project ID)
   this.loadProjects();
@@ -158,46 +160,53 @@ loadProjectDetails(id: string) {
     this.subcontractors = [];
   }
 
-  onSubmit() {
-    if (!this.selectedProject) return alert('Select a project first');
-    const selectedProject = this.projects.find(p => p.projectID === this.selectedProject);
-    if (!selectedProject) return alert('Project not found');
-    const selectedSubs = this.subcontractors.filter(s => s.selected);
-    if (!selectedSubs.length) return alert('Select at least one subcontractor');
-    if (!this.selectedWorkItems.length) return alert('Select at least one work item');
+onSubmit() {
+  if (!this.selectedProject) return alert('Select a project first');
+  const selectedProject = this.projects.find(p => p.projectID === this.selectedProject);
+  if (!selectedProject) return alert('Project not found');
 
-    const now = new Date().toISOString();
+  const selectedSubs = this.subcontractors.filter(s => s.selected);
+  if (!selectedSubs.length) return alert('Select at least one subcontractor');
+  if (!this.selectedWorkItems.length) return alert('Select at least one work item');
 
-    const rfqPayload = {
-      sentDate: now,
-      dueDate: this.selectedDueDate ? new Date(this.selectedDueDate).toISOString() : now,
-      rfqSent: 0,
-      quoteReceived: 0,
-      customerID: selectedProject.customerID,
-      projectID:this.projectId,
-      customerNote: this.customerNote || '',
-      deadLine: this.selectedDueDate ? new Date(this.selectedDueDate).toISOString() : now,
-      createdBy: 'System'
-    };
+  const now = new Date().toISOString();
 
-    const subcontractorIds = selectedSubs.map(s => s.subcontractorID);
-    const workItemIds = this.selectedWorkItems.map(w => w.workItemID);
+  const rfqPayload = {
+    sentDate: now,
+    dueDate: this.selectedDueDate ? new Date(this.selectedDueDate).toISOString() : now,
+    rfqSent: 0,
+    quoteReceived: 0,
+    customerID: selectedProject.customerID,
+    projectID: this.projectId,
+    customerNote: this.customerNote || '',
+    deadLine: this.selectedDueDate ? new Date(this.selectedDueDate).toISOString() : now,
+    createdBy: 'System'
+  };
 
-    console.log('🚀 RFQ Payload:', rfqPayload);
-    console.log('👷 Subcontractors:', subcontractorIds);
-    console.log('🧩 Work Items:', workItemIds);
+  const subcontractorIds = selectedSubs.map(s => s.subcontractorID);
+  const workItemIds = this.selectedWorkItems.map(w => w.workItemID);
 
-    this.rfqService.createRfq(rfqPayload, subcontractorIds, workItemIds).subscribe({
-      next: res => {
-        console.log('✅ RFQ created successfully', res);
-        alert('RFQ created successfully and emails sent!');
-      },
-      error: err => {
-        console.error('❌ RFQ creation failed', err);
-        alert('RFQ creation failed. Check console for details.');
-      }
-    });
-  }
+  console.log('🚀 RFQ Payload:', rfqPayload);
+  console.log('👷 Subcontractors:', subcontractorIds);
+  console.log('🧩 Work Items:', workItemIds);
+
+  // 👉 Start Loader
+  this.isLoader = true;
+
+  this.rfqService.createRfq(rfqPayload, subcontractorIds, workItemIds).subscribe({
+    next: res => {
+      console.log('✅ RFQ created successfully', res);
+      alert('RFQ created successfully and emails sent!');
+      this.isLoader = false;  // 👉 Stop loader
+    },
+    error: err => {
+      console.error('❌ RFQ creation failed', err);
+      alert('RFQ creation failed. Check console for details.');
+      this.isLoader = false; // 👉 Stop loader on error
+    }
+  });
+}
+  
 
   onCancel() {
     this.selectedProject = this.projects.length ? this.projects[0].projectID : '';

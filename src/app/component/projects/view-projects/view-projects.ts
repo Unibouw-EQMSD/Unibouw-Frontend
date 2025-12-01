@@ -53,6 +53,7 @@ interface WorkItem {
   templateUrl: './view-projects.html',
   styleUrls: ['./view-projects.css']   // ✅ fixed
 })
+
 export class ViewProjects {
   projectId!: string;
   projectDetails: any;
@@ -100,6 +101,8 @@ displayedColumns: string[] = [
     this.loadProjectDetails(this.projectId);
   }
 }
+
+reminderType: string = 'default';
 
 loadProjectDetails(id: string) {
   this.isLoading = true;
@@ -168,7 +171,13 @@ loadRfqResponseSummary(projectId: string) {
 }
 
 
-
+ // In your component
+    onDatepickerOpened() {
+      document.body.style.overflow = 'hidden';
+    }
+    onDatepickerClosed() {
+      document.body.style.overflow = '';
+    }
 
 markViewed(work: WorkItem, rfq: any) {
 
@@ -408,4 +417,57 @@ addRfq(){
   console.log(this.projectId,'project id')
 
 }
+
+showReminderPopup = false;
+
+openReminderPopup(rfq: any) {
+    this.selectedRfqId = rfq.rfqId;
+    this.subId = rfq.subcontractorId;
+    this.showReminderPopup = true;
+  }
+
+closeReminderPopup() {
+  this.showReminderPopup = false;
 }
+
+// sendReminder() {
+//     if (!this.selectedRfqId || !this.subId) {
+//       alert('Missing RFQ or Subcontractor information.');
+//       return;
+//     }
+//     // Implement the API call to send a reminder here.
+//     console.log("Reminder:", this.selectedRfqId, this.subId);
+//     this.showReminderPopup = false;
+//     this.snackBar.open("Reminder sent!", "Close", { duration: 2000 });
+//   }
+
+sendReminder() {
+  
+    if (!this.selectedRfqId
+
+ || !this.subId) {
+      alert('Missing RFQ or Subcontractor information.');
+      return;
+    }
+
+this.rfqResponseService.sendReminder(this.subId, this.selectedRfqId)
+      .subscribe({
+        next: (result) => {
+          if (result.success) {
+            this.snackBar.open("Reminder sent!", "Close", { duration: 2000 });
+          } else {
+            this.snackBar.open("Reminder sending failed.", "Close", { duration: 2000 });
+          }
+        },
+        error: (error) => {
+          alert('Failed to send reminder: ' + (error?.error || error));
+        },
+        complete: () => {
+          this.showReminderPopup = false;
+        }
+      });
+  }
+
+
+}
+

@@ -193,6 +193,13 @@
   pointer-events: none;
 }
 
+.upload-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed !important;
+  pointer-events: none !important;
+  background-color: #b3b3b3 !important;   /* light grey */
+  border-color: #999 !important;
+}
 
 /* 🔹 Small screens */
 @media (max-width: 768px) {

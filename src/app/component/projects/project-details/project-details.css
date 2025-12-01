@@ -31,4 +31,10 @@
   font-weight: 600;
 }
 
- 
+.vis-icon{
+  color: #ff7f32 !important;
+}
+
+.vis-icon:hover {
+  opacity: 0.7 !important; 
+}

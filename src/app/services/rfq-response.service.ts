@@ -166,4 +166,13 @@ downloadQuote(rfqId: string, subId: string): Observable<Blob> {
   );
 }
 
+sendReminder(subId: string, rfqId: string): Observable<any> {
+    const body = {
+      SubcontractorId: subId,
+      RfqID: rfqId
+    };
+    return this.http.post<any>(`${this.apiURL}/Email/send-reminder`, body);
+  }
+
+
 }

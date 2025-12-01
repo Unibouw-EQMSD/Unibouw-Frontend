@@ -234,7 +234,7 @@ onSubmit() {
     country: formValue.country ? formValue.country : null,
     officeAddress: formValue.officeAddress ? formValue.officeAddress : null,
     billingAddress: formValue.sameAsOffice? formValue.officeAddress: formValue.billingAddress,
-    registeredDate: formValue.registeredDate ? formValue.registeredDate : null,
+    registeredDate: formValue.registeredDate || new Date(),
     isActive: formValue.status === "Active",
     createdBy: "nitish.ra@flatworldsolutions.com",
     workItemIDs: this.selectedWorkitems.map(item => item.workItemID),

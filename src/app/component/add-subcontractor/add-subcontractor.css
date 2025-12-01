@@ -82,18 +82,7 @@ form {
 .dropdown-arrow {
   margin-left: 2px;
 }
-.dropdown-list {
-  position: absolute;
-  background: #fff;
-  top: 100%;
-  left: 0;
-  width: 180px;
-  z-index: 99;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  max-height: 200px;
-  overflow-y: auto;
-}
+
 .phone-input {
   width: 100%;
 }
@@ -252,7 +241,13 @@ textarea {
 }
 
 .dropdown-list {
-  max-height: 400px;       /* adjust height as you want */
+  position: absolute;
+  background: #fff;
+  top: 100%;
+  left: 0;
+  width: 180px;
+  z-index: 99;
+  max-height: 200px;       /* adjust height as you want */
   overflow-y: auto;        /* enables vertical scrolling */
   overflow-x: hidden;
   border: 1px solid #ddd;  /* optional */
@@ -260,7 +255,7 @@ textarea {
 }
 
 .selected-option{
-  width: 80px;
+  width: 95px;
 }
 
 .selected-option, .dropdown-arrow{

@@ -44,7 +44,7 @@ buttonsDisabled = false;
       validators: [Validators.required]
     });
   }
-
+isQuoteSubmitted: boolean = false;
 ngOnInit(): void {
   this.route.queryParams.subscribe(params => {
     this.rfqId = params['rfqId'];
@@ -153,9 +153,11 @@ submitQuoteFile() {
         saved.viewed = true;
 
         localStorage.setItem(key, JSON.stringify(saved));
+        this.isQuoteSubmitted = true; 
       },
       error: err => {
         alert('Failed to upload quote!');
+        this.isQuoteSubmitted = false; 
       }
     });
 }
