@@ -12,6 +12,7 @@ import { Workitem } from '../../../services/workitem.service';
 import { Router } from '@angular/router';
 import { forkJoin } from 'rxjs';
 
+
 interface RfqResponse {
   name: string;
   rating: number;
@@ -22,9 +23,9 @@ interface RfqResponse {
   viewed: boolean;
   quote: string;
   actions: string[];
-    subcontractorId: string;   // << ADD THIS
-      quoteAmount?: string;
-
+  subcontractorId: string;   // << ADD THIS
+  quoteAmount?: string;
+dueDate: Date;
 
 }
 
@@ -61,6 +62,7 @@ export class ViewProjects {
 selectedFile!: File;
   rfqId!: string;
   subId!: string;
+  dueDate!: Date;
   quoteAmount: string = '';
   groupBy = 'workItem';
   currentPage = 1;
@@ -84,12 +86,16 @@ displayedColumns: string[] = [
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
+  
  workItems: WorkItem[] = [];
+ reminderDates: string[] = [];   
 
 
   constructor(private rfqService:RfqService,private router:Router,private rfqResponseService: RfqResponseService, private cdr: ChangeDetectorRef, private snackBar: MatSnackBar, private route: ActivatedRoute,private projectService: projectService){
 
   }
+
+
   ngOnInit(): void {
   // ✅ Capture the project ID from the route
   this.projectId = this.route.snapshot.paramMap.get('id') || '';
@@ -153,7 +159,8 @@ loadRfqResponseSummary(projectId: string) {
           viewed: s.viewed,
           quote: s.quote || '—',
           actions: ['pdf', 'chat'],
-          quoteAmount: '-'                     // initialize
+          quoteAmount: '-',                // initialize
+          dueDate: s.dueDate
         }))
       }));
 
@@ -418,10 +425,66 @@ addRfq(){
 
 }
 
-showReminderPopup = false;
 
+
+// Reminder Popup Logic
+
+parseDDMMYYYY(dateStr: string): Date {
+  const [day, month, year] = dateStr.split('-').map(Number);
+  return new Date(year, month - 1, day);
+}
+
+
+generateReminderDates(dueDateInput: any): string[] {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  let dueDate: Date;
+
+  // If input is string in DD-MM-YYYY format
+  if (typeof dueDateInput === 'string' && dueDateInput.includes('-')) {
+    dueDate = this.parseDDMMYYYY(dueDateInput);
+  } 
+  else {
+    dueDate = new Date(dueDateInput);
+  }
+
+  dueDate.setHours(0, 0, 0, 0);
+
+  const diffMs = dueDate.getTime() - today.getTime();
+  if (diffMs <= 0) return [];
+
+  const diffDays = diffMs / (1000 * 60 * 60 * 24);
+  const gap = diffDays / 3;
+
+  const reminderDates: string[] = [];
+
+  for (let i = 1; i <= 3; i++) {
+    const nextDate = new Date(today);
+    nextDate.setDate(today.getDate() + Math.round(gap * i));
+    reminderDates.push(this.reminderFormatDate(nextDate));
+  }
+
+  return reminderDates;
+}
+
+
+// Format dd-MM-yyyy
+reminderFormatDate(date: Date): string {
+  const d = String(date.getDate()).padStart(2, '0');
+  const m = String(date.getMonth() + 1).padStart(2, '0');
+  const y = date.getFullYear();
+  return `${d}-${m}-${y}`;
+}
+
+
+showReminderPopup = false;
 openReminderPopup(rfq: any) {
     this.selectedRfqId = rfq.rfqId;
+     this.dueDate = rfq.dueDate;   
+
+      this.reminderDates = this.generateReminderDates(rfq.dueDate);
+
     this.subId = rfq.subcontractorId;
     this.showReminderPopup = true;
   }
@@ -442,32 +505,32 @@ closeReminderPopup() {
 //   }
 
 sendReminder() {
-  
-    if (!this.selectedRfqId
 
- || !this.subId) {
-      alert('Missing RFQ or Subcontractor information.');
-      return;
-    }
-
-this.rfqResponseService.sendReminder(this.subId, this.selectedRfqId)
-      .subscribe({
-        next: (result) => {
-          if (result.success) {
-            this.snackBar.open("Reminder sent!", "Close", { duration: 2000 });
-          } else {
-            this.snackBar.open("Reminder sending failed.", "Close", { duration: 2000 });
-          }
-        },
-        error: (error) => {
-          alert('Failed to send reminder: ' + (error?.error || error));
-        },
-        complete: () => {
-          this.showReminderPopup = false;
-        }
-      });
+  if (!this.selectedRfqId || !this.subId) {
+    alert('Missing RFQ or Subcontractor information.');
+    return;
   }
 
+  this.isLoading = true; // 🔥 Start loader
+
+  this.rfqResponseService.sendReminder(this.subId, this.selectedRfqId)
+    .subscribe({
+      next: (result) => {
+        if (result.success) {
+          this.snackBar.open("Reminder sent!", "Close", { duration: 2000 });
+        } else {
+          this.snackBar.open("Reminder sending failed.", "Close", { duration: 2000 });
+        }
+      },
+      error: (error) => {
+        alert('Failed to send reminder: ' + (error?.error || error));
+      },
+      complete: () => {
+        this.isLoading = false;   // 🔥 Stop loader
+        this.showReminderPopup = false;     
+      }
+    });
+}
 
 }
 
