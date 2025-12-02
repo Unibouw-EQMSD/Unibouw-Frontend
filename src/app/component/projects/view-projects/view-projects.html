@@ -55,10 +55,10 @@
             </span>
           </div>
 
-          <div class="detail-row">
+          <!-- <div class="detail-row">
             <span class="label">Total Dimension</span
             ><span class="value">{{ projectDetails.totalDimension }}</span>
-          </div>
+          </div> -->
           <div class="detail-row">
             <span class="label">Specification</span>
             <span class="value">
@@ -355,24 +355,19 @@ Thank you.</textarea
 
           <!-- Custom Reminder -->
           <div class="reminder-container" *ngIf="reminderType === 'custom'">
-            <div class="date-row" *ngFor="let d of reminderDates; let i = index">
+            <!-- <div class="date-row" *ngFor="let d of reminderDates; let i = index">
               <span class="circle">{{ i + 1 }}</span>
-              <!-- <span class="date-input">{{ d }}</span> -->
-              <input
-                matInput
-                [matDatepicker]="picker"
-                placeholder="Select date"
-                [(ngModel)]="reminderDates[i]"
-                class="date-input"
-              />
-              <mat-datepicker-toggle matSuffix [for]="picker">
+              <span class="date-input">{{ d }}</span>
+              <input [matDatepicker]="picker1" class="date-input" placeholder="Select date" />
+
+              <mat-datepicker-toggle matSuffix [for]="picker1">
                 <i class="fa fa-calendar calendar-icon"></i>
               </mat-datepicker-toggle>
-            </div>
 
-            <mat-datepicker #picker></mat-datepicker>
+              <mat-datepicker #picker1></mat-datepicker>
+            </div> -->
 
-            <!-- <div class="date-row">
+            <div class="date-row">
               <span class="circle">1</span>
 
               <input [matDatepicker]="picker1" class="date-input" placeholder="Select date" />
@@ -382,13 +377,37 @@ Thank you.</textarea
               </mat-datepicker-toggle>
 
               <mat-datepicker #picker1></mat-datepicker>
-            </div> -->
+            </div>
+
+            <div class="date-row">
+              <span class="circle">2</span>
+
+              <input [matDatepicker]="picker2" class="date-input" placeholder="Select date" />
+
+              <mat-datepicker-toggle matSuffix [for]="picker2">
+                <i class="fa fa-calendar calendar-icon"></i>
+              </mat-datepicker-toggle>
+
+              <mat-datepicker #picker2></mat-datepicker>
+            </div>
+
+            <div class="date-row">
+              <span class="circle">3</span>
+
+              <input [matDatepicker]="picker3" class="date-input" placeholder="Select date" />
+
+              <mat-datepicker-toggle matSuffix [for]="picker3">
+                <i class="fa fa-calendar calendar-icon"></i>
+              </mat-datepicker-toggle>
+
+              <mat-datepicker #picker3></mat-datepicker>
+            </div>
           </div>
 
           <!-- Set timer -->
           <div class="time-row mt-8">
             <label>Set Time: </label>
-            <input type="time" class="time-input" value="09:00" />
+            <input type="time" class="time-input" value="08:00" />
             <i class="fa fa-clock-o time-icon"></i>
           </div>
         </div>

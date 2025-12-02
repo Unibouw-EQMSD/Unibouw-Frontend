@@ -106,7 +106,34 @@ displayedColumns: string[] = [
     this.loadRfqData();
     this.loadProjectDetails(this.projectId);
   }
+
+  // 🔥 Start background reminder checker
+  //this.startAutoReminderWatcher();
 }
+
+
+startAutoReminderWatcher() {
+  setInterval(() => {
+    this.checkAndTriggerReminder();
+  }, 60000); // check every 60 seconds
+}
+
+checkAndTriggerReminder() {
+  // if (!this.reminderDates || this.reminderDates.length === 0) return;
+
+  // const today = new Date();
+  // const todayStr = this.reminderFormatDate(today); // "dd-MM-yyyy"
+
+  // // If today matches any reminder date → send reminder
+  // if (this.reminderDates.includes(todayStr)) {
+  //   console.log("🔥 Auto reminder triggered for:", todayStr);
+
+  //   this.sendReminder();  // 🚀 Auto-trigger here
+  // }
+  this.sendReminder(); 
+}
+
+
 
 reminderType: string = 'default';
 
@@ -434,6 +461,20 @@ parseDDMMYYYY(dateStr: string): Date {
   return new Date(year, month - 1, day);
 }
 
+// private _reminderDates: string[] = [];
+
+// get reminderDates1(): string[] {
+//   return this._reminderDates;
+// }
+
+// set reminderDates1(dates: string[]) {
+//   this._reminderDates = dates;
+
+//   // Auto trigger ONLY when popup is open to avoid unwanted calls
+//   if (this.showReminderPopup && dates && dates.length > 0) {
+//     this.sendReminder();
+//   }
+// }
 
 generateReminderDates(dueDateInput: any): string[] {
   const today = new Date();
@@ -481,9 +522,9 @@ reminderFormatDate(date: Date): string {
 showReminderPopup = false;
 openReminderPopup(rfq: any) {
     this.selectedRfqId = rfq.rfqId;
-     this.dueDate = rfq.dueDate;   
+    this.dueDate = rfq.dueDate;   
 
-      this.reminderDates = this.generateReminderDates(rfq.dueDate);
+    this.reminderDates = this.generateReminderDates(rfq.dueDate);
 
     this.subId = rfq.subcontractorId;
     this.showReminderPopup = true;
@@ -504,7 +545,28 @@ closeReminderPopup() {
 //     this.snackBar.open("Reminder sent!", "Close", { duration: 2000 });
 //   }
 
+private _reminderDates: string[] = [];
+
+get reminderDates1(): string[] {
+  return this._reminderDates;
+}
+
+set reminderDates1(dates: string[]) {
+  this._reminderDates = dates;
+
+  if (this.showReminderPopup && dates && dates.length > 0) {
+    
+    // ⏳ Trigger after a delay (example 5 sec)
+    setTimeout(() => {
+      this.sendReminder();
+    }, 60000);
+  }
+}
+
+
 sendReminder() {
+  this.selectedRfqId = "a65866a5-044c-406b-8716-46eb61ba3f35";
+  this.subId = "aa9c34bd-8c52-4478-b95c-cbbad6d41116";
 
   if (!this.selectedRfqId || !this.subId) {
     alert('Missing RFQ or Subcontractor information.');
@@ -531,6 +593,8 @@ sendReminder() {
       }
     });
 }
+
+
 
 }
 
