@@ -727,6 +727,9 @@ sendReminder() {
     });
 }
 
+editRfq(rfqId: string) {
+    this.router.navigate(['/add-rfq', this.projectId, { rfqId: rfqId }]);
+}
 
 }
 
