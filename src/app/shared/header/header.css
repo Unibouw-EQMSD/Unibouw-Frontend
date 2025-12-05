@@ -22,7 +22,11 @@
   font-size: 20px;
   color: #003042;
   cursor: pointer;
-  margin-right: 20px;
+  margin-right: 2px;
+}
+
+.notification:hover {
+  color: orange;
 }
 
 .notification .badge {
@@ -155,3 +159,191 @@ header {
   background-color: #905f33 !important;
   color: white;
 }
+
+
+
+/* -----Modal box------- */
+
+/* Backdrop */
+.custom-modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.3);
+  z-index: 999;
+}
+
+.custom-modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1000;
+   max-height: 80vh;     /* Adjust based on your need */
+  overflow-y: auto;      /* Enables vertical scrolling */
+  overflow-x: hidden;
+  /* z-index: 9999 !important;     */
+    
+}
+
+
+.modal-content-box {
+  background: #fff;
+  width: 800px;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0px 4px 20px rgba(0,0,0,0.2);
+  max-height: 80vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scroll-behavior: smooth;
+
+}
+
+/* Circle Icon */
+.modal-icon {
+  background: #0fa958;
+  width: 110px;
+  height: 110px;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: auto;
+}
+
+.modal-icon i {
+  color: #fff;
+  font-size: 55px;
+}
+
+/* Close Button */
+.close-btn {
+  margin-top: 30px;
+  background: #f47b2b;
+  color: #fff;
+  border: none;
+  padding: 10px 26px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 16px;
+}
+.close-btn:hover {
+  background: #d96a20;
+}
+
+.modal-header {
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.modal-content{
+  padding: 20px 0;
+}
+
+/* ---------- */
+
+.dropdown {
+  position: relative;
+  display: inline-block;
+  width: 300px;
+}
+.dropdown-btn {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #d9dee3;
+  background: #fff;
+  cursor: pointer;
+  text-align: left;
+cursor: pointer;
+  display: flex;              /* NEW */
+  justify-content: flex-end;  /* NEW → pushes arrow to right */
+  align-items: center;        /* NEW → vertical alignment */
+}
+
+.arrow {
+  margin-left: auto;   /* Ensures arrow sticks to right */
+}
+
+.dropdown-content {
+  display: block;
+  position: absolute;
+  background: #fff;
+  border: 1px solid #999;
+  max-height: 200px;
+  overflow-y: auto;
+  width: 100%;
+  z-index: 1;
+}
+.dropdown-item {
+  padding: 4px 8px;
+  cursor: pointer;
+}
+
+.dropdown-item.disabled {
+  opacity: 0.5;
+  pointer-events: none;
+}
+.placeholder-text {
+  color: #9ca3af; /* light grey like placeholder */
+  font-weight: 400;
+}
+
+
+.time-wrapper {
+  position: relative;
+  display: inline-block;
+}
+
+.time-input {
+  padding: 10px;
+  border: 1px solid #d9dee3;
+}
+
+.time-icon {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: pointer !important;
+  font-size: 18px;
+  z-index: 10; /* IMPORTANT: make icon clickable */
+  pointer-events: auto;
+}
+
+.btn {
+  padding: 5px 15px;
+  border-radius: 6px;
+  cursor: pointer;
+  border: none;
+  font-weight: 500;
+}
+
+.cancel-btn {
+    color: #dc3545;
+    background-color: transparent;
+    box-shadow: none !important;
+}
+
+.cancel-btn:hover {
+    border: 1px solid #dc3545;
+}
+
+.submit-btn, .small-btn {
+  background: #f97316;
+  color: white;
+}
+
+.reset-btn {
+  border: 1px solid #003042;
+    background-color: #ffffff;
+    color: #003042 !important;
+}
+
+.reset-btn:hover, .submit-btn:hover {
+  background-color: #003042;
+    color: #ffffff !important;
+}
+
