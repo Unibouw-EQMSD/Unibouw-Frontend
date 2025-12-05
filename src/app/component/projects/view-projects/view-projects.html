@@ -89,10 +89,10 @@
             </span>
           </div>
 
-          <div class="detail-row">
+          <!-- <div class="detail-row">
             <span class="label">Total Dimension</span
             ><span class="value">{{ projectDetails.totalDimension }}</span>
-          </div>
+          </div> -->
           <div class="detail-row">
             <span class="label">Specification</span>
             <span class="value">
@@ -481,45 +481,53 @@ Thank you.</textarea
         Send Reminder
       </p>
 
-      <div class="modal-section" style="margin-bottom: 30px">
-        <div
-          style="
-            background: #f2f7fd;
-            border-radius: 8px;
-            padding: 16px 24px;
-            margin-bottom: 25px;
-            border: 1px solid #e4eeff;
-            display: flex;
-            align-items: flex-start;
-            gap: 12px;
-          "
-        >
-          <!-- Column 1: Icon -->
-          <div style="color: #1d6fe8; font-size: 20px; margin-top: 10px">
-            <i class="fa fa-clock"></i>
+      <!-- 🔥 Overlay text only (no loader) -->
+      <div class="loading-overlay" *ngIf="isLoading">
+        <p>Sending Reminder...</p>
+      </div>
+
+      <!-- 🔥 Content becomes faded + unclickable when loading -->
+      <div [class.disabled-content]="isLoading">
+        <!-- <div *ngIf="!isLoading" style="pointer-events: none; opacity: 0.6"> -->
+        <div class="modal-section" style="margin-bottom: 30px">
+          <div
+            style="
+              background: #f2f7fd;
+              border-radius: 8px;
+              padding: 16px 24px;
+              margin-bottom: 25px;
+              border: 1px solid #e4eeff;
+              display: flex;
+              align-items: flex-start;
+              gap: 12px;
+            "
+          >
+            <!-- Column 1: Icon -->
+            <div style="color: #1d6fe8; font-size: 20px; margin-top: 10px">
+              <i class="fa fa-clock"></i>
+            </div>
+
+            <!-- Column 2: Due date text and actual date -->
+            <div style="display: flex; flex-direction: column; gap: 4px">
+              <span style="color: #1d6fe8; font-size: 16px; font-weight: 500">Due Date</span>
+              <span style="color: #222; font-size: 16px">{{ dueDate }}</span>
+            </div>
           </div>
 
-          <!-- Column 2: Due date text and actual date -->
-          <div style="display: flex; flex-direction: column; gap: 4px">
-            <span style="color: #1d6fe8; font-size: 16px; font-weight: 500">Due Date</span>
-            <span style="color: #222; font-size: 16px">30-12-2025</span>
+          <div style="display: flex; align-items: center; gap: 18px">
+            <label style="display: flex; align-items: center">
+              <input type="radio" name="reminderType" value="default" [(ngModel)]="reminderType" />
+              <span style="margin-left: 6px">Default Reminder</span>
+            </label>
+
+            <label style="display: flex; align-items: center">
+              <input type="radio" name="reminderType" value="custom" [(ngModel)]="reminderType" />
+              <span style="margin-left: 6px">Custom Reminder</span>
+            </label>
           </div>
-        </div>
 
-        <div style="display: flex; align-items: center; gap: 18px">
-          <label style="display: flex; align-items: center">
-            <input type="radio" name="reminderType" value="default" [(ngModel)]="reminderType" />
-            <span style="margin-left: 6px">Default Reminder</span>
-          </label>
-
-          <label style="display: flex; align-items: center">
-            <input type="radio" name="reminderType" value="custom" [(ngModel)]="reminderType" />
-            <span style="margin-left: 6px">Custom Reminder</span>
-          </label>
-        </div>
-
-        <!-- Default Reminder -->
-        <div class="default-reminder-container" *ngIf="reminderType === 'default'">
+          <!-- Default Reminder -->
+          <!-- <div class="default-reminder-container" *ngIf="reminderType === 'default'">
           <div class="date-row">
             <span class="circle">1</span>
             <span class="date-input">15-11-2025</span>
@@ -532,79 +540,87 @@ Thank you.</textarea
             <span class="circle">3</span>
             <span class="date-input">15-12-2025</span>
           </div>
+        </div> -->
+
+          <div class="default-reminder-container" *ngIf="reminderType === 'default'">
+            <div class="date-row" *ngFor="let d of reminderDates; let i = index">
+              <span class="circle">{{ i + 1 }}</span>
+              <span class="date-input">{{ d }}</span>
+            </div>
+          </div>
+
+          <!-- Custom Reminder -->
+          <div class="reminder-container" *ngIf="reminderType === 'custom'">
+            <!-- <div class="date-row" *ngFor="let d of reminderDates; let i = index">
+              <span class="circle">{{ i + 1 }}</span>
+              <span class="date-input">{{ d }}</span>
+              <input [matDatepicker]="picker1" class="date-input" placeholder="Select date" />
+
+              <mat-datepicker-toggle matSuffix [for]="picker1">
+                <i class="fa fa-calendar calendar-icon"></i>
+              </mat-datepicker-toggle>
+
+              <mat-datepicker #picker1></mat-datepicker>
+            </div> -->
+
+            <div class="date-row">
+              <span class="circle">1</span>
+
+              <input [matDatepicker]="picker1" class="date-input" placeholder="Select date" />
+
+              <mat-datepicker-toggle matSuffix [for]="picker1">
+                <i class="fa fa-calendar calendar-icon"></i>
+              </mat-datepicker-toggle>
+
+              <mat-datepicker #picker1></mat-datepicker>
+            </div>
+
+            <div class="date-row">
+              <span class="circle">2</span>
+
+              <input [matDatepicker]="picker2" class="date-input" placeholder="Select date" />
+
+              <mat-datepicker-toggle matSuffix [for]="picker2">
+                <i class="fa fa-calendar calendar-icon"></i>
+              </mat-datepicker-toggle>
+
+              <mat-datepicker #picker2></mat-datepicker>
+            </div>
+
+            <div class="date-row">
+              <span class="circle">3</span>
+
+              <input [matDatepicker]="picker3" class="date-input" placeholder="Select date" />
+
+              <mat-datepicker-toggle matSuffix [for]="picker3">
+                <i class="fa fa-calendar calendar-icon"></i>
+              </mat-datepicker-toggle>
+
+              <mat-datepicker #picker3></mat-datepicker>
+            </div>
+          </div>
+
+          <!-- Set timer -->
+          <div class="time-row mt-8">
+            <label>Set Time: </label>
+            <input type="time" class="time-input" value="08:00" />
+            <i class="fa fa-clock-o time-icon"></i>
+          </div>
         </div>
 
-        <!-- Custom Reminder -->
-        <div class="reminder-container" *ngIf="reminderType === 'custom'">
-          <div class="date-row">
-            <span class="circle">1</span>
-
-            <input [matDatepicker]="picker1" class="date-input" placeholder="Select date" />
-
-            <mat-datepicker-toggle matSuffix [for]="picker1">
-              <i class="fa fa-calendar calendar-icon"></i>
-            </mat-datepicker-toggle>
-
-            <mat-datepicker #picker1></mat-datepicker>
-          </div>
-
-          <div class="date-row">
-            <span class="circle">2</span>
-
-            <input [matDatepicker]="picker2" class="date-input" placeholder="Select date" />
-
-            <mat-datepicker-toggle matSuffix [for]="picker2">
-              <i class="fa fa-calendar calendar-icon"></i>
-            </mat-datepicker-toggle>
-
-            <mat-datepicker #picker2></mat-datepicker>
-          </div>
-
-          <div class="date-row">
-            <span class="circle">3</span>
-
-            <input [matDatepicker]="picker3" class="date-input" placeholder="Select date" />
-
-            <mat-datepicker-toggle matSuffix [for]="picker3">
-              <i class="fa fa-calendar calendar-icon"></i>
-            </mat-datepicker-toggle>
-
-            <mat-datepicker #picker3></mat-datepicker>
-          </div>
-
-          <div class="date-row">
-            <span class="circle">4</span>
-
-            <input [matDatepicker]="picker4" class="date-input" placeholder="Select date" />
-
-            <mat-datepicker-toggle matSuffix [for]="picker4">
-              <i class="fa fa-calendar calendar-icon"></i>
-            </mat-datepicker-toggle>
-
-            <mat-datepicker #picker4></mat-datepicker>
-          </div>
-        </div>
-
-        <!-- Set timer -->
-        <div class="time-row mt-8">
-          <label>Set Time: </label>
-          <input type="time" class="time-input" />
-          <i class="fa fa-clock-o time-icon"></i>
-        </div>
-      </div>
-
-      <div class="modal-section" style="margin-bottom: 20px">
-        <label style="font-weight: 500; margin-bottom: 8px; display: block">Email Body</label>
-        <textarea
-          class="reminder-body"
-          rows="5"
-          style="padding: 10px; width: 100%; resize: none; border: 1px solid #d9dee3"
-        >
+        <div class="modal-section" style="margin-bottom: 20px">
+          <label style="font-weight: 500; margin-bottom: 8px; display: block">Email Body</label>
+          <textarea
+            class="reminder-body"
+            rows="5"
+            style="padding: 10px; width: 100%; resize: none; border: 1px solid #d9dee3"
+          >
 Dear Subcontractor,
 This is a reminder to upload your quote before the due date. Please ensure all required documents are submitted on time.
 Thank you.
       </textarea
-        >
+          >
+        </div>
       </div>
 
       <div
