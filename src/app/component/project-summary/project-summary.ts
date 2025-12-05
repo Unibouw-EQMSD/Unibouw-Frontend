@@ -22,7 +22,7 @@ export class ProjectSummary implements OnInit {
   selectedWorkItem: any = null;
   rfqId!: string;
   subId!: string;
-  workItemId!: string;
+  number!: string;
   isInterested = false;
   buttonsDisabled = false;
 rfq: any;
@@ -30,6 +30,10 @@ rfq: any;
   // comments!: FormControl<string>;
   selectedFiles: (File | null)[] = [];
 showQuotePanel = false;
+hideRightSummaryCard = false;
+rightSectionVisible = true;
+
+isQuoteSubmitted = false;
 quoteForm!: FormGroup;
 
   // Previous submissions
@@ -39,6 +43,8 @@ quoteForm!: FormGroup;
     attachmentUrl: string;
     comment?: string;
   }[] = [];
+  selectedComment: string = '';
+  showCommentModal: boolean = false;
   constructor(
     private route: ActivatedRoute,
     private rfqResponseService: RfqResponseService,
@@ -53,7 +59,6 @@ quoteForm!: FormGroup;
     //   validators: [Validators.required]
     // });
   }
-  isQuoteSubmitted: boolean = false;
   ngOnInit(): void {
      this.quoteForm = this.fb.group({
     quoteAmount: [''],   // default empty
@@ -62,11 +67,11 @@ quoteForm!: FormGroup;
     this.route.queryParams.subscribe(params => {
       this.rfqId = params['rfqId'];
       this.subId = params['subId'];
-      this.workItemId = params['workItemId'];
+      this.number = params['number'];
 
       if (this.rfqId && this.subId) {
         // ⭐ STEP 1 — RESTORE STATE BEFORE LOADING API
-        const stateKey = `rfq_state_${this.rfqId}_${this.subId}_${this.workItemId}`;
+        const stateKey = `rfq_state_${this.rfqId}_${this.subId}_${this.number}`;
         const savedState = localStorage.getItem(stateKey);
 
         if (savedState) {
@@ -86,9 +91,9 @@ quoteForm!: FormGroup;
         }
 
         // 👇 Existing logic — mark as viewed
-        if (this.workItemId) {
+        if (this.number) {
           this.rfqResponseService
-            .markAsViewed(this.rfqId, this.subId, this.workItemId)
+            .markAsViewed(this.rfqId, this.subId, this.number)
             .subscribe();
         }
 
@@ -102,9 +107,9 @@ quoteForm!: FormGroup;
     });
   }
 
-
-  openQuotePanel() {
+openQuotePanel() {
   this.showQuotePanel = true;
+  this.rightSectionVisible = true;   // show right section when opening
 }
   
  loadProjectSummary(rfqId: string, workItemIds?: string[]) {
@@ -189,34 +194,56 @@ submitQuoteFile() {
   const file = this.selectedFiles[0];
   if (!file) return;
 
- const formValues = this.quoteForm.getRawValue();
-
-const totalAmount = Number(formValues.quoteAmount || 0);
-const comment = formValues.comments;
+  const formValues = this.quoteForm.getRawValue();
+  const totalAmount = Number(formValues.quoteAmount || 0);
+  const comment = formValues.comments;
 
   const key = `rfq_prev_submissions_${this.rfqId}_${this.subId}`;
   const previous = JSON.parse(localStorage.getItem(key) || '[]');
 
-  this.rfqResponseService.uploadQuoteFile(this.rfqId, this.subId, file, totalAmount, comment)
-    .subscribe({
-      next: res => {
-        alert('Quote uploaded successfully!');
+  this.rfqResponseService.uploadQuoteFile(
+    this.rfqId, this.subId, file, totalAmount, comment
+  ).subscribe({
+    next: () => {
 
-        const newSubmission = {
-          date: new Date().toISOString(),
-          amount: totalAmount,
-          attachmentUrl: URL.createObjectURL(file),
-          fileName: file.name,
-          comment: comment
-        };
+      alert(this.isQuoteSubmitted ? 'Quote re-submitted!' : 'Quote submitted!');
 
-        previous.unshift(newSubmission);
-        localStorage.setItem(key, JSON.stringify(previous));
+      // ⭐ Mark submitted
+      this.isQuoteSubmitted = true;
 
-        this.previousSubmissions.unshift(newSubmission);
-      },
-      error: () => alert("Failed to upload quote!")
-    });
+      const newSubmission = {
+        date: new Date().toISOString(),
+        amount: totalAmount,
+        attachmentUrl: URL.createObjectURL(file),
+        fileName: file.name,
+        comment: comment
+      };
+
+      previous.unshift(newSubmission);
+      localStorage.setItem(key, JSON.stringify(previous));
+  this.isQuoteSubmitted = true;
+  
+  // Keep summary hidden after submit
+this.rightSectionVisible = false;
+  this.hideRightSummaryCard = true;
+         this.previousSubmissions.unshift(newSubmission);
+
+      // ⭐ Reset form & file
+      this.selectedFiles = [];
+      this.quoteForm.reset();
+    }
+  });
+}
+
+
+openCommentModal(comment: string | null | undefined) {
+  this.selectedComment = comment ?? "No comments available.";
+  this.showCommentModal = true;
+}
+
+closeCommentModal() {
+  this.showCommentModal = false;
+  this.selectedComment = "";
 }
 
 downloadSubmission(submission: any) {
@@ -335,35 +362,7 @@ loadPreviousSubmissions() {
       });
   }
 
-  resubmitQuote() {
-    if (!confirm("Are you sure you want to resubmit? The previous quote will be deleted.")) {
-      return;
-    }
-
-    this.rfqResponseService
-      .deleteQuoteFile(this.rfqId, this.subId, this.selectedWorkItem.workItemID)
-      .subscribe({
-        next: () => {
-          alert("Previous quote deleted. Please upload a new document.");
-
-          // Reset UI state
-          this.selectedFiles = [];
-          this.isQuoteSubmitted = false;
-
-          // Clear localStorage state
-          const key = `rfq_state_${this.rfqId}_${this.subId}_${this.selectedWorkItem.workItemID}`;
-          const saved = JSON.parse(localStorage.getItem(key) || '{}');
-
-          saved.selectedFileNames = [];
-          saved.isQuoteSubmitted = false;
-
-          localStorage.setItem(key, JSON.stringify(saved));
-        },
-        error: () => {
-          alert("Failed to delete previous quote.");
-        }
-      });
-  }
+ 
 
   statusClass(status?: string) {
     if (!status) return '';

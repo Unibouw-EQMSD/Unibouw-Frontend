@@ -114,15 +114,16 @@ submitRfqResponse(rfqId: string, subcontractorId: string, workItemId: string, st
   // ✅ Upload file (if you add this later)
 uploadQuoteFile(rfqId: string, subId: string, file: File, totalAmount: number, comment: string) {
   const formData = new FormData();
-  formData.append('file', file);
-  formData.append('totalAmount', totalAmount.toString());
-  formData.append('comment', comment);
+  formData.append('file', file);               // ✅ must be "file"
+  formData.append('totalAmount', totalAmount.toString()); // ✅ must be "totalAmount"
+  formData.append('comment', comment);         // ✅ must be "comment"
 
   return this.http.post(
     `${this.apiURL}/RfqResponse/UploadQuote?rfqId=${rfqId}&subcontractorId=${subId}`,
     formData
   );
 }
+
 
 getPreviousSubmissions(rfqId: string, subId: string): Observable<any[]> {
     return this.http.get<any[]>(

@@ -72,7 +72,7 @@
         <div class="two-col">
           <div class="rfq-field">
             <label>Workitem Code</label>
-            <input type="text" [value]="selectedWorkItem?.workItemID || '—'" readonly />
+            <input type="text" [value]="selectedWorkItem?.number || '—'" readonly />
           </div>
           <div class="rfq-field">
             <label>Workitem</label>
@@ -100,9 +100,8 @@
   <!-- Right: Submit Quote Button -->
 <button class="btn-primary" 
         type="button"  
-        [disabled]="buttonsDisabled"
         (click)="openQuotePanel()">
-  Submit Quote
+  {{ isQuoteSubmitted ? 'Resubmit Quote' : 'Submit Quote' }}
 </button>
 
 </div>
@@ -135,9 +134,11 @@
                 </div>
                 <div>
                   <div class="submission-label">Comment</div>
-                  <div class="submission-value">
-                    <i class="fa fa-comment-dots comment-icon"></i>
-                  </div>
+                 <div class="submission-value">
+  <i class="fa fa-comment-dots comment-icon"
+     (click)="openCommentModal(submission.comment)">
+  </i>
+</div>
                 </div>
               </div>
               <!-- End repeat -->
@@ -145,12 +146,12 @@
             <!-- Submit Quote Form -->
             <form [formGroup]="quoteForm" style="flex:1; min-width:260px;">
 
-  <div class="rfq-field">
+  <div class="rfq-field" *ngIf="rightSectionVisible">
     <label>Total Quote Amount</label>
     <input type="text" formControlName="quoteAmount" placeholder="Enter amount" />
   </div>
 
- <div class="rfq-field">
+ <div class="rfq-field" *ngIf="rightSectionVisible">
   <label>Attachments</label>
   <div class="attachments-container">
     <input #fileInput type="file" (change)="onFileSelected($event)" />
@@ -161,12 +162,12 @@
 </div>
 
 
-  <div class="rfq-field">
+  <div class="rfq-field" *ngIf="rightSectionVisible">
     <label>Comments</label>
     <textarea placeholder="Add Comments" rows="3" formControlName="comments"></textarea>
   </div>
 
-  <div style="margin-top:10px; text-align:right;">
+  <div style="margin-top:10px; text-align:right;"  *ngIf="rightSectionVisible">
     <button class="btn-primary" type="button" (click)="submitQuoteFile()">Submit</button>
   </div>
 
@@ -177,6 +178,22 @@
         <!-- End Quote Details Panel -->
       </div>
     </section>
+  </div>
+</div>
+<!-- ============================= -->
+<!-- COMMENT MODAL -->
+<!-- ============================= -->
+<div class="comment-modal" *ngIf="showCommentModal">
+  <div class="comment-modal-backdrop" (click)="closeCommentModal()"></div>
+
+  <div class="comment-modal-content">
+    <h3>Comments</h3>
+
+    <div class="comment-text">
+      {{ selectedComment || 'No comments available.' }}
+    </div>
+
+    <button class="close-btn" (click)="closeCommentModal()">Close</button>
   </div>
 </div>
 

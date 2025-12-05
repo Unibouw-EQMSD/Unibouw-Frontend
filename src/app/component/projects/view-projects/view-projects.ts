@@ -201,6 +201,7 @@ loadRfqResponseSummary(projectId: string) {
           responded: s.responded,
           interested: s.interested,
           viewed: s.viewed,
+           maybeLater: s.maybeLater,
           quote: s.quote || '—',
           actions: ['pdf', 'chat'],
           quoteAmount: '-'                     // initialize
