@@ -17,14 +17,16 @@ interface RfqResponse {
   rating: number;
   date: string;
   rfqId: string;
+  rfqNumber:string;
   responded: boolean;
   interested: boolean;
   viewed: boolean;
+  maybeLater:boolean;
   quote: string;
   actions: string[];
     subcontractorId: string;   // << ADD THIS
       quoteAmount?: string;
-
+subcontractorName:string;
 
 }
 
@@ -36,6 +38,8 @@ interface WorkItem {
   interested: number;
   notInterested: number;
   viewed: number;
+    maybeLater:number;
+
   open: boolean;
   searchText: string;
   pageSize: number;
@@ -72,11 +76,16 @@ pageSize = 10;
   pageSizeOptions = [5, 10, 25, 50, 100, 200];  selectedTab = 'response'; 
   rfqList: any[] = [];
 selectedRfqId: string = '';
+subcontractorGroups: any[] = [];
+
 displayedColumns: string[] = [
    'workitem',
     'rfqSentDate',
     'dueDate',
-    'totalSubcontractors'
+    'totalSubcontractors',
+    'quoteRecieved',
+    'status', 
+  'actions'
   ];
   dataSource = new MatTableDataSource<any>([]);
  isLoading = false;
@@ -120,19 +129,22 @@ loadProjectDetails(id: string) {
 }
 
 loadRfqResponseSummary(projectId: string) {
-  this.rfqResponseService.getResponsesByProjectId(projectId).subscribe({
-    next: (res: any) => {
-      console.log("📌 RFQ RESPONSES", res);
 
-      this.workItems = res.map((w: any) => ({
+  /* -------------------------------------- */
+  /* 1️⃣ WORK-ITEM GROUPED API              */
+  /* -------------------------------------- */
+  this.rfqResponseService.getResponsesByProjectId(projectId).subscribe({
+    next: (res: any[]) => {
+
+      this.workItems = res.map(w => ({
         workItemId: w.workItemId,
         name: w.workItemName,
-
         requestsSent: w.subcontractors.length,
         notResponded: w.subcontractors.filter((s: any) => !s.responded).length,
         interested: w.subcontractors.filter((s: any) => s.interested).length,
-        notInterested: w.subcontractors.filter((s: any) => !s.interested && s.responded).length,
+        notInterested: w.subcontractors.filter((s: any) => s.responded && !s.interested).length,
         viewed: w.subcontractors.filter((s: any) => s.viewed).length,
+        maybeLater: w.subcontractors.filter((s: any) => s.maybeLater).length, // ✅ added
 
         open: false,
         searchText: '',
@@ -140,35 +152,108 @@ loadRfqResponseSummary(projectId: string) {
         currentPage: 1,
         totalPages: 1,
         currentStart: 1,
-        currentEnd: 1,
+        currentEnd: 10,
 
         rfqs: w.subcontractors.map((s: any) => ({
-          subcontractorId: s.subcontractorId, // ✅ must exist
-          rfqId: s.rfqId,                     // ✅ must exist
+          subcontractorId: s.subcontractorId,
           name: s.name,
-          rating: s.rating || 0,
-          date: s.date || '—',
+          workItemName: w.workItemName,
+          workItemId: w.workItemId,
+
+          rfqId: s.rfqId,
+          rfqNumber: w.rfqNumber || s.rfqNumber || '-',
+
+          date: s.date,
           responded: s.responded,
           interested: s.interested,
           viewed: s.viewed,
-          quote: s.quote || '—',
-          actions: ['pdf', 'chat'],
-          quoteAmount: '-'                     // initialize
+          maybeLater: s.maybeLater, // ✅ added
+          rating: s.rating || 0,
+
+          quoteAmount: "-",
+          actions: ['pdf']
         }))
       }));
 
-      // After mapping, load quote amounts for all RFQs
+      // load quote amounts
       this.workItems.forEach(work => {
         work.rfqs.forEach(rfq => this.loadQuoteAmount(rfq));
       });
 
     },
-    error: (err: any) => {
-      console.error("❌ Error loading responses", err);
-      this.snackBar.open("No Records Found for this RFQ", "Close", { duration: 3000 });
-    }
+    error: err => console.error("Error loading work item responses", err)
   });
+
+  /* -------------------------------------- */
+  /* 2️⃣ SUBCONTRACTOR GROUPED API          */
+  /* -------------------------------------- */
+  this.rfqResponseService.getResponsesByProjectSubcontractors(projectId).subscribe({
+    next: (res: any[]) => {
+
+      const grouped = res.reduce((acc: any[], item: any) => {
+
+        let group = acc.find(g => g.subcontractorId === item.subcontractorId);
+        if (!group) {
+          group = {
+            subcontractorId: item.subcontractorId,
+            subcontractorName: item.subcontractorName,
+            open: false,
+            searchText: '',
+            workItems: [],
+
+            requestsSent: 0,
+            notResponded: 0,
+            interested: 0,
+            notInterested: 0,
+            viewed: 0,
+            maybeLater: 0 // ✅ added
+          };
+          acc.push(group);
+        }
+
+        group.workItems.push({
+          workItemId: item.workItemId,
+          workItemName: item.workItemName,
+
+          rfqId: item.rfqId,
+          rfqNumber: item.rfqNumber,
+
+          date: item.date,
+          responded: item.responded,
+          interested: item.interested,
+          viewed: item.viewed,
+          maybeLater: item.maybeLater, // ✅ added
+
+          subcontractorId: item.subcontractorId,
+          rating: 0,
+          quoteAmount: "-",
+          actions: ['pdf']
+        });
+
+        group.requestsSent = group.workItems.length;
+        group.notResponded = group.workItems.filter((w: any) => !w.responded).length;
+        group.interested = group.workItems.filter((w: any) => w.interested).length;
+        group.notInterested = group.workItems.filter((w: any) => w.responded && !w.interested).length;
+        group.viewed = group.workItems.filter((w: any) => w.viewed).length;
+        group.maybeLater = group.workItems.filter((w: any) => w.maybeLater).length; // ✅ added
+
+        return acc;
+      }, []);
+
+      this.subcontractorGroups = grouped;
+
+      this.subcontractorGroups.forEach(sub => {
+        sub.workItems.forEach((w: any) => this.loadQuoteAmount(w));
+      });
+
+    },
+    error: err => console.error("Error loading subcontractor responses", err)
+  });
+
 }
+
+
+
 
 
  // In your component
@@ -204,21 +289,68 @@ markViewed(work: WorkItem, rfq: any) {
   });
 }
 
+markMaybeLater(work: WorkItem, rfq: any) {
+  // 1) Immediate local update so UI reflects change right away
+  const wasViewed = !!rfq.viewed;
+  rfq.maybeLater = true;
+  rfq.interested = false;
+  rfq.notInterested = false;
+
+  // ensure viewed tick also shows
+  if (!wasViewed) {
+    rfq.viewed = true;
+  }
+
+  // Immediately refresh summary counts (so header numbers update)
+  this.refreshWorkItemCounts(work);
+
+  // Force change detection immediately (UI update)
+  this.cdr.detectChanges();
+
+  // 2) Persist the response on the server as "Maybe Later"
+  // Use an API that accepts the status string (your backend expects status = "Maybe Later")
+  // I assume you have a method like rfqResponseService.submitResponse(rfqId, subcontractorId, workItemId, status)
+  this.rfqResponseService.submitRfqResponse(
+    rfq.rfqId,
+    rfq.subcontractorId,
+    work.workItemId,
+    'Maybe Later'   // important: persist "Maybe Later" not only "Viewed"
+  ).subscribe({
+    next: (res: any) => {
+      // backend accepted — make sure counts are consistent (optional refresh)
+      // Keep local UI as-is or optionally refresh from server
+      this.refreshWorkItemCounts(work);
+      this.cdr.detectChanges();
+    },
+    error: (err: any) => {
+      console.error('Failed to save Maybe Later status', err);
+      // Optionally revert UI if you want strict consistency:
+      // rfq.maybeLater = false;
+      // if (!wasViewed) rfq.viewed = false;
+      // this.refreshWorkItemCounts(work);
+      // this.cdr.detectChanges();
+      this.snackBar.open('Failed to mark Maybe Later. Try again.', 'Close', { duration: 3000 });
+    }
+  });
+}
+
+
 refreshWorkItemCounts(work: WorkItem) {
   work.requestsSent   = work.rfqs.length;
   work.notResponded   = work.rfqs.filter(r => !r.responded).length;
   work.interested     = work.rfqs.filter(r => r.interested).length;
   work.notInterested  = work.rfqs.filter(r => r.responded && !r.interested).length;
 
-  // 🔥 Keep this ALWAYS correct
   work.viewed         = work.rfqs.filter(r => r.viewed).length;
+  work.maybeLater     = work.rfqs.filter(r => r.maybeLater).length; // <--- add this
 }
 triggerViewOnLoad() {
   if (!this.workItems?.length) return;
 
   this.workItems.forEach(work => {
     work.rfqs.forEach(rfq => {
-      this.markViewed(work, rfq);   // 🔥 calling your existing method
+      // this.markViewed(work, rfq);   
+      // this.markMaybeLater(work,rfq)
     });
   });
 }
@@ -256,7 +388,8 @@ loadRfqData(): void {
 
             // 🔥 Use EXACT swagger response
             workItem: info.workItem || '-',
-            subcontractorCount: info.subcontractorCount ?? 0
+            subcontractorCount: info.subcontractorCount ?? 0,
+            status: item.status || 'N/A' 
           };
         });
 
@@ -380,6 +513,8 @@ loadQuoteAmount(rfq: any) {
       }
     });
 }
+
+
 downloadQuote(event: Event, rfqId: string, subcontractorId: string) {
   event.stopPropagation(); // << prevent triggering row click
 
@@ -468,6 +603,9 @@ this.rfqResponseService.sendReminder(this.subId, this.selectedRfqId)
       });
   }
 
-
+editRfq(rfqId: string) {
+    
+    this.router.navigate(['/add-rfq', this.projectId, { rfqId: rfqId }]);
+}
 }
 
