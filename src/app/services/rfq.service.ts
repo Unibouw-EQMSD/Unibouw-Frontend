@@ -6,19 +6,22 @@ import { AppConfigService } from './app.config.service';
 
 export interface Rfq {
   id?: string;
-  customerID: string;        // required by backend
-  projectID: string;         // required by backend
+  customerID: string;
+  projectID: string;
   customerName?: string;
+
   sentDate: string;
-  dueDate: string;
+  dueDate: string;          // backend sends "DueDate"
+  globalDueDate?: string;   // backend sends "GlobalDueDate"
+
   rfqSent: number;
   quoteReceived: number;
+
   customerNote?: string;
-  deadLine?: string;         // optional, can set same as dueDate
+  deadLine?: string;
   createdBy?: string;
-  actions?: string[];
-  isEditingDueDate?: boolean; // for inline editing
 }
+
 
 @Injectable({ providedIn: 'root' })
 export class RfqService {
@@ -70,7 +73,29 @@ export class RfqService {
       })))
     );
   }
-
+ getRfqById(rfqId: string): Observable<Rfq> {
+  return from(this.getHeaders()).pipe(
+    switchMap(headers =>
+      this.http.get<{ data: any }>(`${this.rfqEndpoint}/${rfqId}`, { headers })
+    ),
+    map(res => {
+      const d = res.data;
+      return {
+        id: d.rfqID,
+        sentDate: d.sentDate,
+        dueDate: d.dueDate || d.DueDate,
+        globalDueDate: d.globalDueDate || d.GlobalDueDate,
+        customerID: d.customerID,
+        projectID: d.projectID,
+        customerName: d.customerName,
+        rfqSent: d.rfqSent,
+        quoteReceived: d.quoteReceived,
+        customerNote: d.customerNote,
+        deadLine: d.deadLine,
+      };
+    })
+  );
+}
   /** Fetch RFQs by project ID */
   getRfqByProjectId(projectId: string): Observable<Rfq[]> {
     return from(this.getHeaders()).pipe(
@@ -92,12 +117,21 @@ getWorkItemInfo(rfqId: string): Observable<any> {
   );
 }
 
+getSubcontractorsByWorkItem(workItemId: string) {
+  return from(this.getHeaders()).pipe(
+    switchMap(headers =>
+      this.http.get<any[]>(`${this.apiURL}/Common/subcontractorworkitemmapping/${workItemId}`, { headers })
+    )
+  );
+}
+
   /** Create a new RFQ */
- createRfq(rfqPayload: any, subcontractorIds: string[], workItemIds: string[]): Observable<any> {
+createRfq(rfqPayload: any, subcontractorIds: string[], workItemIds: string[], sendEmail: boolean = true): Observable<any> {
   const params = new HttpParams({
     fromObject: {
       subcontractorIds: subcontractorIds,
-      workItems: workItemIds
+      workItems: workItemIds,
+      sendEmail: sendEmail.toString() // send flag to backend
     }
   });
 
@@ -107,4 +141,66 @@ getWorkItemInfo(rfqId: string): Observable<any> {
     )
   );
 }
+
+createRfqSimple(
+  rfq: any,
+  subcontractorIds: string[],
+  workItems: string[],
+  emailBody: string,
+  sendEmail: boolean = false
+): Observable<any> {
+  let params = new HttpParams();
+  subcontractorIds.forEach(id => params = params.append('subcontractorIds', id));
+  workItems.forEach(id => params = params.append('workItems', id));
+  params = params.set('emailBody', emailBody);
+  params = params.set('sendEmail', sendEmail.toString()); // convert boolean to string
+
+ return from(this.getHeaders()).pipe(
+  switchMap(headers =>
+    this.http.post(`${this.apiURL}/Rfq/create-simple`, rfq, { headers, params })
+  )
+);
+}
+
+
+
+updateRfq(
+  rfqID: string,
+  rfqPayload: any,
+  subcontractorIds: string[],
+  workItemIds: string[],
+  sendEmail: boolean = true,
+  emailBody: string = ''     // ✅ NEW PARAM
+): Observable<any> 
+{
+  const params = new HttpParams({
+    fromObject: {
+      subcontractorIds: subcontractorIds.join(','), // ensure comma separated
+      workItemIds: workItemIds.join(','),
+      sendEmail: sendEmail.toString(),
+      emailBody: emailBody                          // ✅ SEND EDITED EMAIL BODY
+    }
+  });
+
+  return from(this.getHeaders()).pipe(
+    switchMap(headers =>
+      this.http.put(
+        `${this.apiURL}/Rfq/${rfqID}`,
+        rfqPayload,
+        { headers, params }
+      )
+    )
+  );
+}
+
+
+    getRfqSubcontractorDueDates(rfqId: string): Observable<any[]> {
+         return from(this.getHeaders()).pipe(
+            switchMap(headers =>
+                // ⭐ This assumes the backend endpoint is implemented as /api/Rfq/{rfqId}/subcontractor-duedates
+                this.http.get<any[]>(`${this.rfqEndpoint}/${rfqId}/subcontractor-duedates`, { headers })
+            )
+        );
+    }
+    
 }

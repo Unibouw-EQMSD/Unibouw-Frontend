@@ -5,6 +5,111 @@
   margin-bottom: 25px;
 } */
 
+
+/* FULL PAGE SKELETON */
+.full-page-skeleton {
+  display: flex;
+  gap: 20px;
+  padding: 25px;
+  animation: fadeIn 0.3s ease-in-out;
+   margin-top: 100px;
+}
+
+/* LEFT SIDE (Project Details) */
+.skeleton-left {
+  width: 30%;
+  background: #ffffff;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+}
+
+.skeleton-title {
+  width: 70%;
+  height: 26px;
+  margin-bottom: 25px;
+}
+
+/* Repeating detail blocks */
+.skeleton-block {
+  margin-bottom: 18px;
+}
+
+.skeleton-label {
+  width: 40%;
+  height: 14px;
+  margin-bottom: 6px;
+}
+
+.skeleton-value {
+  width: 80%;
+  height: 18px;
+}
+
+/* RIGHT SIDE (RFQ Section) */
+.skeleton-right {
+  width: 70%;
+  background: #ffffff;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+}
+
+/* Tabs */
+.skeleton-tabs {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.skeleton-tab {
+  width: 120px;
+  height: 32px;
+  border-radius: 8px;
+}
+
+/* Table Skeleton */
+.skeleton-table {
+  display: grid;
+  gap: 12px;
+}
+
+.skeleton-row {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 12px;
+}
+
+.skeleton-cell {
+  height: 22px;
+  border-radius: 6px;
+}
+
+/* Base Skeleton style */
+.skeleton {
+  background: linear-gradient(90deg, #ececec 25%, #f5f5f5 50%, #ececec 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s infinite;
+  border-radius: 4px;
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(5px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.text-ellipsis {
+  max-width: 150px;      /* fixed width */
+  white-space: nowrap;    /* prevent wrapping */
+  overflow: hidden;       /* hide overflowing text */
+  text-overflow: ellipsis;/* add "..." for overflow */
+}
+
 .project-details-container {
   display: grid;
   grid-template-columns: 0.2fr 1fr; /* Two equal columns */
@@ -78,6 +183,10 @@
 .detail-row .value a {
   color: #f97316; /* orange */
   text-decoration: none;
+}
+.button-container {
+  display: flex;
+  justify-content: flex-end;
 }
 
 .detail-row .value a:hover {
@@ -155,10 +264,23 @@ display: flex;
 }
 
 .rfq-summary {
+  display: grid;
+  grid-template-columns: 250px repeat(6, 1fr); /* Work Item column wider, others equal */
+  gap: 15px;
+  align-items: center;
+}
+
+.rfq-field {
   display: flex;
-  justify-content: space-between;
-  margin: 10px 0;
-  font-size: 14px;
+  flex-direction: column;
+}
+
+
+.highlight.text-ellipsis {
+  max-width: 240px; /* slightly less than grid column */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .rfq-summary .highlight {
