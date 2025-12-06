@@ -12,7 +12,7 @@
         enctype="multipart/form-data"
         class="pt-5"
       >
-        <!-- First Row -->
+        <!-- First Row, SubcontractorName & Email -->
         <div class="form-row">
           <div class="form-group">
             <label>Subcontractor Name <span class="text-danger">*</span></label>
@@ -25,24 +25,31 @@
                   subcontractorForm.get('name')?.touched && subcontractorForm.get('name')?.invalid
               }"
             />
-            <div
-              *ngIf="
-                subcontractorForm.get('name')?.touched && subcontractorForm.get('name')?.invalid
-              "
-              class="text-danger small"
-            >
-              This field is required.
-            </div>
-            <div
-              *ngIf="subcontractorForm.get('name')?.errors?.['pattern']"
-              class="text-danger small"
-            >
-              Special characters are not allowed.
+
+            <div class="form-error-space">
+              <span
+                *ngIf="
+      subcontractorForm.get('name')?.touched &&
+      subcontractorForm.get('name')?.errors?.['required']
+    "
+                class="text-danger text-sm"
+              >
+                This field is required.
+              </span>
+              <span
+                *ngIf="
+      subcontractorForm.get('name')?.touched &&
+      subcontractorForm.get('name')?.errors?.['pattern']
+    "
+                class="text-danger text-sm"
+              >
+                Special characters are not allowed.
+              </span>
             </div>
           </div>
 
           <div class="form-group">
-            <label>Email ID <span class="text-danger">*</span></label>
+            <label>Email <span class="text-danger">*</span></label>
             <input
               type="email"
               formControlName="email"
@@ -52,23 +59,31 @@
                   subcontractorForm.get('email')?.touched && subcontractorForm.get('email')?.invalid
               }"
             />
-            <div
-              *ngIf="
-                subcontractorForm.get('email')?.touched && subcontractorForm.get('email')?.invalid
-              "
-              class="text-danger small"
-            >
-              <div *ngIf="subcontractorForm.get('email')?.errors?.['required']">
+
+            <div class="form-error-space">
+              <span
+                *ngIf="subcontractorForm.get('email')?.errors?.['required'] && subcontractorForm.get('email')?.touched"
+                class="text-danger text-sm"
+              >
                 This field is required.
-              </div>
-              <div *ngIf="subcontractorForm.get('email')?.errors?.['email']">
+              </span>
+              <span
+                *ngIf="subcontractorForm.get('email')?.errors?.['pattern']"
+                class="text-danger text-sm"
+              >
                 Enter a valid email address.
-              </div>
+              </span>
+              <span
+                *ngIf="subcontractorForm.get('email')?.errors?.['emailExists']"
+                class="text-danger text-sm"
+              >
+                {{ subcontractorForm.get('email')?.errors?.['emailExists'] }}
+              </span>
             </div>
           </div>
         </div>
 
-        <!-- 🌍 Second Row -->
+        <!-- Second Row, Location & Country -->
         <div class="form-row">
           <div class="form-group">
             <label>Location <span class="text-danger">*</span></label>
@@ -82,52 +97,76 @@
                   subcontractorForm.get('location')?.invalid
               }"
             />
-            <div
-              *ngIf="
-                subcontractorForm.get('location')?.touched &&
-                subcontractorForm.get('location')?.invalid
-              "
-              class="text-danger small"
-            >
-              This field is required.
+            <div class="form-error-space">
+              <span
+                *ngIf="
+                  subcontractorForm.get('location')?.touched &&
+                  subcontractorForm.get('location')?.errors
+                "
+                class="text-danger text-sm"
+              >
+                This field is required.
+              </span>
             </div>
           </div>
 
           <div class="form-group">
-            <label>Country</label>
-            <select formControlName="country" class="form-control">
+            <label>Country <span class="text-danger">*</span></label>
+            <select
+              formControlName="country"
+              class="form-control"
+              [ngClass]="{
+                'is-invalid':
+                  subcontractorForm.get('country')?.touched &&
+                  subcontractorForm.get('country')?.invalid
+              }"
+            >
               <option value="">-- Select --</option>
               <option *ngFor="let c of countries" [value]="c">{{ c }}</option>
             </select>
-          </div>
-        </div>
-
-        <!-- ✉️ Third Row -->
-        <div class="form-row" style="margin-bottom: 0px !important">
-          <div class="form-group">
-            <label>Office Address <span class="text-danger">*</span></label>
-            <textarea formControlName="officeAddress" class="form-control"></textarea>
-          </div>
-          <div class="form-group">
-            <label>Billing Address</label>
-            <textarea formControlName="billingAddress" class="form-control"></textarea>
-            <!-- <div><input type="checkbox" formControlName="sameAsOffice" /> Same as Office Address</div> -->
-          </div>
-        </div>
-
-        <div class="form-row">
-          <div class="form-group" style="flex: 0.7"></div>
-          <div class="form-group" style="flex: none">
-            <div class="checkbox-inline">
-              <input type="checkbox" formControlName="sameAsOffice" id="sameAsOffice" />
-              <label for="sameAsOffice" style="margin-left: 6px">Same as Office Address</label>
+            <div class="form-error-space">
+              <span
+                *ngIf="
+      subcontractorForm.get('country')?.touched &&
+      subcontractorForm.get('country')?.errors?.['required']
+    "
+                class="text-danger small"
+              >
+                This field is required.
+              </span>
             </div>
           </div>
         </div>
-        <!-- 📞 Fourth Row -->
+
+        <!-- Third Row, ContactName & ContactPerson -->
         <div class="form-row">
           <div class="form-group">
-            <label>Contact Number <span class="text-danger">*</span></label>
+            <label>Contact Name <span class="text-danger">*</span></label>
+            <input
+              type="text"
+              formControlName="contactPerson"
+              class="form-control"
+              [ngClass]="{
+                'is-invalid':
+                  subcontractorForm.get('contactPerson')?.touched &&
+                  subcontractorForm.get('contactPerson')?.invalid
+              }"
+            />
+            <div class="form-error-space">
+              <span
+                *ngIf="
+      subcontractorForm.get('contactPerson')?.touched &&
+      subcontractorForm.get('contactPerson')?.errors?.['required']
+    "
+                class="text-danger text-sm"
+              >
+                This field is required.
+              </span>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Contact Phone <span class="text-danger">*</span></label>
             <div class="contact-number-wrapper">
               <div class="custom-select-wrapper">
                 <div class="selected-option" (click)="toggleDropdown()">
@@ -162,94 +201,135 @@
                 }"
               />
             </div>
-            <div
-              *ngIf="
-                subcontractorForm.get('contactNumber')?.touched &&
-                subcontractorForm.get('contactNumber')?.invalid
-              "
-              class="text-danger small"
-            >
-              <div *ngIf="subcontractorForm.get('contactNumber')?.errors?.['required']">
+            <div class="form-error-space">
+              <span
+                *ngIf="
+      subcontractorForm.get('contactNumber')?.touched &&
+      subcontractorForm.get('contactNumber')?.errors?.['required']
+    "
+                class="text-danger text-sm"
+              >
                 This field is required.
-              </div>
-              <div *ngIf="subcontractorForm.get('contactNumber')?.errors?.['pattern']">
+              </span>
+              <span
+                *ngIf="
+      subcontractorForm.get('contactNumber')?.touched &&
+      subcontractorForm.get('contactNumber')?.errors?.['pattern']
+    "
+                class="text-danger text-sm"
+              >
                 Enter a valid phone number (10–15 digits).
-              </div>
-            </div>
-          </div>
-          <div class="form-group">
-            <label>Contact Person <span class="text-danger">*</span></label>
-            <select
-              formControlName="contactPerson"
-              class="form-control"
-              [ngClass]="{
-                'is-invalid':
-                  subcontractorForm.get('contactPerson')?.touched &&
-                  subcontractorForm.get('contactPerson')?.invalid
-              }"
-            >
-              <option value="">- - Select --</option>
-              <option *ngFor="let person of persons" [value]="person.personID">
-                {{ person.name }}
-              </option>
-            </select>
-            <div
-              *ngIf="
-                subcontractorForm.get('contactPerson')?.touched &&
-                subcontractorForm.get('contactPerson')?.invalid
-              "
-              class="text-danger small"
-            >
-              This field is required.
+              </span>
             </div>
           </div>
         </div>
 
+        <!-- Fourth Row, ContactEmailID & Status -->
         <div class="form-row">
           <div class="form-group">
-            <label>Status </label>
+            <label>Contact Email ID <span class="text-danger">*</span></label>
+            <input
+              type="contactEmail"
+              formControlName="contactEmail"
+              class="form-control"
+              [ngClass]="{
+                'is-invalid':
+                  subcontractorForm.get('contactEmail')?.touched &&
+                  subcontractorForm.get('contactEmail')?.invalid
+              }"
+            />
+            <div class="form-error-space">
+              <span
+                *ngIf="
+      subcontractorForm.get('contactEmail')?.touched &&
+      subcontractorForm.get('contactEmail')?.errors?.['required']
+    "
+                class="text-danger text-sm"
+              >
+                This field is required.
+              </span>
+              <span
+                *ngIf="
+      subcontractorForm.get('contactEmail')?.touched &&
+      subcontractorForm.get('contactEmail')?.errors?.['email']
+    "
+                class="text-danger text-sm"
+              >
+                Enter a valid email address.
+              </span>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Status <span class="text-danger">*</span></label>
             <select formControlName="status" class="form-control">
               <option value="Active">Active</option>
               <option value="Inactive">Inactive</option>
             </select>
+            <div class="form-error-space"></div>
+          </div>
+        </div>
+
+        <!-- Firth Row, OfficeAddress & BillingAddress -->
+        <div class="form-row">
+          <div class="form-group">
+            <label>Office Address <span class="text-danger">*</span></label>
+            <textarea
+              rows="4"
+              formControlName="officeAddress"
+              class="form-control-textarea"
+              [ngClass]="{
+                'is-invalid-textarea':
+                  subcontractorForm.get('officeAddress')?.touched &&
+                  subcontractorForm.get('officeAddress')?.invalid
+              }"
+              placeholder="Address 1"
+            ></textarea>
+            <div class="form-error-space">
+              <span
+                *ngIf="
+      subcontractorForm.get('officeAddress')?.touched &&
+      subcontractorForm.get('officeAddress')?.errors?.['required']
+    "
+                class="text-danger text-sm"
+              >
+                This field is required.
+              </span>
+            </div>
           </div>
           <div class="form-group">
-            <label> </label>
+            <div class="form-billing-row">
+              <label>Billing Address</label>
+              <div class="checkbox-inline">
+                <input type="checkbox" formControlName="sameAsOffice" id="sameAsOffice" />
+                <label for="sameAsOffice" class="form-checkbox-label">Same as Office Address</label>
+              </div>
+            </div>
+            <textarea
+              rows="4"
+              formControlName="billingAddress"
+              class="form-control-textarea"
+              placeholder="Address 2"
+            ></textarea>
+            <div class="form-error-space">
+              <!-- Empty placeholder for alignment -->
+            </div>
           </div>
         </div>
-
-        <!-- 📎 Attachments -->
-
-        <!-- <div class="form-group">
-          <label>Attachments</label>
-          <div class="file-upload">
-            <input type="file" (change)="onFileSelected($event)" />
-            <button type="button" class="btn small-btn" (click)="addMoreFiles()">Add More</button>
-          </div>
-        </div>
-        <div *ngIf="uploadedFiles.length > 0" class="uploaded-files">
-          <label>Selected Files:</label>
-          <span>
-            <ng-container *ngFor="let file of uploadedFiles; let i = index">
-              📎 {{ file.name }}
-              <button type="button" class="remove-btn" (click)="removeFile(i)">❌</button>
-              <span *ngIf="i < uploadedFiles.length - 1">, </span>
-            </ng-container>
-          </span>
-        </div> -->
       </form>
 
       <!-- Workitems Section -->
       <div class="workitems-card">
-        <label>Workitems</label> <span class="text-danger"> *</span>
+        <div><label>Workitems</label> <span class="text-danger"> *</span></div>
+
         <div
-          *ngIf="subcontractorForm.touched && selectedWorkitems.length === 0"
-          class="text-danger small p-3"
+          *ngIf="submitAttempted && selectedWorkitems.length === 0"
+          class="text-danger text-sm p-1"
         >
           At least one workitem is required.
         </div>
         <!-- Category Tabs -->
-        <div class="tabs">
+        <div class="tabs mt-3">
           <button
             *ngFor="let cat of categories"
             type="button"
@@ -258,13 +338,25 @@
             (click)="selectCategory(cat.categoryID)"
           >
             {{ cat.categoryName }}
+            <span class="count-badge" *ngIf="getSelectedCount(cat.categoryID) > 0">
+              {{ getSelectedCount(cat.categoryID) }}
+            </span>
           </button>
         </div>
 
         <!-- Workitems List -->
         <div class="checkbox-list pt-1">
+          <!-- Search Input -->
+          <input
+            type="text"
+            class="form-control mb-2"
+            placeholder="Search workitems..."
+            [(ngModel)]="workitemSearch"
+          />
+
           <ng-container *ngIf="workitems.length > 0; else noWorkitems">
-            <label *ngFor="let w of workitems" style="font-size: 15px">
+            <!-- <label *ngFor="let w of workitems" style="font-size: 15px"> -->
+            <label *ngFor="let w of filteredWorkitems()" style="font-size: 15px">
               <input
                 type="checkbox"
                 [checked]="isSelected(w)"
@@ -280,17 +372,17 @@
         </div>
       </div>
 
-      <!-- ✅ Form Actions -->
+      <!-- Form Actions -->
       <div class="form-actions">
         <button type="button" class="btn cancel-btn" (click)="onCancel()">Cancel</button>
         <button type="button" class="btn reset-btn" (click)="onReset()">Reset</button>
-        <!-- <button type="submit" class="btn submit-btn" (click)="onSubmit()"  [disabled]="!subcontractorForm.valid">Submit</button> -->
         <button type="submit" class="btn submit-btn" (click)="onSubmit()">Submit</button>
       </div>
     </div>
   </div>
 </main>
-<!-- ✅ Success/Error Popup -->
+
+<!-- Success/Error Popup -->
 <div *ngIf="showPopup" [ngClass]="{ popup: true, error: popupError }">
   <span *ngIf="!popupError">✅</span>
   <span *ngIf="popupError">❌</span>

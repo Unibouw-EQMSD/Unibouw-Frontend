@@ -1,341 +1,319 @@
-import { Component, HostListener } from '@angular/core';
+import { Component, HostListener, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { WorkitemService, Workitem, WorkitemCategory } from '../../services/workitem.service';
 import { SubcontractorService } from '../../services/subcontractor.service';
 import { Router } from '@angular/router';
 import { countryList } from '../../shared/countries';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-add-subcontractor',
   standalone: false,
   templateUrl: './add-subcontractor.html',
-  styleUrl: './add-subcontractor.css'
+  styleUrls: ['./add-subcontractor.css']
 })
-export class AddSubcontractor {
+
+export class AddSubcontractor implements OnInit {
   subcontractorForm: FormGroup;
   countryList = countryList;
   countries = countryList.map(c => c.name);
   isDropdownOpen = false;
-  selectedCountry = countryList.find(c => c.code === '+31') || countryList[0]; // Default to Netherland or first country
+  selectedCountry = countryList.find(c => c.code === '+33') || countryList[0]; // default
   workitems: Workitem[] = [];
   selectedWorkitems: Workitem[] = [];
+  selectionsByCategory = new Map<string, Workitem[]>(); // preserve selections per category
+  selectedCount = 0;
+
   persons: any[] = [];
   categories: WorkitemCategory[] = [
-    { categoryID: '60a1a614-05fd-402d-81b3-3ba05fdd2d8a', categoryName: 'Standard' },
-    { categoryID: '213cf69b-627e-4962-83ec-53463c8664d2', categoryName: 'Unibouw' }
+    { categoryID: '213cf69b-627e-4962-83ec-53463c8664d2', categoryName: 'Unibouw' },
+    { categoryID: '60a1a614-05fd-402d-81b3-3ba05fdd2d8a', categoryName: 'Standard' }
   ];
+  selectedCategoryId: string = '';
   attachments: File[] = [];
   uploadedFiles: { name: string; type: string; path: string }[] = [];
-  uploadedFileType: string = '';
-  uploadedFilePath: string = '';
-  showPopup = false;
-  popupMessage = '';
-  popupError = false;
-  selectedCategoryId: string = '';
-  constructor(private fb: FormBuilder, private router: Router, private workItemService: WorkitemService, private subcontractorService: SubcontractorService) {
+  officeSub?: Subscription;
+
+  popupMessage: string = '';
+  popupError: boolean = false;
+  showPopup: boolean = false;
+  
+
+  constructor(
+    private fb: FormBuilder,
+    private router: Router,
+    private workItemService: WorkitemService,
+    private subcontractorService: SubcontractorService
+  ) {
     this.subcontractorForm = this.fb.group({
-      name: [
-  '',
-  [
-    Validators.required,
-    Validators.pattern(/^[a-zA-Z0-9 ]+$/)
-  ]
-],
-    location: ['', Validators.required],
-    country: ['', Validators.required],
-    registeredDate: [''],
-    email: ['', [Validators.required, 
-       Validators.pattern(/^[a-zA-Z0-9]+([._%+-]?[a-zA-Z0-9]+)*@[a-zA-Z0-9-]+(\.[a-zA-Z]{2,})+$/)]
-      ],
-    status: ['Active'],
-    officeAddress: ['', Validators.required],
-    billingAddress: [''],
-    sameAsOffice: [false],
-    countryCode: [this.selectedCountry.code],
-    contactNumber: [
-      '',
-      [Validators.required, Validators.pattern(/^[0-9]{10,15}$/)]
-    ],
-    contactPerson: ['', Validators.required],
-    attachments: [null]
+      name: ['', [Validators.required, Validators.pattern(/^(?=.*\S)[a-zA-Z0-9 ]+$/)]],
+      location: ['', [Validators.required, Validators.pattern(/\S+/)]],
+      country: ['', Validators.required],
+      registeredDate: [''],
+      email: ['', [Validators.required, Validators.pattern(/^[a-zA-Z0-9]+([._%+-]?[a-zA-Z0-9]+)*@[a-zA-Z0-9-]+(\.[a-zA-Z]{2,})+$/)]],
+      contactEmail: ['', [Validators.required, Validators.pattern(/^[a-zA-Z0-9]+([._%+-]?[a-zA-Z0-9]+)*@[a-zA-Z0-9-]+(\.[a-zA-Z]{2,})+$/)]],
+      status: ['Active', Validators.required],
+      officeAddress: ['', Validators.required],
+      billingAddress: [''],
+      sameAsOffice: [false],
+      countryCode: [this.selectedCountry.code],
+      contactNumber: ['', [Validators.required, Validators.pattern(/^[0-9]{10,15}$/)]],
+      contactPerson: ['', Validators.required],
+      attachments: [null]
     });
   }
 
-officeSub: any;
+  ngOnInit() {
+    this.loadPersons();
 
-ngOnInit() {
-  this.loadPersons();
-
-  if (this.categories.length > 0) {
-    this.selectedCategoryId = this.categories[0].categoryID;
-    this.loadWorkitems();
-  }
-
-  const officeCtrl = this.subcontractorForm.get('officeAddress');
-  const billingCtrl = this.subcontractorForm.get('billingAddress');
-  const sameAsCtrl = this.subcontractorForm.get('sameAsOffice');
-
-  sameAsCtrl?.valueChanges.subscribe((checked) => {
-    if (checked) {
-      // Copy office → billing
-      billingCtrl?.setValue(officeCtrl?.value);
-      billingCtrl?.disable();
-
-      // If previously subscribed, unsubscribe first
-      if (this.officeSub) {
-        this.officeSub.unsubscribe();
-      }
-
-      // Sync office → billing continuously
-      this.officeSub = officeCtrl?.valueChanges.subscribe((val) => {
-        billingCtrl?.setValue(val, { emitEvent: false });
-      });
-    } else {
-      // Unchecked → stop syncing
-      if (this.officeSub) {
-        this.officeSub.unsubscribe();
-      }
-
-      billingCtrl?.enable();
-      billingCtrl?.setValue(''); // Clear billing address
+    if (this.categories.length > 0) {
+      this.selectedCategoryId = this.categories[0].categoryID;
+      this.loadWorkitems();
     }
-  });
-}
 
-  toggleDropdown() {
-    this.isDropdownOpen = !this.isDropdownOpen;
+    const officeCtrl = this.subcontractorForm.get('officeAddress');
+    const billingCtrl = this.subcontractorForm.get('billingAddress');
+    const sameAsCtrl = this.subcontractorForm.get('sameAsOffice');
+
+    sameAsCtrl?.valueChanges.subscribe((checked) => {
+      if (checked) {
+        billingCtrl?.setValue(officeCtrl?.value);
+        billingCtrl?.disable();
+
+        if (this.officeSub) this.officeSub.unsubscribe();
+        this.officeSub = officeCtrl?.valueChanges.subscribe((val) => {
+          billingCtrl?.setValue(val, { emitEvent: false });
+        });
+      } else {
+        if (this.officeSub) this.officeSub.unsubscribe();
+        billingCtrl?.enable();
+        billingCtrl?.setValue('');
+      }
+    });
   }
 
-  // Select country from dropdown
+  /** Dropdown logic */
+  toggleDropdown() { this.isDropdownOpen = !this.isDropdownOpen; }
+
   selectCountry(country: any) {
     this.selectedCountry = country;
     this.subcontractorForm.patchValue({ countryCode: country.code });
     this.isDropdownOpen = false;
   }
 
-  // Close dropdown when clicking outside
   @HostListener('document:click', ['$event'])
   onClickOutside(event: Event) {
     const target = event.target as HTMLElement;
-    if (!target.closest('.custom-select-wrapper')) {
-      this.isDropdownOpen = false;
-    }
+    if (!target.closest('.custom-select-wrapper')) this.isDropdownOpen = false;
   }
 
-  // Load workitems for selected category
+  /** Load workitems per category */
   loadWorkitems() {
-    if (!this.selectedCategoryId) {
-      this.workitems = [];
-      this.selectedWorkitems = [];
-      return;
-    }
-
     this.workItemService.getWorkitems(this.selectedCategoryId).subscribe(items => {
-      // Only keep items where isActive is true
-      this.workitems = (items || []).filter(w => w.isActive !== false).sort((a, b) => a.name.localeCompare(b.name));
+      this.workitems = (items || [])
+        .filter(w => w.isActive !== false)
+        .map(w => ({ ...w, categoryID: this.selectedCategoryId }))
+        .sort((a, b) => a.name.localeCompare(b.name));
 
-      // Keep selected items only if they exist in the new list
-      this.selectedWorkitems = this.selectedWorkitems.filter(sw =>
-        this.workitems.some(w => w.workItemID === sw.workItemID)
-      );
+      // Restore selections for this category
+      this.selectedWorkitems = this.selectionsByCategory.get(this.selectedCategoryId) || [];
+      this.selectedCount = this.selectedWorkitems.length;
     });
   }
 
-  selectCategory(categoryId: string) {
-    this.selectedCategoryId = categoryId;
-    this.selectedWorkitems = [];   // clear selected items for new category
-    this.workitems = [];           // clear current workitems
+  selectCategory(id: string) {
+    this.selectionsByCategory.set(this.selectedCategoryId, this.selectedWorkitems);
+    this.selectedCategoryId = id;
     this.loadWorkitems();
   }
 
   toggleWorkitem(event: any, item: Workitem) {
+    const itemWithCategory = { ...item, categoryID: this.selectedCategoryId };
     if (event.target.checked) {
-      this.selectedWorkitems.push(item);
+      if (!this.selectedWorkitems.some(w => w.workItemID === item.workItemID)) {
+        this.selectedWorkitems.push(itemWithCategory);
+      }
     } else {
       this.selectedWorkitems = this.selectedWorkitems.filter(w => w.workItemID !== item.workItemID);
     }
-  }
-onFileSelected(event: any) {
-  const input = event.target as HTMLInputElement;
-  const file = input.files && input.files.length > 0 ? input.files[0] : null;
-
-  if (file) {
-    this.attachments.push(file);
-    this.uploadedFiles.push({
-      name: file.name,
-      type: file.type,
-      path: `uploads/${file.name}`, // Example placeholder
-    });
-    this.subcontractorForm.patchValue({ attachments: this.attachments });
+    this.selectionsByCategory.set(this.selectedCategoryId, this.selectedWorkitems);
   }
 
-  // ✅ Clear the file input after upload
-  input.value = '';
-}
-
-addMoreFiles() {
-  const input = document.createElement('input');
-  input.type = 'file';
-  input.onchange = (event: any) => {
-    const file: File = event.target.files[0];
-    if (file) {
-      this.attachments.push(file);
-      this.uploadedFiles.push({
-        name: file.name,
-        type: file.type,
-        path: `uploads/${file.name}`,
-      });
-      this.subcontractorForm.patchValue({ attachments: this.attachments });
-    }
-  };
-  input.click();
-}
-removeFile(index: number) {
-  this.attachments.splice(index, 1);
-  this.uploadedFiles.splice(index, 1);
-  this.subcontractorForm.patchValue({ attachments: this.attachments });
-}
-loadPersons(): void {
-    this.subcontractorService.getPersons().subscribe({
-      next: (res: any[]) => {
-        this.persons = res;
-      },
-      error: (err: any) => console.error('Error fetching persons:', err)
-    });
-  }
-
-  
-onSubmit() {
-  // Mark all form fields as touched to show validation errors
-  this.subcontractorForm.markAllAsTouched();
-
-  // Validate that at least one work item is selected
-  if (this.selectedWorkitems.length === 0) {
-   return;
-  }
-
-  // Proceed only if the form is valid
-  if (!this.subcontractorForm.valid) {
-    return;
-  }
-
-  const formValue = this.subcontractorForm.value;
-
-  // Prepare the payload for API call
-  const payload = {
-    erP_ID: formValue.erpId?.trim() || "",
-    name: formValue.name?.trim(),
-    rating: formValue.rating || 0,
-    contactPerson: formValue.contactPerson || "",
-    emailID: formValue.email,
-    phoneNumber1: formValue.contactNumber? this.selectedCountry.code + formValue.contactNumber: "",
-    personID: formValue.contactPerson,
-    location: formValue.location,
-    country: formValue.country ? formValue.country : null,
-    officeAddress: formValue.officeAddress ? formValue.officeAddress : null,
-    billingAddress: formValue.sameAsOffice? formValue.officeAddress: formValue.billingAddress,
-    registeredDate: formValue.registeredDate || new Date(),
-    isActive: formValue.status === "Active",
-    createdBy: "nitish.ra@flatworldsolutions.com",
-    workItemIDs: this.selectedWorkitems.map(item => item.workItemID),
-  };
-
-  // Call API to create subcontractor
-  this.subcontractorService.createSubcontractor(payload).subscribe({
-    next: (res) => {
-      const subcontractorID = res?.subcontractorID || res?.id;
-      const files: File[] = formValue.attachments || [];
-
-      // If subcontractor created and attachments exist, upload them
-      if (subcontractorID && files.length > 0) {
-        this.subcontractorService.createAttachments(subcontractorID, files).subscribe({
-          next: () => {
-            this.showPopupMessage("Subcontractor and files uploaded successfully!");
-            this.handleFormResetAndRedirect();
-          },
-          error: (uploadErr) => {
-            console.error("File upload failed:", uploadErr);
-            this.showPopupMessage("File upload failed.", true);
-          },
-        });
-      } 
-      // If no attachments, just show success message
-      else {
-        this.showPopupMessage("Subcontractor created successfully!");
-        this.handleFormResetAndRedirect();
-      }
-    },
-    error: (err) => {
-      console.error("Backend error:", err);
-      // Safely extract backend error message
-  const errorMessage =
-    err?.error?.message ||    // Custom message from backend
-    err?.error?.error ||      // Detailed error if available
-    err?.message ||           // Generic message
-    'Failed to create Subcontractor. Please try again.'; // Fallback
-
-      this.showPopupMessage(errorMessage, true);
-      //this.showPopupMessage("Failed to create Subcontractor. Please try again.", true);
-    },
-  });
-}
-
-/** method to reset the form and navigate back to the Subcontractor list*/
-private handleFormResetAndRedirect(): void {
-  this.onReset();
-  setTimeout(() => this.router.navigate(['/subcontractor']), 1000);
-}
-
-
-onReset() {
-  this.subcontractorForm.reset();
-    this.subcontractorForm.markAsPristine(); // Optional: marks form as pristine
-  this.subcontractorForm.markAsUntouched(); // Optional: marks form as untouched
-  this.selectedWorkitems = [];
-  //this.selectedCountry = { name: 'India', code: '+91', flag: 'in' }; // or default country
-  this.selectedCountry = { name: 'France', code: '+31', flag: 'fr' }; // default country set to France
-  this.uploadedFiles = []; // clear uploaded file preview list if any
-  const fileInput = document.querySelector<HTMLInputElement>('#fileInput');
-  if (fileInput) fileInput.value = ''; // clear the file input
-}
-
-
-  onCancel() {
-    // this.subcontractorForm.reset({
-    //   status: 'Active',
-    //   sameAsOffice: false,
-    //   attachments: null
-    // });
-    // this.selectedWorkitems = [];
-    this.router.navigate(['/subcontractor']);
-
-  }
-
-
-
-  // Helper function for template to check if a workitem is selected
   isSelected(w: Workitem): boolean {
     return this.selectedWorkitems.some(sw => sw.workItemID === w.workItemID);
   }
 
-  // showPopupMessage(message: string, isError: boolean = false) {
-  //   this.popupMessage = message;
-  //   this.showPopup = true;
-  //   // Change popup style dynamically if it's an error
-  //   const popupEl = document.querySelector('.popup');
-  //   if (popupEl) {
-  //     popupEl.classList.toggle('error', isError);
-  //   }
-  //   // Hide after 3 seconds
-  //   setTimeout(() => {
-  //     this.showPopup = false;
-  //   }, 3000);
-  // }
+  getSelectedCount(categoryId: string): number {
+    return (this.selectionsByCategory.get(categoryId) || []).length;
+  }
 
-   showPopupMessage(message: string, isError: boolean = false) {
+  workitemSearch: string = '';
+  filteredWorkitems() {
+    if (!this.workitemSearch) return this.workitems;
+    const term = this.workitemSearch.toLowerCase();
+    return this.workitems.filter(w => w.name.toLowerCase().includes(term));
+  }
+
+  /** File uploads */
+  onFileSelected(event: any) {
+    const file = event.target.files?.[0];
+    if (file) this.addAttachment(file);
+    event.target.value = '';
+  }
+
+  addMoreFiles() {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.onchange = (event: any) => {
+      const file: File = event.target.files[0];
+      if (file) this.addAttachment(file);
+    };
+    input.click();
+  }
+
+  private addAttachment(file: File) {
+    this.attachments.push(file);
+    this.uploadedFiles.push({ name: file.name, type: file.type, path: `uploads/${file.name}` });
+    this.subcontractorForm.patchValue({ attachments: this.attachments });
+  }
+
+  removeFile(index: number) {
+    this.attachments.splice(index, 1);
+    this.uploadedFiles.splice(index, 1);
+    this.subcontractorForm.patchValue({ attachments: this.attachments });
+  }
+
+  loadPersons(): void {
+    this.subcontractorService.getPersons().subscribe({
+      next: (res: any[]) => this.persons = res,
+      error: (err: any) => console.error('Error fetching persons:', err)
+    });
+  }
+
+  submitAttempted = false;
+
+  /** Form submission */
+  onSubmit() {
+   this.submitAttempted = true;
+
+  // Mark the form fields as touched so validation errors appear
+  this.subcontractorForm.markAllAsTouched();
+
+  // Validate workitems + form together
+  if (this.selectedWorkitems.length === 0 || this.subcontractorForm.invalid) {
+    return; // stop submission
+  }
+  const formValue = this.subcontractorForm.value;
+
+  const payload = {
+    erp_ID: formValue.erpId?.trim() || '',
+    name: formValue.name?.trim(),
+    rating: formValue.rating || 0,
+
+    emailID: formValue.email,                    // main subcontractor email
+    phoneNumber1: this.selectedCountry.code + formValue.contactNumber,
+    phoneNumber2: '',                             // optional
+
+    location: formValue.location,
+    country: formValue.country,
+    officeAddress: formValue.officeAddress,
+    billingAddress: formValue.sameAsOffice
+      ? formValue.officeAddress
+      : (formValue.billingAddress || ''),
+
+    personID: null,           
+
+    workItemIDs: this.selectedWorkitems.map(w => w.workItemID),
+
+    contactName: formValue.contactPerson,
+    contactEmailID: formValue.contactEmail,
+    contactPhone: this.selectedCountry.code + formValue.contactNumber
+  };
+
+  console.log("FINAL PAYLOAD:", payload);
+
+  this.subcontractorService.createSubcontractor(payload).subscribe({
+  next: (res) => {
+    console.log("API SUCCESS:", res);
+    this.handleSuccess(res, formValue.attachments || []);
+  },
+  error: (err) => {
+    console.error("API ERROR:", err);   // 👈 FULL LOG
+     if (err.status === 409 && err.error?.field === "email") {
+    // Set field-level error on email form control
+    this.subcontractorForm.get('email')?.setErrors({
+      emailExists: err.error.message || 'Email already exists.'
+    });
+
+    return; // ⛔ Don't show popup for field errors
+  }
+  // For other errors, show popup
+    this.handleError(err);
+  }
+});
+
+}
+
+  private handleSuccess(res: any, files: File[]) {
+    const subcontractorID = res?.subcontractorID || res?.id;
+
+    if (subcontractorID && files.length > 0) {
+      this.subcontractorService.createAttachments(subcontractorID, files).subscribe({
+        next: () => {
+          this.showPopupMessage('Subcontractor and files uploaded successfully!');
+          this.handleFormResetAndRedirect();
+        },
+        error: (uploadErr) => {
+          console.error('File upload failed:', uploadErr);
+          this.showPopupMessage('File upload failed.', true);
+        }
+      });
+    } else {
+      this.showPopupMessage('Subcontractor created successfully!');
+      this.handleFormResetAndRedirect();
+    }
+  }
+
+  private handleError(err: any) {
+    console.error('Backend error:', err);
+    const errorMessage =
+      err?.error?.message ||
+      err?.error?.error ||
+      JSON.stringify(err?.error?.errors) ||  // show validation errors
+      err?.message ||
+      'Failed to create Subcontractor. Please try again.';
+    this.showPopupMessage(errorMessage, true);
+  }
+
+  private handleFormResetAndRedirect(): void {
+    this.onReset();
+    setTimeout(() => this.router.navigate(['/subcontractor']), 1000);
+  }
+
+onReset() {
+  this.subcontractorForm.reset();
+  this.subcontractorForm.patchValue({ status: 'Active', country: '' });
+  this.submitAttempted = false;
+  this.selectedWorkitems = [];
+  this.selectedCountry = countryList.find(c => c.code === '+33') || countryList[0];
+  this.uploadedFiles = [];
+
+  const fileInput = document.querySelector<HTMLInputElement>('#fileInput');
+  if (fileInput) fileInput.value = '';
+
+  this.selectionsByCategory.clear();
+}
+
+
+  onCancel() {
+    this.router.navigate(['/subcontractor']);
+  }
+
+  showPopupMessage(message: string, isError: boolean = false) {
     this.popupMessage = message;
     this.popupError = isError;
     this.showPopup = true;
     setTimeout(() => (this.showPopup = false), 3000);
   }
 }
+ 
