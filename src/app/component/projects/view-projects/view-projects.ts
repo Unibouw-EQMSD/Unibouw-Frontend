@@ -94,7 +94,7 @@ displayedColumns: string[] = [
   rfqs: Rfq[] = []; // <-- Add this line
   duedate: Date | null = null;
   GlobalReminderConfig: any = null;
-  reminderDates: number[] = [];
+  //reminderDates: number[] = [];
   reminderTime: string = ''
   reminderEmailBody: string = '';
 
