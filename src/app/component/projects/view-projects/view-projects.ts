@@ -11,7 +11,7 @@ import { RfqResponseService } from '../../../services/rfq-response.service';
 import { Workitem } from '../../../services/workitem.service';
 import { Router } from '@angular/router';
 import { forkJoin } from 'rxjs';
-
+import { ReminderService } from '../../../services/reminder.service';
 
 interface RfqResponse {
   name: string;
@@ -27,8 +27,7 @@ interface RfqResponse {
   actions: string[];
     subcontractorId: string;   // << ADD THIS
       quoteAmount?: string;
-subcontractorName:string;
-dueDate: Date;
+
 
 }
 
@@ -93,6 +92,11 @@ displayedColumns: string[] = [
   dataSource = new MatTableDataSource<any>([]);
  isLoading = false;
   rfqs: Rfq[] = []; // <-- Add this line
+  duedate: Date | null = null;
+  GlobalReminderConfig: any = null;
+  //reminderDates: number[] = [];
+  reminderTime: string = ''
+  reminderEmailBody: string = '';
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
@@ -101,12 +105,28 @@ displayedColumns: string[] = [
  reminderDates: string[] = [];   
 
 
-  constructor(private rfqService:RfqService,private router:Router,private rfqResponseService: RfqResponseService, private cdr: ChangeDetectorRef, private snackBar: MatSnackBar, private route: ActivatedRoute,private projectService: projectService){
+  constructor(private rfqService:RfqService,private router:Router,private rfqResponseService: RfqResponseService, private cdr: ChangeDetectorRef, private snackBar: MatSnackBar, private route: ActivatedRoute,private projectService: projectService, private reminderService: ReminderService){
 
   }
 
 
   ngOnInit(): void {
+
+    // // Subscribe to sequence
+    // this.reminderService.reminderSequence$.subscribe(sequence => {
+    //   console.log('Reminder sequence:', sequence);
+    // });
+
+    // // Subscribe to time
+    // this.reminderService.reminderTime$.subscribe(time => {
+    //   console.log('Reminder time:', time);
+    // });
+
+    // // Subscribe to email body
+    // this.reminderService.reminderEmailBody$.subscribe(body => {
+    //   console.log('Reminder email body:', body);
+    // });
+
   // ✅ Capture the project ID from the route
   this.projectId = this.route.snapshot.paramMap.get('id') || '';
   console.log('📦 Captured Project ID:', this.projectId);
@@ -191,13 +211,8 @@ loadRfqResponseSummary(projectId: string) {
         rfqs: w.subcontractors.map((s: any) => ({
           subcontractorId: s.subcontractorId,
           name: s.name,
-          workItemName: w.workItemName,
-          workItemId: w.workItemId,
-
-          rfqId: s.rfqId,
-          rfqNumber: w.rfqNumber || s.rfqNumber || '-',
-
-          date: s.date,
+          rating: s.rating || 0,
+          date: s.date || '—',
           responded: s.responded,
           interested: s.interested,
           viewed: s.viewed,
@@ -654,13 +669,54 @@ reminderFormatDate(date: Date): string {
 
 showReminderPopup = false;
 openReminderPopup(rfq: any) {
+
+    this.reminderService.getGlobalReminderConfig().subscribe({
+    next: (res) => {  
+      const config = Array.isArray(res) && res.length > 0 ? res[0] : null;
+      if (!config) {
+        this.snackBar.open("No reminder configuration found", "Close", { duration: 3000 });
+        return;
+      }
+
+      // Store deep copy for reset
+      this.GlobalReminderConfig = JSON.parse(JSON.stringify(config));
+// this.reminderDates = config.reminderSequence
+//   ? config.reminderSequence.split(',').map(Number)
+//   : [];
+
+const dueDate = new Date(rfq.dueDate); // convert string to Date
+
+// const reminderDates: Date[] = config.reminderSequence.split(',').map((num: string) => {
+//   const daysBefore = Number(num);
+//   const reminderDate = new Date(dueDate);
+//   reminderDate.setDate(dueDate.getDate() + daysBefore);
+//   return reminderDate;
+// });
+
+//console.log(reminderDates.map(d => d.toISOString().split('T')[0]));
+
+      this.reminderTime = config.reminderTime || '08:00';
+      this.reminderEmailBody = config.reminderEmailBody || '';
+   
+
     this.selectedRfqId = rfq.rfqId;
     this.dueDate = rfq.dueDate;   
 
     this.reminderDates = this.generateReminderDates(rfq.dueDate);
 
     this.subId = rfq.subcontractorId;
+    this.duedate = rfq.dueDate; 
     this.showReminderPopup = true;
+
+    },
+    error: (err) => {
+      console.error("Error loading reminder config:", err);
+
+this.snackBar.open("Failed to load reminder configuration", "Close", {
+        duration: 4000
+      });
+    }
+  });
   }
 
 closeReminderPopup() {
