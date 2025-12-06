@@ -1,6 +1,40 @@
 <app-header></app-header>
 <main id="main">
   <div class="container">
+
+
+
+    <!-- 🌟 SKELETON LOADING -->
+<!-- FULL PAGE SKELETON -->
+<div class="full-page-skeleton" *ngIf="isLoading">
+
+  <!-- LEFT SIDE SKELETON -->
+  <div class="skeleton-left">
+    <div class="skeleton-title skeleton"></div>
+
+    <div class="skeleton-block" *ngFor="let x of [].constructor(7)">
+      <div class="skeleton-label skeleton"></div>
+      <div class="skeleton-value skeleton"></div>
+    </div>
+  </div>
+
+  <!-- RIGHT SIDE SKELETON -->
+  <div class="skeleton-right">
+    <div class="skeleton-tabs">
+      <div class="skeleton-tab skeleton"></div>
+      <div class="skeleton-tab skeleton"></div>
+      <div class="skeleton-tab skeleton"></div>
+    </div>
+
+    <div class="skeleton-table">
+      <div class="skeleton-row" *ngFor="let r of [].constructor(6)">
+        <div class="skeleton-cell skeleton" *ngFor="let c of [].constructor(6)"></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
     <!-- 🔹 Page Header -->
     <div class="pagetitle">
       <h1>{{ projectDetails.name }}</h1>
@@ -55,10 +89,10 @@
             </span>
           </div>
 
-          <div class="detail-row">
+          <!-- <div class="detail-row">
             <span class="label">Total Dimension</span
             ><span class="value">{{ projectDetails.totalDimension }}</span>
-          </div>
+          </div> -->
           <div class="detail-row">
             <span class="label">Specification</span>
             <span class="value">
@@ -88,116 +122,270 @@
           </button>
         </div>
 
-        <!-- 🟢 TAB 1: RFQ RESPONSE (Accordion Section) -->
-        <div *ngIf="selectedTab === 'response'">
-          <div class="rfq-header">
-            <!-- <h3>RFQ Responses</h3> -->
-            <div class="group-options">
-              <label
-                ><input type="radio" name="groupBy" [(ngModel)]="groupBy" value="workItem" /> Group
-                by Work Item</label
-              >
-              <label
-                ><input type="radio" name="groupBy" [(ngModel)]="groupBy" value="subcontractor" />
-                Group by Subcontractor</label
-              >
-            </div>
+          <!-- 🟢 TAB 1: RFQ RESPONSE (Accordion Section) -->
+     <div *ngIf="selectedTab === 'response'">
+
+  <!-- GROUP OPTIONS -->
+  <div class="rfq-header">
+    <div class="group-options">
+      <label>
+        <input type="radio" name="groupBy" [(ngModel)]="groupBy" value="workItem" />
+        Group by Work Item
+      </label>
+      <label>
+        <input type="radio" name="groupBy" [(ngModel)]="groupBy" value="subcontractor" />
+        Group by Subcontractor
+      </label>
+    </div>
+  </div>
+
+  <!-- ===================================================== -->
+  <!-- 1️⃣  WORK ITEM GROUPING                              -->
+  <!-- ===================================================== -->
+  <div *ngIf="groupBy === 'workItem'">
+
+    <div *ngFor="let work of workItems" class="work-item">
+
+      <!-- Work Item Header -->
+      <div class="work-item-header" (click)="work.open = !work.open">
+        <div class="rfq-summary">
+          <div style="width: 100px;">
+            <span class="label">Work Item</span>
+             <div class="highlight text-ellipsis" [title]="work.name">
+    {{ work.name }}
+  </div>
           </div>
+          <div>
+            <span class="label">Requests Sent</span>
+            <div>{{ work.requestsSent }}</div>
+          </div>
+           <div>
+            <span class="label">Viewed</span>
+            <div>{{ work.viewed }}</div>
+          </div>
+          <div>
+            <span class="label">Interested</span>
+            <div>{{ work.interested }}</div>
+          </div>
+           <div>
+            <span class="label">Not Interested</span>
+            <div>{{ work.notInterested }}</div>
+          </div>
+           <div>
+            <span class="label">Maybe Later</span>
+            <div>{{work.maybeLater}}</div>
+          </div>
+          <div>
+            <span class="label">Not Responded</span>
+            <div>{{ work.notResponded }}</div>
+          </div>
+          
+         
+         
+        </div>
 
-          <div *ngFor="let work of workItems" class="work-item">
-            <div class="work-item-header" (click)="work.open = !work.open">
-              <div class="rfq-summary">
-                <div>
-                  <span class="label">Work Item</span>
-                  <div class="highlight">{{ work.name }}</div>
-                </div>
-                <div>
-                  <span class="label">Requests Sent</span>
-                  <div>{{ work.requestsSent }}</div>
-                </div>
-                <div>
-                  <span class="label">Not Responded</span>
-                  <div>{{ work.notResponded }}</div>
-                </div>
-                <div>
-                  <span class="label">Interested</span>
-                  <div>{{ work.interested }}</div>
-                </div>
-                <div>
-                  <span class="label">Not Interested</span>
-                  <div>{{ work.notInterested }}</div>
-                </div>
-                <div>
-                  <span class="label">Viewed</span>
-                  <div>{{ work.viewed }}</div>
-                </div>
-              </div>
-              <div>
-                <i class="fa" [ngClass]="work.open ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
-              </div>
-            </div>
+        <i class="fa" [ngClass]="work.open ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
+      </div>
 
-            <div class="work-item-body" *ngIf="work.open">
-              <div class="search-box" style="margin-bottom: 12px">
-                <input type="text" [(ngModel)]="work.searchText" placeholder="Search" />
-              </div>
+      <!-- Work Item Body -->
+      <div class="work-item-body" *ngIf="work.open">
 
-              <div class="rfq-table-wrapper">
-                <table class="rfq-table">
-                  <thead>
-                    <tr>
-                      <th>Name</th>
-                      <th>Date</th>
-                      <th>RFQ ID</th>
-                      <th>Responded</th>
-                      <th>Interested</th>
-                      <th>Viewed</th>
-                      <th>Quote Status</th>
-                      <th>Quote Amount</th>
-                      <th>Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr *ngFor="let rfq of getFilteredRfqs(work)" (click)="markViewed(work, rfq)">
-                      <td>
-                        {{ rfq.name }}
-                        <div class="rating">★ {{ rfq.rating }}</div>
-                      </td>
-                      <td>{{ rfq.date }}</td>
-                      <td>{{ rfq.rfqId }}</td>
-                      <td><i class="fa fa-check-circle success" *ngIf="rfq.responded"></i></td>
-                      <td><i class="fa fa-check-circle success" *ngIf="rfq.interested"></i></td>
-                      <td><i class="fa fa-check-circle success" *ngIf="rfq.viewed"></i></td>
-                      <td>{{ rfq.responded ? 'Uploaded' : 'Not Uploaded' }}</td>
-                      <td>{{ rfq.quoteAmount || '-' }}</td>
+        <!-- Search -->
+        <div class="search-box" style="margin-bottom: 12px">
+          <input type="text" [(ngModel)]="work.searchText" placeholder="Search" />
+        </div>
 
-                      <td>
-                        <i
-                          *ngIf="rfq.actions?.includes('pdf')"
-                          class="fa fa-file-pdf action-icon download-icon"
-                          (click)="downloadQuote($event, rfq.rfqId, rfq.subcontractorId)"
-                          title="Download"
-                        ></i>
-                        <i *ngIf="rfq.actions?.includes('lock')" class="fa fa-lock action-icon"></i>
-                        <i
-                          class="fa fa-bell"
-                          title="Set Reminder"
-                          (click)="openReminderPopup(rfq)"
-                        ></i>
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-            </div>
+        <!-- Table -->
+        <div class="rfq-table-wrapper">
+          <table class="rfq-table">
+            <thead>
+              <tr>
+                <th>Name</th>
+                 <th>Date</th>
+                <th>RFQ ID</th>
+                                <th>Viewed</th>
+
+                <th>Interested</th>
+                <th>Maybe Later</th>
+                <th>Quote Amount</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              <!-- Loop through RFQs -->
+              <tr *ngFor="let rfq of getFilteredRfqs(work)">
+                
+                <!-- ✅ CHECK: Does this row have a Subcontractor? -->
+                <ng-container *ngIf="rfq.subcontractorId; else noResponseTemplate">
+                  
+                  <td (click)="markViewed(work, rfq)">
+                    {{ rfq.name }}
+                    <div class="rating">★ {{ rfq.rating }}</div>
+                  </td>
+
+                  <td (click)="markViewed(work, rfq)">{{ rfq.date }}</td>
+                  <td (click)="markViewed(work, rfq)">{{ rfq.rfqNumber }}</td>
+
+                                    <td (click)="markViewed(work, rfq)"><i class="fa fa-check-circle success" *ngIf="rfq.viewed"></i></td>
+
+                  <td (click)="markViewed(work, rfq)"><i class="fa fa-check-circle success" *ngIf="rfq.interested"></i></td>
+                    <td (click)="markMaybeLater(work, rfq)">
+        <i class="fa fa-check-circle success" *ngIf="rfq.maybeLater"></i>
+      </td>
+
+                  <!-- <td (click)="markViewed(work, rfq)">{{ rfq.responded ? 'Uploaded' : 'Not Uploaded' }}</td> -->
+                  <td (click)="markViewed(work, rfq)">{{ rfq.quoteAmount }}</td>
+
+                  <td>
+                    <!-- PDF Icon with Disabled Logic -->
+                    <i class="fa fa-file-pdf action-icon download-icon"
+                       [class.disabled-icon]="!rfq.responded"
+                       (click)="rfq.responded && downloadQuote($event, rfq.rfqId, rfq.subcontractorId)"
+                       [title]="rfq.responded ? 'Download Quote' : 'No Quote Uploaded'">
+                    </i>
+
+                    <i class="fa fa-bell"
+                       title="Set Reminder"
+                       (click)="openReminderPopup(rfq)">
+                    </i>
+                  </td>
+                </ng-container>
+
+                <!-- ❌ FALLBACK: If RFQ exists but no Subcontractor (e.g. RFQ59) -->
+                <ng-template #noResponseTemplate>
+                  <td colspan="9" class="no-records-cell" style="text-align: center; padding: 20px; color: #888;">
+                    No responses found
+                  </td>
+                </ng-template>
+
+              </tr>
+
+              <!-- EDGE CASE: Filter returns 0 results completely -->
+              <tr *ngIf="getFilteredRfqs(work)?.length === 0">
+                <td colspan="9" class="no-records-cell" style="text-align: center; padding: 20px; color: #888;">
+                  No responses found
+                </td>
+              </tr>
+
+            </tbody>
+          </table>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ===================================================== -->
+  <!-- 2️⃣ SUBCONTRACTOR GROUPING                            -->
+  <!-- ===================================================== -->
+  <div *ngIf="groupBy === 'subcontractor'">
+    <div *ngFor="let sub of subcontractorGroups" class="work-item">
+
+      <!-- Header -->
+      <div class="work-item-header" (click)="sub.open = !sub.open">
+        <div class="rfq-summary">
+          <div>
+            <span class="label">Subcontractor</span>
+            <div class="highlight">{{ sub.subcontractorName }}</div>
+          </div>
+          <div>
+            <span class="label">Requests Sent</span>
+            <div>{{ sub.requestsSent }}</div>
+          </div>
+          <div>
+            <span class="label">Viewed</span>
+            <div>{{ sub.viewed }}</div>
+          </div>
+          <div>
+            <span class="label">Interested</span>
+            <div>{{ sub.interested }}</div>
+          </div>
+          <div>
+            <span class="label">Not Interested</span>
+            <div>{{ sub.notInterested }}</div>
+          </div>
+          <div>
+            <span class="label">Maybe Later</span>
+            <div>{{sub.maybeLater}}</div>
+          </div>
+           <div>
+            <span class="label">Not Responded</span>
+            <div>{{ sub.notResponded }}</div>
           </div>
         </div>
 
+        <i class="fa" [ngClass]="sub.open ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
+      </div>
+
+      <!-- Body -->
+      <div class="work-item-body" *ngIf="sub.open">
+        <!-- Search -->
+        <div class="search-box" style="margin-bottom: 12px">
+          <input [(ngModel)]="sub.searchText" placeholder="Search" />
+        </div>
+
+        <!-- Table -->
+        <div class="rfq-table-wrapper">
+          <table class="rfq-table">
+            <thead>
+              <tr>
+                <th>Work Item</th>
+                <th>Date</th>
+                <th>RFQ ID</th>
+                                <th>Viewed</th>
+
+                <th>Interested</th>
+                <th>Maybe Later</th>
+                <!-- <th>Quote Status</th> -->
+                <th>Quote Amount</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let w of sub.workItems" (click)="markViewed(sub, w)">
+                <td>{{ w.workItemName }}</td>
+                <td>{{ w.date }}</td>
+                <td>{{ w.rfqNumber }}</td>
+                                <td><i class="fa fa-check-circle success" *ngIf="w.viewed"></i></td>
+
+                <td><i class="fa fa-check-circle success" *ngIf="w.interested"></i></td>
+                <td><i class="fa fa-check-circle success" *ngIf="w.maybeLater"></i></td>
+                <!-- <td>{{ w.responded ? 'Uploaded' : 'Not Uploaded' }}</td> -->
+                <td>{{ w.quoteAmount }}</td>
+                <td>
+                  <!-- PDF Icon with Disabled Logic -->
+                  <i
+                    *ngIf="w.actions?.includes('pdf')"
+                    class="fa fa-file-pdf action-icon download-icon"
+                    [class.disabled-icon]="!w.responded"
+                    (click)="w.responded && downloadQuote($event, w.rfqId, sub.subcontractorId)"
+                    [title]="w.responded ? 'Download Quote' : 'No Quote Uploaded'"
+                  ></i>
+                  
+                  <i *ngIf="w.actions?.includes('lock')" class="fa fa-lock action-icon"></i>
+                  <i class="fa fa-bell" title="Set Reminder" (click)="openReminderPopup(w)"></i>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+</div>
+
+
         <!-- 🔵 TAB 2: RFQ (Mat Table Section) -->
         <div *ngIf="selectedTab === 'rfq'">
-          <button type="button" class="addbtn" (click)="addRfq()">
-            <b>Add RFQ</b>
-          </button>
+          <div class="button-container">
+  <button type="button" class="addbtn" (click)="addRfq()">
+    <b>Add RFQ</b>
+  </button>
+</div>
           <table
             mat-table
             [dataSource]="dataSource"
@@ -225,13 +413,21 @@
               <th mat-header-cell *matHeaderCellDef mat-sort-header>No. of Subcontractors</th>
               <td mat-cell *matCellDef="let row">{{ row.subcontractorCount }}</td>
             </ng-container>
+            <ng-container matColumnDef="quoteRecieved">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header>Quote Recieved</th>
+      <td mat-cell *matCellDef="let row">{{ row.quoteReceived  }}</td>
+    </ng-container>
+            <ng-container matColumnDef="status">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header>Status</th>
+      <td mat-cell *matCellDef="let row">{{ row.status }}</td>
+    </ng-container>
 
-            <!-- <ng-container matColumnDef="actions">
+            <ng-container matColumnDef="actions">
           <th mat-header-cell *matHeaderCellDef> Actions </th>
           <td mat-cell *matCellDef="let row">
-            <i class="fa-regular fa-pen-to-square edit-icon"></i>
+        <i class="fa-regular fa-pen-to-square edit-icon" style=" color: #f97316;" (click)="editRfq(row.id)"></i>
           </td>
-        </ng-container> -->
+        </ng-container>
 
             <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
             <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
@@ -285,45 +481,53 @@ Thank you.</textarea
         Send Reminder
       </p>
 
-      <div class="modal-section" style="margin-bottom: 30px">
-        <div
-          style="
-            background: #f2f7fd;
-            border-radius: 8px;
-            padding: 16px 24px;
-            margin-bottom: 25px;
-            border: 1px solid #e4eeff;
-            display: flex;
-            align-items: flex-start;
-            gap: 12px;
-          "
-        >
-          <!-- Column 1: Icon -->
-          <div style="color: #1d6fe8; font-size: 20px; margin-top: 10px">
-            <i class="fa fa-clock"></i>
+      <!-- 🔥 Overlay text only (no loader) -->
+      <div class="loading-overlay" *ngIf="isLoading">
+        <p>Sending Reminder...</p>
+      </div>
+
+      <!-- 🔥 Content becomes faded + unclickable when loading -->
+      <div [class.disabled-content]="isLoading">
+        <!-- <div *ngIf="!isLoading" style="pointer-events: none; opacity: 0.6"> -->
+        <div class="modal-section" style="margin-bottom: 30px">
+          <div
+            style="
+              background: #f2f7fd;
+              border-radius: 8px;
+              padding: 16px 24px;
+              margin-bottom: 25px;
+              border: 1px solid #e4eeff;
+              display: flex;
+              align-items: flex-start;
+              gap: 12px;
+            "
+          >
+            <!-- Column 1: Icon -->
+            <div style="color: #1d6fe8; font-size: 20px; margin-top: 10px">
+              <i class="fa fa-clock"></i>
+            </div>
+
+            <!-- Column 2: Due date text and actual date -->
+            <div style="display: flex; flex-direction: column; gap: 4px">
+              <span style="color: #1d6fe8; font-size: 16px; font-weight: 500">Due Date</span>
+              <span style="color: #222; font-size: 16px">{{ dueDate }}</span>
+            </div>
           </div>
 
-          <!-- Column 2: Due date text and actual date -->
-          <div style="display: flex; flex-direction: column; gap: 4px">
-            <span style="color: #1d6fe8; font-size: 16px; font-weight: 500">Due Date</span>
-            <span style="color: #222; font-size: 16px">{{ this.duedate }}</span>
+          <div style="display: flex; align-items: center; gap: 18px">
+            <label style="display: flex; align-items: center">
+              <input type="radio" name="reminderType" value="default" [(ngModel)]="reminderType" />
+              <span style="margin-left: 6px">Default Reminder</span>
+            </label>
+
+            <label style="display: flex; align-items: center">
+              <input type="radio" name="reminderType" value="custom" [(ngModel)]="reminderType" />
+              <span style="margin-left: 6px">Custom Reminder</span>
+            </label>
           </div>
-        </div>
 
-        <div style="display: flex; align-items: center; gap: 18px">
-          <label style="display: flex; align-items: center">
-            <input type="radio" name="reminderType" value="default" [(ngModel)]="reminderType" />
-            <span style="margin-left: 6px">Default Reminder</span>
-          </label>
-
-          <label style="display: flex; align-items: center">
-            <input type="radio" name="reminderType" value="custom" [(ngModel)]="reminderType" />
-            <span style="margin-left: 6px">Custom Reminder</span>
-          </label>
-        </div>
-
-        <!-- Default Reminder -->
-        <div class="default-reminder-container" *ngIf="reminderType === 'default'">
+          <!-- Default Reminder -->
+          <!-- <div class="default-reminder-container" *ngIf="reminderType === 'default'">
           <div class="date-row">
             <span class="circle">1</span>
             <span class="date-input">15-11-2025</span>
@@ -336,79 +540,87 @@ Thank you.</textarea
             <span class="circle">3</span>
             <span class="date-input">15-12-2025</span>
           </div>
+        </div> -->
+
+          <div class="default-reminder-container" *ngIf="reminderType === 'default'">
+            <div class="date-row" *ngFor="let d of reminderDates; let i = index">
+              <span class="circle">{{ i + 1 }}</span>
+              <span class="date-input">{{ d }}</span>
+            </div>
+          </div>
+
+          <!-- Custom Reminder -->
+          <div class="reminder-container" *ngIf="reminderType === 'custom'">
+            <!-- <div class="date-row" *ngFor="let d of reminderDates; let i = index">
+              <span class="circle">{{ i + 1 }}</span>
+              <span class="date-input">{{ d }}</span>
+              <input [matDatepicker]="picker1" class="date-input" placeholder="Select date" />
+
+              <mat-datepicker-toggle matSuffix [for]="picker1">
+                <i class="fa fa-calendar calendar-icon"></i>
+              </mat-datepicker-toggle>
+
+              <mat-datepicker #picker1></mat-datepicker>
+            </div> -->
+
+            <div class="date-row">
+              <span class="circle">1</span>
+
+              <input [matDatepicker]="picker1" class="date-input" placeholder="Select date" />
+
+              <mat-datepicker-toggle matSuffix [for]="picker1">
+                <i class="fa fa-calendar calendar-icon"></i>
+              </mat-datepicker-toggle>
+
+              <mat-datepicker #picker1></mat-datepicker>
+            </div>
+
+            <div class="date-row">
+              <span class="circle">2</span>
+
+              <input [matDatepicker]="picker2" class="date-input" placeholder="Select date" />
+
+              <mat-datepicker-toggle matSuffix [for]="picker2">
+                <i class="fa fa-calendar calendar-icon"></i>
+              </mat-datepicker-toggle>
+
+              <mat-datepicker #picker2></mat-datepicker>
+            </div>
+
+            <div class="date-row">
+              <span class="circle">3</span>
+
+              <input [matDatepicker]="picker3" class="date-input" placeholder="Select date" />
+
+              <mat-datepicker-toggle matSuffix [for]="picker3">
+                <i class="fa fa-calendar calendar-icon"></i>
+              </mat-datepicker-toggle>
+
+              <mat-datepicker #picker3></mat-datepicker>
+            </div>
+          </div>
+
+          <!-- Set timer -->
+          <div class="time-row mt-8">
+            <label>Set Time: </label>
+            <input type="time" class="time-input" value="08:00" />
+            <i class="fa fa-clock-o time-icon"></i>
+          </div>
         </div>
 
-        <!-- Custom Reminder -->
-        <div class="reminder-container" *ngIf="reminderType === 'custom'">
-          <div class="date-row">
-            <span class="circle">1</span>
-
-            <input [matDatepicker]="picker1" class="date-input" placeholder="Select date" />
-
-            <mat-datepicker-toggle matSuffix [for]="picker1">
-              <i class="fa fa-calendar calendar-icon"></i>
-            </mat-datepicker-toggle>
-
-            <mat-datepicker #picker1></mat-datepicker>
-          </div>
-
-          <div class="date-row">
-            <span class="circle">2</span>
-
-            <input [matDatepicker]="picker2" class="date-input" placeholder="Select date" />
-
-            <mat-datepicker-toggle matSuffix [for]="picker2">
-              <i class="fa fa-calendar calendar-icon"></i>
-            </mat-datepicker-toggle>
-
-            <mat-datepicker #picker2></mat-datepicker>
-          </div>
-
-          <div class="date-row">
-            <span class="circle">3</span>
-
-            <input [matDatepicker]="picker3" class="date-input" placeholder="Select date" />
-
-            <mat-datepicker-toggle matSuffix [for]="picker3">
-              <i class="fa fa-calendar calendar-icon"></i>
-            </mat-datepicker-toggle>
-
-            <mat-datepicker #picker3></mat-datepicker>
-          </div>
-
-          <div class="date-row">
-            <span class="circle">4</span>
-
-            <input [matDatepicker]="picker4" class="date-input" placeholder="Select date" />
-
-            <mat-datepicker-toggle matSuffix [for]="picker4">
-              <i class="fa fa-calendar calendar-icon"></i>
-            </mat-datepicker-toggle>
-
-            <mat-datepicker #picker4></mat-datepicker>
-          </div>
-        </div>
-
-        <!-- Set timer -->
-        <div class="time-row mt-8">
-          <label>Set Time: </label>
-          <input type="time" class="time-input" />
-          <i class="fa fa-clock-o time-icon"></i>
-        </div>
-      </div>
-
-      <div class="modal-section" style="margin-bottom: 20px">
-        <label style="font-weight: 500; margin-bottom: 8px; display: block">Email Body</label>
-        <textarea
-          class="reminder-body"
-          rows="5"
-          style="padding: 10px; width: 100%; resize: none; border: 1px solid #d9dee3"
-        >
+        <div class="modal-section" style="margin-bottom: 20px">
+          <label style="font-weight: 500; margin-bottom: 8px; display: block">Email Body</label>
+          <textarea
+            class="reminder-body"
+            rows="5"
+            style="padding: 10px; width: 100%; resize: none; border: 1px solid #d9dee3"
+          >
 Dear Subcontractor,
 This is a reminder to upload your quote before the due date. Please ensure all required documents are submitted on time.
 Thank you.
       </textarea
-        >
+          >
+        </div>
       </div>
 
       <div

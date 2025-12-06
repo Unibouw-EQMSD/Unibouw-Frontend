@@ -18,13 +18,17 @@ interface RfqResponse {
   rating: number;
   date: string;
   rfqId: string;
+  rfqNumber:string;
   responded: boolean;
   interested: boolean;
   viewed: boolean;
+  maybeLater:boolean;
   quote: string;
   actions: string[];
-  subcontractorId: string;   // << ADD THIS
-  quoteAmount?: string;
+    subcontractorId: string;   // << ADD THIS
+      quoteAmount?: string;
+
+
 }
 
 interface WorkItem {
@@ -35,6 +39,8 @@ interface WorkItem {
   interested: number;
   notInterested: number;
   viewed: number;
+    maybeLater:number;
+
   open: boolean;
   searchText: string;
   pageSize: number;
@@ -60,6 +66,7 @@ export class ViewProjects {
 selectedFile!: File;
   rfqId!: string;
   subId!: string;
+  dueDate!: Date;
   quoteAmount: string = '';
   groupBy = 'workItem';
   currentPage = 1;
@@ -71,11 +78,16 @@ pageSize = 10;
   pageSizeOptions = [5, 10, 25, 50, 100, 200];  selectedTab = 'response'; 
   rfqList: any[] = [];
 selectedRfqId: string = '';
+subcontractorGroups: any[] = [];
+
 displayedColumns: string[] = [
    'workitem',
     'rfqSentDate',
     'dueDate',
-    'totalSubcontractors'
+    'totalSubcontractors',
+    'quoteRecieved',
+    'status', 
+  'actions'
   ];
   dataSource = new MatTableDataSource<any>([]);
  isLoading = false;
@@ -88,12 +100,16 @@ displayedColumns: string[] = [
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
+  
  workItems: WorkItem[] = [];
+ reminderDates: string[] = [];   
 
 
   constructor(private rfqService:RfqService,private router:Router,private rfqResponseService: RfqResponseService, private cdr: ChangeDetectorRef, private snackBar: MatSnackBar, private route: ActivatedRoute,private projectService: projectService, private reminderService: ReminderService){
 
   }
+
+
   ngOnInit(): void {
 
     // // Subscribe to sequence
@@ -120,7 +136,34 @@ displayedColumns: string[] = [
     this.loadRfqData();
     this.loadProjectDetails(this.projectId);
   }
+
+  // 🔥 Start background reminder checker
+  //this.startAutoReminderWatcher();
 }
+
+
+startAutoReminderWatcher() {
+  setInterval(() => {
+    this.checkAndTriggerReminder();
+  }, 60000); // check every 60 seconds
+}
+
+checkAndTriggerReminder() {
+  // if (!this.reminderDates || this.reminderDates.length === 0) return;
+
+  // const today = new Date();
+  // const todayStr = this.reminderFormatDate(today); // "dd-MM-yyyy"
+
+  // // If today matches any reminder date → send reminder
+  // if (this.reminderDates.includes(todayStr)) {
+  //   console.log("🔥 Auto reminder triggered for:", todayStr);
+
+  //   this.sendReminder();  // 🚀 Auto-trigger here
+  // }
+  this.sendReminder(); 
+}
+
+
 
 reminderType: string = 'default';
 
@@ -140,19 +183,22 @@ loadProjectDetails(id: string) {
 }
 
 loadRfqResponseSummary(projectId: string) {
-  this.rfqResponseService.getResponsesByProjectId(projectId).subscribe({
-    next: (res: any) => {
-      console.log("📌 RFQ RESPONSES", res);
 
-      this.workItems = res.map((w: any) => ({
+  /* -------------------------------------- */
+  /* 1️⃣ WORK-ITEM GROUPED API              */
+  /* -------------------------------------- */
+  this.rfqResponseService.getResponsesByProjectId(projectId).subscribe({
+    next: (res: any[]) => {
+
+      this.workItems = res.map(w => ({
         workItemId: w.workItemId,
         name: w.workItemName,
-
         requestsSent: w.subcontractors.length,
         notResponded: w.subcontractors.filter((s: any) => !s.responded).length,
         interested: w.subcontractors.filter((s: any) => s.interested).length,
-        notInterested: w.subcontractors.filter((s: any) => !s.interested && s.responded).length,
+        notInterested: w.subcontractors.filter((s: any) => s.responded && !s.interested).length,
         viewed: w.subcontractors.filter((s: any) => s.viewed).length,
+        maybeLater: w.subcontractors.filter((s: any) => s.maybeLater).length, // ✅ added
 
         open: false,
         searchText: '',
@@ -160,15 +206,13 @@ loadRfqResponseSummary(projectId: string) {
         currentPage: 1,
         totalPages: 1,
         currentStart: 1,
-        currentEnd: 1,
+        currentEnd: 10,
 
         rfqs: w.subcontractors.map((s: any) => ({
-          subcontractorId: s.subcontractorId, // ✅ must exist
-          rfqId: s.rfqId,                     // ✅ must exist
+          subcontractorId: s.subcontractorId,
           name: s.name,
           rating: s.rating || 0,
           date: s.date || '—',
-          dueDate: s.dueDate || '—',
           responded: s.responded,
           interested: s.interested,
           viewed: s.viewed,
@@ -178,18 +222,85 @@ loadRfqResponseSummary(projectId: string) {
         }))
       }));
 
-      // After mapping, load quote amounts for all RFQs
+      // load quote amounts
       this.workItems.forEach(work => {
         work.rfqs.forEach(rfq => this.loadQuoteAmount(rfq));
       });
 
     },
-    error: (err: any) => {
-      console.error("❌ Error loading responses", err);
-      this.snackBar.open("No Records Found for this RFQ", "Close", { duration: 3000 });
-    }
+    error: err => console.error("Error loading work item responses", err)
   });
+
+  /* -------------------------------------- */
+  /* 2️⃣ SUBCONTRACTOR GROUPED API          */
+  /* -------------------------------------- */
+  this.rfqResponseService.getResponsesByProjectSubcontractors(projectId).subscribe({
+    next: (res: any[]) => {
+
+      const grouped = res.reduce((acc: any[], item: any) => {
+
+        let group = acc.find(g => g.subcontractorId === item.subcontractorId);
+        if (!group) {
+          group = {
+            subcontractorId: item.subcontractorId,
+            subcontractorName: item.subcontractorName,
+            open: false,
+            searchText: '',
+            workItems: [],
+
+            requestsSent: 0,
+            notResponded: 0,
+            interested: 0,
+            notInterested: 0,
+            viewed: 0,
+            maybeLater: 0 // ✅ added
+          };
+          acc.push(group);
+        }
+
+        group.workItems.push({
+          workItemId: item.workItemId,
+          workItemName: item.workItemName,
+
+          rfqId: item.rfqId,
+          rfqNumber: item.rfqNumber,
+
+          date: item.date,
+          responded: item.responded,
+          interested: item.interested,
+          viewed: item.viewed,
+          maybeLater: item.maybeLater, // ✅ added
+
+          subcontractorId: item.subcontractorId,
+          rating: 0,
+          quoteAmount: "-",
+          actions: ['pdf']
+        });
+
+        group.requestsSent = group.workItems.length;
+        group.notResponded = group.workItems.filter((w: any) => !w.responded).length;
+        group.interested = group.workItems.filter((w: any) => w.interested).length;
+        group.notInterested = group.workItems.filter((w: any) => w.responded && !w.interested).length;
+        group.viewed = group.workItems.filter((w: any) => w.viewed).length;
+        group.maybeLater = group.workItems.filter((w: any) => w.maybeLater).length; // ✅ added
+
+        return acc;
+      }, []);
+
+      this.subcontractorGroups = grouped;
+
+      this.subcontractorGroups.forEach(sub => {
+        sub.workItems.forEach((w: any) => this.loadQuoteAmount(w));
+      });
+
+    },
+    error: err => console.error("Error loading subcontractor responses", err)
+  });
+
 }
+
+
+
 
 
  // In your component
@@ -225,21 +336,68 @@ markViewed(work: WorkItem, rfq: any) {
   });
 }
 
+markMaybeLater(work: WorkItem, rfq: any) {
+  // 1) Immediate local update so UI reflects change right away
+  const wasViewed = !!rfq.viewed;
+  rfq.maybeLater = true;
+  rfq.interested = false;
+  rfq.notInterested = false;
+
+  // ensure viewed tick also shows
+  if (!wasViewed) {
+    rfq.viewed = true;
+  }
+
+  // Immediately refresh summary counts (so header numbers update)
+  this.refreshWorkItemCounts(work);
+
+  // Force change detection immediately (UI update)
+  this.cdr.detectChanges();
+
+  // 2) Persist the response on the server as "Maybe Later"
+  // Use an API that accepts the status string (your backend expects status = "Maybe Later")
+  // I assume you have a method like rfqResponseService.submitResponse(rfqId, subcontractorId, workItemId, status)
+  this.rfqResponseService.submitRfqResponse(
+    rfq.rfqId,
+    rfq.subcontractorId,
+    work.workItemId,
+    'Maybe Later'   // important: persist "Maybe Later" not only "Viewed"
+  ).subscribe({
+    next: (res: any) => {
+      // backend accepted — make sure counts are consistent (optional refresh)
+      // Keep local UI as-is or optionally refresh from server
+      this.refreshWorkItemCounts(work);
+      this.cdr.detectChanges();
+    },
+    error: (err: any) => {
+      console.error('Failed to save Maybe Later status', err);
+      // Optionally revert UI if you want strict consistency:
+      // rfq.maybeLater = false;
+      // if (!wasViewed) rfq.viewed = false;
+      // this.refreshWorkItemCounts(work);
+      // this.cdr.detectChanges();
+      this.snackBar.open('Failed to mark Maybe Later. Try again.', 'Close', { duration: 3000 });
+    }
+  });
+}
+
+
 refreshWorkItemCounts(work: WorkItem) {
   work.requestsSent   = work.rfqs.length;
   work.notResponded   = work.rfqs.filter(r => !r.responded).length;
   work.interested     = work.rfqs.filter(r => r.interested).length;
   work.notInterested  = work.rfqs.filter(r => r.responded && !r.interested).length;
 
-  // 🔥 Keep this ALWAYS correct
   work.viewed         = work.rfqs.filter(r => r.viewed).length;
+  work.maybeLater     = work.rfqs.filter(r => r.maybeLater).length; // <--- add this
 }
 triggerViewOnLoad() {
   if (!this.workItems?.length) return;
 
   this.workItems.forEach(work => {
     work.rfqs.forEach(rfq => {
-      this.markViewed(work, rfq);   // 🔥 calling your existing method
+      // this.markViewed(work, rfq);   
+      // this.markMaybeLater(work,rfq)
     });
   });
 }
@@ -277,7 +435,8 @@ loadRfqData(): void {
 
             // 🔥 Use EXACT swagger response
             workItem: info.workItem || '-',
-            subcontractorCount: info.subcontractorCount ?? 0
+            subcontractorCount: info.subcontractorCount ?? 0,
+            status: item.status || 'N/A' 
           };
         });
 
@@ -401,6 +560,8 @@ loadQuoteAmount(rfq: any) {
       }
     });
 }
+
+
 downloadQuote(event: Event, rfqId: string, subcontractorId: string) {
   event.stopPropagation(); // << prevent triggering row click
 
@@ -439,8 +600,74 @@ addRfq(){
 
 }
 
-showReminderPopup = false;
 
+
+// Reminder Popup Logic
+
+parseDDMMYYYY(dateStr: string): Date {
+  const [day, month, year] = dateStr.split('-').map(Number);
+  return new Date(year, month - 1, day);
+}
+
+// private _reminderDates: string[] = [];
+
+// get reminderDates1(): string[] {
+//   return this._reminderDates;
+// }
+
+// set reminderDates1(dates: string[]) {
+//   this._reminderDates = dates;
+
+//   // Auto trigger ONLY when popup is open to avoid unwanted calls
+//   if (this.showReminderPopup && dates && dates.length > 0) {
+//     this.sendReminder();
+//   }
+// }
+
+generateReminderDates(dueDateInput: any): string[] {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  let dueDate: Date;
+
+  // If input is string in DD-MM-YYYY format
+  if (typeof dueDateInput === 'string' && dueDateInput.includes('-')) {
+    dueDate = this.parseDDMMYYYY(dueDateInput);
+  } 
+  else {
+    dueDate = new Date(dueDateInput);
+  }
+
+  dueDate.setHours(0, 0, 0, 0);
+
+  const diffMs = dueDate.getTime() - today.getTime();
+  if (diffMs <= 0) return [];
+
+  const diffDays = diffMs / (1000 * 60 * 60 * 24);
+  const gap = diffDays / 3;
+
+  const reminderDates: string[] = [];
+
+  for (let i = 1; i <= 3; i++) {
+    const nextDate = new Date(today);
+    nextDate.setDate(today.getDate() + Math.round(gap * i));
+    reminderDates.push(this.reminderFormatDate(nextDate));
+  }
+
+  return reminderDates;
+}
+
+
+// Format dd-MM-yyyy
+reminderFormatDate(date: Date): string {
+  const d = String(date.getDate()).padStart(2, '0');
+  const m = String(date.getMonth() + 1).padStart(2, '0');
+  const y = date.getFullYear();
+  return `${d}-${m}-${y}`;
+}
+
+
+showReminderPopup = false;
 openReminderPopup(rfq: any) {
 
     this.reminderService.getGlobalReminderConfig().subscribe({
@@ -473,6 +700,10 @@ const dueDate = new Date(rfq.dueDate); // convert string to Date
    
 
     this.selectedRfqId = rfq.rfqId;
+    this.dueDate = rfq.dueDate;   
+
+    this.reminderDates = this.generateReminderDates(rfq.dueDate);
+
     this.subId = rfq.subcontractorId;
     this.duedate = rfq.dueDate; 
     this.showReminderPopup = true;
@@ -503,33 +734,58 @@ closeReminderPopup() {
 //     this.snackBar.open("Reminder sent!", "Close", { duration: 2000 });
 //   }
 
+private _reminderDates: string[] = [];
+
+get reminderDates1(): string[] {
+  return this._reminderDates;
+}
+
+set reminderDates1(dates: string[]) {
+  this._reminderDates = dates;
+
+  if (this.showReminderPopup && dates && dates.length > 0) {
+    
+    // ⏳ Trigger after a delay (example 5 sec)
+    setTimeout(() => {
+      this.sendReminder();
+    }, 60000);
+  }
+}
+
+
 sendReminder() {
-  
-    if (!this.selectedRfqId
+  this.selectedRfqId = "a65866a5-044c-406b-8716-46eb61ba3f35";
+  this.subId = "aa9c34bd-8c52-4478-b95c-cbbad6d41116";
 
- || !this.subId) {
-      alert('Missing RFQ or Subcontractor information.');
-      return;
-    }
-
-this.rfqResponseService.sendReminder(this.subId, this.selectedRfqId)
-      .subscribe({
-        next: (result) => {
-          if (result.success) {
-            this.snackBar.open("Reminder sent!", "Close", { duration: 2000 });
-          } else {
-            this.snackBar.open("Reminder sending failed.", "Close", { duration: 2000 });
-          }
-        },
-        error: (error) => {
-          alert('Failed to send reminder: ' + (error?.error || error));
-        },
-        complete: () => {
-          this.showReminderPopup = false;
-        }
-      });
+  if (!this.selectedRfqId || !this.subId) {
+    alert('Missing RFQ or Subcontractor information.');
+    return;
   }
 
+  this.isLoading = true; // 🔥 Start loader
+
+  this.rfqResponseService.sendReminder(this.subId, this.selectedRfqId)
+    .subscribe({
+      next: (result) => {
+        if (result.success) {
+          this.snackBar.open("Reminder sent!", "Close", { duration: 2000 });
+        } else {
+          this.snackBar.open("Reminder sending failed.", "Close", { duration: 2000 });
+        }
+      },
+      error: (error) => {
+        alert('Failed to send reminder: ' + (error?.error || error));
+      },
+      complete: () => {
+        this.isLoading = false;   // 🔥 Stop loader
+        this.showReminderPopup = false;     
+      }
+    });
+}
+
+editRfq(rfqId: string) {
+    this.router.navigate(['/add-rfq', this.projectId, { rfqId: rfqId }]);
+}
 
 }
 

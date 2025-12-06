@@ -51,6 +51,12 @@ getResponsesByProjectId(projectId: string) {
     switchMap((headers) =>
       this.http.get<any>(`${this.apiURL}/RfqResponse/responses/project/${projectId}`,{headers})));
 }
+
+deleteQuoteFile(rfqId: string, subId: string, workItemId: string) {
+  return this.http.delete(
+    `${this.apiURL}/RfqResponse/DeleteQuoteFile?rfqId=${rfqId}&subcontractorId=${subId}&workItemId=${workItemId}`
+  );
+}
   
  submitRfqResponseWithFile(
   rfqId: string,
@@ -106,18 +112,24 @@ submitRfqResponse(rfqId: string, subcontractorId: string, workItemId: string, st
   return this.http.post(`${this.apiURL}/RfqResponse/submit`, formData);
 }
   // ✅ Upload file (if you add this later)
-uploadQuoteFile(rfqId: string, subId: string, file: File): Observable<any> {
+uploadQuoteFile(rfqId: string, subId: string, file: File, totalAmount: number, comment: string) {
   const formData = new FormData();
-  formData.append('file', file); // only file in the form data
+  formData.append('file', file);
+  formData.append('totalAmount', totalAmount.toString());
+  formData.append('comment', comment);
 
-  // pass rfqId and subcontractorId in query params
   return this.http.post(
     `${this.apiURL}/RfqResponse/UploadQuote?rfqId=${rfqId}&subcontractorId=${subId}`,
     formData
   );
-
-
 }
+
+getPreviousSubmissions(rfqId: string, subId: string): Observable<any[]> {
+    return this.http.get<any[]>(
+      `${this.apiURL}/RfqResponse/PreviousSubmissions?rfqId=${rfqId}&subcontractorId=${subId}`
+    );
+  }
+
 getResponsesByProjectSubcontractors(projectId: string): Observable<any> {
   return from(this.getHeaders()).pipe(
     switchMap((headers) =>
