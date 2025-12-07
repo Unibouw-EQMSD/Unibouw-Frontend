@@ -183,13 +183,11 @@ loadProjectDetails(id: string) {
 }
 
 loadRfqResponseSummary(projectId: string) {
+  this.isLoading = true;
+  /*  WORK-ITEM GROUPED API */
 
-  /* -------------------------------------- */
-  /* 1️⃣ WORK-ITEM GROUPED API              */
-  /* -------------------------------------- */
   this.rfqResponseService.getResponsesByProjectId(projectId).subscribe({
     next: (res: any[]) => {
-
       this.workItems = res.map(w => ({
         workItemId: w.workItemId,
         name: w.workItemName,
@@ -199,7 +197,6 @@ loadRfqResponseSummary(projectId: string) {
         notInterested: w.subcontractors.filter((s: any) => s.responded && !s.interested).length,
         viewed: w.subcontractors.filter((s: any) => s.viewed).length,
         maybeLater: w.subcontractors.filter((s: any) => s.maybeLater).length, // ✅ added
-
         open: false,
         searchText: '',
         pageSize: 10,
@@ -207,7 +204,6 @@ loadRfqResponseSummary(projectId: string) {
         totalPages: 1,
         currentStart: 1,
         currentEnd: 10,
-
         rfqs: w.subcontractors.map((s: any) => ({
           subcontractorId: s.subcontractorId,
           name: s.name,
@@ -216,6 +212,7 @@ loadRfqResponseSummary(projectId: string) {
           responded: s.responded,
           interested: s.interested,
           viewed: s.viewed,
+           maybeLater: s.maybeLater,
           quote: s.quote || '—',
           actions: ['pdf', 'chat'],
           quoteAmount: '-'                     // initialize
@@ -226,13 +223,16 @@ loadRfqResponseSummary(projectId: string) {
       this.workItems.forEach(work => {
         work.rfqs.forEach(rfq => this.loadQuoteAmount(rfq));
       });
-
+this.isLoading = false;
     },
-    error: err => console.error("Error loading work item responses", err)
+     error: err => {
+      console.error("Error loading work item responses", err);
+      this.isLoading = false;
+    }
   });
 
   /* -------------------------------------- */
-  /* 2️⃣ SUBCONTRACTOR GROUPED API          */
+  /*  SUBCONTRACTOR GROUPED API          */
   /* -------------------------------------- */
   this.rfqResponseService.getResponsesByProjectSubcontractors(projectId).subscribe({
     next: (res: any[]) => {
@@ -292,10 +292,14 @@ loadRfqResponseSummary(projectId: string) {
       this.subcontractorGroups.forEach(sub => {
         sub.workItems.forEach((w: any) => this.loadQuoteAmount(w));
       });
-
+this.isLoading = false;
     },
-    error: err => console.error("Error loading subcontractor responses", err)
+     error: err => {
+      console.error("Error loading subcontractor responses", err);
+      this.isLoading = false;
+    }
   });
+
 
 }
 
