@@ -184,10 +184,7 @@ header {
    max-height: 80vh;     /* Adjust based on your need */
   overflow-y: auto;      /* Enables vertical scrolling */
   overflow-x: hidden;
-  /* z-index: 9999 !important;     */
-    
 }
-
 
 .modal-content-box {
   background: #fff;

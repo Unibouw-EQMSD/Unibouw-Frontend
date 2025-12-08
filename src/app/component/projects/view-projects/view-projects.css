@@ -452,6 +452,8 @@ display: flex;
 }
 
 
+/* -----Modal box------- */
+
 /* Backdrop */
 .custom-modal-backdrop {
   position: fixed;
@@ -463,20 +465,16 @@ display: flex;
   z-index: 999;
 }
 
-/* Modal box */
 .custom-modal {
   position: fixed;
-  top: 50%;
+  top: 53%;
   left: 50%;
   transform: translate(-50%, -50%);
   z-index: 1100;
    max-height: 80vh;     /* Adjust based on your need */
   overflow-y: auto;      /* Enables vertical scrolling */
   overflow-x: hidden;
-  /* z-index: 9999 !important;     */
-    
 }
-
 
 .modal-content-box {
   background: #fff;
@@ -488,7 +486,6 @@ display: flex;
   overflow-y: auto;
   overflow-x: hidden;
   scroll-behavior: smooth;
-
 }
 
 /* Circle Icon */
@@ -520,7 +517,7 @@ display: flex;
   font-size: 16px;
 }
 .close-btn:hover {
-  background: #d96a20;
+  background: #d96a20 !important;
 }
 
 .modal-header {
@@ -564,6 +561,129 @@ display: flex;
   margin-top: 20px;
 }
 
+.modal-section {
+  margin-bottom: 30px;
+}
+
+/* Due Date Box */
+.due-date-box {
+  background: #f2f7fd;
+  border-radius: 8px;
+  padding: 16px 24px;
+  margin-bottom: 25px;
+  border: 1px solid #e4eeff;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.due-date-icon {
+  color: #1d6fe8;
+  font-size: 20px;
+  margin-top: 10px;
+}
+
+.due-date-content {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.due-date-label {
+  color: #1d6fe8;
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.due-date-value {
+  color: #222;
+  font-size: 16px;
+}
+
+/* Radio row */
+.reminder-radio-row {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+
+.radio-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Date rows */
+.date-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 14px;
+}
+
+.circle {
+  width: 28px;
+  height: 28px;
+  background: #e7f0ff;
+  color: #1d6fe8;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-weight: 600;
+}
+
+.date-input {
+  border: 1px solid #d9dee3;
+  padding: 8px 10px;
+  border-radius: 6px;
+  width: 220px;
+}
+
+.calendar-icon {
+  font-size: 18px;
+  color: #1d6fe8;
+}
+
+/* Time Row */
+.time-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.time-input {
+  border: 1px solid #d9dee3;
+  padding: 6px 10px;
+  border-radius: 6px;
+}
+
+.time-icon {
+  font-size: 18px;
+  color: #1d6fe8;
+}
+
+/* Email Body Label */
+.email-label {
+  font-weight: 500;
+  margin-bottom: 8px;
+  display: block;
+}
+
+/* Textarea */
+.reminder-body {
+  padding: 10px;
+  width: 100%;
+  resize: none;
+  border: 1px solid #d9dee3;
+  border-radius: 6px;
+}
+.reminder-body:focus {
+  border: 1px solid #1d6fe8;
+  outline: none;
+}
+
 .date-row {
   display: flex;
   align-items: center;
@@ -588,7 +708,7 @@ display: flex;
   border: none;
   border-bottom: 1px solid #d2d2d2;
   padding: 5px 0;
-  width: 135px;
+  width: 90px;
   font-size: 15px;
   outline: none;
 }
@@ -606,15 +726,14 @@ display: flex;
 .calendar-icon:hover {
   color: #1d6fe8;
 }
-
-.cdk-overlay-container {
-  z-index: 999999 !important;
-}
-
-
 .disabled-content {
   opacity: 0.4;
   pointer-events: none;
+}
+
+.readonly-bg {
+  background-color: #f3f3f3; /* light grey */
+  cursor: not-allowed;
 }
 
 .loading-overlay {
@@ -631,4 +750,48 @@ display: flex;
   font-size: 18px;
   font-weight: 600;
   color: #f95c0f;
+}
+
+.btn {
+  padding: 5px 15px;
+  border-radius: 6px;
+  cursor: pointer;
+  border: none;
+  font-weight: 500;
+}
+
+.cancel-btn {
+    color: #dc3545;
+    background-color: transparent;
+    box-shadow: none !important;
+}
+
+.cancel-btn:hover {
+    border: 1px solid #dc3545;
+}
+
+.submit-btn, .small-btn {
+  background: #f97316;
+  color: white;
+}
+
+.reset-btn {
+  border: 1px solid #003042;
+    background-color: #ffffff;
+    color: #003042 !important;
+}
+
+.reset-btn:hover, .submit-btn:hover {
+  background-color: #003042;
+    color: #ffffff !important;
+}
+
+.cdk-overlay-container {
+  z-index: 5000 !important;
+}
+
+.disabled-icon {
+  opacity: 0.3 !important;      /* 🔥 Reduce opacity when disabled */
+  pointer-events: none !important;  /* Prevent clicks */
+  cursor: not-allowed !important;   /* Show disabled cursor */
 }

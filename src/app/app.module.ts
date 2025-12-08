@@ -42,7 +42,8 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations'; 
 import { AppConfigService } from './services/app.config.service';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
-import { ProjectSummary } from './component/project-summary/project-summary';
+import { MAT_DATE_FORMATS, DateAdapter } from '@angular/material/core';
+import { CustomDateAdapter } from './component/custom-date-adapter';
 
 export function MSALInstanceFactory(): PublicClientApplication {
   return (window as any).msalInstance;
@@ -102,6 +103,20 @@ MatTooltipModule,
   ],
   providers: [
     provideBrowserGlobalErrorListeners(),
+
+     { provide: DateAdapter, useClass: CustomDateAdapter },
+  { 
+    provide: MAT_DATE_FORMATS, 
+    useValue: {
+      parse: { dateInput: 'DD-MM-YYYY' },
+      display: {
+        dateInput: 'DD-MM-YYYY',
+        monthYearLabel: 'MMM YYYY',
+        dateA11yLabel: 'DD-MM-YYYY',
+        monthYearA11yLabel: 'MMMM YYYY',
+      }
+    }
+  },
     {
       provide: MSAL_INSTANCE,
       useFactory: MSALInstanceFactory
