@@ -112,6 +112,7 @@ displayedColumns: string[] = [
 
   constructor(private rfqService:RfqService,private router:Router,private rfqResponseService: RfqResponseService, private cdr: ChangeDetectorRef, private snackBar: MatSnackBar, private route: ActivatedRoute,private projectService: projectService, private reminderService: ReminderService){
   }
+  
 
   ngOnInit(): void {
 
@@ -124,7 +125,6 @@ displayedColumns: string[] = [
     this.loadRfqData();
     this.loadProjectDetails(this.projectId);
   }
-
 }
 
 startAutoReminderWatcher() {

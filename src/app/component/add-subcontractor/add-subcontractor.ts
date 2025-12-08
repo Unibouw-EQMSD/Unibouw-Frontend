@@ -200,9 +200,15 @@ export class AddSubcontractor implements OnInit {
   this.subcontractorForm.markAllAsTouched();
 
   // Validate workitems + form together
-  if (this.selectedWorkitems.length === 0 || this.subcontractorForm.invalid) {
-    return; // stop submission
-  }
+  // if (this.selectedWorkitems.length === 0 || this.subcontractorForm.invalid) {
+  //   return; // stop submission
+  // }
+
+  const allSelectedWorkitems = Array.from(this.selectionsByCategory.values()).flat();
+if (allSelectedWorkitems.length === 0 || this.subcontractorForm.invalid) {
+    return;
+}
+
   const formValue = this.subcontractorForm.value;
 
   const payload = {
@@ -223,7 +229,15 @@ export class AddSubcontractor implements OnInit {
 
     personID: null,           
 
-    workItemIDs: this.selectedWorkitems.map(w => w.workItemID),
+   // workItemIDs: this.selectedWorkitems.map(w => w.workItemID),
+workItemIDs: Array.from(
+  new Set(
+    Array.from(this.selectionsByCategory.values())
+      .flat()
+      .map(w => w.workItemID)
+  )
+),
+
 
     contactName: formValue.contactPerson,
     contactEmailID: formValue.contactEmail,

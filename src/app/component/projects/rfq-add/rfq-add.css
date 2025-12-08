@@ -134,21 +134,9 @@
   justify-content: flex-end;
   gap: 10px;
   margin-top: 15px;
+  margin-bottom: 40px;
 }
 
-.btn {
-  padding: 8px 18px;
-  border-radius: 6px;
-  border: 1px solid;
-  cursor: pointer;
-  font-weight: 500;
-  transition: background 0.2s ease;
-}
-
-.btn:hover {
-  background: #f97316;
-  color: white;
-}
 .page-wrap.blurred {
   filter: blur(6px);
   pointer-events: none;
@@ -159,9 +147,9 @@
 .modal-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(15, 23, 42, 0.35);
-  backdrop-filter: blur(4px); /* modern browsers */
+  background: rgba(0, 0, 0, 0.3);
   z-index: 999;
+ 
 }
 
 /* Centered modal */
@@ -339,6 +327,40 @@
   margin: 25px 0;
   padding-left: 15px;
   border-left: 4px solid #fd7e14; /* Orange accent color */
+}
+
+.btn {
+  padding: 6px 30px;
+  border-radius: 6px;
+  cursor: pointer;
+  border: none;
+  font-weight: 500;
+}
+
+.cancel-btn {
+    color: #dc3545;
+    background-color: transparent;
+    box-shadow: none !important;
+}
+
+.cancel-btn:hover {
+    border: 1px solid #dc3545;
+}
+
+.submit-btn {
+  background: #f97316;
+  color: white;
+}
+
+.reset-btn {
+  border: 1px solid #003042;
+    background-color: #ffffff;
+    color: #003042 !important;
+}
+
+.reset-btn:hover, .submit-btn:hover{
+  background-color: #003042;
+    color: #ffffff !important;
 }
 
 .action-section .action-title {

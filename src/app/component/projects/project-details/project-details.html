@@ -110,15 +110,18 @@
             class="clickable-row"
           ></tr>
 
-          <!-- ❗ No Data / Loading Messages -->
           <tr *matNoDataRow>
-            <td [attr.colspan]="displayedColumns.length" class="table-spinner-cell">
+            <td [attr.colspan]="displayedColumns.length || 1" class="table-spinner-cell">
+              <!-- Show spinner only when loading -->
               <div *ngIf="isLoading">
                 <mat-spinner diameter="40"></mat-spinner>
                 <div>Loading...</div>
               </div>
 
-              <div *ngIf="!isLoading" class="no-data-message">No projects found.</div>
+              <!-- Show empty message only when there are no columns -->
+              <div *ngIf="!isLoading && displayedColumns.length === 0" class="no-data-message">
+                No projects found.
+              </div>
             </td>
           </tr>
         </table>

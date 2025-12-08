@@ -65,7 +65,6 @@ editedEmailBody: string = '';
     isLoader: boolean = false;
 
   ngOnInit() {
-
     // ⬅ SHOW DEFAULT MESSAGE ON PAGE LOAD (Add + Edit mode)
     this.noSubMessage = "Select a work item to view subcontractors.";
 
@@ -176,83 +175,67 @@ editedEmailBody: string = '';
         return date.toLocaleDateString('en-GB'); 
     }
     // End Helpers
-loadSubcontractors(workItemID: string, existingSubs?: any[]) {
-  this.isLoader = true;
+loadSubcontractors(workItemID: string, existingSubs?: any[]): Promise<void> {
+  return new Promise((resolve) => {
+    this.isLoader = true;
 
-  forkJoin({
-    mappings: this.subcontractorService.getSubcontractorWorkItemMappings(),
-    subs: this.subcontractorService.getSubcontractors()
-  }).subscribe(({ mappings, subs }) => {
-    const isEditMode = existingSubs && existingSubs.length > 0;
+    forkJoin({
+      mappings: this.subcontractorService.getSubcontractorWorkItemMappings(),
+      subs: this.subcontractorService.getSubcontractors()
+    }).subscribe(({ mappings, subs }) => {
+      const isEditMode = existingSubs && existingSubs.length > 0;
+      const normalize = (id: string) => (id || "").toUpperCase();
 
-    const normalize = (id: string) => (id || "").toUpperCase();
+      const linkedIds = mappings
+        .filter((m: any) => normalize(m.workItemID) === normalize(workItemID))
+        .map((m: any) => normalize(m.subcontractorID));
 
-    const linkedIds = mappings
-      .filter((m: any) => normalize(m.workItemID) === normalize(workItemID))
-      .map((m: any) => normalize(m.subcontractorID));
+      const existingMap = new Map<string, string>();
+      (existingSubs || []).forEach(s => {
+        const exId = normalize(s.subcontractorID || s.subcontractorId);
+        existingMap.set(exId, this.formatDateForHtml(s.dueDate));
+      });
 
-    const existingMap = new Map<string, string>();
-    (existingSubs || []).forEach(s => {
-      const exId = normalize(s.subcontractorID || s.subcontractorId);
-      existingMap.set(exId, this.formatDateForHtml(s.dueDate));
+      let mappedSubcontractors = subs.map(s => {
+        const id = normalize(s.subcontractorID);
+        const isSelected = isEditMode ? existingMap.has(id) : false;
+        const dueDate = isSelected
+          ? existingMap.get(id)
+          : this.globalDueDate || ''; // Apply global due date if present
+
+        return {
+          subcontractorID: s.subcontractorID,
+          name: s.name,
+          selected: isSelected,
+          dueDate
+        } as SubcontractorItem;
+      });
+
+      // Sort selected first
+      mappedSubcontractors.sort((a, b) => {
+        if (a.selected && !b.selected) return -1;
+        if (!a.selected && b.selected) return 1;
+        return a.name.localeCompare(b.name);
+      });
+
+      this.subcontractors = mappedSubcontractors;
+
+      // Filter list if showAll not checked
+      setTimeout(() => {
+        if (!this.showAll) {
+          this.subcontractors = mappedSubcontractors.filter(
+            s => s.selected || linkedIds.includes(normalize(s.subcontractorID))
+          );
+        }
+        this.noSubMessage = this.subcontractors.length ? '' : 'No subcontractors linked to this work item.';
+        this.isLoader = false;
+        resolve();
+      }, 0);
     });
-
-    let mappedSubcontractors = subs.map(s => {
-      const id = normalize(s.subcontractorID);
-
-      const isSelected = isEditMode
-        ? existingMap.has(id)
-        : linkedIds.includes(id);
-
-      return {
-        subcontractorID: s.subcontractorID,
-        name: s.name,
-        selected: isSelected,
-        dueDate: isSelected
-          ? (isEditMode ? existingMap.get(id) : this.globalDueDate)
-          : '',
-      } as SubcontractorItem;
-    });
-mappedSubcontractors = mappedSubcontractors.sort((a, b) => {
-  if (a.selected && !b.selected) return -1;
-  if (!a.selected && b.selected) return 1;
-  return a.name.localeCompare(b.name);
-});
-    console.log('Mapped subcontractors:', mappedSubcontractors);
-
-    // 🔥 Always assign full list first (important)
-    this.subcontractors = mappedSubcontractors;
-
-    // 🔥 Apply filtering after 1 tick → checkbox states preserved
-    setTimeout(() => {
-  if (!this.showAll) {
-    this.subcontractors = mappedSubcontractors.filter(s =>
-      s.selected || linkedIds.includes(normalize(s.subcontractorID))
-    );
-  }
-
-  // Update noSubMessage based on filtered list
-  this.noSubMessage = this.subcontractors.length
-    ? ''
-    : isEditMode
-      ? "No subcontractors linked to this work item."
-      : "No subcontractors linked to this work item.";
-}, 0);
-    this.noSubMessage = mappedSubcontractors.length
-      ? ''
-      : isEditMode
-        ? "No subcontractors linked to this work item."
-        : "Select a work item to view subcontractors.";
-
-    this.isLoader = false;
   });
 }
 
-
-
-
-
-    // ⭐ MODIFIED: onSubmit to handle both Create and Update (WITHOUT client-side mapping API call)
+// ⭐ MODIFIED: onSubmit to handle both Create and Update (WITHOUT client-side mapping API call)
 onSubmit(sendEmail: boolean = false, editedEmailBody: string = '') {
   if (!this.selectedProject) return alert('Select a project first');
 
@@ -327,8 +310,6 @@ onSubmit(sendEmail: boolean = false, editedEmailBody: string = '') {
   });
 }
 
-
-
   loadProjectDetails(id: string) {
     this.projectService.getProjectById(id).subscribe({
       next: (res) => {
@@ -384,16 +365,29 @@ onSubmit(sendEmail: boolean = false, editedEmailBody: string = '') {
     }
 
     /** Toggle work item selection */
-    onWorkitemSelect(item: Workitem) {
-      const index = this.selectedWorkItems.findIndex(w => w.workItemID === item.workItemID);
-      if (index === -1) {
-        this.selectedWorkItems.push(item);
-        this.loadSubcontractors(item.workItemID);
-      } else {
-        this.selectedWorkItems.splice(index, 1);
-      }
-    }
+    // onWorkitemSelect(item: Workitem) {
+    //   const index = this.selectedWorkItems.findIndex(w => w.workItemID === item.workItemID);
+    //   if (index === -1) {
+    //     this.selectedWorkItems.push(item);
+    //     this.loadSubcontractors(item.workItemID);
+    //   } else {
+    //     this.selectedWorkItems.splice(index, 1);
+    //   }
+    // }
 
+    onWorkitemSelect(item: Workitem) {
+  const index = this.selectedWorkItems.findIndex(w => w.workItemID === item.workItemID);
+  if (index === -1) {
+    this.selectedWorkItems.push(item);
+    this.loadSubcontractors(item.workItemID).then(() => {
+      // Apply globalDueDate automatically to loaded subcontractors
+      if (this.globalDueDate) this.applyGlobalDate();
+    });
+  } else {
+    this.selectedWorkItems.splice(index, 1);
+    this.subcontractors = []; // clear subcontractors if deselected
+  }
+}
 
     addSubcontractor() {
       const newName = prompt('Enter subcontractor name:');
@@ -405,34 +399,38 @@ onSubmit(sendEmail: boolean = false, editedEmailBody: string = '') {
           personName: '',
           phoneNumber1: '',
           emailID: '',
-          selected: true,
-          dueDate: this.globalDueDate || ''
+          selected: false,
+          dueDate: this.globalDueDate || '' // default global date
         };
         this.subcontractors.unshift(newSub); // Add to top
       }
     }
 
     // ✅ 5. Function to apply top date to all rows
-    applyGlobalDate() {
-      if (this.globalDueDate) {
-        this.subcontractors.forEach(sub => {
-          sub.dueDate = this.globalDueDate;
-        });
-      }
-    }
+    // applyGlobalDate() {
+    //   if (this.globalDueDate) {
+    //     this.subcontractors.forEach(sub => {
+    //       sub.dueDate = this.globalDueDate;
+    //     });
+    //   }
+    // }
+
+ /** Apply the global due date to all listed subcontractors */
+applyGlobalDate() {
+  if (!this.globalDueDate) return;
+
+  this.subcontractors.forEach(sub => {
+    sub.dueDate = this.globalDueDate; // always update listed subcontractor
+  });
+}
+
+
     onProjectChange(event: Event) {
       const projectId = (event.target as HTMLSelectElement).value;
       this.selectedProject = projectId;
       this.selectedWorkItems = [];
       this.subcontractors = [];
     }
-
-
-
-
-
-
-    
 
     onCancel() {
       this.selectedProject = this.projects.length ? this.projects[0].projectID : '';
@@ -488,41 +486,6 @@ You are invited to submit a quotation for the following work item under the [Pro
     onEsc() {
       if (this.showPreview) this.closePreview();
     }
-
-// confirmAndSend() {
-//   if (!this.previewData) return;
-
-//   const sendEmail = true; // user confirmed send
-
-//   // Prepare updated RFQ payload
-//   const rfqPayload = {
-//     ...this.previewData.rfq,                 // original RFQ data
-//     CustomerNote: this.previewData.emailBody, // overwrite with edited body
-//     Status: sendEmail ? 'Sent' : this.previewData.rfq.Status,
-//     RfqSent: sendEmail ? 1 : this.previewData.rfq.RfqSent
-//   };
-
-//   // Ensure subcontractorIds and workItemIds exist
-//   const subcontractorIds = this.previewData.subcontractorIds || [];
-//   const workItemIds = this.previewData.workItemIds || [];
-
-//   this.rfqService.updateRfq(
-//     rfqPayload,        // payload containing rfqID
-//     subcontractorIds,  // array of subcontractor IDs
-//     workItemIds,       // array of work item IDs
-//     sendEmail          // optional, defaults to true
-//   ).subscribe({
-//     next: () => {
-//       alert('RFQ sent successfully!');
-//       this.closePreview();
-//     },
-//     error: (err) => {
-//       console.error('Error sending RFQ:', err);
-//       alert('Failed to send RFQ. Check console for details.');
-//     }
-//   });
-// }
-
 
 addSub(){
   this.router.navigate(['/add-subcontractor']);
