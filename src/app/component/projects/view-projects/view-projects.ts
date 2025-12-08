@@ -155,7 +155,7 @@ loadProjectDetails(id: string) {
 }
 
 loadRfqResponseSummary(projectId: string) {
-this.isLoading = true;
+
   /* -------------------------------------- */
   /* 1️⃣ WORK-ITEM GROUPED API              */
   /* -------------------------------------- */
@@ -172,7 +172,6 @@ this.isLoading = true;
         notInterested: w.subcontractors.filter((s: any) => s.responded && !s.interested).length,
         viewed: w.subcontractors.filter((s: any) => s.viewed).length,
         maybeLater: w.subcontractors.filter((s: any) => s.maybeLater).length, // ✅ added
-
         open: false,
         searchText: '',
         pageSize: 10,
@@ -180,7 +179,6 @@ this.isLoading = true;
         totalPages: 1,
         currentStart: 1,
         currentEnd: 10,
-
         rfqs: w.subcontractors.map((s: any) => ({
           subcontractorId: s.subcontractorId,
           name: s.name,
@@ -189,6 +187,7 @@ this.isLoading = true;
           responded: s.responded,
           interested: s.interested,
           viewed: s.viewed,
+           maybeLater: s.maybeLater,
           quote: s.quote || '—',
           actions: ['pdf', 'chat'],
           quoteAmount: '-',                    // initialize      
@@ -200,16 +199,13 @@ this.isLoading = true;
       this.workItems.forEach(work => {
         work.rfqs.forEach(rfq => this.loadQuoteAmount(rfq));
       });
-
+this.isLoading = false;
     },
-     error: (err) => {
-      console.error("Error loading work item responses", err)
-      this.isLoading = false;
-    }
+    error: err => console.error("Error loading work item responses", err)
   });
 
   /* -------------------------------------- */
-  /* 2️⃣ SUBCONTRACTOR GROUPED API          */
+  /*  SUBCONTRACTOR GROUPED API          */
   /* -------------------------------------- */
   this.rfqResponseService.getResponsesByProjectSubcontractors(projectId).subscribe({ 
     next: (res: any[]) => { 
@@ -263,15 +259,11 @@ this.isLoading = true;
       this.subcontractorGroups.forEach(sub => {
         sub.workItems.forEach((w: any) => this.loadQuoteAmount(w));
       });
-
+this.isLoading = false;
     },
-     error: (err) => {
-      console.error("Error loading subcontractor responses", err)
-      this.isLoading = false;
-    }
-   
+    error: err => console.error("Error loading subcontractor responses", err)
   });
-  // this.isLoading = false;
+
 }
 
  // In your component

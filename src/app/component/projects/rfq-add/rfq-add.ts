@@ -471,11 +471,9 @@ toggleSelectAll() {
 
   // CLEAN email body text (no leading spaces)
   this.editedEmailBody = 
-`Dear Subcontractor,
+`Dear [Subcontractor],
 
-You have been invited to participate in a Quote Request (RFQ). 
-
-Please indicate your interest for the following work item:`; 
+You are invited to submit a quotation for the following work item under the [Project].`;
 
   this.showPreview = true;
   document.body.style.overflow = "hidden";

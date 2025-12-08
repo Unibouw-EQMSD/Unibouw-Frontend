@@ -15,6 +15,59 @@ body, .container {
   letter-spacing: 0.2px;
 }
 
+/* Background Overlay */
+.comment-modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.5);
+  z-index: 999;
+}
+
+/* Modal Container */
+.comment-modal-content {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 350px;
+  background: #fff;
+  padding: 20px;
+  border-radius: 10px;
+  z-index: 1000;
+  box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+}
+
+.comment-modal-content h3 {
+  margin-top: 0;
+  margin-bottom: 15px;
+  font-size: 20px;
+  font-weight: bold;
+}
+
+.comment-text {
+  padding: 10px;
+  background: #f7f7f7;
+  border-radius: 6px;
+  min-height: 60px;
+  margin-bottom: 20px;
+  white-space: pre-wrap;
+}
+
+/* Close Button */
+.close-btn {
+  width: 100%;
+  padding: 10px;
+  background: #f97316;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+
 .rfq-status-banner {
   display: flex;
   align-items: center;
