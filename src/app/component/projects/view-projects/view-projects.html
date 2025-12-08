@@ -1,451 +1,479 @@
 <app-header></app-header>
 <main id="main">
   <div class="container">
+    <!-- FULL PAGE SKELETON LOADING-->
+    <div class="full-page-skeleton" *ngIf="isLoading">
+      <!-- LEFT SIDE SKELETON -->
+      <div class="skeleton-left">
+        <div class="skeleton-title skeleton"></div>
 
-
-
-    <!-- 🌟 SKELETON LOADING -->
-<!-- FULL PAGE SKELETON -->
-<div class="full-page-skeleton" *ngIf="isLoading">
-
-  <!-- LEFT SIDE SKELETON -->
-  <div class="skeleton-left">
-    <div class="skeleton-title skeleton"></div>
-
-    <div class="skeleton-block" *ngFor="let x of [].constructor(7)">
-      <div class="skeleton-label skeleton"></div>
-      <div class="skeleton-value skeleton"></div>
-    </div>
-  </div>
-
-  <!-- RIGHT SIDE SKELETON -->
-  <div class="skeleton-right">
-    <div class="skeleton-tabs">
-      <div class="skeleton-tab skeleton"></div>
-      <div class="skeleton-tab skeleton"></div>
-      <div class="skeleton-tab skeleton"></div>
-    </div>
-
-    <div class="skeleton-table">
-      <div class="skeleton-row" *ngFor="let r of [].constructor(6)">
-        <div class="skeleton-cell skeleton" *ngFor="let c of [].constructor(6)"></div>
+        <div class="skeleton-block" *ngFor="let x of [].constructor(7)">
+          <div class="skeleton-label skeleton"></div>
+          <div class="skeleton-value skeleton"></div>
+        </div>
       </div>
-    </div>
-  </div>
 
-</div>
-
-    <!-- 🔹 Page Header -->
-    <div class="pagetitle">
-      <h1>{{ projectDetails.name }}</h1>
-    </div>
-
-    <div class="project-details-container">
-      <!-- LEFT: Project Details -->
-      <div class="details-card" *ngIf="projectDetails">
-        <div class="details-header">
-          <h3>Details</h3>
+      <!-- RIGHT SIDE SKELETON -->
+      <div class="skeleton-right">
+        <div class="skeleton-tabs">
+          <div class="skeleton-tab skeleton"></div>
+          <div class="skeleton-tab skeleton"></div>
+          <div class="skeleton-tab skeleton"></div>
         </div>
 
-        <div class="details-content">
-          <div class="detail-row">
-            <span class="label">Project Code</span
-            ><span class="value">{{ projectDetails.number }}</span>
+        <div class="skeleton-table">
+          <div class="skeleton-row" *ngFor="let r of [].constructor(6)">
+            <div class="skeleton-cell skeleton" *ngFor="let c of [].constructor(6)"></div>
           </div>
-          <div class="detail-row">
-            <span class="label">Project</span><span class="value">{{ projectDetails.name }}</span>
+        </div>
+      </div>
+    </div>
+
+    <div *ngIf="!isLoading">
+      <!-- 🔹 Page Header -->
+      <div class="pagetitle">
+        <h1>{{ projectDetails.name }}</h1>
+      </div>
+
+      <div class="project-details-container">
+        <!-- LEFT: Project Details -->
+        <div class="details-card" *ngIf="projectDetails">
+          <div class="details-header">
+            <h3>Details</h3>
           </div>
-          <div class="detail-row">
-            <span class="label">Customer</span
-            ><span class="value">{{ projectDetails.customerName }}</span>
-          </div>
-          <div class="detail-row">
-            <span class="label">Project Manager</span
-            ><span class="value">{{ projectDetails.projectManagerName }}</span>
-          </div>
-          <div class="detail-row">
-            <span class="label">Start Date</span
-            ><span class="value">{{ projectDetails.startDate | date : 'dd-MM-yyyy' }}</span>
-          </div>
-          <div class="detail-row">
-            <span class="label">Committed Date</span
-            ><span class="value">{{ projectDetails.completionDate | date : 'dd-MM-yyyy' }}</span>
-          </div>
-          <!-- <div class="detail-row">
+
+          <div class="details-content">
+            <div class="detail-row">
+              <span class="label">Project Code</span
+              ><span class="value">{{ projectDetails.number }}</span>
+            </div>
+            <div class="detail-row">
+              <span class="label">Project</span><span class="value">{{ projectDetails.name }}</span>
+            </div>
+            <div class="detail-row">
+              <span class="label">Customer</span
+              ><span class="value">{{ projectDetails.customerName }}</span>
+            </div>
+            <div class="detail-row">
+              <span class="label">Project Manager</span
+              ><span class="value">{{ projectDetails.projectManagerName }}</span>
+            </div>
+            <div class="detail-row">
+              <span class="label">Start Date</span
+              ><span class="value">{{ projectDetails.startDate | date : 'dd-MM-yyyy' }}</span>
+            </div>
+            <div class="detail-row">
+              <span class="label">Committed Date</span
+              ><span class="value">{{ projectDetails.completionDate | date : 'dd-MM-yyyy' }}</span>
+            </div>
+            <!-- <div class="detail-row">
         <span class="label">Status</span>
         <span class="value status">{{ projectDetails.status }}</span>
       </div> -->
-          <div class="detail-row">
-            <span class="label">Status</span>
-            <span
-              class="value status"
-              [ngClass]="{
-                'status-started': projectDetails.status === 'Started',
-                'status-inprogress': projectDetails.status === 'In Progress',
-                'status-completed': projectDetails.status === 'Completed'
-              }"
-            >
-              {{ projectDetails.status }}
-            </span>
-          </div>
+            <div class="detail-row">
+              <span class="label">Status</span>
+              <span
+                class="value status"
+                [ngClass]="{
+                  'status-started': projectDetails.status === 'Started',
+                  'status-inprogress': projectDetails.status === 'In Progress',
+                  'status-completed': projectDetails.status === 'Completed'
+                }"
+              >
+                {{ projectDetails.status }}
+              </span>
+            </div>
 
-          <!-- <div class="detail-row">
+            <!-- <div class="detail-row">
             <span class="label">Total Dimension</span
             ><span class="value">{{ projectDetails.totalDimension }}</span>
           </div> -->
-          <div class="detail-row">
-            <span class="label">Specification</span>
-            <span class="value">
-              <a [href]="projectDetails.sharepointURL" target="_blank">Project Files</a>
-            </span>
+            <div class="detail-row">
+              <span class="label">Specification</span>
+              <span class="value">
+                <a [href]="projectDetails.sharepointURL" target="_blank">Project Files</a>
+              </span>
+            </div>
           </div>
         </div>
-      </div>
 
-      <div *ngIf="isLoading" class="loading">Loading project details...</div>
+        <!-- RIGHT: TAB CONTENT -->
+        <div class="rfq-card">
+          <!-- 🔹 Tabs -->
+          <div class="tabs">
+            <button [class.active]="selectedTab === 'response'" (click)="selectedTab = 'response'">
+              RFQ Response
+            </button>
 
-      <!-- RIGHT: TAB CONTENT -->
-      <div class="rfq-card">
-        <!-- 🔹 Tabs -->
-        <div class="tabs">
-          <button [class.active]="selectedTab === 'response'" (click)="selectedTab = 'response'">
-            RFQ Response
-          </button>
+            <button [class.active]="selectedTab === 'rfq'" (click)="selectedTab = 'rfq'">
+              RFQ
+            </button>
 
-          <button [class.active]="selectedTab === 'rfq'" (click)="selectedTab = 'rfq'">RFQ</button>
-
-          <button
-            [class.active]="selectedTab === 'conversation'"
-            (click)="selectedTab = 'conversation'"
-          >
-            Conversation
-          </button>
-        </div>
+            <button
+              [class.active]="selectedTab === 'conversation'"
+              (click)="selectedTab = 'conversation'"
+            >
+              Conversation
+            </button>
+          </div>
 
           <!-- 🟢 TAB 1: RFQ RESPONSE (Accordion Section) -->
-     <div *ngIf="selectedTab === 'response'">
+          <div *ngIf="selectedTab === 'response'">
+            <!-- GROUP OPTIONS -->
+            <div class="rfq-header">
+              <div class="group-options">
+                <label class="cursor-pointer">
+                  <input
+                    type="radio"
+                    name="groupBy"
+                    [(ngModel)]="groupBy"
+                    value="workItem"
+                    class="cursor-pointer"
+                  />
+                  Group by Work Item
+                </label>
+                <label class="cursor-pointer">
+                  <input
+                    type="radio"
+                    name="groupBy"
+                    [(ngModel)]="groupBy"
+                    value="subcontractor"
+                    class="cursor-pointer"
+                  />
+                  Group by Subcontractor
+                </label>
+              </div>
+            </div>
 
-  <!-- GROUP OPTIONS -->
-  <div class="rfq-header">
-    <div class="group-options">
-      <label>
-        <input type="radio" name="groupBy" [(ngModel)]="groupBy" value="workItem" />
-        Group by Work Item
-      </label>
-      <label>
-        <input type="radio" name="groupBy" [(ngModel)]="groupBy" value="subcontractor" />
-        Group by Subcontractor
-      </label>
-    </div>
-  </div>
+            <div *ngIf="isLoading">
+              <p>Loading responses...</p>
+            </div>
+            <div *ngIf="!isLoading">
+              <!-- ===================================================== -->
+              <!-- 1️⃣  WORK ITEM GROUPING                              -->
+              <!-- ===================================================== -->
+              <div *ngIf="groupBy === 'workItem'">
+                <div *ngFor="let work of workItems" class="work-item">
+                  <!-- Work Item Header -->
+                  <div class="work-item-header" (click)="work.open = !work.open">
+                    <div class="rfq-summary">
+                      <div style="width: 100px">
+                        <span class="label">Work Item</span>
+                        <div class="highlight text-ellipsis" [title]="work.name">
+                          {{ work.name }}
+                        </div>
+                      </div>
+                      <div>
+                        <span class="label">Requests Sent</span>
+                        <div>{{ work.requestsSent }}</div>
+                      </div>
+                      <div>
+                        <span class="label">Viewed</span>
+                        <div>{{ work.viewed }}</div>
+                      </div>
+                      <div>
+                        <span class="label">Interested</span>
+                        <div>{{ work.interested }}</div>
+                      </div>
+                      <div>
+                        <span class="label">Not Interested</span>
+                        <div>{{ work.notInterested }}</div>
+                      </div>
+                      <div>
+                        <span class="label">Maybe Later</span>
+                        <div>{{ work.maybeLater }}</div>
+                      </div>
+                      <div>
+                        <span class="label">Not Responded</span>
+                        <div>{{ work.notResponded }}</div>
+                      </div>
+                    </div>
 
-  <!-- ===================================================== -->
-  <!-- 1️⃣  WORK ITEM GROUPING                              -->
-  <!-- ===================================================== -->
-  <div *ngIf="groupBy === 'workItem'">
+                    <i class="fa" [ngClass]="work.open ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
+                  </div>
 
-    <div *ngFor="let work of workItems" class="work-item">
+                  <!-- Work Item Body -->
+                  <div class="work-item-body" *ngIf="work.open">
+                    <!-- Search -->
+                    <div class="search-box" style="margin-bottom: 12px">
+                      <input type="text" [(ngModel)]="work.searchText" placeholder="Search" />
+                    </div>
 
-      <!-- Work Item Header -->
-      <div class="work-item-header" (click)="work.open = !work.open">
-        <div class="rfq-summary">
-          <div style="width: 100px;">
-            <span class="label">Work Item</span>
-             <div class="highlight text-ellipsis" [title]="work.name">
-    {{ work.name }}
-  </div>
+                    <!-- Table -->
+                    <div class="rfq-table-wrapper">
+                      <table class="rfq-table">
+                        <thead>
+                          <tr>
+                            <th>Name</th>
+                            <th>Date</th>
+                            <th>RFQ ID</th>
+                            <th>Viewed</th>
+
+                            <th>Interested</th>
+                            <th>Maybe Later</th>
+                            <th>Quote Amount</th>
+                            <th>Actions</th>
+                          </tr>
+                        </thead>
+
+                        <tbody>
+                          <!-- Loop through RFQs -->
+                          <tr *ngFor="let rfq of getFilteredRfqs(work)">
+                            <!-- ✅ CHECK: Does this row have a Subcontractor? -->
+                            <ng-container *ngIf="rfq.subcontractorId; else noResponseTemplate">
+                              <td (click)="markViewed(work, rfq)">
+                                {{ rfq.name }}
+                                <div class="rating">★ {{ rfq.rating }}</div>
+                              </td>
+
+                              <td (click)="markViewed(work, rfq)">{{ rfq.date }}</td>
+                              <td (click)="markViewed(work, rfq)">{{ rfq.rfqNumber }}</td>
+
+                              <td (click)="markViewed(work, rfq)">
+                                <i class="fa fa-check-circle success" *ngIf="rfq.viewed"></i>
+                              </td>
+
+                              <td (click)="markViewed(work, rfq)">
+                                <i class="fa fa-check-circle success" *ngIf="rfq.interested"></i>
+                              </td>
+                              <td (click)="markMaybeLater(work, rfq)">
+                                <i class="fa fa-check-circle success" *ngIf="rfq.maybeLater"></i>
+                              </td>
+
+                              <!-- <td (click)="markViewed(work, rfq)">{{ rfq.responded ? 'Uploaded' : 'Not Uploaded' }}</td> -->
+                              <td (click)="markViewed(work, rfq)">{{ rfq.quoteAmount }}</td>
+
+                              <td>
+                                <!-- PDF Icon with Disabled Logic -->
+                                <i
+                                  class="fa fa-file-pdf action-icon download-icon"
+                                  [class.disabled-icon]="!rfq.responded"
+                                  (click)="
+                                    rfq.responded &&
+                                      downloadQuote($event, rfq.rfqId, rfq.subcontractorId)
+                                  "
+                                  [title]="rfq.responded ? 'Download Quote' : 'No Quote Uploaded'"
+                                >
+                                </i>
+
+                                <i
+                                  class="fa fa-bell"
+                                  title="Set Reminder"
+                                  (click)="openReminderPopup(rfq)"
+                                >
+                                </i>
+                              </td>
+                            </ng-container>
+
+                            <!-- ❌ FALLBACK: If RFQ exists but no Subcontractor (e.g. RFQ59) -->
+                            <ng-template #noResponseTemplate>
+                              <td
+                                colspan="9"
+                                class="no-records-cell"
+                                style="text-align: center; padding: 20px; color: #888"
+                              >
+                                No responses found
+                              </td>
+                            </ng-template>
+                          </tr>
+
+                          <!-- EDGE CASE: Filter returns 0 results completely -->
+                          <tr *ngIf="getFilteredRfqs(work)?.length === 0">
+                            <td
+                              colspan="9"
+                              class="no-records-cell"
+                              style="text-align: center; padding: 20px; color: #888"
+                            >
+                              No responses found
+                            </td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- ===================================================== -->
+              <!-- 2️⃣ SUBCONTRACTOR GROUPING                            -->
+              <!-- ===================================================== -->
+              <div *ngIf="groupBy === 'subcontractor'">
+                <div *ngFor="let sub of subcontractorGroups" class="work-item">
+                  <!-- Header -->
+                  <div class="work-item-header" (click)="sub.open = !sub.open">
+                    <div class="rfq-summary">
+                      <div>
+                        <span class="label">Subcontractor</span>
+                        <div class="highlight">{{ sub.subcontractorName }}</div>
+                      </div>
+                      <div>
+                        <span class="label">Requests Sent</span>
+                        <div>{{ sub.requestsSent }}</div>
+                      </div>
+                      <div>
+                        <span class="label">Viewed</span>
+                        <div>{{ sub.viewed }}</div>
+                      </div>
+                      <div>
+                        <span class="label">Interested</span>
+                        <div>{{ sub.interested }}</div>
+                      </div>
+                      <div>
+                        <span class="label">Not Interested</span>
+                        <div>{{ sub.notInterested }}</div>
+                      </div>
+                      <div>
+                        <span class="label">Maybe Later</span>
+                        <div>{{ sub.maybeLater }}</div>
+                      </div>
+                      <div>
+                        <span class="label">Not Responded</span>
+                        <div>{{ sub.notResponded }}</div>
+                      </div>
+                    </div>
+
+                    <i class="fa" [ngClass]="sub.open ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
+                  </div>
+
+                  <!-- Body -->
+                  <div class="work-item-body" *ngIf="sub.open">
+                    <!-- Search -->
+                    <div class="search-box" style="margin-bottom: 12px">
+                      <input [(ngModel)]="sub.searchText" placeholder="Search" />
+                    </div>
+
+                    <!-- Table -->
+                    <div class="rfq-table-wrapper">
+                      <table class="rfq-table">
+                        <thead>
+                          <tr>
+                            <th>Work Item</th>
+                            <th>Date</th>
+                            <th>RFQ ID</th>
+                            <th>Viewed</th>
+
+                            <th>Interested</th>
+                            <th>Maybe Later</th>
+                            <!-- <th>Quote Status</th> -->
+                            <th>Quote Amount</th>
+                            <th>Actions</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <tr *ngFor="let w of sub.workItems" (click)="markViewed(sub, w)">
+                            <td>{{ w.workItemName }}</td>
+                            <td>{{ w.date }}</td>
+                            <td>{{ w.rfqNumber }}</td>
+                            <td><i class="fa fa-check-circle success" *ngIf="w.viewed"></i></td>
+
+                            <td><i class="fa fa-check-circle success" *ngIf="w.interested"></i></td>
+                            <td><i class="fa fa-check-circle success" *ngIf="w.maybeLater"></i></td>
+                            <!-- <td>{{ w.responded ? 'Uploaded' : 'Not Uploaded' }}</td> -->
+                            <td>{{ w.quoteAmount }}</td>
+                            <td>
+                              <!-- PDF Icon with Disabled Logic -->
+                              <i
+                                *ngIf="w.actions?.includes('pdf')"
+                                class="fa fa-file-pdf action-icon download-icon"
+                                [class.disabled-icon]="!w.responded"
+                                (click)="
+                                  w.responded && downloadQuote($event, w.rfqId, sub.subcontractorId)
+                                "
+                                [title]="w.responded ? 'Download Quote' : 'No Quote Uploaded'"
+                              ></i>
+
+                              <i
+                                *ngIf="w.actions?.includes('lock')"
+                                class="fa fa-lock action-icon"
+                              ></i>
+                              <i
+                                class="fa fa-bell"
+                                title="Set Reminder"
+                                (click)="openReminderPopup(w)"
+                              ></i>
+                            </td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
-          <div>
-            <span class="label">Requests Sent</span>
-            <div>{{ work.requestsSent }}</div>
-          </div>
-           <div>
-            <span class="label">Viewed</span>
-            <div>{{ work.viewed }}</div>
-          </div>
-          <div>
-            <span class="label">Interested</span>
-            <div>{{ work.interested }}</div>
-          </div>
-           <div>
-            <span class="label">Not Interested</span>
-            <div>{{ work.notInterested }}</div>
-          </div>
-           <div>
-            <span class="label">Maybe Later</span>
-            <div>{{work.maybeLater}}</div>
-          </div>
-          <div>
-            <span class="label">Not Responded</span>
-            <div>{{ work.notResponded }}</div>
-          </div>
-          
-         
-         
-        </div>
 
-        <i class="fa" [ngClass]="work.open ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
-      </div>
+          <!-- 🔵 TAB 2: RFQ (Mat Table Section) -->
+          <div *ngIf="selectedTab === 'rfq'">
+            <div class="button-container">
+              <button type="button" class="addbtn" (click)="addRfq()">
+                <b>Add RFQ</b>
+              </button>
+            </div>
+            <table
+              mat-table
+              [dataSource]="dataSource"
+              class="mat-elevation-z8"
+              matSort
+              matSortActive="customer"
+              matSortDirection="asc"
+            >
+              <ng-container matColumnDef="workitem">
+                <th mat-header-cell *matHeaderCellDef mat-sort-header>WorkItem</th>
+                <td mat-cell *matCellDef="let row">{{ row.workItem }}</td>
+              </ng-container>
 
-      <!-- Work Item Body -->
-      <div class="work-item-body" *ngIf="work.open">
+              <ng-container matColumnDef="rfqSentDate">
+                <th mat-header-cell *matHeaderCellDef mat-sort-header>Sent Date</th>
+                <td mat-cell *matCellDef="let row">{{ row.rfqSentDate }}</td>
+              </ng-container>
+              <ng-container matColumnDef="dueDate">
+                <th mat-header-cell *matHeaderCellDef mat-sort-header>Due Date</th>
 
-        <!-- Search -->
-        <div class="search-box" style="margin-bottom: 12px">
-          <input type="text" [(ngModel)]="work.searchText" placeholder="Search" />
-        </div>
+                <td mat-cell *matCellDef="let row">{{ row.dueDate }}</td>
+              </ng-container>
 
-        <!-- Table -->
-        <div class="rfq-table-wrapper">
-          <table class="rfq-table">
-            <thead>
-              <tr>
-                <th>Name</th>
-                 <th>Date</th>
-                <th>RFQ ID</th>
-                                <th>Viewed</th>
+              <ng-container matColumnDef="totalSubcontractors">
+                <th mat-header-cell *matHeaderCellDef mat-sort-header>No. of Subcontractors</th>
+                <td mat-cell *matCellDef="let row">{{ row.subcontractorCount }}</td>
+              </ng-container>
+              <ng-container matColumnDef="quoteRecieved">
+                <th mat-header-cell *matHeaderCellDef mat-sort-header>Quote Recieved</th>
+                <td mat-cell *matCellDef="let row">{{ row.quoteReceived }}</td>
+              </ng-container>
+              <ng-container matColumnDef="status">
+                <th mat-header-cell *matHeaderCellDef mat-sort-header>Status</th>
+                <td mat-cell *matCellDef="let row">{{ row.status }}</td>
+              </ng-container>
 
-                <th>Interested</th>
-                <th>Maybe Later</th>
-                <th>Quote Amount</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-
-            <tbody>
-              <!-- Loop through RFQs -->
-              <tr *ngFor="let rfq of getFilteredRfqs(work)">
-                
-                <!-- ✅ CHECK: Does this row have a Subcontractor? -->
-                <ng-container *ngIf="rfq.subcontractorId; else noResponseTemplate">
-                  
-                  <td (click)="markViewed(work, rfq)">
-                    {{ rfq.name }}
-                    <div class="rating">★ {{ rfq.rating }}</div>
-                  </td>
-
-                  <td (click)="markViewed(work, rfq)">{{ rfq.date }}</td>
-                  <td (click)="markViewed(work, rfq)">{{ rfq.rfqNumber }}</td>
-
-                                    <td (click)="markViewed(work, rfq)"><i class="fa fa-check-circle success" *ngIf="rfq.viewed"></i></td>
-
-                  <td (click)="markViewed(work, rfq)"><i class="fa fa-check-circle success" *ngIf="rfq.interested"></i></td>
-                    <td (click)="markMaybeLater(work, rfq)">
-        <i class="fa fa-check-circle success" *ngIf="rfq.maybeLater"></i>
-      </td>
-
-                  <!-- <td (click)="markViewed(work, rfq)">{{ rfq.responded ? 'Uploaded' : 'Not Uploaded' }}</td> -->
-                  <td (click)="markViewed(work, rfq)">{{ rfq.quoteAmount }}</td>
-
-                  <td>
-                    <!-- PDF Icon with Disabled Logic -->
-                    <i class="fa fa-file-pdf action-icon download-icon"
-                       [class.disabled-icon]="!rfq.responded"
-                       (click)="rfq.responded && downloadQuote($event, rfq.rfqId, rfq.subcontractorId)"
-                       [title]="rfq.responded ? 'Download Quote' : 'No Quote Uploaded'">
-                    </i>
-
-                    <i class="fa fa-bell"
-                       title="Set Reminder"
-                       (click)="openReminderPopup(rfq)">
-                    </i>
-                  </td>
-                </ng-container>
-
-                <!-- ❌ FALLBACK: If RFQ exists but no Subcontractor (e.g. RFQ59) -->
-                <ng-template #noResponseTemplate>
-                  <td colspan="9" class="no-records-cell" style="text-align: center; padding: 20px; color: #888;">
-                    No responses found
-                  </td>
-                </ng-template>
-
-              </tr>
-
-              <!-- EDGE CASE: Filter returns 0 results completely -->
-              <tr *ngIf="getFilteredRfqs(work)?.length === 0">
-                <td colspan="9" class="no-records-cell" style="text-align: center; padding: 20px; color: #888;">
-                  No responses found
-                </td>
-              </tr>
-
-            </tbody>
-          </table>
-        </div>
-
-      </div>
-    </div>
-
-  </div>
-
-  <!-- ===================================================== -->
-  <!-- 2️⃣ SUBCONTRACTOR GROUPING                            -->
-  <!-- ===================================================== -->
-  <div *ngIf="groupBy === 'subcontractor'">
-    <div *ngFor="let sub of subcontractorGroups" class="work-item">
-
-      <!-- Header -->
-      <div class="work-item-header" (click)="sub.open = !sub.open">
-        <div class="rfq-summary">
-          <div>
-            <span class="label">Subcontractor</span>
-            <div class="highlight">{{ sub.subcontractorName }}</div>
-          </div>
-          <div>
-            <span class="label">Requests Sent</span>
-            <div>{{ sub.requestsSent }}</div>
-          </div>
-          <div>
-            <span class="label">Viewed</span>
-            <div>{{ sub.viewed }}</div>
-          </div>
-          <div>
-            <span class="label">Interested</span>
-            <div>{{ sub.interested }}</div>
-          </div>
-          <div>
-            <span class="label">Not Interested</span>
-            <div>{{ sub.notInterested }}</div>
-          </div>
-          <div>
-            <span class="label">Maybe Later</span>
-            <div>{{sub.maybeLater}}</div>
-          </div>
-           <div>
-            <span class="label">Not Responded</span>
-            <div>{{ sub.notResponded }}</div>
-          </div>
-        </div>
-
-        <i class="fa" [ngClass]="sub.open ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
-      </div>
-
-      <!-- Body -->
-      <div class="work-item-body" *ngIf="sub.open">
-        <!-- Search -->
-        <div class="search-box" style="margin-bottom: 12px">
-          <input [(ngModel)]="sub.searchText" placeholder="Search" />
-        </div>
-
-        <!-- Table -->
-        <div class="rfq-table-wrapper">
-          <table class="rfq-table">
-            <thead>
-              <tr>
-                <th>Work Item</th>
-                <th>Date</th>
-                <th>RFQ ID</th>
-                                <th>Viewed</th>
-
-                <th>Interested</th>
-                <th>Maybe Later</th>
-                <!-- <th>Quote Status</th> -->
-                <th>Quote Amount</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr *ngFor="let w of sub.workItems" (click)="markViewed(sub, w)">
-                <td>{{ w.workItemName }}</td>
-                <td>{{ w.date }}</td>
-                <td>{{ w.rfqNumber }}</td>
-                                <td><i class="fa fa-check-circle success" *ngIf="w.viewed"></i></td>
-
-                <td><i class="fa fa-check-circle success" *ngIf="w.interested"></i></td>
-                <td><i class="fa fa-check-circle success" *ngIf="w.maybeLater"></i></td>
-                <!-- <td>{{ w.responded ? 'Uploaded' : 'Not Uploaded' }}</td> -->
-                <td>{{ w.quoteAmount }}</td>
-                <td>
-                  <!-- PDF Icon with Disabled Logic -->
+              <ng-container matColumnDef="actions">
+                <th mat-header-cell *matHeaderCellDef>Actions</th>
+                <td mat-cell *matCellDef="let row">
                   <i
-                    *ngIf="w.actions?.includes('pdf')"
-                    class="fa fa-file-pdf action-icon download-icon"
-                    [class.disabled-icon]="!w.responded"
-                    (click)="w.responded && downloadQuote($event, w.rfqId, sub.subcontractorId)"
-                    [title]="w.responded ? 'Download Quote' : 'No Quote Uploaded'"
+                    class="fa-regular fa-pen-to-square edit-icon"
+                    style="color: #f97316"
+                    (click)="editRfq(row.id)"
                   ></i>
-                  
-                  <i *ngIf="w.actions?.includes('lock')" class="fa fa-lock action-icon"></i>
-                  <i class="fa fa-bell" title="Set Reminder" (click)="openReminderPopup(w)"></i>
                 </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
+              </ng-container>
 
-      </div>
-    </div>
-  </div>
+              <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+              <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+            </table>
+          </div>
 
-</div>
-
-
-        <!-- 🔵 TAB 2: RFQ (Mat Table Section) -->
-        <div *ngIf="selectedTab === 'rfq'">
-          <div class="button-container">
-  <button type="button" class="addbtn" (click)="addRfq()">
-    <b>Add RFQ</b>
-  </button>
-</div>
-          <table
-            mat-table
-            [dataSource]="dataSource"
-            class="mat-elevation-z8"
-            matSort
-            matSortActive="customer"
-            matSortDirection="asc"
+          <mat-paginator
+            *ngIf="selectedTab === 'rfq'"
+            [pageSize]="pageSize"
+            [pageSizeOptions]="pageSizeOptions"
+            showFirstLastButtons
           >
-            <ng-container matColumnDef="workitem">
-              <th mat-header-cell *matHeaderCellDef mat-sort-header>WorkItem</th>
-              <td mat-cell *matCellDef="let row">{{ row.workItem }}</td>
-            </ng-container>
+          </mat-paginator>
 
-            <ng-container matColumnDef="rfqSentDate">
-              <th mat-header-cell *matHeaderCellDef mat-sort-header>Sent Date</th>
-              <td mat-cell *matCellDef="let row">{{ row.rfqSentDate }}</td>
-            </ng-container>
-            <ng-container matColumnDef="dueDate">
-              <th mat-header-cell *matHeaderCellDef mat-sort-header>Due Date</th>
-
-              <td mat-cell *matCellDef="let row">{{ row.dueDate }}</td>
-            </ng-container>
-
-            <ng-container matColumnDef="totalSubcontractors">
-              <th mat-header-cell *matHeaderCellDef mat-sort-header>No. of Subcontractors</th>
-              <td mat-cell *matCellDef="let row">{{ row.subcontractorCount }}</td>
-            </ng-container>
-            <ng-container matColumnDef="quoteRecieved">
-      <th mat-header-cell *matHeaderCellDef mat-sort-header>Quote Recieved</th>
-      <td mat-cell *matCellDef="let row">{{ row.quoteReceived  }}</td>
-    </ng-container>
-            <ng-container matColumnDef="status">
-      <th mat-header-cell *matHeaderCellDef mat-sort-header>Status</th>
-      <td mat-cell *matCellDef="let row">{{ row.status }}</td>
-    </ng-container>
-
-            <ng-container matColumnDef="actions">
-          <th mat-header-cell *matHeaderCellDef> Actions </th>
-          <td mat-cell *matCellDef="let row">
-        <i class="fa-regular fa-pen-to-square edit-icon" style=" color: #f97316;" (click)="editRfq(row.id)"></i>
-          </td>
-        </ng-container>
-
-            <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-            <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
-          </table>
-        </div>
-
-        <mat-paginator
-          *ngIf="selectedTab === 'rfq'"
-          [pageSize]="pageSize"
-          [pageSizeOptions]="pageSizeOptions"
-          showFirstLastButtons
-        >
-        </mat-paginator>
-
-        <!-- 🟣 TAB 3: CONVERSATION -->
-        <div *ngIf="selectedTab === 'conversation'">
-          <h3>Conversation</h3>
-          <p>No messages yet.</p>
+          <!-- 🟣 TAB 3: CONVERSATION -->
+          <div *ngIf="selectedTab === 'conversation'">
+            <h3>Conversation</h3>
+            <p>No messages yet.</p>
+          </div>
         </div>
       </div>
     </div>
@@ -454,94 +482,45 @@
   <!-- Reminder Popup Modal -->
   <div class="custom-modal-backdrop" *ngIf="showReminderPopup"></div>
 
-  <!-- <div class="custom-modal" *ngIf="showReminderPopup">
-    <div class="modal-content-box">
-      <p class="modal-header">Set Reminder</p>
-
-      <div class="modal-content">
-        <textarea class="reminder-body" readonly rows="7" style="width: 100%; margin-bottom: 16px">
-Dear Subcontractor,
-
-This is a reminder to upload your quote before the due date. Please ensure all required documents are submitted on time.
-
-Thank you.</textarea
-        >
-      </div>
-
-      <div style="display: flex; justify-content: flex-end; gap: 12px">
-        <button class="btn cancel-btn" (click)="closeReminderPopup()">Cancel</button>
-        <button class="btn submit-btn" (click)="sendReminder()">Send</button>
-      </div>
-    </div>
-  </div> -->
-
   <div class="custom-modal" *ngIf="showReminderPopup">
-    <div class="modal-content-box" style="max-width: 53vw">
-      <p class="modal-header" style="font-size: 20px; font-weight: 500; margin-bottom: 24px">
-        Send Reminder
-      </p>
+    <div class="modal-content-box max-w-[53vw] bg-white rounded-lg shadow-lg p-6">
+      <!-- Modal Header -->
+      <div class="modal-header p-2 border-b border-gray-200">
+        <p class="text-xl font-semibold">Settings</p>
+      </div>
 
-      <!-- 🔥 Overlay text only (no loader) -->
       <div class="loading-overlay" *ngIf="isLoading">
         <p>Sending Reminder...</p>
       </div>
-
-      <!-- 🔥 Content becomes faded + unclickable when loading -->
-      <div [class.disabled-content]="isLoading">
-        <!-- <div *ngIf="!isLoading" style="pointer-events: none; opacity: 0.6"> -->
-        <div class="modal-section" style="margin-bottom: 30px">
-          <div
-            style="
-              background: #f2f7fd;
-              border-radius: 8px;
-              padding: 16px 24px;
-              margin-bottom: 25px;
-              border: 1px solid #e4eeff;
-              display: flex;
-              align-items: flex-start;
-              gap: 12px;
-            "
-          >
-            <!-- Column 1: Icon -->
-            <div style="color: #1d6fe8; font-size: 20px; margin-top: 10px">
+      <!-- Modal Body -->
+      <div class="modal-body space-y-6 px-4 pt-6 pb-3" *ngIf="!isLoading">
+        <div class="modal-section">
+          <!-- Due Date Box -->
+          <div class="due-date-box">
+            <div class="due-date-icon">
               <i class="fa fa-clock"></i>
             </div>
 
-            <!-- Column 2: Due date text and actual date -->
-            <div style="display: flex; flex-direction: column; gap: 4px">
-              <span style="color: #1d6fe8; font-size: 16px; font-weight: 500">Due Date</span>
-              <span style="color: #222; font-size: 16px">{{ dueDate }}</span>
+            <div class="due-date-content">
+              <span class="due-date-label">Due Date</span>
+              <span class="due-date-value">{{ dueDate }}</span>
             </div>
           </div>
 
-          <div style="display: flex; align-items: center; gap: 18px">
-            <label style="display: flex; align-items: center">
+          <!-- Radio buttons -->
+          <div class="reminder-radio-row">
+            <label class="radio-label">
               <input type="radio" name="reminderType" value="default" [(ngModel)]="reminderType" />
-              <span style="margin-left: 6px">Default Reminder</span>
+              <span>Default Reminder</span>
             </label>
 
-            <label style="display: flex; align-items: center">
+            <label class="radio-label">
               <input type="radio" name="reminderType" value="custom" [(ngModel)]="reminderType" />
-              <span style="margin-left: 6px">Custom Reminder</span>
+              <span>Custom Reminder</span>
             </label>
           </div>
 
           <!-- Default Reminder -->
-          <!-- <div class="default-reminder-container" *ngIf="reminderType === 'default'">
-          <div class="date-row">
-            <span class="circle">1</span>
-            <span class="date-input">15-11-2025</span>
-          </div>
-          <div class="date-row">
-            <span class="circle">2</span>
-            <span class="date-input">15-12-2025</span>
-          </div>
-          <div class="date-row">
-            <span class="circle">3</span>
-            <span class="date-input">15-12-2025</span>
-          </div>
-        </div> -->
-
           <div class="default-reminder-container" *ngIf="reminderType === 'default'">
             <div class="date-row" *ngFor="let d of reminderDates; let i = index">
               <span class="circle">{{ i + 1 }}</span>
@@ -551,101 +530,89 @@ Thank you.</textarea
 
           <!-- Custom Reminder -->
           <div class="reminder-container" *ngIf="reminderType === 'custom'">
-            <!-- <div class="date-row" *ngFor="let d of reminderDates; let i = index">
+            <div class="date-row" *ngFor="let date of customReminderDates; let i = index">
               <span class="circle">{{ i + 1 }}</span>
-              <span class="date-input">{{ d }}</span>
-              <input [matDatepicker]="picker1" class="date-input" placeholder="Select date" />
 
-              <mat-datepicker-toggle matSuffix [for]="picker1">
+              <input
+                [matDatepicker]="picker"
+                class="date-input"
+                placeholder="Select date"
+                [(ngModel)]="customReminderDates[i]"
+              />
+
+              <mat-datepicker-toggle matSuffix [for]="picker">
                 <i class="fa fa-calendar calendar-icon"></i>
               </mat-datepicker-toggle>
 
-              <mat-datepicker #picker1></mat-datepicker>
-            </div> -->
+              <mat-datepicker #picker></mat-datepicker>
+            </div>
+          </div>
 
+          <!-- Custom Reminder -->
+          <!-- <div class="reminder-container" *ngIf="reminderType === 'custom'">
             <div class="date-row">
               <span class="circle">1</span>
-
               <input [matDatepicker]="picker1" class="date-input" placeholder="Select date" />
-
               <mat-datepicker-toggle matSuffix [for]="picker1">
                 <i class="fa fa-calendar calendar-icon"></i>
               </mat-datepicker-toggle>
-
               <mat-datepicker #picker1></mat-datepicker>
             </div>
 
             <div class="date-row">
               <span class="circle">2</span>
-
               <input [matDatepicker]="picker2" class="date-input" placeholder="Select date" />
-
               <mat-datepicker-toggle matSuffix [for]="picker2">
                 <i class="fa fa-calendar calendar-icon"></i>
               </mat-datepicker-toggle>
-
               <mat-datepicker #picker2></mat-datepicker>
             </div>
 
             <div class="date-row">
               <span class="circle">3</span>
-
               <input [matDatepicker]="picker3" class="date-input" placeholder="Select date" />
-
               <mat-datepicker-toggle matSuffix [for]="picker3">
                 <i class="fa fa-calendar calendar-icon"></i>
               </mat-datepicker-toggle>
-
               <mat-datepicker #picker3></mat-datepicker>
             </div>
-          </div>
+          </div> -->
 
-          <!-- Set timer -->
-          <div class="time-row mt-8">
+          <!-- Time Picker -->
+          <div class="time-row">
             <label>Set Time: </label>
-            <input type="time" class="time-input" value="08:00" />
+            <input
+              type="time"
+              class="time-input"
+              [value]="reminderTime"
+              [readonly]="reminderType === 'default'"
+              [ngClass]="{ 'readonly-bg': reminderType === 'default' }"
+            />
             <i class="fa fa-clock-o time-icon"></i>
           </div>
         </div>
 
-        <div class="modal-section" style="margin-bottom: 20px">
-          <label style="font-weight: 500; margin-bottom: 8px; display: block">Email Body</label>
+        <!-- Email Body -->
+        <div class="modal-section">
+          <label class="email-label">Email Body</label>
           <textarea
             class="reminder-body"
-            rows="5"
-            style="padding: 10px; width: 100%; resize: none; border: 1px solid #d9dee3"
-          >
-Dear Subcontractor,
-This is a reminder to upload your quote before the due date. Please ensure all required documents are submitted on time.
-Thank you.
-      </textarea
+            rows="4"
+            [(ngModel)]="reminderEmailBody"
+            [readonly]="reminderType === 'default'"
+            [ngClass]="{ 'readonly-bg': reminderType === 'default' }"
+            >{{ reminderEmailBody }}
+         </textarea
           >
         </div>
       </div>
 
-      <div
-        style="
-          display: flex;
-          justify-content: flex-end;
-          gap: 18px;
-          border-top: 1px solid #eee;
-          padding-top: 16px;
-        "
-      >
-        <button
-          class="btn cancel-btn"
-          style="color: #f95c0f; background: none; border: none; font-weight: 500; font-size: 15px"
-          (click)="closeReminderPopup()"
-        >
-          Cancel
-        </button>
-        <button
-          class="btn submit-btn"
-          style="background: #f95c0f; color: white; font-weight: 500; font-size: 15px"
-          (click)="sendReminder()"
-        >
-          Send Reminder
-        </button>
+      <!-- Modal Footer -->
+      <div class="modal-footer flex justify-end gap-4 border-t border-gray-200 pt-4 mt-4">
+        <button class="btn cancel-btn" (click)="closeReminderPopup()">Cancel</button>
+        <!-- <button class="btn reset-btn">Reset</button> -->
+        <button class="btn reset-btn" *ngIf="reminderType === 'custom'">Reset</button>
+        <button class="btn submit-btn" (click)="sendReminder()">Set Reminder</button>
       </div>
     </div>
   </div>
