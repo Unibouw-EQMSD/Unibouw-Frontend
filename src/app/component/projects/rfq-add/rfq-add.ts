@@ -267,7 +267,7 @@ onSubmit(sendEmail: boolean = false, editedEmailBody: string = '') {
     rfqSent: sendEmail ? 1 : this.originalRfq?.rfqSent || 0,
     quoteReceived: this.originalRfq?.quoteReceived || 0,
     customerID: selectedProject.customerID,
-    projectID: this.selectedProject,
+    projectID: this.projectId,
     customerNote: emailBodyToUse, // ✅ important for draft/save
     deadLine: primaryDueDate,
     createdBy: createdBy,
