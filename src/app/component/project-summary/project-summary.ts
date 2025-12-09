@@ -45,6 +45,7 @@ quoteForm!: FormGroup;
   }[] = [];
   selectedComment: string = '';
   showCommentModal: boolean = false;
+  formSubmitted: boolean = false;
   constructor(
     private route: ActivatedRoute,
     private rfqResponseService: RfqResponseService,
@@ -61,8 +62,8 @@ quoteForm!: FormGroup;
   }
   ngOnInit(): void {
      this.quoteForm = this.fb.group({
-    quoteAmount: [''],   // default empty
-    comments: ['']
+    quoteAmount: ['', Validators.required],
+    comments: ['', Validators.required],
   });
     this.route.queryParams.subscribe(params => {
       this.rfqId = params['rfqId'];
@@ -190,50 +191,59 @@ removeFile(inputRef: HTMLInputElement) {
   inputRef.value = '';      // clear the input
 }
 
-submitQuoteFile() {
-  const file = this.selectedFiles[0];
-  if (!file) return;
+  submitQuoteFile() {
 
-  const formValues = this.quoteForm.getRawValue();
-  const totalAmount = Number(formValues.quoteAmount || 0);
-  const comment = formValues.comments;
 
-  const key = `rfq_prev_submissions_${this.rfqId}_${this.subId}`;
-  const previous = JSON.parse(localStorage.getItem(key) || '[]');
+     this.formSubmitted = true; // 👈 enable error messages
 
-  this.rfqResponseService.uploadQuoteFile(
-    this.rfqId, this.subId, file, totalAmount, comment
-  ).subscribe({
-    next: () => {
+  // Validate form fields
+  if (this.quoteForm.invalid) {
+    alert("Please fill all required fields.");
+    return;
+  }
+    const file = this.selectedFiles[0];
+    if (!file) return;
 
-      alert(this.isQuoteSubmitted ? 'Quote re-submitted!' : 'Quote submitted!');
+    const formValues = this.quoteForm.getRawValue();
+    const totalAmount = Number(formValues.quoteAmount || 0);
+    const comment = formValues.comments;
 
-      // ⭐ Mark submitted
-      this.isQuoteSubmitted = true;
+    const key = `rfq_prev_submissions_${this.rfqId}_${this.subId}`;
+    const previous = JSON.parse(localStorage.getItem(key) || '[]');
 
-      const newSubmission = {
-        date: new Date().toISOString(),
-        amount: totalAmount,
-        attachmentUrl: URL.createObjectURL(file),
-        fileName: file.name,
-        comment: comment
-      };
+    this.rfqResponseService.uploadQuoteFile(
+      this.rfqId, this.subId, file, totalAmount, comment
+    ).subscribe({
+      next: () => {
 
-      previous.unshift(newSubmission);
-      localStorage.setItem(key, JSON.stringify(previous));
-  this.isQuoteSubmitted = true;
-  
-  // Keep summary hidden after submit
-this.rightSectionVisible = false;
-  this.hideRightSummaryCard = true;
-         this.previousSubmissions.unshift(newSubmission);
+        alert(this.isQuoteSubmitted ? 'Quote re-submitted!' : 'Quote submitted!');
 
-      // ⭐ Reset form & file
-      this.selectedFiles = [];
-      this.quoteForm.reset();
-    }
-  });
-}
+        // ⭐ Mark submitted
+        this.isQuoteSubmitted = true;
+
+        const newSubmission = {
+          date: new Date().toISOString(),
+          amount: totalAmount,
+          attachmentUrl: URL.createObjectURL(file),
+          fileName: file.name,
+          comment: comment
+        };
+
+        previous.unshift(newSubmission);
+        localStorage.setItem(key, JSON.stringify(previous));
+    this.isQuoteSubmitted = true;
+    
+    // Keep summary hidden after submit
+  this.rightSectionVisible = false;
+    this.hideRightSummaryCard = true;
+          this.previousSubmissions.unshift(newSubmission);
+
+        // ⭐ Reset form & file
+        this.selectedFiles = [];
+        this.quoteForm.reset();
+      }
+    });
+  }
 
 
 openCommentModal(comment: string | null | undefined) {

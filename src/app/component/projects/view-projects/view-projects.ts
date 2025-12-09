@@ -116,6 +116,13 @@ displayedColumns: string[] = [
 
   ngOnInit(): void {
 
+
+    this.route.queryParams.subscribe(params => {
+    if (params['tab'] === 'rfq') {
+      this.selectedTab = 'rfq';
+      this.loadRfqData(); // reload table
+    }
+  });
   // ✅ Capture the project ID from the route
   this.projectId = this.route.snapshot.paramMap.get('id') || '';
   console.log('📦 Captured Project ID:', this.projectId);
@@ -127,12 +134,17 @@ displayedColumns: string[] = [
   }
 }
 
+
+
 startAutoReminderWatcher() {
   setInterval(() => {
     this.checkAndTriggerReminder();
   }, 60000); // check every 60 seconds
 }
-
+ ngAfterViewInit() {
+    this.dataSource.paginator = this.paginator;
+    this.dataSource.sort = this.sort;
+  }
 checkAndTriggerReminder() {
   this.sendReminder(); 
 }
@@ -181,6 +193,7 @@ loadRfqResponseSummary(projectId: string) {
         currentEnd: 10,
         rfqs: w.subcontractors.map((s: any) => ({
           subcontractorId: s.subcontractorId,
+          rfqId: s.rfqId,  
           name: s.name,
           rating: s.rating || 0,
           date: s.date || '—',

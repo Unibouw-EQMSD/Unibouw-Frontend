@@ -6,21 +6,22 @@ import { AppConfigService } from './app.config.service';
 
 export interface Rfq {
   id?: string;
+  rfqNumber?: string;   // ✅ Add this
+  projectName?: string; // optional
   customerID: string;
   projectID: string;
   customerName?: string;
-
   sentDate: string;
-  dueDate: string;          // backend sends "DueDate"
-  globalDueDate?: string;   // backend sends "GlobalDueDate"
-
+  dueDate: string;
+  globalDueDate?: string;
   rfqSent: number;
   quoteReceived: number;
-
   customerNote?: string;
   deadLine?: string;
+  createdOn?: string;    // ✅ Add this
   createdBy?: string;
 }
+
 
 
 @Injectable({ providedIn: 'root' })
@@ -73,7 +74,7 @@ export class RfqService {
       })))
     );
   }
- getRfqById(rfqId: string): Observable<Rfq> {
+getRfqById(rfqId: string): Observable<Rfq> {
   return from(this.getHeaders()).pipe(
     switchMap(headers =>
       this.http.get<{ data: any }>(`${this.rfqEndpoint}/${rfqId}`, { headers })
@@ -82,20 +83,25 @@ export class RfqService {
       const d = res.data;
       return {
         id: d.rfqID,
+        rfqNumber: d.rfqNumber,          // ✅ Add this
         sentDate: d.sentDate,
-        dueDate: d.dueDate || d.DueDate,
-        globalDueDate: d.globalDueDate || d.GlobalDueDate,
+        dueDate: d.dueDate,
+        globalDueDate: d.globalDueDate,
         customerID: d.customerID,
         projectID: d.projectID,
         customerName: d.customerName,
+        projectName: d.projectName,      // ✅ Add if needed
         rfqSent: d.rfqSent,
         quoteReceived: d.quoteReceived,
         customerNote: d.customerNote,
         deadLine: d.deadLine,
+        createdOn: d.createdOn,          // ✅ Add this
+        createdBy: d.createdBy,
       };
     })
   );
 }
+
   /** Fetch RFQs by project ID */
   getRfqByProjectId(projectId: string): Observable<Rfq[]> {
     return from(this.getHeaders()).pipe(
@@ -176,7 +182,7 @@ updateRfq(
   const params = new HttpParams({
     fromObject: {
       subcontractorIds: subcontractorIds.join(','), // ensure comma separated
-      workItemIds: workItemIds.join(','),
+      workItems: workItemIds.join(','),
       sendEmail: sendEmail.toString(),
       emailBody: emailBody                          // ✅ SEND EDITED EMAIL BODY
     }

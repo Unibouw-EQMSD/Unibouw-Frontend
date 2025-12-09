@@ -149,6 +149,10 @@
   <div class="rfq-field" *ngIf="rightSectionVisible">
     <label>Total Quote Amount</label>
     <input type="text" formControlName="quoteAmount" placeholder="Enter amount" />
+    <div class="error" *ngIf="formSubmitted && quoteForm.get('quoteAmount')?.errors?.['required']">
+  Quote amount is required.
+</div>
+
   </div>
 
  <div class="rfq-field" *ngIf="rightSectionVisible">
@@ -159,12 +163,20 @@
       <i class="fa fa-trash"></i>
     </button>
   </div>
+  <div class="error" *ngIf="formSubmitted && selectedFiles.length === 0">
+  Please upload at least one file.
+</div>
+
 </div>
 
 
   <div class="rfq-field" *ngIf="rightSectionVisible">
     <label>Comments</label>
     <textarea placeholder="Add Comments" rows="3" formControlName="comments"></textarea>
+    <div class="error" *ngIf="formSubmitted && quoteForm.get('comments')?.errors?.['required']">
+  Comments are required.
+</div>
+
   </div>
 
   <div style="margin-top:10px; text-align:right;"  *ngIf="rightSectionVisible">

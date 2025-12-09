@@ -89,20 +89,19 @@ editedEmailBody: string = '';
 
     this.loadProjects();
   }
- loadRfqForEdit(rfqId: string) {
+loadRfqForEdit(rfqId: string) {
   this.rfqIdForEdit = rfqId;
   this.isLoader = true;
 
   this.rfqService.getRfqById(rfqId).subscribe({
     next: (res: any) => {
-      this.originalRfq = res.data;
+      this.originalRfq = res;
 
       if (!this.originalRfq) {
         this.isLoader = false;
         return;
       }
 
-      // Set header fields
       this.rfqNumber = this.originalRfq.rfqNumber || 'N/A';
       this.createdDateDisplay = this.formatDateDisplay(this.originalRfq.createdOn);
       this.customerNote = this.originalRfq.customerNote;
@@ -114,34 +113,39 @@ editedEmailBody: string = '';
       ]).subscribe({
         next: ([info, subDates]: [any, any[]]) => {
 
-          // 🔥 FIX: Normalize existing subcontractor IDs
           const fixedSubDates = subDates.map(s => ({
             ...s,
-            subcontractorID: s.subcontractorID || s.subcontractorId  // <-- FIX
+            subcontractorID: s.subcontractorID || s.subcontractorId
           }));
 
-          const allWorkItems = this.unibouwWorkitems.concat(this.standardWorkitems);
+          const allWorkItems = [...this.unibouwWorkitems, ...this.standardWorkitems];
           const workItemToSelect = allWorkItems.find(w => w.name === info.workItem);
 
-          if (workItemToSelect) {
-            this.selectedWorkItems = [workItemToSelect];
-            this.workItemName = workItemToSelect.name;
+        if (workItemToSelect) {
+  // ✅ Ensure selectedWorkItems is set correctly
+  this.selectedWorkItems = [workItemToSelect];
+  this.workItemName = workItemToSelect.name;
 
-            const isStandard = this.standardWorkitems.some(
-              w => w.workItemID === workItemToSelect.workItemID
-            );
-            this.selectedTab = isStandard ? 'standard' : 'unibouw';
+  const isStandard = this.standardWorkitems.some(
+    w => w.workItemID === workItemToSelect.workItemID
+  );
+  this.selectedTab = isStandard ? 'standard' : 'unibouw';
 
-            this.globalDueDate = this.formatDateForHtml(this.originalRfq.dueDate);
+  this.globalDueDate = this.formatDateForHtml(this.originalRfq.dueDate);
 
-            // 🔥 FIX: Pass the corrected subcontractor list
-            this.loadSubcontractors(workItemToSelect.workItemID, fixedSubDates);
+  // ✅ Pass existing subcontractor due dates
+  const existingSubs = fixedSubDates.filter(s => s.workItemID === workItemToSelect.workItemID);
+  this.loadSubcontractors(workItemToSelect.workItemID, existingSubs);
+}
+ else {
+  this.workItemName = info.workItem || 'N/A';
+  this.selectedWorkItems = [];
+  this.subcontractors = [];
+}
 
-          } else {
-            this.workItemName = info.workItem || 'N/A';
-            this.selectedWorkItems = [];
-            this.subcontractors = [];
-          }
+
+          // ❌ REMOVE THE WRONG CALL
+          // this.loadSubcontractors(res.workitemID, res.subcontractors);
 
           this.isLoader = false;
         },
@@ -157,7 +161,6 @@ editedEmailBody: string = '';
     }
   });
 }
-
 
 
     // ⭐ New/Modified Helpers
@@ -276,7 +279,7 @@ onSubmit(sendEmail: boolean = false, editedEmailBody: string = '') {
   };
 
   const subcontractorIds = selectedSubs.map(s => s.subcontractorID);
-  const workItemIds = this.selectedWorkItems.map(w => w.workItemID);
+  const workItems = this.selectedWorkItems.map(w => w.workItemID);
 
   this.isLoader = true;
 
@@ -285,14 +288,14 @@ onSubmit(sendEmail: boolean = false, editedEmailBody: string = '') {
         rfqPayload.rfqID,
         rfqPayload,
         subcontractorIds,
-        workItemIds,
+        workItems,
         sendEmail,
         emailBodyToUse
       )
     :this.rfqService.createRfqSimple(
   rfqPayload,
   subcontractorIds,
-  workItemIds,
+  workItems,
  emailBodyToUse,     // ✔ correct email body
   sendEmail    );
 
@@ -375,19 +378,30 @@ onSubmit(sendEmail: boolean = false, editedEmailBody: string = '') {
     //   }
     // }
 
-    onWorkitemSelect(item: Workitem) {
-  const index = this.selectedWorkItems.findIndex(w => w.workItemID === item.workItemID);
-  if (index === -1) {
-    this.selectedWorkItems.push(item);
-    this.loadSubcontractors(item.workItemID).then(() => {
-      // Apply globalDueDate automatically to loaded subcontractors
-      if (this.globalDueDate) this.applyGlobalDate();
-    });
-  } else {
-    this.selectedWorkItems.splice(index, 1);
-    this.subcontractors = []; // clear subcontractors if deselected
-  }
+onWorkitemSelect(item: Workitem) {
+  // Only allow one selection
+  this.selectedWorkItems = [item];
+
+  // Reset subcontractors
+  this.subcontractors = [];
+  this.noSubMessage = "Loading subcontractors...";
+
+  // ✅ Pass existing subcontractor due dates if in edit mode
+  const existingSubs = this.originalRfq
+    ? this.originalRfq.subcontractors?.filter((s: any) =>
+        s.workItemID === item.workItemID
+      )
+    : [];
+
+  this.loadSubcontractors(item.workItemID, existingSubs).then(() => {
+    this.noSubMessage = this.subcontractors.length
+      ? ""
+      : "No subcontractors linked to this work item.";
+  });
 }
+  
+
+
 
     addSubcontractor() {
       const newName = prompt('Enter subcontractor name:');
@@ -449,33 +463,37 @@ toggleSelectAll() {
   get selectedSubcontractors() {
       return (this.subcontractors || []).filter((s: any) => s.selected);
     }
- openPreview() {
+openPreview() {
   if (!this.selectedProject) return alert("Select a project");
   if (!this.selectedWorkItems.length) return alert("Select work item");
   if (!this.selectedSubcontractors.length) return alert("Select subcontractors");
 
-  const selectedProject = this.projects.find(p => p.projectID === this.selectedProject);
-
   const workItem = this.selectedWorkItems[0];
 
-  // preview fields
-  this.previewData = {
+  // Always assign a new object for previewData
+  this.previewData = { ...{
     rfqId: this.originalRfq?.rfqNumber || 'RFQ ID will be generated once saved',
-    projectName: selectedProject?.name ?? '',
+    projectName: this.projectDetails?.name || 'N/A',
     workItemName: workItem.name,
-    dueDate: this.globalDueDate ,
+    dueDate: this.globalDueDate,
     subcontractors: this.selectedSubcontractors.map(s => s.name),
-  };
+  }};
 
-  // CLEAN email body text (no leading spaces)
+  // regenerate email body every time
   this.editedEmailBody = 
 `Dear [Subcontractor],
 
-You are invited to submit a quotation for the following work item under the [Project].`;
+You are invited to submit a quotation for the work item "${workItem.name}" under the project "${this.projectDetails?.name}".`;
 
-  this.showPreview = true;
-  document.body.style.overflow = "hidden";
+  // toggle modal
+  this.showPreview = false;  // reset first
+  setTimeout(() => {
+    this.showPreview = true;
+    document.body.style.overflow = "hidden";
+  }, 0);
 }
+
+
 
   closePreview() {
       this.showPreview = false;
