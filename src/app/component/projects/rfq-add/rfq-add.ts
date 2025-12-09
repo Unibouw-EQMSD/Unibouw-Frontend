@@ -303,8 +303,9 @@ onSubmit(sendEmail: boolean = false, editedEmailBody: string = '') {
     next: (res) => {
       alert(sendEmail ? 'RFQ sent successfully!' : 'RFQ saved successfully!');
       this.isLoader = false;
-      this.router.navigate(['/view-projects', this.projectId]);
-    },
+  this.router.navigate(['/view-projects', this.projectId], {
+        queryParams: { tab: 'rfq' }
+      });    },
     error: (err) => {
       console.error(err);
       alert('RFQ failed!');
