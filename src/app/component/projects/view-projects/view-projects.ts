@@ -167,10 +167,8 @@ loadProjectDetails(id: string) {
 }
 
 loadRfqResponseSummary(projectId: string) {
-
-  /* -------------------------------------- */
-  /* 1️⃣ WORK-ITEM GROUPED API              */
-  /* -------------------------------------- */
+this.isLoading = true;
+ /* 1️⃣ WORK-ITEM GROUPED API              */
   this.rfqResponseService.getResponsesByProjectId(projectId).subscribe({
     
     next: (res: any[]) => {
@@ -194,6 +192,7 @@ loadRfqResponseSummary(projectId: string) {
         rfqs: w.subcontractors.map((s: any) => ({
           subcontractorId: s.subcontractorId,
           rfqId: s.rfqId,  
+          rfqNumber: w.rfqNumber,
           name: s.name,
           rating: s.rating || 0,
           date: s.date || '—',
@@ -213,14 +212,16 @@ loadRfqResponseSummary(projectId: string) {
       this.workItems.forEach(work => {
         work.rfqs.forEach(rfq => this.loadQuoteAmount(rfq));
       });
-this.isLoading = false;
-    },
-    error: err => console.error("Error loading work item responses", err)
+      this.isLoading = false;
+    }, 
+    error: (err) => {
+      console.error("Error loading work item responses", err)
+      this.isLoading = false;
+    }    
+    
   });
 
-  /* -------------------------------------- */
   /*  SUBCONTRACTOR GROUPED API          */
-  /* -------------------------------------- */
   this.rfqResponseService.getResponsesByProjectSubcontractors(projectId).subscribe({ 
     next: (res: any[]) => { 
       const grouped = res.reduce((acc: any[], item: any) => {
@@ -275,7 +276,11 @@ this.isLoading = false;
       });
 this.isLoading = false;
     },
-    error: err => console.error("Error loading subcontractor responses", err)
+     error: (err) => {
+      console.error("Error loading subcontractor responses", err);
+      this.isLoading = false;
+    } 
+   
   });
 
 }
@@ -597,54 +602,95 @@ formatDateForApi(date: any): string {
 addRfq(){
   this.router.navigate(['/add-rfq', this.projectId]);
   console.log(this.projectId,'project id')
-
 }
 
+editRfq(rfqId: string) {
+    this.router.navigate(['/add-rfq', this.projectId, { rfqId: rfqId }]);
+}
+
+private applyReminderConfig(dueDate: any, config: any) {
+
+  // Helper normalize
+  const normalize = (d: Date) => new Date(d.getFullYear(), d.getMonth(), d.getDate());
+
+  // Robust date parser
+  const parseDate = (input: any): Date | null => {
+    if (!input && input !== 0) return null;
+
+    if (input instanceof Date) return isNaN(input.getTime()) ? null : input;
+
+    if (typeof input === "number") {
+      const d = new Date(input);
+      return isNaN(d.getTime()) ? null : d;
+    }
+
+    if (typeof input === "string") {
+      const trimmed = input.trim();
+
+      // ISO YYYY-MM-DD
+      const iso = trimmed.match(/^(\d{4})[-\/](\d{2})[-\/](\d{2})$/);
+      if (iso) {
+        const dt = new Date(trimmed);
+        if (!isNaN(dt.getTime())) return dt;
+      }
+
+      // dd-mm-yyyy
+      const dmy = trimmed.match(/^(\d{2})[-\/](\d{2})[-\/](\d{4})$/);
+      if (dmy) {
+        const day = +dmy[1];
+        const month = +dmy[2] - 1;
+        const year = +dmy[3];
+        const dt = new Date(year, month, day);
+        if (!isNaN(dt.getTime())) return dt;
+      }
+
+      const fallback = new Date(trimmed);
+      if (!isNaN(fallback.getTime())) return fallback;
+    }
+
+    return null;
+  };
+
+  // Parse due date
+  const dueObj = parseDate(dueDate);
+  if (!dueObj) return false;
+
+  const due = normalize(dueObj);
+  const today = normalize(new Date());
+
+  // Extract sequence
+  const seqString = (config.reminderSequence ?? config.sequence ?? "").toString();
+
+  const sequenceArray = seqString
+    .split(",")
+    .map((x:any) => parseInt((x || "").toString().trim(), 10))
+    .filter((n:any) => !isNaN(n))
+    .sort((a:any, b:any) => b - a);
+
+  // Build reminder dates
+  this.reminderDates = sequenceArray
+    .map((seq:any) => {
+      const d = new Date(due);
+      d.setDate(d.getDate() + seq);
+      return normalize(d);
+    })
+    .filter((d:any) => d >= today)
+    .sort((a:any, b:any) => a.getTime() - b.getTime())
+    .map((d:any) => d.toLocaleDateString("en-CA"));
+
+  // Custom dates start same as default
+  this.customReminderDates = this.reminderDates.map((d) => new Date(d));
+
+  // Restore time & email body
+  this.reminderTime = config.reminderTime || "08:00";
+  this.reminderEmailBody = config.reminderEmailBody || "";
+
+  return true;
+}
+
+
 showReminderPopup = false;
-    
-// openReminderPopup(rfq: any) {
-//   this.reminderService.getGlobalReminderConfig().subscribe({
-//     next: (res) => {
-//       const config = Array.isArray(res) && res.length > 0 ? res[0] : null;
-//       if (!config) {
-//         this.snackBar.open("No reminder configuration found", "Close", { duration: 3000 });
-//         return;
-//       }
-
-//       this.GlobalReminderConfig = JSON.parse(JSON.stringify(config));
-//       this.selectedRfqId = rfq.rfqId;
-
-//       this.dueDate = rfq.dueDate;
-
-//       // Generate reminder dates
-//         const today = new Date();
-//         const dueDate = new Date(rfq.dueDate);
-
-//         const sequenceArray = config.reminderSequence
-//           .split(',')
-//           .map((x:any) => parseInt(x.trim(), 10))    // convert to numbers
-//           .sort((a:any, b:any) => b - a);              // sort from highest to lowest (e.g., -1, -3, -5...)
-
-//         this.reminderDates = sequenceArray
-//           .map((seq:any) => {
-//             const reminderDate = new Date(dueDate);
-//             reminderDate.setDate(dueDate.getDate() + seq); // seq is negative
-//             return reminderDate;
-//           })
-//           .filter((date:any) => date >= today) // ensure only future dates
-//           .map((date:any) => date.toISOString().split("T")[0]); // final string format YYYY-MM-DD
-
-
-//       this.reminderTime = config.reminderTime || "08:00";
-//       this.reminderEmailBody = config.reminderEmailBody || "";
-
-//       this.showReminderPopup = true;
-//     },
-//     error: () => {
-//       this.snackBar.open("Failed to load reminder settings", "Close", { duration: 3000 });
-//     }
-//   });
-// }
+customReminderDates: Date[] = [];
 
 // openReminderPopup(rfq: any) {
 //   this.reminderService.getGlobalReminderConfig().subscribe({
@@ -657,34 +703,95 @@ showReminderPopup = false;
 
 //       this.GlobalReminderConfig = JSON.parse(JSON.stringify(config));
 //       this.selectedRfqId = rfq.rfqId;
-//       this.dueDate = rfq.dueDate;
+//       this.subId = rfq.subcontractorId;
 
-//       // Helper to normalize date to local midnight
+//       // Helper: normalize to local midnight
 //       const atMidnight = (d: Date) => new Date(d.getFullYear(), d.getMonth(), d.getDate());
 
-//       const today = atMidnight(new Date());
-//       const dueDate = new Date(rfq.dueDate);
+//       // Robust parser for various input formats (Date, ISO, dd-mm-yyyy, dd/mm/yyyy, timestamp)
+//       const parseDate = (input: any): Date | null => {
+//         if (!input && input !== 0) return null;
 
-//       if (isNaN(dueDate.getTime())) {
+//         // If already a Date
+//         if (input instanceof Date) {
+//           return isNaN(input.getTime()) ? null : input;
+//         }
+
+//         // If numeric timestamp
+//         if (typeof input === 'number') {
+//           const dt = new Date(input);
+//           return isNaN(dt.getTime()) ? null : dt;
+//         }
+
+//         // If string - try ISO first (YYYY-MM-DD or YYYY/MM/DD or full ISO)
+//         if (typeof input === 'string') {
+//           const trimmed = input.trim();
+
+//           // ISO-like (YYYY-MM-DD or YYYY/MM/DD)
+//           const isoMatch = trimmed.match(/^(\d{4})[-\/](\d{2})[-\/](\d{2})$/);
+//           if (isoMatch) {
+//             const dt = new Date(trimmed); // safe for YYYY-MM-DD
+//             if (!isNaN(dt.getTime())) return dt;
+//           }
+
+//           // dd-mm-yyyy or dd/mm/yyyy
+//           const dmyMatch = trimmed.match(/^(\d{2})[-\/](\d{2})[-\/](\d{4})$/);
+//           if (dmyMatch) {
+//             const day = parseInt(dmyMatch[1], 10);
+//             const month = parseInt(dmyMatch[2], 10) - 1;
+//             const year = parseInt(dmyMatch[3], 10);
+//             const dt = new Date(year, month, day);
+//             if (!isNaN(dt.getTime())) return dt;
+//           }
+
+//           // Attempt Date parse as last resort
+//           const dtFallback = new Date(trimmed);
+//           if (!isNaN(dtFallback.getTime())) return dtFallback;
+//         }
+
+//         // unknown format
+//         return null;
+//       };
+
+//       const dueDateObj = parseDate(rfq.dueDate);
+//       if (!dueDateObj) {
 //         this.snackBar.open("Invalid due date", "Close", { duration: 3000 });
 //         return;
 //       }
 
-//       // Generate reminder dates
-//       const sequenceArray = config.reminderSequence
-//         .split(',')
-//         .map((x: any) => parseInt(x.trim(), 10))
-//         .filter((n:any) => !isNaN(n))
-//         .sort((a: any, b: any) => b - a); // highest to lowest (-1, -3, ...)
+//       this.dueDate = rfq.dueDate;
 
-//       this.reminderDates = sequenceArray
-//         .map((seq: number) => {
-//           const reminderDate = new Date(dueDate);
-//           reminderDate.setDate(reminderDate.getDate() + seq);
-//           return atMidnight(reminderDate); // normalize
-//         })
-//         .filter((date:any) => date.getTime() >= today.getTime()) // only future or today
-//         .map((date:any) => date.toISOString().split("T")[0]); // YYYY-MM-DD
+//       const today = atMidnight(new Date());
+
+//       // support config.reminderSequence or config.sequence (string like "-1,-3,-5")
+//       const seqString = (config.reminderSequence ?? config.sequence ?? '').toString();
+
+//       const sequenceArray = seqString
+//         .split(',')
+//         .map((x: any) => parseInt((x ?? '').toString().trim(), 10))
+//         .filter((n: any) => !isNaN(n))
+//         .sort((a: any, b: any) => b - a); // descending (most negative first)
+
+//       const normalize = (d: Date) =>
+//   new Date(d.getFullYear(), d.getMonth(), d.getDate()); // force midnight local
+
+//       const due = normalize(new Date(dueDateObj));
+// const now = normalize(new Date(today));
+
+// this.reminderDates = sequenceArray
+//   .map((seq: number) => {
+//     const reminderDate = new Date(due);   // already normalized
+//     reminderDate.setDate(reminderDate.getDate() + seq);
+//     return normalize(reminderDate);
+//   })
+//   .filter((date: Date) => date >= now)
+//   .sort((a:any, b:any) => a.getTime() - b.getTime())
+//   .map((d:any) => {
+//     // output in YYYY-MM-DD without timezone shift
+//     return d.toLocaleDateString("en-CA"); // → 2025-12-28 etc.
+//   });
+
+//   this.customReminderDates = this.reminderDates.map(d => new Date(d));
 
 //       this.reminderTime = config.reminderTime || "08:00";
 //       this.reminderEmailBody = config.reminderEmailBody || "";
@@ -696,8 +803,6 @@ showReminderPopup = false;
 //     }
 //   });
 // }
-
-customReminderDates: Date[] = [];
 
 openReminderPopup(rfq: any) {
   this.reminderService.getGlobalReminderConfig().subscribe({
@@ -710,136 +815,33 @@ openReminderPopup(rfq: any) {
 
       this.GlobalReminderConfig = JSON.parse(JSON.stringify(config));
       this.selectedRfqId = rfq.rfqId;
+      this.subId = rfq.subcontractorId;
 
-      // Helper: normalize to local midnight
-      const atMidnight = (d: Date) => new Date(d.getFullYear(), d.getMonth(), d.getDate());
+      this.dueDate = rfq.dueDate;
 
-      // Robust parser for various input formats (Date, ISO, dd-mm-yyyy, dd/mm/yyyy, timestamp)
-      const parseDate = (input: any): Date | null => {
-        if (!input && input !== 0) return null;
-
-        // If already a Date
-        if (input instanceof Date) {
-          return isNaN(input.getTime()) ? null : input;
-        }
-
-        // If numeric timestamp
-        if (typeof input === 'number') {
-          const dt = new Date(input);
-          return isNaN(dt.getTime()) ? null : dt;
-        }
-
-        // If string - try ISO first (YYYY-MM-DD or YYYY/MM/DD or full ISO)
-        if (typeof input === 'string') {
-          const trimmed = input.trim();
-
-          // ISO-like (YYYY-MM-DD or YYYY/MM/DD)
-          const isoMatch = trimmed.match(/^(\d{4})[-\/](\d{2})[-\/](\d{2})$/);
-          if (isoMatch) {
-            const dt = new Date(trimmed); // safe for YYYY-MM-DD
-            if (!isNaN(dt.getTime())) return dt;
-          }
-
-          // dd-mm-yyyy or dd/mm/yyyy
-          const dmyMatch = trimmed.match(/^(\d{2})[-\/](\d{2})[-\/](\d{4})$/);
-          if (dmyMatch) {
-            const day = parseInt(dmyMatch[1], 10);
-            const month = parseInt(dmyMatch[2], 10) - 1;
-            const year = parseInt(dmyMatch[3], 10);
-            const dt = new Date(year, month, day);
-            if (!isNaN(dt.getTime())) return dt;
-          }
-
-          // Attempt Date parse as last resort
-          const dtFallback = new Date(trimmed);
-          if (!isNaN(dtFallback.getTime())) return dtFallback;
-        }
-
-        // unknown format
-        return null;
-      };
-
-      const dueDateObj = parseDate(rfq.dueDate);
-      if (!dueDateObj) {
+      const ok = this.applyReminderConfig(this.dueDate, this.GlobalReminderConfig);
+      if (!ok) {
         this.snackBar.open("Invalid due date", "Close", { duration: 3000 });
         return;
       }
 
-      this.dueDate = rfq.dueDate;
-
-      const today = atMidnight(new Date());
-
-      // support config.reminderSequence or config.sequence (string like "-1,-3,-5")
-      const seqString = (config.reminderSequence ?? config.sequence ?? '').toString();
-
-      const sequenceArray = seqString
-        .split(',')
-        .map((x: any) => parseInt((x ?? '').toString().trim(), 10))
-        .filter((n: any) => !isNaN(n))
-        .sort((a: any, b: any) => b - a); // descending (most negative first)
-
-      const normalize = (d: Date) =>
-  new Date(d.getFullYear(), d.getMonth(), d.getDate()); // force midnight local
-
-      const due = normalize(new Date(dueDateObj));
-const now = normalize(new Date(today));
-
-this.reminderDates = sequenceArray
-  .map((seq: number) => {
-    const reminderDate = new Date(due);   // already normalized
-    reminderDate.setDate(reminderDate.getDate() + seq);
-    return normalize(reminderDate);
-  })
-  .filter((date: Date) => date >= now)
-  .sort((a:any, b:any) => a.getTime() - b.getTime())
-  .map((d:any) => {
-    // output in YYYY-MM-DD without timezone shift
-    return d.toLocaleDateString("en-CA"); // → 2025-12-28 etc.
-  });
-
-// this.reminderDates = sequenceArray
-//   .map((seq: number) => {
-//     const reminderDate = new Date(due); // already normalized
-//     reminderDate.setDate(reminderDate.getDate() + seq);
-//     return normalize(reminderDate);
-//   })
-//   .filter((date: Date) => date >= now)
-//   .sort((a: any, b: any) => a.getTime() - b.getTime())
-//   .map((d: any) => {
-//     // convert to DD-MM-YYYY
-//     const day = String(d.getDate()).padStart(2, '0');
-//     const month = String(d.getMonth() + 1).padStart(2, '0');
-//     const year = d.getFullYear();
-//     return `${day}-${month}-${year}`;
-//   });
-
-  this.customReminderDates = this.reminderDates.map(d => new Date(d));
-
-      this.reminderTime = config.reminderTime || "08:00";
-      this.reminderEmailBody = config.reminderEmailBody || "";
-
+      this.reminderType = "default";
       this.showReminderPopup = true;
-    },
-    error: () => {
-      this.snackBar.open("Failed to load reminder settings", "Close", { duration: 3000 });
     }
   });
 }
 
+resetReminderPopup() {
+  if (!this.GlobalReminderConfig || !this.dueDate) return;
+
+  // this.reminderType = "default";
+  this.applyReminderConfig(this.dueDate, this.GlobalReminderConfig);
+}
+
+
 closeReminderPopup() {
   this.showReminderPopup = false;
 }
-
-// sendReminder() {
-//     if (!this.selectedRfqId || !this.subId) {
-//       alert('Missing RFQ or Subcontractor information.');
-//       return;
-//     }
-//     // Implement the API call to send a reminder here.
-//     console.log("Reminder:", this.selectedRfqId, this.subId);
-//     this.showReminderPopup = false;
-//     this.snackBar.open("Reminder sent!", "Close", { duration: 2000 });
-//   }
 
 private _reminderDates: string[] = [];
 
@@ -858,8 +860,8 @@ set reminderDates1(dates: string[]) {
 }
 
 sendReminder() {
-  this.selectedRfqId = "a65866a5-044c-406b-8716-46eb61ba3f35";
-  this.subId = "aa9c34bd-8c52-4478-b95c-cbbad6d41116";
+  // this.selectedRfqId = "a65866a5-044c-406b-8716-46eb61ba3f35";
+  // this.subId = "aa9c34bd-8c52-4478-b95c-cbbad6d41116";
 
   if (!this.selectedRfqId || !this.subId) {
     alert('Missing RFQ or Subcontractor information.');
@@ -872,9 +874,11 @@ sendReminder() {
     .subscribe({
       next: (result) => {
         if (result.success) {
-          this.snackBar.open("Reminder sent!", "Close", { duration: 2000 });
+          this.snackBar.open("Reminder sent.", "Close", { duration: 2000 });
+          alert("Reminder sent.");
         } else {
           this.snackBar.open("Reminder sending failed.", "Close", { duration: 2000 });
+          alert("Reminder sending failed.");
         }
       },
       error: (error) => {
@@ -885,10 +889,6 @@ sendReminder() {
         this.showReminderPopup = false;     
       }
     });
-}
-
-editRfq(rfqId: string) {
-    this.router.navigate(['/add-rfq', this.projectId, { rfqId: rfqId }]);
 }
 
 }

@@ -103,6 +103,7 @@
                       [value]="item"
                       [checked]="isWorkItemSelected(item)"
                       (change)="onWorkitemSelect(item)"
+                      class="cursor-pointer"
                     />
                   </td>
                   <td>{{ item.name }}</td>
@@ -124,18 +125,13 @@
               border-bottom: 1px solid #eee;
             "
           >
-            <div style="display: flex; align-items: center; gap: 10px">
+            <div style="display: flex; align-items: center; gap: 3px; margin-right: 10px">
               <h3 style="margin: 0; font-size: 16px">Subcontractors</h3>
               <button
                 type="button"
                 (click)="addSub()"
                 class="add-btn"
-                style="
-                  display: flex;
-                  justify-content: center;
-                  align-items: center;
-                  padding-bottom: 2px;
-                "
+                style="display: flex; justify-content: center; align-items: center"
               >
                 +
               </button>
@@ -175,8 +171,13 @@
                   color: #555;
                 "
               >
-                <input type="checkbox" [(ngModel)]="showAll" (change)="toggleSelectAll()" /> Show
-                all
+                <input
+                  class="cursor-pointer"
+                  type="checkbox"
+                  [(ngModel)]="showAll"
+                  (change)="toggleSelectAll()"
+                />
+                Show all
               </label>
             </div>
           </div>
@@ -266,12 +267,7 @@
                 type="button"
                 (click)="addSub()"
                 class="add-btn"
-                style="
-                  display: flex;
-                  justify-content: center;
-                  align-items: center;
-                  padding-bottom: 2px;
-                "
+                style="display: flex; justify-content: center; align-items: center"
               >
                 +
               </button>
@@ -311,8 +307,13 @@
                   color: #555;
                 "
               >
-                <input type="checkbox" [(ngModel)]="showAll" (change)="toggleSelectAll()" /> Show
-                all
+                <input
+                  type="checkbox"
+                  [(ngModel)]="showAll"
+                  (change)="toggleSelectAll()"
+                  class="cursor-pointer"
+                />
+                Show all
               </label>
             </div>
           </div>

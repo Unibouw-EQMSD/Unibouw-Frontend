@@ -123,21 +123,26 @@
             <!-- GROUP OPTIONS -->
             <div class="rfq-header">
               <div class="group-options">
-                <label>
+                <label class="cursor-pointer">
                   <input type="radio" name="groupBy" [(ngModel)]="groupBy" value="workItem" />
                   Group by Work Item
                 </label>
-                <label>
-                  <input type="radio" name="groupBy" [(ngModel)]="groupBy" value="subcontractor" />
+                <label class="cursor-pointer">
+                  <input
+                    type="radio"
+                    name="groupBy"
+                    [(ngModel)]="groupBy"
+                    value="subcontractor"
+                    class="cursor-pointer"
+                  />
                   Group by Subcontractor
                 </label>
               </div>
             </div>
+            <div class="text-center pt-20" *ngIf="isLoading">Loading...</div>
 
-            <!-- ===================================================== -->
             <!-- 1️⃣  WORK ITEM GROUPING                              -->
-            <!-- ===================================================== -->
-            <div *ngIf="groupBy === 'workItem'">
+            <div *ngIf="groupBy === 'workItem' && !isLoading">
               <div *ngFor="let work of workItems" class="work-item">
                 <!-- Work Item Header -->
                 <div class="work-item-header" (click)="work.open = !work.open">
@@ -196,7 +201,7 @@
                           <th style="text-align: center">Interested</th>
                           <th style="text-align: center">Maybe Later</th>
                           <th style="text-align: center">Quote Amount</th>
-                          <th style="text-align: center">Actions</th>
+                          <th>Actions</th>
                         </tr>
                       </thead>
 
@@ -211,28 +216,32 @@
                             </td>
 
                             <td (click)="markViewed(work, rfq)">{{ rfq.date }}</td>
-                            <td (click)="markViewed(work, rfq)">{{ rfq.rfqId }}</td>
+                            <td (click)="markViewed(work, rfq)">{{ rfq.rfqNumber }}</td>
 
                             <td style="text-align: center" (click)="markViewed(work, rfq)">
                               <i class="fa fa-check-circle success" *ngIf="rfq.viewed"></i>
+                              <i class="fa fa-times fail" *ngIf="!rfq.viewed"></i>
                             </td>
 
                             <td style="text-align: center" (click)="markViewed(work, rfq)">
                               <i class="fa fa-check-circle success" *ngIf="rfq.interested"></i>
+                              <i class="fa fa-times fail" *ngIf="!rfq.interested"></i>
                             </td>
                             <td style="text-align: center" (click)="markMaybeLater(work, rfq)">
                               <i class="fa fa-check-circle success" *ngIf="rfq.maybeLater"></i>
+                              <i class="fa fa-times fail" *ngIf="!rfq.maybeLater"></i>
                             </td>
-
-                            <!-- <td (click)="markViewed(work, rfq)">{{ rfq.responded ? 'Uploaded' : 'Not Uploaded' }}</td> -->
                             <td
-                              style="text-align: right; padding-right: 33px"
+                              style="text-align: right; padding-right: 50px"
                               (click)="markViewed(work, rfq)"
                             >
-                              € {{ rfq.quoteAmount }}
+                              <!-- € {{ rfq.quoteAmount }} -->
+                              <ng-container *ngIf="rfq.quoteAmount && rfq.quoteAmount !== '-'">
+                                € {{ rfq.quoteAmount }}
+                              </ng-container>
                             </td>
 
-                            <td style="text-align: right">
+                            <td style="text-align: center">
                               <!-- PDF Icon with Disabled Logic -->
                               <i
                                 class="fa fa-file-pdf action-icon download-icon"
@@ -282,10 +291,8 @@
               </div>
             </div>
 
-            <!-- ===================================================== -->
             <!-- 2️⃣ SUBCONTRACTOR GROUPING                            -->
-            <!-- ===================================================== -->
-            <div *ngIf="groupBy === 'subcontractor'">
+            <div *ngIf="groupBy === 'subcontractor' && !isLoading">
               <div *ngFor="let sub of subcontractorGroups" class="work-item">
                 <!-- Header -->
                 <div class="work-item-header" (click)="sub.open = !sub.open">
@@ -338,11 +345,10 @@
                           <th>Work Item</th>
                           <th>Date</th>
                           <th>RFQ ID</th>
-                          <th>Viewed</th>
-                          <th>Interested</th>
-                          <th>Maybe Later</th>
-                          <!-- <th>Quote Status</th> -->
-                          <th>Quote Amount</th>
+                          <th style="text-align: center">Viewed</th>
+                          <th style="text-align: center">Interested</th>
+                          <th style="text-align: center">Maybe Later</th>
+                          <th style="text-align: center">Quote Amount</th>
                           <th>Actions</th>
                         </tr>
                       </thead>
@@ -351,15 +357,28 @@
                           <td>{{ w.workItemName }}</td>
                           <td>{{ w.date }}</td>
                           <td>{{ w.rfqNumber }}</td>
-                          <td><i class="fa fa-check-circle success" *ngIf="w.viewed"></i></td>
+                          <td style="text-align: center">
+                            <i class="fa fa-check-circle success" *ngIf="w.viewed"></i>
+                            <i class="fa fa-times fail" *ngIf="!w.viewed"></i>
+                          </td>
 
-                          <td><i class="fa fa-check-circle success" *ngIf="w.interested"></i></td>
-                          <td><i class="fa fa-check-circle success" *ngIf="w.maybeLater"></i></td>
-                          <!-- <td>{{ w.responded ? 'Uploaded' : 'Not Uploaded' }}</td> -->
-                          <td>{{ w.quoteAmount }}</td>
-                          <td>
+                          <td style="text-align: center">
+                            <i class="fa fa-check-circle success" *ngIf="w.interested"></i>
+                            <i class="fa fa-times fail" *ngIf="!w.interested"></i>
+                          </td>
+                          <td style="text-align: center">
+                            <i class="fa fa-check-circle success" *ngIf="w.maybeLater"></i>
+                            <i class="fa fa-times fail" *ngIf="!w.maybeLater"></i>
+                          </td>
+                          <td style="text-align: right; padding-right: 50px">
+                            <!-- € {{ rfq.quoteAmount }} -->
+                            <ng-container *ngIf="w.quoteAmount && w.quoteAmount !== '-'">
+                              € {{ w.quoteAmount }}
+                            </ng-container>
+                          </td>
+                          <td style="text-align: center">
                             <!-- PDF Icon with Disabled Logic -->
-                            <i
+                            <!-- <i
                               *ngIf="w.actions?.includes('pdf')"
                               class="fa fa-file-pdf action-icon download-icon"
                               [class.disabled-icon]="!w.responded"
@@ -368,7 +387,6 @@
                               "
                               [title]="w.responded ? 'Download Quote' : 'No Quote Uploaded'"
                             ></i>
-
                             <i
                               *ngIf="w.actions?.includes('lock')"
                               class="fa fa-lock action-icon"
@@ -377,6 +395,22 @@
                               class="fa fa-bell"
                               title="Set Reminder"
                               (click)="openReminderPopup(w)"
+                            ></i> -->
+
+                            <i
+                              class="fa fa-file-pdf action-icon download-icon"
+                              *ngIf="w.actions?.includes('pdf')"
+                              [class.disabled-icon]="!isPdfEnabled(w)"
+                              (click)="
+                                w.responded && downloadQuote($event, w.rfqId, sub.subcontractorId)
+                              "
+                              [title]="w.responded ? 'Download Quote' : 'No Quote Uploaded'"
+                            ></i>
+                            <i
+                              class="fa fa-bell"
+                              [class.disabled-icon]="!isBellEnabled(w)"
+                              (click)="isBellEnabled(w) && openReminderPopup(w)"
+                              title="Set Reminder"
                             ></i>
                           </td>
                         </tr>
@@ -435,9 +469,10 @@
                 <th mat-header-cell *matHeaderCellDef>Actions</th>
                 <td mat-cell *matCellDef="let row">
                   <i
-                    class="fa-regular fa-pen-to-square edit-icon"
+                    class="fa-regular fa-pen-to-square edit-icon cursor-pointer"
                     style="color: #f97316"
                     (click)="editRfq(row.id)"
+                    title="Edit RFQ"
                   ></i>
                 </td>
               </ng-container>
@@ -446,7 +481,6 @@
               <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
             </table>
           </div>
-
           <mat-paginator
             *ngIf="selectedTab === 'rfq'"
             [pageSize]="pageSize"
@@ -454,7 +488,6 @@
             showFirstLastButtons
           >
           </mat-paginator>
-
           <!-- 🟣 TAB 3: CONVERSATION -->
           <div *ngIf="selectedTab === 'conversation'">
             <h3>Conversation</h3>
@@ -467,35 +500,12 @@
 
   <!-- Reminder Popup Modal -->
   <div class="custom-modal-backdrop" *ngIf="showReminderPopup"></div>
-
-  <!-- <div class="custom-modal" *ngIf="showReminderPopup">
-    <div class="modal-content-box">
-      <p class="modal-header">Set Reminder</p>
-
-      <div class="modal-content">
-        <textarea class="reminder-body" readonly rows="7" style="width: 100%; margin-bottom: 16px">
-Dear Subcontractor,
-
-This is a reminder to upload your quote before the due date. Please ensure all required documents are submitted on time.
-
-Thank you.</textarea
-        >
-      </div>
-
-      <div style="display: flex; justify-content: flex-end; gap: 12px">
-        <button class="btn cancel-btn" (click)="closeReminderPopup()">Cancel</button>
-        <button class="btn submit-btn" (click)="sendReminder()">Send</button>
-      </div>
-    </div>
-  </div> -->
-
   <div class="custom-modal" *ngIf="showReminderPopup">
     <div class="modal-content-box max-w-[53vw] bg-white rounded-lg shadow-lg p-6">
       <!-- Modal Header -->
       <div class="modal-header p-2 border-b border-gray-200">
         <p class="text-xl font-semibold">Settings</p>
       </div>
-
       <div class="loading-overlay" *ngIf="isLoading">
         <p>Sending Reminder...</p>
       </div>
@@ -531,7 +541,10 @@ Thank you.</textarea
           <div class="default-reminder-container" *ngIf="reminderType === 'default'">
             <div class="date-row" *ngFor="let d of reminderDates; let i = index">
               <span class="circle">{{ i + 1 }}</span>
-              <span class="date-input">{{ d }}</span>
+              <!-- <span class="date-input">{{ d }}</span> -->
+              <span class="date-input">
+                {{ d.split('-')[2] }}-{{ d.split('-')[1] }}-{{ d.split('-')[0] }}
+              </span>
             </div>
           </div>
 
@@ -556,45 +569,17 @@ Thank you.</textarea
           </div>
 
           <!-- Custom Reminder -->
-          <!-- <div class="reminder-container" *ngIf="reminderType === 'custom'">
-            <div class="date-row">
-              <span class="circle">1</span>
-              <input [matDatepicker]="picker1" class="date-input" placeholder="Select date" />
-              <mat-datepicker-toggle matSuffix [for]="picker1">
-                <i class="fa fa-calendar calendar-icon"></i>
-              </mat-datepicker-toggle>
-              <mat-datepicker #picker1></mat-datepicker>
-            </div>
-
-            <div class="date-row">
-              <span class="circle">2</span>
-              <input [matDatepicker]="picker2" class="date-input" placeholder="Select date" />
-              <mat-datepicker-toggle matSuffix [for]="picker2">
-                <i class="fa fa-calendar calendar-icon"></i>
-              </mat-datepicker-toggle>
-              <mat-datepicker #picker2></mat-datepicker>
-            </div>
-
-            <div class="date-row">
-              <span class="circle">3</span>
-              <input [matDatepicker]="picker3" class="date-input" placeholder="Select date" />
-              <mat-datepicker-toggle matSuffix [for]="picker3">
-                <i class="fa fa-calendar calendar-icon"></i>
-              </mat-datepicker-toggle>
-              <mat-datepicker #picker3></mat-datepicker>
-            </div>
-          </div> -->
-
           <!-- Time Picker -->
           <div class="time-row">
             <label>Set Time: </label>
-            <input
+            <!-- <input
               type="time"
               class="time-input"
               [value]="reminderTime"
               [readonly]="reminderType === 'default'"
               [ngClass]="{ 'readonly-bg': reminderType === 'default' }"
-            />
+            /> -->
+            <input type="time" class="time-input readonly-bg" [value]="reminderTime" readonly />
             <i class="fa fa-clock-o time-icon"></i>
           </div>
         </div>
@@ -617,9 +602,14 @@ Thank you.</textarea
       <!-- Modal Footer -->
       <div class="modal-footer flex justify-end gap-4 border-t border-gray-200 pt-4 mt-4">
         <button class="btn cancel-btn" (click)="closeReminderPopup()">Cancel</button>
-        <!-- <button class="btn reset-btn">Reset</button> -->
-        <button class="btn reset-btn" *ngIf="reminderType === 'custom'">Reset</button>
-        <button class="btn submit-btn" (click)="sendReminder()">Set Reminder</button>
+        <button
+          class="btn reset-btn"
+          *ngIf="reminderType === 'custom'"
+          (click)="resetReminderPopup()"
+        >
+          Reset
+        </button>
+        <button class="btn submit-btn" (click)="sendReminder()">Send Reminder</button>
       </div>
     </div>
   </div>

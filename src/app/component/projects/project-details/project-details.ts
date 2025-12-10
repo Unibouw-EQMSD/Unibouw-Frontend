@@ -62,6 +62,7 @@ goToRFQ() {
   this.router.navigate(['/rfq']);
 }
  loadProjects(): void {
+  this.isLoading = true;
     this.projectService.getProjects().subscribe({
       next: (data) => {
         this.dataSource.data = data;
