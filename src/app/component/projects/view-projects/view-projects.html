@@ -481,7 +481,6 @@
               <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
             </table>
           </div>
-
           <mat-paginator
             *ngIf="selectedTab === 'rfq'"
             [pageSize]="pageSize"
@@ -489,7 +488,6 @@
             showFirstLastButtons
           >
           </mat-paginator>
-
           <!-- 🟣 TAB 3: CONVERSATION -->
           <div *ngIf="selectedTab === 'conversation'">
             <h3>Conversation</h3>
@@ -502,35 +500,12 @@
 
   <!-- Reminder Popup Modal -->
   <div class="custom-modal-backdrop" *ngIf="showReminderPopup"></div>
-
-  <!-- <div class="custom-modal" *ngIf="showReminderPopup">
-    <div class="modal-content-box">
-      <p class="modal-header">Set Reminder</p>
-
-      <div class="modal-content">
-        <textarea class="reminder-body" readonly rows="7" style="width: 100%; margin-bottom: 16px">
-Dear Subcontractor,
-
-This is a reminder to upload your quote before the due date. Please ensure all required documents are submitted on time.
-
-Thank you.</textarea
-        >
-      </div>
-
-      <div style="display: flex; justify-content: flex-end; gap: 12px">
-        <button class="btn cancel-btn" (click)="closeReminderPopup()">Cancel</button>
-        <button class="btn submit-btn" (click)="sendReminder()">Send</button>
-      </div>
-    </div>
-  </div> -->
-
   <div class="custom-modal" *ngIf="showReminderPopup">
     <div class="modal-content-box max-w-[53vw] bg-white rounded-lg shadow-lg p-6">
       <!-- Modal Header -->
       <div class="modal-header p-2 border-b border-gray-200">
         <p class="text-xl font-semibold">Settings</p>
       </div>
-
       <div class="loading-overlay" *ngIf="isLoading">
         <p>Sending Reminder...</p>
       </div>
@@ -566,7 +541,10 @@ Thank you.</textarea
           <div class="default-reminder-container" *ngIf="reminderType === 'default'">
             <div class="date-row" *ngFor="let d of reminderDates; let i = index">
               <span class="circle">{{ i + 1 }}</span>
-              <span class="date-input">{{ d }}</span>
+              <!-- <span class="date-input">{{ d }}</span> -->
+              <span class="date-input">
+                {{ d.split('-')[2] }}-{{ d.split('-')[1] }}-{{ d.split('-')[0] }}
+              </span>
             </div>
           </div>
 
@@ -591,45 +569,17 @@ Thank you.</textarea
           </div>
 
           <!-- Custom Reminder -->
-          <!-- <div class="reminder-container" *ngIf="reminderType === 'custom'">
-            <div class="date-row">
-              <span class="circle">1</span>
-              <input [matDatepicker]="picker1" class="date-input" placeholder="Select date" />
-              <mat-datepicker-toggle matSuffix [for]="picker1">
-                <i class="fa fa-calendar calendar-icon"></i>
-              </mat-datepicker-toggle>
-              <mat-datepicker #picker1></mat-datepicker>
-            </div>
-
-            <div class="date-row">
-              <span class="circle">2</span>
-              <input [matDatepicker]="picker2" class="date-input" placeholder="Select date" />
-              <mat-datepicker-toggle matSuffix [for]="picker2">
-                <i class="fa fa-calendar calendar-icon"></i>
-              </mat-datepicker-toggle>
-              <mat-datepicker #picker2></mat-datepicker>
-            </div>
-
-            <div class="date-row">
-              <span class="circle">3</span>
-              <input [matDatepicker]="picker3" class="date-input" placeholder="Select date" />
-              <mat-datepicker-toggle matSuffix [for]="picker3">
-                <i class="fa fa-calendar calendar-icon"></i>
-              </mat-datepicker-toggle>
-              <mat-datepicker #picker3></mat-datepicker>
-            </div>
-          </div> -->
-
           <!-- Time Picker -->
           <div class="time-row">
             <label>Set Time: </label>
-            <input
+            <!-- <input
               type="time"
               class="time-input"
               [value]="reminderTime"
               [readonly]="reminderType === 'default'"
               [ngClass]="{ 'readonly-bg': reminderType === 'default' }"
-            />
+            /> -->
+            <input type="time" class="time-input readonly-bg" [value]="reminderTime" readonly />
             <i class="fa fa-clock-o time-icon"></i>
           </div>
         </div>
@@ -652,9 +602,14 @@ Thank you.</textarea
       <!-- Modal Footer -->
       <div class="modal-footer flex justify-end gap-4 border-t border-gray-200 pt-4 mt-4">
         <button class="btn cancel-btn" (click)="closeReminderPopup()">Cancel</button>
-        <!-- <button class="btn reset-btn">Reset</button> -->
-        <button class="btn reset-btn" *ngIf="reminderType === 'custom'">Reset</button>
-        <button class="btn submit-btn" (click)="sendReminder()">Set Reminder</button>
+        <button
+          class="btn reset-btn"
+          *ngIf="reminderType === 'custom'"
+          (click)="resetReminderPopup()"
+        >
+          Reset
+        </button>
+        <button class="btn submit-btn" (click)="sendReminder()">Send Reminder</button>
       </div>
     </div>
   </div>
