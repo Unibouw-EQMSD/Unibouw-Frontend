@@ -199,6 +199,7 @@ loadRfqResponseSummary(projectId: string) {
           date: s.date || '—',
           responded: s.responded,
           interested: s.interested,
+          notInterested: s.notInterested,
           viewed: s.viewed,
            maybeLater: s.maybeLater,
           quote: s.quote || '—',
@@ -277,6 +278,31 @@ this.isLoading = false;
     error: err => console.error("Error loading subcontractor responses", err)
   });
 
+}
+
+isBellEnabled(rfq: any): boolean {
+  const amt = rfq.quoteAmount;
+
+  // TRUE only when NO valid quote is submitted
+  const noValidQuote =
+    !amt || amt === "-" || isNaN(Number(amt));
+
+  return (
+    noValidQuote &&                // enable only if no quote uploaded
+    !rfq.notInterested &&          // disable if Not Interested
+    (rfq.viewed || rfq.interested || rfq.maybeLater)  // must have engagement
+  );
+}
+
+isPdfEnabled(rfqs: any): boolean {
+  const amt = rfqs.quoteAmount;
+
+  // Disable when "-", empty, null, undefined, or not a number
+  if (!amt || amt === "-" || isNaN(Number(amt))) {
+    return false;
+  }
+
+  return true;
 }
 
  // In your component
