@@ -348,6 +348,16 @@ display: flex;
   color: red;
 }
 
+.success {
+  color: green;
+  font-size: 17px;
+}
+
+.fail {
+  color: red;
+  font-size: 17px;
+}
+
 /* Pagination */
 
 .pagination-wrapper {

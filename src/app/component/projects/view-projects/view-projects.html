@@ -123,21 +123,26 @@
             <!-- GROUP OPTIONS -->
             <div class="rfq-header">
               <div class="group-options">
-                <label>
+                <label class="cursor-pointer">
                   <input type="radio" name="groupBy" [(ngModel)]="groupBy" value="workItem" />
                   Group by Work Item
                 </label>
-                <label>
-                  <input type="radio" name="groupBy" [(ngModel)]="groupBy" value="subcontractor" />
+                <label class="cursor-pointer">
+                  <input
+                    type="radio"
+                    name="groupBy"
+                    [(ngModel)]="groupBy"
+                    value="subcontractor"
+                    class="cursor-pointer"
+                  />
                   Group by Subcontractor
                 </label>
               </div>
             </div>
+            <div class="text-center pt-20" *ngIf="isLoading">Loading...</div>
 
-            <!-- ===================================================== -->
             <!-- 1️⃣  WORK ITEM GROUPING                              -->
-            <!-- ===================================================== -->
-            <div *ngIf="groupBy === 'workItem'">
+            <div *ngIf="groupBy === 'workItem' && !isLoading">
               <div *ngFor="let work of workItems" class="work-item">
                 <!-- Work Item Header -->
                 <div class="work-item-header" (click)="work.open = !work.open">
@@ -196,7 +201,7 @@
                           <th style="text-align: center">Interested</th>
                           <th style="text-align: center">Maybe Later</th>
                           <th style="text-align: center">Quote Amount</th>
-                          <th style="text-align: center">Actions</th>
+                          <th>Actions</th>
                         </tr>
                       </thead>
 
@@ -211,28 +216,32 @@
                             </td>
 
                             <td (click)="markViewed(work, rfq)">{{ rfq.date }}</td>
-                            <td (click)="markViewed(work, rfq)">{{ rfq.rfqId }}</td>
+                            <td (click)="markViewed(work, rfq)">{{ rfq.rfqNumber }}</td>
 
                             <td style="text-align: center" (click)="markViewed(work, rfq)">
                               <i class="fa fa-check-circle success" *ngIf="rfq.viewed"></i>
+                              <i class="fa fa-times fail" *ngIf="!rfq.viewed"></i>
                             </td>
 
                             <td style="text-align: center" (click)="markViewed(work, rfq)">
                               <i class="fa fa-check-circle success" *ngIf="rfq.interested"></i>
+                              <i class="fa fa-times fail" *ngIf="!rfq.interested"></i>
                             </td>
                             <td style="text-align: center" (click)="markMaybeLater(work, rfq)">
                               <i class="fa fa-check-circle success" *ngIf="rfq.maybeLater"></i>
+                              <i class="fa fa-times fail" *ngIf="!rfq.maybeLater"></i>
                             </td>
-
-                            <!-- <td (click)="markViewed(work, rfq)">{{ rfq.responded ? 'Uploaded' : 'Not Uploaded' }}</td> -->
                             <td
-                              style="text-align: right; padding-right: 33px"
+                              style="text-align: right; padding-right: 50px"
                               (click)="markViewed(work, rfq)"
                             >
-                              € {{ rfq.quoteAmount }}
+                              <!-- € {{ rfq.quoteAmount }} -->
+                              <ng-container *ngIf="rfq.quoteAmount && rfq.quoteAmount !== '-'">
+                                € {{ rfq.quoteAmount }}
+                              </ng-container>
                             </td>
 
-                            <td style="text-align: right">
+                            <td style="text-align: center">
                               <!-- PDF Icon with Disabled Logic -->
                               <i
                                 class="fa fa-file-pdf action-icon download-icon"
@@ -282,10 +291,8 @@
               </div>
             </div>
 
-            <!-- ===================================================== -->
             <!-- 2️⃣ SUBCONTRACTOR GROUPING                            -->
-            <!-- ===================================================== -->
-            <div *ngIf="groupBy === 'subcontractor'">
+            <div *ngIf="groupBy === 'subcontractor' && !isLoading">
               <div *ngFor="let sub of subcontractorGroups" class="work-item">
                 <!-- Header -->
                 <div class="work-item-header" (click)="sub.open = !sub.open">
@@ -338,11 +345,10 @@
                           <th>Work Item</th>
                           <th>Date</th>
                           <th>RFQ ID</th>
-                          <th>Viewed</th>
-                          <th>Interested</th>
-                          <th>Maybe Later</th>
-                          <!-- <th>Quote Status</th> -->
-                          <th>Quote Amount</th>
+                          <th style="text-align: center">Viewed</th>
+                          <th style="text-align: center">Interested</th>
+                          <th style="text-align: center">Maybe Later</th>
+                          <th style="text-align: center">Quote Amount</th>
                           <th>Actions</th>
                         </tr>
                       </thead>
@@ -351,15 +357,28 @@
                           <td>{{ w.workItemName }}</td>
                           <td>{{ w.date }}</td>
                           <td>{{ w.rfqNumber }}</td>
-                          <td><i class="fa fa-check-circle success" *ngIf="w.viewed"></i></td>
+                          <td style="text-align: center">
+                            <i class="fa fa-check-circle success" *ngIf="w.viewed"></i>
+                            <i class="fa fa-times fail" *ngIf="!w.viewed"></i>
+                          </td>
 
-                          <td><i class="fa fa-check-circle success" *ngIf="w.interested"></i></td>
-                          <td><i class="fa fa-check-circle success" *ngIf="w.maybeLater"></i></td>
-                          <!-- <td>{{ w.responded ? 'Uploaded' : 'Not Uploaded' }}</td> -->
-                          <td>{{ w.quoteAmount }}</td>
-                          <td>
+                          <td style="text-align: center">
+                            <i class="fa fa-check-circle success" *ngIf="w.interested"></i>
+                            <i class="fa fa-times fail" *ngIf="!w.interested"></i>
+                          </td>
+                          <td style="text-align: center">
+                            <i class="fa fa-check-circle success" *ngIf="w.maybeLater"></i>
+                            <i class="fa fa-times fail" *ngIf="!w.maybeLater"></i>
+                          </td>
+                          <td style="text-align: right; padding-right: 50px">
+                            <!-- € {{ rfq.quoteAmount }} -->
+                            <ng-container *ngIf="w.quoteAmount && w.quoteAmount !== '-'">
+                              € {{ w.quoteAmount }}
+                            </ng-container>
+                          </td>
+                          <td style="text-align: center">
                             <!-- PDF Icon with Disabled Logic -->
-                            <i
+                            <!-- <i
                               *ngIf="w.actions?.includes('pdf')"
                               class="fa fa-file-pdf action-icon download-icon"
                               [class.disabled-icon]="!w.responded"
@@ -368,7 +387,6 @@
                               "
                               [title]="w.responded ? 'Download Quote' : 'No Quote Uploaded'"
                             ></i>
-
                             <i
                               *ngIf="w.actions?.includes('lock')"
                               class="fa fa-lock action-icon"
@@ -377,6 +395,22 @@
                               class="fa fa-bell"
                               title="Set Reminder"
                               (click)="openReminderPopup(w)"
+                            ></i> -->
+
+                            <i
+                              class="fa fa-file-pdf action-icon download-icon"
+                              *ngIf="w.actions?.includes('pdf')"
+                              [class.disabled-icon]="!isPdfEnabled(w)"
+                              (click)="
+                                w.responded && downloadQuote($event, w.rfqId, sub.subcontractorId)
+                              "
+                              [title]="w.responded ? 'Download Quote' : 'No Quote Uploaded'"
+                            ></i>
+                            <i
+                              class="fa fa-bell"
+                              [class.disabled-icon]="!isBellEnabled(w)"
+                              (click)="isBellEnabled(w) && openReminderPopup(w)"
+                              title="Set Reminder"
                             ></i>
                           </td>
                         </tr>
@@ -435,9 +469,10 @@
                 <th mat-header-cell *matHeaderCellDef>Actions</th>
                 <td mat-cell *matCellDef="let row">
                   <i
-                    class="fa-regular fa-pen-to-square edit-icon"
+                    class="fa-regular fa-pen-to-square edit-icon cursor-pointer"
                     style="color: #f97316"
                     (click)="editRfq(row.id)"
+                    title="Edit RFQ"
                   ></i>
                 </td>
               </ng-container>

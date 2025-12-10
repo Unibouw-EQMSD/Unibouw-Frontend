@@ -167,10 +167,8 @@ loadProjectDetails(id: string) {
 }
 
 loadRfqResponseSummary(projectId: string) {
-
-  /* -------------------------------------- */
-  /* 1️⃣ WORK-ITEM GROUPED API              */
-  /* -------------------------------------- */
+this.isLoading = true;
+ /* 1️⃣ WORK-ITEM GROUPED API              */
   this.rfqResponseService.getResponsesByProjectId(projectId).subscribe({
     
     next: (res: any[]) => {
@@ -194,6 +192,7 @@ loadRfqResponseSummary(projectId: string) {
         rfqs: w.subcontractors.map((s: any) => ({
           subcontractorId: s.subcontractorId,
           rfqId: s.rfqId,  
+          rfqNumber: w.rfqNumber,
           name: s.name,
           rating: s.rating || 0,
           date: s.date || '—',
@@ -213,14 +212,16 @@ loadRfqResponseSummary(projectId: string) {
       this.workItems.forEach(work => {
         work.rfqs.forEach(rfq => this.loadQuoteAmount(rfq));
       });
-this.isLoading = false;
-    },
-    error: err => console.error("Error loading work item responses", err)
+      this.isLoading = false;
+    }, 
+    error: (err) => {
+      console.error("Error loading work item responses", err)
+      this.isLoading = false;
+    }    
+    
   });
 
-  /* -------------------------------------- */
   /*  SUBCONTRACTOR GROUPED API          */
-  /* -------------------------------------- */
   this.rfqResponseService.getResponsesByProjectSubcontractors(projectId).subscribe({ 
     next: (res: any[]) => { 
       const grouped = res.reduce((acc: any[], item: any) => {
@@ -275,7 +276,11 @@ this.isLoading = false;
       });
 this.isLoading = false;
     },
-    error: err => console.error("Error loading subcontractor responses", err)
+     error: (err) => {
+      console.error("Error loading subcontractor responses", err);
+      this.isLoading = false;
+    } 
+   
   });
 
 }
