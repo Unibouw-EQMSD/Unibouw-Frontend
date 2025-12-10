@@ -116,6 +116,13 @@ displayedColumns: string[] = [
 
   ngOnInit(): void {
 
+
+    this.route.queryParams.subscribe(params => {
+    if (params['tab'] === 'rfq') {
+      this.selectedTab = 'rfq';
+      this.loadRfqData(); // reload table
+    }
+  });
   // ✅ Capture the project ID from the route
   this.projectId = this.route.snapshot.paramMap.get('id') || '';
   console.log('📦 Captured Project ID:', this.projectId);
@@ -127,12 +134,17 @@ displayedColumns: string[] = [
   }
 }
 
+
+
 startAutoReminderWatcher() {
   setInterval(() => {
     this.checkAndTriggerReminder();
   }, 60000); // check every 60 seconds
 }
-
+ ngAfterViewInit() {
+    this.dataSource.paginator = this.paginator;
+    this.dataSource.sort = this.sort;
+  }
 checkAndTriggerReminder() {
   this.sendReminder(); 
 }
@@ -181,11 +193,13 @@ loadRfqResponseSummary(projectId: string) {
         currentEnd: 10,
         rfqs: w.subcontractors.map((s: any) => ({
           subcontractorId: s.subcontractorId,
+          rfqId: s.rfqId,  
           name: s.name,
           rating: s.rating || 0,
           date: s.date || '—',
           responded: s.responded,
           interested: s.interested,
+          notInterested: s.notInterested,
           viewed: s.viewed,
            maybeLater: s.maybeLater,
           quote: s.quote || '—',
@@ -264,6 +278,31 @@ this.isLoading = false;
     error: err => console.error("Error loading subcontractor responses", err)
   });
 
+}
+
+isBellEnabled(rfq: any): boolean {
+  const amt = rfq.quoteAmount;
+
+  // TRUE only when NO valid quote is submitted
+  const noValidQuote =
+    !amt || amt === "-" || isNaN(Number(amt));
+
+  return (
+    noValidQuote &&                // enable only if no quote uploaded
+    !rfq.notInterested &&          // disable if Not Interested
+    (rfq.viewed || rfq.interested || rfq.maybeLater)  // must have engagement
+  );
+}
+
+isPdfEnabled(rfqs: any): boolean {
+  const amt = rfqs.quoteAmount;
+
+  // Disable when "-", empty, null, undefined, or not a number
+  if (!amt || amt === "-" || isNaN(Number(amt))) {
+    return false;
+  }
+
+  return true;
 }
 
  // In your component

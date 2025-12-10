@@ -192,12 +192,11 @@
                           <th>Name</th>
                           <th>Date</th>
                           <th>RFQ ID</th>
-                          <th>Viewed</th>
-
-                          <th>Interested</th>
-                          <th>Maybe Later</th>
-                          <th>Quote Amount</th>
-                          <th>Actions</th>
+                          <th style="text-align: center">Viewed</th>
+                          <th style="text-align: center">Interested</th>
+                          <th style="text-align: center">Maybe Later</th>
+                          <th style="text-align: center">Quote Amount</th>
+                          <th style="text-align: center">Actions</th>
                         </tr>
                       </thead>
 
@@ -212,41 +211,45 @@
                             </td>
 
                             <td (click)="markViewed(work, rfq)">{{ rfq.date }}</td>
-                            <td (click)="markViewed(work, rfq)">{{ rfq.rfqNumber }}</td>
+                            <td (click)="markViewed(work, rfq)">{{ rfq.rfqId }}</td>
 
-                            <td (click)="markViewed(work, rfq)">
+                            <td style="text-align: center" (click)="markViewed(work, rfq)">
                               <i class="fa fa-check-circle success" *ngIf="rfq.viewed"></i>
                             </td>
 
-                            <td (click)="markViewed(work, rfq)">
+                            <td style="text-align: center" (click)="markViewed(work, rfq)">
                               <i class="fa fa-check-circle success" *ngIf="rfq.interested"></i>
                             </td>
-                            <td (click)="markMaybeLater(work, rfq)">
+                            <td style="text-align: center" (click)="markMaybeLater(work, rfq)">
                               <i class="fa fa-check-circle success" *ngIf="rfq.maybeLater"></i>
                             </td>
 
                             <!-- <td (click)="markViewed(work, rfq)">{{ rfq.responded ? 'Uploaded' : 'Not Uploaded' }}</td> -->
-                            <td (click)="markViewed(work, rfq)">{{ rfq.quoteAmount }}</td>
+                            <td
+                              style="text-align: right; padding-right: 33px"
+                              (click)="markViewed(work, rfq)"
+                            >
+                              € {{ rfq.quoteAmount }}
+                            </td>
 
-                            <td>
+                            <td style="text-align: right">
                               <!-- PDF Icon with Disabled Logic -->
                               <i
                                 class="fa fa-file-pdf action-icon download-icon"
-                                [class.disabled-icon]="!rfq.responded"
+                                [class.disabled-icon]="!isPdfEnabled(rfq)"
                                 (click)="
-                                  rfq.responded &&
+                                  isPdfEnabled(rfq) &&
                                     downloadQuote($event, rfq.rfqId, rfq.subcontractorId)
                                 "
-                                [title]="rfq.responded ? 'Download Quote' : 'No Quote Uploaded'"
-                              >
-                              </i>
+                                title="Download Quote"
+                              ></i>
 
                               <i
                                 class="fa fa-bell"
+                                [class.disabled-icon]="!isBellEnabled(rfq)"
+                                (click)="isBellEnabled(rfq) && openReminderPopup(rfq)"
                                 title="Set Reminder"
-                                (click)="openReminderPopup(rfq)"
-                              >
-                              </i>
+                              ></i>
                             </td>
                           </ng-container>
 
@@ -397,8 +400,8 @@
               [dataSource]="dataSource"
               class="mat-elevation-z8"
               matSort
-              matSortActive="customer"
-              matSortDirection="asc"
+              matSortActive="workitem"
+              matSortDirection="desc"
             >
               <ng-container matColumnDef="workitem">
                 <th mat-header-cell *matHeaderCellDef mat-sort-header>WorkItem</th>
