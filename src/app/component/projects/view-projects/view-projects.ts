@@ -14,6 +14,7 @@ import { ReminderService } from '../../../services/reminder.service';
 interface RfqResponse {
   name: string;
   rating: number;
+  documentId: string;
   date: string;
   rfqId: string;
   rfqNumber:string;
@@ -86,7 +87,7 @@ export class ViewProjects {
   rfqList: any[] = [];
   selectedRfqId: string = '';
  subcontractorGroups: any[] = [];
-
+viewedCount = 0;
 displayedColumns: string[] = [
    'workitem',
     'rfqSentDate',
@@ -176,6 +177,7 @@ loadRfqResponseSummary(projectId: string) {
     next: (res: any[]) => {
        
        this.workItems = res.map(w => ({
+          
         workItemId: w.workItemId,
         name: w.workItemName,
         requestsSent: w.subcontractors.length,
@@ -193,7 +195,11 @@ loadRfqResponseSummary(projectId: string) {
         currentEnd: 10,
         rfqs: w.subcontractors.map((s: any) => ({
           subcontractorId: s.subcontractorId,
-          rfqId: s.rfqId,  
+          rfqId: s.rfqId, 
+            workItemId: w.workItemId,   // 🔥 REQUIRED
+ 
+            documentId: s.documentId,       // ✅ add this
+
           name: s.name,
           rating: s.rating || 0,
           date: s.date || '—',
@@ -246,6 +252,8 @@ this.isLoading = false;
           workItemId: item.workItemId,
           workItemName: item.workItemName,
           rfqId: item.rfqId,
+            documentId: item.documentId,  // ✅ add this
+
           rfqNumber: item.rfqNumber,
           date: item.date,
           responded: item.responded,
@@ -270,6 +278,18 @@ this.isLoading = false;
 
       this.subcontractorGroups = grouped;
 
+      // ✅ Automatically mark RFQs as viewed once IDs are available
+this.subcontractorGroups.forEach(sub => {
+  sub.workItems.forEach((w: any) => {
+
+    if (!w.viewed) {
+      console.log("Calling markViewed for", w);
+      this.markViewed(w, sub);   // 🔥 swap arguments
+    }
+  });
+});
+
+
       this.subcontractorGroups.forEach(sub => {
         sub.workItems.forEach((w: any) => this.loadQuoteAmount(w));
       });
@@ -278,6 +298,11 @@ this.isLoading = false;
     error: err => console.error("Error loading subcontractor responses", err)
   });
 
+}
+
+getViewedCount(work: any): number {
+  if (!work?.rfqs) return 0;
+  return work.rfqs.filter((r: { viewed: any; }) => r?.viewed).length;
 }
 
 isBellEnabled(rfq: any): boolean {
@@ -313,30 +338,36 @@ isPdfEnabled(rfqs: any): boolean {
       document.body.style.overflow = '';
     }
 
-markViewed(work: WorkItem, rfq: any) {
+markViewed(rfq: any, parent: any) {
 
-  // ❌ If already viewed, do nothing (prevents double counting)
   if (rfq.viewed) return;
 
   this.rfqResponseService.markAsViewed(
     rfq.rfqId,
     rfq.subcontractorId,
-    work.workItemId
+    rfq.workItemId
   ).subscribe({
     next: () => {
 
-      // 🔥 Update this RFQ row
       rfq.viewed = true;
+this.viewedCount = 1;
+      // 🔥 FIX: update VIEWED count for WORK-ITEM view
+      if (parent.rfqs) {
+        parent.viewed = parent.rfqs.filter((r: any) => r.viewed).length;
+      }
 
-      // 🔥 Recalculate summary counts
-      this.refreshWorkItemCounts(work);
+      // Existing: update subcontractor grouped view
+      if (parent.workItems) {
+        parent.viewed = parent.workItems.filter((w: any) => w.viewed).length;
+      }
 
-      // 🔥 Force UI refresh
       this.cdr.detectChanges();
     },
     error: () => console.error("Failed to mark viewed")
   });
 }
+
+
 
 markMaybeLater(work: WorkItem, rfq: any) {
   // 1) Immediate local update so UI reflects change right away
@@ -344,10 +375,12 @@ markMaybeLater(work: WorkItem, rfq: any) {
   rfq.maybeLater = true;
   rfq.interested = false;
   rfq.notInterested = false;
+this.viewedCount = 1;
 
   // ensure viewed tick also shows
   if (!wasViewed) {
     rfq.viewed = true;
+    
   }
 
   // Immediately refresh summary counts (so header numbers update)
@@ -562,24 +595,21 @@ loadQuoteAmount(rfq: any) {
 }
 
 
-downloadQuote(event: Event, rfqId: string, subcontractorId: string) {
-  event.stopPropagation(); // << prevent triggering row click
+downloadQuote(event: Event, documentId: string) {
+  event.stopPropagation();
 
-  this.rfqResponseService.downloadQuote(rfqId, subcontractorId).subscribe({
-    next: (blob: Blob) => {
-      const url = window.URL.createObjectURL(blob);
+  this.rfqResponseService.downloadQuote(documentId).subscribe({
+    next: (blob) => {
+      const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-
-      // OPTIONAL: if your backend provides filename in headers, use it.
-      a.download = `Quote_Document.pdf`;
+      a.download = "Quote.pdf";
       a.click();
-
-      window.URL.revokeObjectURL(url);
+      URL.revokeObjectURL(url);
     },
     error: (err) => {
       console.error("Download error:", err);
-      alert("No file uploaded for this subcontractor.");
+      alert("No file uploaded for this document.");
     }
   });
 }

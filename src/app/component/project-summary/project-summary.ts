@@ -94,7 +94,7 @@ quoteForm!: FormGroup;
         // 👇 Existing logic — mark as viewed
         if (this.number) {
           this.rfqResponseService
-            .markAsViewed(this.rfqId, this.subId, this.number)
+    .markAsViewed(this.rfqId, this.subId, this.selectedWorkItem.workItemID)
             .subscribe();
         }
 
@@ -142,6 +142,9 @@ openQuotePanel() {
         // auto-select first work item
         if (this.workItems.length > 0) {
           this.selectedWorkItem = this.workItems[0];
+          this.rfqResponseService
+    .markAsViewed(this.rfqId, this.subId, this.selectedWorkItem.workItemID)
+    .subscribe();
           console.log("✅ Auto-selected Work Item:", this.selectedWorkItem);
         } else {
           console.warn("⚠️ No work items found");
