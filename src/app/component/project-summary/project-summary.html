@@ -19,7 +19,7 @@
   <div class="rfq-layout" *ngIf="project; else errorBlock">
     <!-- LEFT CARD: Project Details -->
     <aside class="left-card">
-      <div class="details-card" style="width:180px">
+      <div class="details-card" style="width: 180px">
         <h3>Project Details</h3>
         <div class="detail-row">
           <span class="label">Project Code</span>
@@ -59,7 +59,8 @@
           <span class="label">Specification</span>
           <span class="value">
             <ng-container *ngFor="let file of project.sharepointURL.split(','); let last = last">
-              <a [href]="file" target="_blank">{{ file.split('/').pop() }}</a><span *ngIf="!last">, </span>
+              <a [href]="file" target="_blank">{{ file.split('/').pop() }}</a
+              ><span *ngIf="!last">, </span>
             </ng-container>
           </span>
         </div>
@@ -67,7 +68,7 @@
     </aside>
 
     <!-- RIGHT CARD: RFQ Details -->
-    <section class="right-card" style="width:100%">
+    <section class="right-card" style="width: 100%">
       <div class="panel">
         <div class="two-col">
           <div class="rfq-field">
@@ -79,112 +80,135 @@
             <input type="text" [value]="selectedWorkItem?.name || '—'" readonly />
           </div>
         </div>
-        <div style="margin: 18px 0 12px 0; border-bottom: 1px solid #ececec;"></div>
+        <div style="margin: 18px 0 12px 0; border-bottom: 1px solid #ececec"></div>
         <!-- Share your interest buttons row -->
-        <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom:18px;">
+        <div
+          style="
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            margin-bottom: 18px;
+          "
+        >
+          <!-- Left: Interest Buttons -->
+          <div style="display: flex; align-items: center; gap: 12px">
+            <span style="font-weight: 500; color: #22223b">Share your Interest</span>
+            <button
+              class="btn-primary"
+              type="button"
+              (click)="submitInterest('Interested')"
+              [disabled]="buttonsDisabled"
+            >
+              Interested
+            </button>
+            <button
+              class="btn-ghost"
+              type="button"
+              (click)="submitInterest('Maybe Later')"
+              [disabled]="buttonsDisabled"
+            >
+              Maybe Later
+            </button>
+            <button
+              class="btn-ghost"
+              type="button"
+              (click)="submitInterest('Not Interested')"
+              [disabled]="buttonsDisabled"
+            >
+              Not Interested
+            </button>
+          </div>
 
-  <!-- Left: Interest Buttons -->
-  <div style="display: flex; align-items: center; gap: 12px;">
-    <span style="font-weight:500; color:#22223b;">Share your Interest</span>
-    <button class="btn-primary" type="button" (click)="submitInterest('Interested')" [disabled]="buttonsDisabled">
-      Interested
-    </button>
-    <button class="btn-ghost" type="button" (click)="submitInterest('Maybe Later')" [disabled]="buttonsDisabled">
-      Maybe Later
-    </button>
-    <button class="btn-ghost" type="button" (click)="submitInterest('Not Interested')" [disabled]="buttonsDisabled">
-      Not Interested
-    </button>
-  </div>
-
-  <!-- Right: Submit Quote Button -->
-<button class="btn-primary" 
-        type="button"  
-        (click)="openQuotePanel()">
-  {{ isQuoteSubmitted ? 'Resubmit Quote' : 'Submit Quote' }}
-</button>
-
-</div>
-
+          <!-- Right: Submit Quote Button -->
+          <button class="btn-primary" type="button" (click)="openQuotePanel()">
+            {{ isQuoteSubmitted ? 'Resubmit Quote' : 'Submit Quote' }}
+          </button>
+        </div>
 
         <!-- Quote Details Panel -->
         <div *ngIf="showQuotePanel" class="quote-details-panel">
           <h4>Quote Details</h4>
-          <div style="display: flex; gap: 18px; flex-wrap: wrap;">
+          <div style="display: flex; gap: 18px; flex-wrap: wrap">
             <!-- Previous Submissions -->
-            <div style="flex:1.8;">
-              <span style="font-weight:500; color:#22223b; font-size:15px;">Previous Submissions</span>
+            <div style="flex: 1.8">
+              <span style="font-weight: 500; color: #22223b; font-size: 15px"
+                >Previous Submissions</span
+              >
               <!-- Repeat this block for each previous quote -->
               <div class="previous-submission-row" *ngFor="let submission of previousSubmissions">
                 <div>
                   <div class="submission-label">Submitted on</div>
-                  <div class="submission-value">{{ submission.date | date:'dd-MM-yyyy' }}</div>
+                  <div class="submission-value">{{ submission.date | date : 'dd-MM-yyyy' }}</div>
                 </div>
                 <div>
                   <div class="submission-label">Total Quote Amount</div>
-                  <div class="submission-value">{{ submission.amount | currency:'USD' }}</div>
+                  <div class="submission-value">{{ submission.amount | currency : 'USD' }}</div>
                 </div>
                 <div>
                   <div class="submission-label">Attachment</div>
                   <div class="submission-value">
-                    <a (click)="downloadSubmission(submission)" style="cursor:pointer;">
+                    <a (click)="downloadSubmission(submission)" style="cursor: pointer">
                       <i class="fa fa-file-pdf attachment-icon"></i>
                     </a>
                   </div>
                 </div>
                 <div>
                   <div class="submission-label">Comment</div>
-                 <div class="submission-value">
-  <i class="fa fa-comment-dots comment-icon"
-     (click)="openCommentModal(submission.comment)">
-  </i>
-</div>
+                  <div class="submission-value">
+                    <i
+                      class="fa fa-comment-dots comment-icon"
+                      (click)="openCommentModal(submission.comment)"
+                    >
+                    </i>
+                  </div>
                 </div>
               </div>
               <!-- End repeat -->
             </div>
             <!-- Submit Quote Form -->
-            <form [formGroup]="quoteForm" style="flex:1; min-width:260px;">
+            <form [formGroup]="quoteForm" style="flex: 1; min-width: 260px">
+              <div class="rfq-field" *ngIf="rightSectionVisible">
+                <label>Total Quote Amount <span class="text-danger"> *</span></label>
+                <input type="text" formControlName="quoteAmount" placeholder="Enter amount" />
+                <div
+                  class="error"
+                  *ngIf="formSubmitted && quoteForm.get('quoteAmount')?.errors?.['required']"
+                >
+                  Quote amount is required.
+                </div>
+              </div>
 
-  <div class="rfq-field" *ngIf="rightSectionVisible">
-    <label>Total Quote Amount</label>
-    <input type="text" formControlName="quoteAmount" placeholder="Enter amount" />
-    <div class="error" *ngIf="formSubmitted && quoteForm.get('quoteAmount')?.errors?.['required']">
-  Quote amount is required.
-</div>
+              <div class="rfq-field" *ngIf="rightSectionVisible">
+                <label>Attachments <span class="text-danger"> *</span></label>
+                <div class="attachments-container">
+                  <input #fileInput type="file" (change)="onFileSelected($event)" />
+                  <button type="button" class="delete-btn" (click)="removeFile(fileInput)">
+                    <i class="fa fa-trash"></i>
+                  </button>
+                </div>
+                <div class="error" *ngIf="formSubmitted && selectedFiles.length === 0">
+                  Please upload at least one file.
+                </div>
+              </div>
 
-  </div>
+              <div class="rfq-field" *ngIf="rightSectionVisible">
+                <label>Comments <span class="text-danger"> *</span></label>
+                <textarea placeholder="Add Comments" rows="3" formControlName="comments"></textarea>
+                <div
+                  class="error"
+                  *ngIf="formSubmitted && quoteForm.get('comments')?.errors?.['required']"
+                >
+                  Comments are required.
+                </div>
+              </div>
 
- <div class="rfq-field" *ngIf="rightSectionVisible">
-  <label>Attachments</label>
-  <div class="attachments-container">
-    <input #fileInput type="file" (change)="onFileSelected($event)" />
-    <button type="button" class="delete-btn" (click)="removeFile(fileInput)">
-      <i class="fa fa-trash"></i>
-    </button>
-  </div>
-  <div class="error" *ngIf="formSubmitted && selectedFiles.length === 0">
-  Please upload at least one file.
-</div>
-
-</div>
-
-
-  <div class="rfq-field" *ngIf="rightSectionVisible">
-    <label>Comments</label>
-    <textarea placeholder="Add Comments" rows="3" formControlName="comments"></textarea>
-    <div class="error" *ngIf="formSubmitted && quoteForm.get('comments')?.errors?.['required']">
-  Comments are required.
-</div>
-
-  </div>
-
-  <div style="margin-top:10px; text-align:right;"  *ngIf="rightSectionVisible">
-    <button class="btn-primary" type="button" (click)="submitQuoteFile()">Submit</button>
-  </div>
-
-</form>
-
+              <div style="margin-top: 10px; text-align: right" *ngIf="rightSectionVisible">
+                <button class="btn-primary" type="button" (click)="submitQuoteFile()">
+                  Submit
+                </button>
+              </div>
+            </form>
           </div>
         </div>
         <!-- End Quote Details Panel -->

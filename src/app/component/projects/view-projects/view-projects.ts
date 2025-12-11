@@ -87,7 +87,6 @@ export class ViewProjects {
   rfqList: any[] = [];
   selectedRfqId: string = '';
  subcontractorGroups: any[] = [];
-
 displayedColumns: string[] = [
    'workitem',
     'rfqSentDate',
@@ -333,30 +332,30 @@ isPdfEnabled(rfqs: any): boolean {
       document.body.style.overflow = '';
     }
 
-markViewed(work: WorkItem, rfq: any) {
-
-  // ❌ If already viewed, do nothing (prevents double counting)
+markViewed(rfq: any, parent: any) {
+ 
   if (rfq.viewed) return;
-
+ 
   this.rfqResponseService.markAsViewed(
     rfq.rfqId,
     rfq.subcontractorId,
-    work.workItemId
+    rfq.workItemId     // 🔥 correct source
   ).subscribe({
     next: () => {
-
-      // 🔥 Update this RFQ row
+ 
       rfq.viewed = true;
-
-      // 🔥 Recalculate summary counts
-      this.refreshWorkItemCounts(work);
-
-      // 🔥 Force UI refresh
+ 
+      // Update parent summary ONLY if parent has workItems (subcontractor view)
+      if (parent.workItems) {
+        parent.viewed = parent.workItems.filter((w: any) => w.viewed).length;
+      }
+ 
       this.cdr.detectChanges();
     },
     error: () => console.error("Failed to mark viewed")
   });
 }
+ 
 
 markMaybeLater(work: WorkItem, rfq: any) {
   // 1) Immediate local update so UI reflects change right away
