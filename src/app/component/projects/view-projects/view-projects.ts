@@ -102,8 +102,23 @@ displayedColumns: string[] = [
   duedate: Date | null = null;
   GlobalReminderConfig: any = null;
   reminderDates: string[] = [];  
-  reminderTime: string = ''
+  reminderTime: string = '';
   reminderEmailBody: string = '';
+  minDate: Date = new Date();
+  maxDate!: Date;
+
+
+setMaxDueDate(due: Date | string) {
+  if (typeof due === 'string') {
+    // assume format is "DD-MM-YYYY"
+    const [day, month, year] = due.split('-').map(Number);
+    this.maxDate = new Date(year, month - 1, day);
+  } else {
+    // it's already a Date
+    this.maxDate = new Date(due); // clone to avoid reference issues
+  }
+}
+
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
@@ -112,11 +127,9 @@ displayedColumns: string[] = [
 
   constructor(private rfqService:RfqService,private router:Router,private rfqResponseService: RfqResponseService, private cdr: ChangeDetectorRef, private snackBar: MatSnackBar, private route: ActivatedRoute,private projectService: projectService, private reminderService: ReminderService){
   }
-  
 
   ngOnInit(): void {
-
-
+   
     this.route.queryParams.subscribe(params => {
     if (params['tab'] === 'rfq') {
       this.selectedTab = 'rfq';
@@ -131,10 +144,9 @@ displayedColumns: string[] = [
   if (this.projectId) {
     this.loadRfqData();
     this.loadProjectDetails(this.projectId);
-  }
+  } 
+
 }
-
-
 
 startAutoReminderWatcher() {
   setInterval(() => {
@@ -171,8 +183,7 @@ this.isLoading = true;
  /* 1️⃣ WORK-ITEM GROUPED API              */
   this.rfqResponseService.getResponsesByProjectId(projectId).subscribe({
     
-    next: (res: any[]) => {
-       
+    next: (res: any[]) => {      
        this.workItems = res.map(w => ({
         workItemId: w.workItemId,
         name: w.workItemName,
@@ -378,11 +389,6 @@ markMaybeLater(work: WorkItem, rfq: any) {
     },
     error: (err: any) => {
       console.error('Failed to save Maybe Later status', err);
-      // Optionally revert UI if you want strict consistency:
-      // rfq.maybeLater = false;
-      // if (!wasViewed) rfq.viewed = false;
-      // this.refreshWorkItemCounts(work);
-      // this.cdr.detectChanges();
       this.snackBar.open('Failed to mark Maybe Later. Try again.', 'Close', { duration: 3000 });
     }
   });
@@ -402,8 +408,6 @@ triggerViewOnLoad() {
 
   this.workItems.forEach(work => {
     work.rfqs.forEach(rfq => {
-      // this.markViewed(work, rfq);   
-      // this.markMaybeLater(work,rfq)
     });
   });
 }
@@ -688,121 +692,8 @@ private applyReminderConfig(dueDate: any, config: any) {
   return true;
 }
 
-
 showReminderPopup = false;
 customReminderDates: Date[] = [];
-
-// openReminderPopup(rfq: any) {
-//   this.reminderService.getGlobalReminderConfig().subscribe({
-//     next: (res) => {
-//       const config = Array.isArray(res) && res.length > 0 ? res[0] : null;
-//       if (!config) {
-//         this.snackBar.open("No reminder configuration found", "Close", { duration: 3000 });
-//         return;
-//       }
-
-//       this.GlobalReminderConfig = JSON.parse(JSON.stringify(config));
-//       this.selectedRfqId = rfq.rfqId;
-//       this.subId = rfq.subcontractorId;
-
-//       // Helper: normalize to local midnight
-//       const atMidnight = (d: Date) => new Date(d.getFullYear(), d.getMonth(), d.getDate());
-
-//       // Robust parser for various input formats (Date, ISO, dd-mm-yyyy, dd/mm/yyyy, timestamp)
-//       const parseDate = (input: any): Date | null => {
-//         if (!input && input !== 0) return null;
-
-//         // If already a Date
-//         if (input instanceof Date) {
-//           return isNaN(input.getTime()) ? null : input;
-//         }
-
-//         // If numeric timestamp
-//         if (typeof input === 'number') {
-//           const dt = new Date(input);
-//           return isNaN(dt.getTime()) ? null : dt;
-//         }
-
-//         // If string - try ISO first (YYYY-MM-DD or YYYY/MM/DD or full ISO)
-//         if (typeof input === 'string') {
-//           const trimmed = input.trim();
-
-//           // ISO-like (YYYY-MM-DD or YYYY/MM/DD)
-//           const isoMatch = trimmed.match(/^(\d{4})[-\/](\d{2})[-\/](\d{2})$/);
-//           if (isoMatch) {
-//             const dt = new Date(trimmed); // safe for YYYY-MM-DD
-//             if (!isNaN(dt.getTime())) return dt;
-//           }
-
-//           // dd-mm-yyyy or dd/mm/yyyy
-//           const dmyMatch = trimmed.match(/^(\d{2})[-\/](\d{2})[-\/](\d{4})$/);
-//           if (dmyMatch) {
-//             const day = parseInt(dmyMatch[1], 10);
-//             const month = parseInt(dmyMatch[2], 10) - 1;
-//             const year = parseInt(dmyMatch[3], 10);
-//             const dt = new Date(year, month, day);
-//             if (!isNaN(dt.getTime())) return dt;
-//           }
-
-//           // Attempt Date parse as last resort
-//           const dtFallback = new Date(trimmed);
-//           if (!isNaN(dtFallback.getTime())) return dtFallback;
-//         }
-
-//         // unknown format
-//         return null;
-//       };
-
-//       const dueDateObj = parseDate(rfq.dueDate);
-//       if (!dueDateObj) {
-//         this.snackBar.open("Invalid due date", "Close", { duration: 3000 });
-//         return;
-//       }
-
-//       this.dueDate = rfq.dueDate;
-
-//       const today = atMidnight(new Date());
-
-//       // support config.reminderSequence or config.sequence (string like "-1,-3,-5")
-//       const seqString = (config.reminderSequence ?? config.sequence ?? '').toString();
-
-//       const sequenceArray = seqString
-//         .split(',')
-//         .map((x: any) => parseInt((x ?? '').toString().trim(), 10))
-//         .filter((n: any) => !isNaN(n))
-//         .sort((a: any, b: any) => b - a); // descending (most negative first)
-
-//       const normalize = (d: Date) =>
-//   new Date(d.getFullYear(), d.getMonth(), d.getDate()); // force midnight local
-
-//       const due = normalize(new Date(dueDateObj));
-// const now = normalize(new Date(today));
-
-// this.reminderDates = sequenceArray
-//   .map((seq: number) => {
-//     const reminderDate = new Date(due);   // already normalized
-//     reminderDate.setDate(reminderDate.getDate() + seq);
-//     return normalize(reminderDate);
-//   })
-//   .filter((date: Date) => date >= now)
-//   .sort((a:any, b:any) => a.getTime() - b.getTime())
-//   .map((d:any) => {
-//     // output in YYYY-MM-DD without timezone shift
-//     return d.toLocaleDateString("en-CA"); // → 2025-12-28 etc.
-//   });
-
-//   this.customReminderDates = this.reminderDates.map(d => new Date(d));
-
-//       this.reminderTime = config.reminderTime || "08:00";
-//       this.reminderEmailBody = config.reminderEmailBody || "";
-
-//       this.showReminderPopup = true;
-//     },
-//     error: () => {
-//       this.snackBar.open("Failed to load reminder settings", "Close", { duration: 3000 });
-//     }
-//   });
-// }
 
 openReminderPopup(rfq: any) {
   this.reminderService.getGlobalReminderConfig().subscribe({
@@ -825,6 +716,7 @@ openReminderPopup(rfq: any) {
         return;
       }
 
+      this.setMaxDueDate(this.dueDate);
       this.reminderType = "default";
       this.showReminderPopup = true;
     }
@@ -860,9 +752,6 @@ set reminderDates1(dates: string[]) {
 }
 
 sendReminder() {
-  // this.selectedRfqId = "a65866a5-044c-406b-8716-46eb61ba3f35";
-  // this.subId = "aa9c34bd-8c52-4478-b95c-cbbad6d41116";
-
   if (!this.selectedRfqId || !this.subId) {
     alert('Missing RFQ or Subcontractor information.');
     return;

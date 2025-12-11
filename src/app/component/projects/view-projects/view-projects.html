@@ -235,12 +235,10 @@
                               style="text-align: right; padding-right: 50px"
                               (click)="markViewed(work, rfq)"
                             >
-                              <!-- € {{ rfq.quoteAmount }} -->
                               <ng-container *ngIf="rfq.quoteAmount && rfq.quoteAmount !== '-'">
                                 € {{ rfq.quoteAmount }}
                               </ng-container>
                             </td>
-
                             <td style="text-align: center">
                               <!-- PDF Icon with Disabled Logic -->
                               <i
@@ -553,11 +551,20 @@
             <div class="date-row" *ngFor="let date of customReminderDates; let i = index">
               <span class="circle">{{ i + 1 }}</span>
 
+              <!-- <input
+                [matDatepicker]="picker"
+                class="date-input"
+                placeholder="Select date"
+                [(ngModel)]="customReminderDates[i]"
+              /> -->
+
               <input
                 [matDatepicker]="picker"
                 class="date-input"
                 placeholder="Select date"
                 [(ngModel)]="customReminderDates[i]"
+                [min]="minDate"
+                [max]="maxDate"
               />
 
               <mat-datepicker-toggle matSuffix [for]="picker">
