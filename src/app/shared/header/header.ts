@@ -225,6 +225,23 @@ this.selectedReminderSequence = config.reminderSequence
 
   // ------------------ Sequence Dropdown (Max 5 values) ------------------
 
+ numberList: number[] = Array.from({ length: 31 }, (_, i) => i);
+
+  maxSequenceLimit: number = 5;
+
+  open = false;
+
+selectLimit(limit: number) {
+  this.maxSequenceLimit = limit;
+
+   // 🔥 Reset selected values if they exceed the new limit
+  if (this.selectedReminderSequence.length > limit) {
+    this.selectedReminderSequence = [];
+  }
+
+  this.open = false;
+}
+
  
   toggleDropdown() {
     this.dropdownOpen = !this.dropdownOpen;
@@ -236,7 +253,7 @@ this.selectedReminderSequence = config.reminderSequence
 
   onCheck(value: number, checked: boolean) {
     if (checked) {
-      if (this.selectedReminderSequence.length < 5) {
+      if (this.selectedReminderSequence.length < this.maxSequenceLimit) {
         this.selectedReminderSequence.push(value);
       }
     } else {
@@ -245,7 +262,7 @@ this.selectedReminderSequence = config.reminderSequence
   }
 
   isDisabled(value: number): boolean {
-    return !this.isChecked(value) && this.selectedReminderSequence.length >= 5;
+    return !this.isChecked(value) && this.selectedReminderSequence.length >= this.maxSequenceLimit;
   }
 
   onRowClick(value: number) {
