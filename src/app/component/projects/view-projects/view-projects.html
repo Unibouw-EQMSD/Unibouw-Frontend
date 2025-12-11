@@ -244,10 +244,7 @@
                               <i
                                 class="fa fa-file-pdf action-icon download-icon"
                                 [class.disabled-icon]="!isPdfEnabled(rfq)"
-                                (click)="
-                                  isPdfEnabled(rfq) &&
-                                    downloadQuote($event, rfq.rfqId, rfq.subcontractorId)
-                                "
+                                (click)="isPdfEnabled(rfq) && downloadQuote($event, rfq.documentId)"
                                 title="Download Quote"
                               ></i>
 
@@ -399,9 +396,7 @@
                               class="fa fa-file-pdf action-icon download-icon"
                               *ngIf="w.actions?.includes('pdf')"
                               [class.disabled-icon]="!isPdfEnabled(w)"
-                              (click)="
-                                w.responded && downloadQuote($event, w.rfqId, sub.subcontractorId)
-                              "
+                              (click)="w.documentId && downloadQuote($event, w.documentId)"
                               [title]="w.responded ? 'Download Quote' : 'No Quote Uploaded'"
                             ></i>
                             <i

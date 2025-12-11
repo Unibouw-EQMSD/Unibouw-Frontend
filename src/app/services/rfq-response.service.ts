@@ -161,20 +161,15 @@ markAsViewed(rfqId: string, subcontractorId: string, workItemId: string): Observ
     }
   );
 }
-downloadQuote(rfqId: string, subId: string): Observable<Blob> {
+
+downloadQuote(documentId: string): Observable<Blob> {
   return from(this.getHeaders()).pipe(
     switchMap((headers) =>
-      this.http.get(
-        `${this.apiURL}/RfqResponse/DownloadQuote`,
-        {
-          params: {
-            rfqId: rfqId,
-            subcontractorId: subId
-          },
-          headers,
-          responseType: 'blob'
-        }
-      )
+      this.http.get(`${this.apiURL}/RfqResponse/DownloadQuote`, {
+        params: { documentId },
+        headers,
+        responseType: 'blob'
+      })
     )
   );
 }

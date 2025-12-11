@@ -14,6 +14,7 @@ import { ReminderService } from '../../../services/reminder.service';
 interface RfqResponse {
   name: string;
   rating: number;
+  documentId: string;
   date: string;
   rfqId: string;
   rfqNumber:string;
@@ -203,6 +204,8 @@ this.isLoading = true;
         rfqs: w.subcontractors.map((s: any) => ({
           subcontractorId: s.subcontractorId,
           rfqId: s.rfqId,  
+          workItemId: w.workItemId,   // 🔥 REQUIRED
+          documentId: s.documentId,
           rfqNumber: w.rfqNumber,
           name: s.name,
           rating: s.rating || 0,
@@ -258,6 +261,7 @@ this.isLoading = true;
           workItemId: item.workItemId,
           workItemName: item.workItemName,
           rfqId: item.rfqId,
+          documentId: item.documentId,
           rfqNumber: item.rfqNumber,
           date: item.date,
           responded: item.responded,
@@ -570,29 +574,24 @@ loadQuoteAmount(rfq: any) {
     });
 }
 
-
-downloadQuote(event: Event, rfqId: string, subcontractorId: string) {
-  event.stopPropagation(); // << prevent triggering row click
-
-  this.rfqResponseService.downloadQuote(rfqId, subcontractorId).subscribe({
-    next: (blob: Blob) => {
-      const url = window.URL.createObjectURL(blob);
+downloadQuote(event: Event, documentId: string) {
+  event.stopPropagation();
+ 
+  this.rfqResponseService.downloadQuote(documentId).subscribe({
+    next: (blob) => {
+      const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-
-      // OPTIONAL: if your backend provides filename in headers, use it.
-      a.download = `Quote_Document.pdf`;
+      a.download = "Quote.pdf";
       a.click();
-
-      window.URL.revokeObjectURL(url);
+      URL.revokeObjectURL(url);
     },
     error: (err) => {
       console.error("Download error:", err);
-      alert("No file uploaded for this subcontractor.");
+      alert("No file uploaded for this document.");
     }
   });
 }
-
 
 formatDateForApi(date: any): string {
   if (!date) return '';
