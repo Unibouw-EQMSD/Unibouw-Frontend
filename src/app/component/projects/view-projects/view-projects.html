@@ -142,7 +142,7 @@
             <div class="text-center pt-20" *ngIf="isLoading">Loading...</div>
 
             <!-- 1️⃣  WORK ITEM GROUPING                              -->
-            <div *ngIf="groupBy === 'workItem' && !isLoading">
+            <div *ngIf="groupBy === 'workItem' && !isLoading" class="h-24">
               <div *ngFor="let work of workItems" class="work-item">
                 <!-- Work Item Header -->
                 <div class="work-item-header" (click)="work.open = !work.open">
@@ -519,12 +519,12 @@
 
           <!-- Radio buttons -->
           <div class="reminder-radio-row">
-            <label class="radio-label">
+            <label class="radio-label" style="cursor: pointer">
               <input type="radio" name="reminderType" value="default" [(ngModel)]="reminderType" />
               <span>Default Reminder</span>
             </label>
 
-            <label class="radio-label">
+            <label class="radio-label" style="cursor: pointer">
               <input type="radio" name="reminderType" value="custom" [(ngModel)]="reminderType" />
               <span>Custom Reminder</span>
             </label>
@@ -545,14 +545,6 @@
           <div class="reminder-container" *ngIf="reminderType === 'custom'">
             <div class="date-row" *ngFor="let date of customReminderDates; let i = index">
               <span class="circle">{{ i + 1 }}</span>
-
-              <!-- <input
-                [matDatepicker]="picker"
-                class="date-input"
-                placeholder="Select date"
-                [(ngModel)]="customReminderDates[i]"
-              /> -->
-
               <input
                 [matDatepicker]="picker"
                 class="date-input"
@@ -565,22 +557,16 @@
               <mat-datepicker-toggle matSuffix [for]="picker">
                 <i class="fa fa-calendar calendar-icon"></i>
               </mat-datepicker-toggle>
-
+              <span class="delete-icon" title="Remove" (click)="removeCustomDate(i)">x</span>
               <mat-datepicker #picker></mat-datepicker>
             </div>
+
+            <i class="far fa-calendar-plus calendar-add" title="Add" (click)="addCustomDate()"></i>
           </div>
 
-          <!-- Custom Reminder -->
           <!-- Time Picker -->
           <div class="time-row">
             <label>Set Time: </label>
-            <!-- <input
-              type="time"
-              class="time-input"
-              [value]="reminderTime"
-              [readonly]="reminderType === 'default'"
-              [ngClass]="{ 'readonly-bg': reminderType === 'default' }"
-            /> -->
             <input type="time" class="time-input readonly-bg" [value]="reminderTime" readonly />
             <i class="fa fa-clock-o time-icon"></i>
           </div>
@@ -602,7 +588,7 @@
       </div>
 
       <!-- Modal Footer -->
-      <div class="modal-footer flex justify-end gap-4 border-t border-gray-200 pt-4 mt-4">
+      <div class="modal-footer">
         <button class="btn cancel-btn" (click)="closeReminderPopup()">Cancel</button>
         <button
           class="btn reset-btn"

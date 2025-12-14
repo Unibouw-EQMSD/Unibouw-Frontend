@@ -161,8 +161,7 @@ header {
 }
 
 
-
-/* -----Modal box------- */
+/* ----------------- Modal -------------------- */
 
 /* Backdrop */
 .custom-modal-backdrop {
@@ -241,7 +240,6 @@ header {
 }
 
 /* ---------- */
-
 .dropdown {
   position: relative;
   display: inline-block;
@@ -349,12 +347,6 @@ select option {
     height: 35px !important;
   }
 
-
-
-
-
-
-
   /* ---------------------- */
 
   .custom-dropdown {
@@ -400,6 +392,83 @@ select option {
   background: #fef3e7;
 }
 
+.modal-title {
+  font-size: 20px;
+  font-weight: 600;
+}
 
-/* -------------------- */
+.modal-subtitle {
+  font-size: 14px;
+  color: #6b7280;
+}
 
+.modal-body {
+  padding: 20px;
+}
+
+.modal-section {
+  margin-bottom: 24px;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.label {
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.dropdown-icon {
+  width: 16px;
+  height: 16px;
+  margin-left: 8px;
+}
+
+.dropdown-text {
+  font-weight: 500;
+}
+
+.dropdown-text.placeholder {
+  color: #9ca3af;
+  font-weight: 400;
+}
+
+.clear {
+  margin: 0 8px;
+  color: #9ca3af;
+}
+
+.clear.active {
+  color: #dc2626;
+  cursor: pointer;
+}
+
+.email-body {
+  width: 100%;
+  border: 1px solid #d9dee3;
+  border-radius: 6px;
+  padding: 10px;
+  resize: none;
+}
+
+.checkbox-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 16px;
+  border-top: 1px solid #e5e7eb;
+  padding-top: 16px;
+  margin-top: 16px;
+}
+
+
+/* ----------------- Model End ---------------- */

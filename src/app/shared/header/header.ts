@@ -27,13 +27,21 @@ export class Header {
 @HostListener('document:click', ['$event'])
 handleClickOutside(event: Event) {
   const target = event.target as HTMLElement;
+
+  // Close Max Reminder Sequence dropdown
+  if (!target.closest('.custom-dropdown')) {
+    this.open = false;
+  }
+
+  // Close Reminder Sequence multi-select dropdown
   if (!target.closest('.dropdown')) {
     this.dropdownOpen = false;
   }
+
 }
 
 
-
+  isAdmin = false;
   //reminderSequence: number[] = [];
   reminderTimeValue: string = '08:00';
   reminderEmailBody: string = '';
@@ -43,6 +51,11 @@ handleClickOutside(event: Event) {
   selectedReminderSequence: number[] = [];
   // Add a property to your component
   InitialLoadedReminderConfig: any = null;
+
+   ngOnInit() {
+
+     this.isAdmin = this.userService.isAdmin(); // Check role
+     }
 
   // ------------------ Active Route Checks ------------------
 
@@ -102,47 +115,6 @@ handleClickOutside(event: Event) {
   // ------------------ Reminder Popup ------------------
 
   showSetReminderPopup = false;
-
-// openReminderConfig() {
-//   this.reminderService.getGlobalReminderConfig().subscribe({
-//     next: (res) => {  
-
-//       // API is returning an array, so take the first item
-//       const config = Array.isArray(res) && res.length > 0 ? res[0] : null;
-
-//       if (!config) {
-//         this.snackBar.open("No reminder configuration found", "Close", { duration: 3000 });
-//         return;
-//       }
-
-//       // this.selectedReminderSequence = config.reminderSequence
-//       //   ? config.reminderSequence.split(',')
-//       //   : [];
-
-//       this.selectedReminderSequence = config.reminderSequence
-//   ? config.reminderSequence.split(',').map(Number)
-//   : [];
-
-//       this.reminderTimeValue = config.reminderTime || '08:00';
-//       this.reminderEmailBody = config.reminderEmailBody || '';
-//       this.enableGlobalReminders = config.isEnable || false;
-
-//       this.snackBar.open("Reminder configuration loaded successfully", "Close", {
-//         duration: 3000
-//       });
-
-//       this.showSetReminderPopup = true;
-//     },
-
-//     error: (err) => {
-//       console.error("Error loading reminder config:", err);
-
-//       this.snackBar.open("Failed to load reminder configuration", "Close", {
-//         duration: 4000
-//       });
-//     }
-//   });
-// }
 
 openReminderConfig() {
   this.reminderService.getGlobalReminderConfig().subscribe({
@@ -239,12 +211,31 @@ selectLimit(limit: number) {
     this.selectedReminderSequence = [];
   }
 
+   // Close this dropdown
   this.open = false;
+
 }
 
+// Toggle Max Reminder Sequence dropdown
+toggleMaxSequenceDropdown() {
+  this.open = !this.open;
+  if (this.open) {
+    this.dropdownOpen = false; // close other dropdown
+  }
+}
+
+// Toggle Reminder Sequence dropdown
+toggleReminderDropdown() {
+  this.dropdownOpen = !this.dropdownOpen;
+  if (this.dropdownOpen) {
+    this.open = false; // close other dropdown
+  }
+}
  
   toggleDropdown() {
-    this.dropdownOpen = !this.dropdownOpen;
+     // Close other dropdown when opening this one
+  this.open = false;
+  this.dropdownOpen = !this.dropdownOpen;
   }
 
   isChecked(value: number): boolean {

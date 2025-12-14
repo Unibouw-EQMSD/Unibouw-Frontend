@@ -567,7 +567,7 @@ display: flex;
 .reminder-container {
   display: grid;
   grid-template-columns: repeat(3, 250px);
-  gap: 25px 15px;
+  gap: 25px 5px;
   margin-top: 20px;
 }
 
@@ -627,7 +627,7 @@ display: flex;
 .date-row {
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 8px;
   margin-bottom: 14px;
 }
 
@@ -805,3 +805,29 @@ display: flex;
   pointer-events: none !important;  /* Prevent clicks */
   cursor: not-allowed !important;   /* Show disabled cursor */
 }
+
+.modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 16px; /* spacing between buttons */
+  border-top: 1px solid #e5e7eb; /* gray-200 equivalent */
+  padding-top: 16px;
+  margin-top: 16px;
+}
+
+.delete-icon{
+  color: red;
+  font-size: 18px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.calendar-add{
+  font-size: 21px;
+  color: #44474e;
+  cursor: pointer;
+  padding-top: 8px;
+  padding-left: 10px;
+}
+
+

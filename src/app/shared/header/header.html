@@ -7,7 +7,7 @@
     </div>
 
     <!-- Right side -->
-    <div class="header-right">
+    <div class="header-right" *ngIf="isAdmin">
       <!-- Notification -->
       <div class="notification">
         <i class="fa fa-gear" title="Set RFQ Reminder" (click)="openReminderConfig()"></i>
@@ -61,37 +61,33 @@
 <div class="custom-modal-backdrop" *ngIf="showSetReminderPopup"></div>
 
 <div class="custom-modal" *ngIf="showSetReminderPopup">
-  <div class="modal-content-box max-w-[53vw] bg-white rounded-lg shadow-lg p-6">
+  <div class="modal-content-box">
     <!-- Modal Header -->
-    <div class="modal-header p-2 border-b border-gray-200">
-      <p class="text-xl font-semibold">Settings</p>
-      <p class="text-base text-gray-600">
+    <div class="modal-header">
+      <p class="modal-title">Settings</p>
+      <p class="modal-subtitle">
         Global Reminder Configuration for configuring default reminder settings for all RFQs
       </p>
     </div>
 
     <!-- Modal Body -->
-    <div class="modal-body space-y-6 px-4 pt-6 pb-3">
-      <!-- Reminder Sequence Dropdown -->
+    <div class="modal-body">
+      <!-- Reminder Sequence -->
       <div class="modal-section">
-        <div class="flex items-center mb-5">
-          <label class="mr-2 font-medium">Max Reminder Sequence</label>
+        <div class="row">
+          <label class="label">Max Reminder Sequence</label>
+
+          <!-- Max Reminder Sequence -->
           <div class="custom-dropdown" (clickOutside)="open = false">
-            <div class="dropdown-btn" (click)="open = !open; $event.stopPropagation()">
+            <div
+              class="dropdown-btn"
+              (click)="toggleMaxSequenceDropdown(); $event.stopPropagation()"
+            >
               {{ maxSequenceLimit || '0' }}
-              <svg
-                class="absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              >
+              <svg class="dropdown-icon" viewBox="0 0 24 24">
                 <path d="M6 9l6 6 6-6" />
               </svg>
             </div>
-
             <ul class="dropdown-list" *ngIf="open">
               <li
                 *ngFor="let limit of numberList"
@@ -104,18 +100,14 @@
           </div>
         </div>
 
-        <div class="flex items-center">
-          <label class="mr-2">Reminder Sequence</label>
+        <!-- Reminder Sequence Multi Select -->
+        <div class="row">
+          <label class="label">Reminder Sequence</label>
 
-          <div class="dropdown mr-2" (clickOutside)="dropdownOpen = false">
-            <div
-              class="dropdown-btn flex items-center cursor-pointer"
-              (click)="toggleDropdown(); $event.stopPropagation()"
-            >
-              <span
-                [ngClass]="{ 'placeholder-text': selectedReminderSequence.length === 0 }"
-                class="font-medium"
-              >
+          <!-- Reminder Sequence Multi Select -->
+          <div class="dropdown" (clickOutside)="dropdownOpen = false">
+            <div class="dropdown-btn" (click)="toggleReminderDropdown(); $event.stopPropagation()">
+              <span class="dropdown-text" [class.placeholder]="!selectedReminderSequence.length">
                 {{
                   selectedReminderSequence.length
                     ? selectedReminderSequence.join(', ')
@@ -123,15 +115,11 @@
                 }}
               </span>
 
-              <div class="arrow flex items-center ml-2">
+              <div class="arrow">
                 <span
+                  class="clear"
                   (click)="clearSelected($event)"
-                  [class.text-red-600]="selectedReminderSequence.length"
-                  [class.text-gray-400]="!selectedReminderSequence.length"
-                  [class.cursor-pointer]="selectedReminderSequence.length"
-                  [class.cursor-default]="!selectedReminderSequence.length"
-                  class="mx-2 font-bold"
-                  title="Clear all"
+                  [class.active]="selectedReminderSequence.length"
                 >
                   ×
                 </span>
@@ -141,7 +129,7 @@
 
             <div class="dropdown-content" *ngIf="dropdownOpen" (click)="$event.stopPropagation()">
               <div
-                class="dropdown-item flex items-center"
+                class="dropdown-item"
                 *ngFor="let value of values"
                 [class.disabled]="isDisabled(value)"
                 (click)="onRowClick(value)"
@@ -152,57 +140,38 @@
                   [disabled]="isDisabled(value)"
                   (click)="$event.stopPropagation()"
                   (change)="onCheck(value, $event.target.checked)"
-                  class="mr-2"
                 />
                 <span>{{ value }}</span>
               </div>
             </div>
           </div>
-          <!-- <span class="text-red-500 text-sm">Max 5 sequence</span> -->
         </div>
       </div>
 
-      <!-- Set Timer -->
-      <div class="time-row flex items-center">
-        <label class="mr-2">Set Time:</label>
-        <div class="time-wrapper relative">
-          <input
-            type="time"
-            class="time-input border border-gray-300 rounded px-2 py-1"
-            [(ngModel)]="reminderTimeValue"
-          />
-          <i
-            class="fa fa-clock-o absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400"
-          ></i>
+      <!-- Set Time -->
+      <div class="row">
+        <label class="label">Set Time</label>
+        <div class="time-wrapper">
+          <input type="time" class="time-input" [(ngModel)]="reminderTimeValue" />
+          <i class="fa fa-clock-o time-icon"></i>
         </div>
       </div>
 
       <!-- Email Body -->
       <div class="modal-section">
-        <label class="block font-medium mb-2">Email Body</label>
-        <textarea
-          class="reminder-body w-full p-2 border border-gray-300 rounded resize-none"
-          rows="4"
-          [(ngModel)]="reminderEmailBody"
-        ></textarea>
+        <label class="label block">Email Body</label>
+        <textarea class="email-body" rows="4" [(ngModel)]="reminderEmailBody"></textarea>
       </div>
 
-      <!-- Enable Automated Reminders -->
-      <div class="modal-section flex items-center">
-        <input
-          type="checkbox"
-          id="enableGlobalReminders"
-          [(ngModel)]="enableGlobalReminders"
-          class="mr-2 cursor-pointer"
-        />
-        <label for="enableGlobalReminders" class="font-medium">
-          Enable automated reminders globally
-        </label>
+      <!-- Enable Reminder -->
+      <div class="checkbox-row">
+        <input type="checkbox" id="enableGlobalReminders" [(ngModel)]="enableGlobalReminders" />
+        <label for="enableGlobalReminders"> Enable automated reminders globally </label>
       </div>
     </div>
 
-    <!-- Modal Footer -->
-    <div class="modal-footer flex justify-end gap-4 border-t border-gray-200 pt-4 mt-4">
+    <!-- Footer -->
+    <div class="modal-footer">
       <button class="btn cancel-btn" (click)="closeReminderConfig()">Cancel</button>
       <button class="btn reset-btn" (click)="resetReminderConfig()">Reset</button>
       <button class="btn submit-btn" (click)="setReminderConfig()">Set Reminder</button>

@@ -65,40 +65,6 @@ getGlobalReminderConfig(): Observable<any> {
   );
 }
 
-
-
-  
-//   ------------------ Reminder State Management ------------------
-
-  // Default values
-//   private defaultReminderSequence = [-2, -3, -5, -7, -9];
-//   private defaultReminderTime = '08:00';
-//   private defaultReminderEmailBody = `Dear Subcontractor,
-// This is a reminder to upload your quote before the due date. Please ensure all required documents are submitted on time.
-// Thank you.`;
-
-//   // BehaviorSubjects with default values
-//   private reminderSequenceSource = new BehaviorSubject<any[]>(this.defaultReminderSequence);
-//   private reminderTimeSource = new BehaviorSubject<string | null>(this.defaultReminderTime);
-//   private reminderEmailBodySource = new BehaviorSubject<string | null>(this.defaultReminderEmailBody);
-
-//   reminderSequence$ = this.reminderSequenceSource.asObservable();
-//   reminderTime$ = this.reminderTimeSource.asObservable();
-//   reminderEmailBody$ = this.reminderEmailBodySource.asObservable();
-
-//   // Methods to update the values
-//   setReminderSequence(value: any[]) {
-//     this.reminderSequenceSource.next(value);
-//   }
-
-//   setReminderTime(value: string) {
-//     this.reminderTimeSource.next(value);
-//   }
-
-//   setReminderEmailBody(value: string) {
-//     this.reminderEmailBodySource.next(value);
-//   }
-
 }
 
 

@@ -189,7 +189,12 @@ input[type="email"]:-webkit-autofill:active {
 }
 .body-loginBG {
     background-color: #0f2e3d;
+    min-height: 100vh;        /* Full viewport height */
+  display: flex;            /* Enable flexbox */
+  align-items: center;      /* Vertical center */
+  justify-content: center;  /* Horizontal center */
 }
+
 .max-w-md {
     max-width: 28rem;
 }

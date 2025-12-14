@@ -691,7 +691,8 @@ private applyReminderConfig(dueDate: any, config: any) {
 }
 
 showReminderPopup = false;
-customReminderDates: Date[] = [];
+customReminderDates: (Date | null)[] = [];
+
 
 openReminderPopup(rfq: any) {
   this.reminderService.getGlobalReminderConfig().subscribe({
@@ -777,6 +778,41 @@ sendReminder() {
       }
     });
 }
+
+
+// Remove a custom reminder date
+removeCustomDate(index: number) {
+  if (this.customReminderDates.length === 1) {
+    this.snackBar.open('At least one reminder date is required', 'Close', {
+      duration: 2000
+    });
+    return;
+  }
+
+  this.customReminderDates.splice(index, 1);
+}
+
+// Add a new custom reminder date
+addCustomDate() {
+  // const lastDate = 
+  //   this.customReminderDates[this.customReminderDates.length - 1];
+
+  // Default next date = +1 day from last selected date
+  //const newDate = 
+  // lastDate ? new Date(lastDate) : new Date();
+  // newDate.setDate(newDate.getDate() + 1);
+
+  // Respect max date (due date)
+  // if (this.maxDate && newDate > this.maxDate) {
+  //   this.snackBar.open('Date cannot exceed due date', 'Close', {
+  //     duration: 2000
+  //   });
+  //   return;
+  // }
+
+  this.customReminderDates.push(null);
+}
+
 
 }
 
