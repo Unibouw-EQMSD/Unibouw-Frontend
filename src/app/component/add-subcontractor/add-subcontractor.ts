@@ -38,7 +38,6 @@ export class AddSubcontractor implements OnInit {
   popupError: boolean = false;
   showPopup: boolean = false;
   
-
   constructor(
     private fb: FormBuilder,
     private router: Router,
@@ -199,11 +198,6 @@ export class AddSubcontractor implements OnInit {
   // Mark the form fields as touched so validation errors appear
   this.subcontractorForm.markAllAsTouched();
 
-  // Validate workitems + form together
-  // if (this.selectedWorkitems.length === 0 || this.subcontractorForm.invalid) {
-  //   return; // stop submission
-  // }
-
   const allSelectedWorkitems = Array.from(this.selectionsByCategory.values()).flat();
 if (allSelectedWorkitems.length === 0 || this.subcontractorForm.invalid) {
     return;
@@ -215,37 +209,27 @@ if (allSelectedWorkitems.length === 0 || this.subcontractorForm.invalid) {
     erp_ID: formValue.erpId?.trim() || '',
     name: formValue.name?.trim(),
     rating: formValue.rating || 0,
-
     emailID: formValue.email,                    // main subcontractor email
-    phoneNumber1: this.selectedCountry.code + formValue.contactNumber,
+    phoneNumber1: this.selectedCountry.code + ' ' + formValue.contactNumber,
     phoneNumber2: '',                             // optional
-
     location: formValue.location,
     country: formValue.country,
     officeAddress: formValue.officeAddress,
     billingAddress: formValue.sameAsOffice
       ? formValue.officeAddress
       : (formValue.billingAddress || ''),
-
     personID: null,           
-
-   // workItemIDs: this.selectedWorkitems.map(w => w.workItemID),
-workItemIDs: Array.from(
-  new Set(
-    Array.from(this.selectionsByCategory.values())
-      .flat()
-      .map(w => w.workItemID)
-  )
-),
-
-
+    workItemIDs: Array.from(
+          new Set(
+            Array.from(this.selectionsByCategory.values())
+              .flat()
+              .map(w => w.workItemID)
+          )
+        ),
     contactName: formValue.contactPerson,
     contactEmailID: formValue.contactEmail,
     contactPhone: this.selectedCountry.code + formValue.contactNumber
   };
-
-  console.log("FINAL PAYLOAD:", payload);
-
   this.subcontractorService.createSubcontractor(payload).subscribe({
   next: (res) => {
     console.log("API SUCCESS:", res);
@@ -259,7 +243,7 @@ workItemIDs: Array.from(
       emailExists: err.error.message || 'Email already exists.'
     });
 
-    return; // ⛔ Don't show popup for field errors
+    return; // Don't show popup for field errors
   }
   // For other errors, show popup
     this.handleError(err);
@@ -317,7 +301,6 @@ onReset() {
 
   this.selectionsByCategory.clear();
 }
-
 
   onCancel() {
     this.router.navigate(['/subcontractor']);

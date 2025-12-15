@@ -10,6 +10,8 @@ import { RfqResponseService } from '../../../services/rfq-response.service';
 import { Router } from '@angular/router';
 import { forkJoin } from 'rxjs';
 import { ReminderService } from '../../../services/reminder.service';
+import { registerLocaleData } from '@angular/common';
+import localeNl from '@angular/common/locales/nl';
 
 interface RfqResponse {
   name: string;
@@ -127,6 +129,8 @@ setMaxDueDate(due: Date | string) {
   workItems: WorkItem[] = [];
 
   constructor(private rfqService:RfqService,private router:Router,private rfqResponseService: RfqResponseService, private cdr: ChangeDetectorRef, private snackBar: MatSnackBar, private route: ActivatedRoute,private projectService: projectService, private reminderService: ReminderService){
+  registerLocaleData(localeNl); 
+
   }
 
   ngOnInit(): void {
