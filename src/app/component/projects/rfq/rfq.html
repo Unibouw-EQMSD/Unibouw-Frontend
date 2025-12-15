@@ -1,84 +1,84 @@
 <app-header></app-header>
 <main id="main">
-<div class="container">
-  <div class="pagetitle">
-    <h1>Projects</h1>
-  </div>
-
-  <div class="table-container">
-    <!-- Tabs -->
-    <div class="tabs">
-      <button type="button" [routerLink]="['/projectdetails']">Project List</button>
-      <button class="active">RFQ</button>
-    </div>
-    <div class="search-box">
-      <input type="text" placeholder="Search" [(ngModel)]="searchText" (input)="applyFilter()" />
-
-      <button type="button" class="addbtn" [routerLink]="['/add-rfq']"><b>Add RFQ</b></button>
-    </div>
-    <div class="table-scroll-container">
-      <table class="styled-table">
-        <thead>
-          <tr>
-            <th>Project Id</th>
-            <th>Project Name</th>
-            <th>Customer</th>
-            <th>RFQ Sent</th>
-            <th>Due Date</th>
-            <th>#RFQ Sent</th>
-            <th>#Quote Recieved</th>
-            <th>Action</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let item of pagedItems">
-            <td>{{ item.id }}</td>
-            <td>{{ item.name }}</td>
-            <td>{{ item.customer }}</td>
-            <td>{{ item.rfqSentDate }}</td>
-            <td>{{ item.dueDate }}</td>
-            <td>{{ item.rfqSent }}</td>
-            <td>{{ item.quoteRecieved }}</td>
-            <td>
-              <i class="fa-regular fa-pen-to-square edit-icon" (click)="editItem(item)"></i>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+  <div class="container">
+    <div class="pagetitle">
+      <h1>Projects</h1>
     </div>
 
-    <div class="pagination-wrapper">
-      <div>
-        <!-- Left: Records per page -->
-        <div class="records-per-page">
-          <select id="pageSize" [(ngModel)]="pageSize" (change)="onPageSizeChange()">
-            <option *ngFor="let size of pageSizes" [value]="size">{{ size }}</option>
-          </select>
-          {{ paginationInfo }}
+    <div class="table-container">
+      <!-- Tabs -->
+      <div class="tabs">
+        <button type="button" [routerLink]="['/projectdetails']">Project List</button>
+        <button class="active">RFQ</button>
+      </div>
+      <div class="search-box">
+        <input type="text" placeholder="Search" [(ngModel)]="searchText" (input)="applyFilter()" />
+
+        <button type="button" class="addbtn" [routerLink]="['/add-rfq']"><b>Add RFQ</b></button>
+      </div>
+      <div class="table-scroll-container">
+        <table class="styled-table">
+          <thead>
+            <tr>
+              <th>Project Id</th>
+              <th>Project Name</th>
+              <th>Customer</th>
+              <th>RFQ Sent</th>
+              <th>Due Date</th>
+              <th>#RFQ Sent</th>
+              <th>#Quote Recieved</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let item of pagedItems">
+              <td>{{ item.id }}</td>
+              <td>{{ item.name }}</td>
+              <td>{{ item.customer }}</td>
+              <td>{{ item.rfqSentDate }}</td>
+              <td>{{ item.dueDate }}</td>
+              <td>{{ item.rfqSent }}</td>
+              <td>{{ item.quoteRecieved }}</td>
+              <td>
+                <i class="fa-regular fa-pen-to-square edit-icon" (click)="editItem(item)"></i>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="pagination-wrapper">
+        <div>
+          <!-- Left: Records per page -->
+          <div class="records-per-page">
+            <select id="pageSize" [(ngModel)]="pageSize" (change)="onPageSizeChange()">
+              <option *ngFor="let size of pageSizes" [value]="size">{{ size }}</option>
+            </select>
+            {{ paginationInfo }}
+          </div>
+        </div>
+        <!-- Right: Pagination -->
+        <div class="pagination-container">
+          <button class="page-btn" [disabled]="currentPage === 1" (click)="prevPage()">
+            Previous
+          </button>
+
+          <!-- Page Numbers -->
+          <button
+            class="page-btn"
+            *ngFor="let page of [].constructor(totalPages); let i = index"
+            [class.active]="currentPage === i + 1"
+            (click)="goToPage(i + 1)"
+          >
+            {{ i + 1 }}
+          </button>
+
+          <button class="page-btn" [disabled]="currentPage === totalPages" (click)="nextPage()">
+            Next
+          </button>
         </div>
       </div>
-      <!-- Right: Pagination -->
-      <div class="pagination-container">
-        <button class="page-btn" [disabled]="currentPage === 1" (click)="prevPage()">
-          Previous
-        </button>
-
-        <!-- Page Numbers -->
-        <button
-          class="page-btn"
-          *ngFor="let page of [].constructor(totalPages); let i = index"
-          [class.active]="currentPage === i + 1"
-          (click)="goToPage(i + 1)"
-        >
-          {{ i + 1 }}
-        </button>
-
-        <button class="page-btn" [disabled]="currentPage === totalPages" (click)="nextPage()">
-          Next
-        </button>
-      </div>
     </div>
   </div>
-</div>
 </main>
 <app-footer></app-footer>
