@@ -201,7 +201,7 @@
                           <th style="text-align: center">Interested</th>
                           <th style="text-align: center">Maybe Later</th>
                           <th style="text-align: center">Quote Amount</th>
-                          <th>Actions</th>
+                          <th style="text-align: center">Actions</th>
                         </tr>
                       </thead>
 
@@ -232,14 +232,18 @@
                               <!-- <i class="fa fa-times fail" *ngIf="!rfq.maybeLater"></i> -->
                             </td>
                             <td
-                              style="text-align: right; padding-right: 50px"
+                              style="text-align: right; padding-right: 56px"
                               (click)="markViewed(work, rfq)"
                             >
                               <ng-container *ngIf="rfq.quoteAmount && rfq.quoteAmount !== '-'">
-                                € {{ rfq.quoteAmount }}
+                                <!-- € {{ rfq.quoteAmount }} -->
+
+                                {{
+                                  rfq.quoteAmount | currency : 'EUR' : 'symbol' : '1.2-2' : 'nl-NL'
+                                }}
                               </ng-container>
                             </td>
-                            <td style="text-align: center">
+                            <td style="text-align: center; padding-left: 20px">
                               <!-- PDF Icon with Disabled Logic -->
                               <i
                                 class="fa fa-file-pdf action-icon download-icon"

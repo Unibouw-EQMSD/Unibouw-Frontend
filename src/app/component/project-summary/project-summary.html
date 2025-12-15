@@ -143,7 +143,10 @@
                 </div>
                 <div>
                   <div class="submission-label">Total Quote Amount</div>
-                  <div class="submission-value">{{ submission.amount | currency : 'USD' }}</div>
+                  <div class="submission-value" style="text-align: right">
+                    <!-- {{ submission.amount | currency : 'EUR' }} -->
+                    {{ submission.amount | currency : 'EUR' : 'symbol' : '1.2-2' : 'nl-NL' }}
+                  </div>
                 </div>
                 <div>
                   <div class="submission-label">Attachment</div>

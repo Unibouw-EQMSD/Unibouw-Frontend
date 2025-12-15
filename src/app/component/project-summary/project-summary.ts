@@ -6,6 +6,8 @@ import { CommonModule } from '@angular/common';
 import { RfqResponseService } from '../../services/rfq-response.service';
 import { ActivatedRoute } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
+import { registerLocaleData } from '@angular/common';
+import localeNl from '@angular/common/locales/nl';
 
 @Component({
   selector: 'app-project-summary',
@@ -53,12 +55,12 @@ quoteForm!: FormGroup;
     private http: HttpClient,
 
   ) {
+
+    registerLocaleData(localeNl);
+
     this.attachments = this.fb.array<FormControl<File | null>>([
       this.fb.control<File | null>(null)
     ]);
-    // this.comments = this.fb.nonNullable.control('', {
-    //   validators: [Validators.required]
-    // });
   }
   ngOnInit(): void {
      this.quoteForm = this.fb.group({
@@ -107,6 +109,7 @@ quoteForm!: FormGroup;
       }
     });
   }
+  
 
 openQuotePanel() {
   this.showQuotePanel = true;
