@@ -245,17 +245,15 @@
 
 /* Dropdown for Work Item (like Construction) */
 .work-item-header {
-display: flex;
+    display: flex;
     justify-content: space-between;
     align-items: center;
     cursor: pointer;
-    padding: 5px 10px 5px 0px;
+    padding: 23px 10px 15px 0px;
     margin: 10px auto;
-    border-bottom: 1px solid #eee;
     font-size: 15px;
     font-weight: 100;
     color: #6c757d;
-    background-color: #f8f8f8;
     height: 45px;
 }
 
@@ -423,9 +421,11 @@ display: flex;
   width:100%;
   justify-content: space-between;
   align-items: flex-start;
-  padding: 12px 15px;
+  padding: 3px 8px;
   margin-bottom: 10px;
   font-size: 14px;
+  background-color: #f8f8f8;
+  border-bottom: 1px solid #dedede;
 }
 
 .rfq-summary div {
