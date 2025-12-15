@@ -6,6 +6,8 @@
   import { Rfq, RfqService } from '../../../services/rfq.service';
   import { projectdetails,projectService } from '../../../services/project.service';
   import { ActivatedRoute, Router } from '@angular/router';
+import { MatDialog } from '@angular/material/dialog';
+import { ConfirmDialogComponent } from '../../../confirm-dialog-component/confirm-dialog-component';
 
 
   interface SubcontractorItem {
@@ -58,7 +60,9 @@ editedEmailBody: string = '';
       private http: HttpClient,
       private projectService: projectService,
         private route: ActivatedRoute  ,
-        private router: Router
+        private router: Router,
+          private dialog: MatDialog
+
 
     ) {}
 
@@ -89,6 +93,47 @@ editedEmailBody: string = '';
 
     this.loadProjects();
   }
+
+  confirmCancel() {
+  const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+    width: '350px',
+
+    // ✅ THIS IS THE KEY
+    position: {
+      top: '10%',
+      right:'35%'
+    },
+    panelClass: 'center-dialog',
+
+    data: {
+      title: 'Confirm',
+      message: 'Discard all changes?'
+    }
+  });
+
+  dialogRef.afterClosed().subscribe(result => {
+    if (result === true) {
+      this.onCancelConfirmed();
+    }
+  });
+}
+
+
+onCancelConfirmed() {
+  const projectId =
+    this.projects.length ? this.projects[0].projectID : null;
+
+  // reset state
+  this.selectedProject = projectId;
+  this.selectedTab = 'standard';
+  this.selectedWorkItems = [];
+  this.subcontractors = [];
+
+  if (projectId) {
+this.router.navigate(['view-projects', projectId], {
+  queryParams: { tab: 'rfq' }
+});  }
+}
 loadRfqForEdit(rfqId: string) {
   this.rfqIdForEdit = rfqId;
   this.isLoader = true;
