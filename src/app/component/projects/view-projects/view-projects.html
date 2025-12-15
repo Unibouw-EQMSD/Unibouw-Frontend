@@ -209,7 +209,7 @@
                         <!-- Loop through RFQs -->
                         <tr *ngFor="let rfq of getFilteredRfqs(work)">
                           <!-- ✅ CHECK: Does this row have a Subcontractor? -->
-                          <ng-container *ngIf="rfq.subcontractorId; else noResponseTemplate">
+                          <ng-container *ngIf="rfq.viewed; else noResponseTemplate">
                             <td (click)="markViewed(work, rfq)">
                               {{ rfq.name }}
                               <div class="rating">★ {{ rfq.rating }}</div>
@@ -220,16 +220,16 @@
 
                             <td style="text-align: center" (click)="markViewed(work, rfq)">
                               <i class="fa fa-check-circle success" *ngIf="rfq.viewed"></i>
-                              <i class="fa fa-times fail" *ngIf="!rfq.viewed"></i>
+                              <!-- <i class="fa fa-times fail" *ngIf="!rfq.viewed"></i> -->
                             </td>
 
                             <td style="text-align: center" (click)="markViewed(work, rfq)">
                               <i class="fa fa-check-circle success" *ngIf="rfq.interested"></i>
-                              <i class="fa fa-times fail" *ngIf="!rfq.interested"></i>
+                              <i class="fa fa-times fail" *ngIf="rfq.notInterested"></i>
                             </td>
                             <td style="text-align: center" (click)="markMaybeLater(work, rfq)">
                               <i class="fa fa-check-circle success" *ngIf="rfq.maybeLater"></i>
-                              <i class="fa fa-times fail" *ngIf="!rfq.maybeLater"></i>
+                              <!-- <i class="fa fa-times fail" *ngIf="!rfq.maybeLater"></i> -->
                             </td>
                             <td
                               style="text-align: right; padding-right: 50px"

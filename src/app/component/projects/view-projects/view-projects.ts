@@ -22,6 +22,7 @@ interface RfqResponse {
   interested: boolean;
   viewed: boolean;
   maybeLater:boolean;
+  notInterested: number;
   quote: string;
   actions: string[];
   subcontractorId: string;   // << ADD THIS
@@ -182,7 +183,7 @@ loadRfqResponseSummary(projectId: string) {
 this.isLoading = true;
  /* 1️⃣ WORK-ITEM GROUPED API              */
   this.rfqResponseService.getResponsesByProjectId(projectId).subscribe({
-    
+   
     next: (res: any[]) => {      
        this.workItems = res.map(w => ({
         workItemId: w.workItemId,
@@ -190,7 +191,7 @@ this.isLoading = true;
         requestsSent: w.subcontractors.length,
         notResponded: w.subcontractors.filter((s: any) => !s.responded).length,
         interested: w.subcontractors.filter((s: any) => s.interested).length,
-        notInterested: w.subcontractors.filter((s: any) => s.responded && !s.interested).length,
+        notInterested: w.subcontractors.filter((s: any) => s.notInterested).length,
         viewed: w.subcontractors.filter((s: any) => s.viewed).length,
         maybeLater: w.subcontractors.filter((s: any) => s.maybeLater).length, // ✅ added
         open: false,
@@ -211,7 +212,7 @@ this.isLoading = true;
           date: s.date || '—',
           responded: s.responded,
           interested: s.interested,
-          notInterested: s.notInterested,
+  notInterested: s.notInterested,  // ⭐ FIXED
           viewed: s.viewed,
            maybeLater: s.maybeLater,
           quote: s.quote || '—',
@@ -220,23 +221,23 @@ this.isLoading = true;
           dueDate: s.dueDate          
         }))
       }));
-
+ 
       // load quote amounts
       this.workItems.forEach(work => {
         work.rfqs.forEach(rfq => this.loadQuoteAmount(rfq));
       });
       this.isLoading = false;
-    }, 
+    },
     error: (err) => {
       console.error("Error loading work item responses", err)
       this.isLoading = false;
     }    
-    
+   
   });
-
+ 
   /*  SUBCONTRACTOR GROUPED API          */
-  this.rfqResponseService.getResponsesByProjectSubcontractors(projectId).subscribe({ 
-    next: (res: any[]) => { 
+  this.rfqResponseService.getResponsesByProjectSubcontractors(projectId).subscribe({
+    next: (res: any[]) => {
       const grouped = res.reduce((acc: any[], item: any) => {
         let group = acc.find(g => g.subcontractorId === item.subcontractorId);
         if (!group) {
@@ -255,7 +256,7 @@ this.isLoading = true;
           };
           acc.push(group);
         }
-
+ 
         group.workItems.push({
           workItemId: item.workItemId,
           workItemName: item.workItemName,
@@ -265,6 +266,8 @@ this.isLoading = true;
           date: item.date,
           responded: item.responded,
           interested: item.interested,
+          notInterested: item.notInterested,
+ 
           viewed: item.viewed,
           maybeLater: item.maybeLater, // ✅ added
           subcontractorId: item.subcontractorId,
@@ -272,19 +275,19 @@ this.isLoading = true;
           quoteAmount: "-",
           actions: ['pdf']
         });
-
+ 
         group.requestsSent = group.workItems.length;
         group.notResponded = group.workItems.filter((w: any) => !w.responded).length;
         group.interested = group.workItems.filter((w: any) => w.interested).length;
-        group.notInterested = group.workItems.filter((w: any) => w.responded && !w.interested).length;
+        group.notInterested = group.workItems.filter((w: any) => w.notInterested).length;
         group.viewed = group.workItems.filter((w: any) => w.viewed).length;
         group.maybeLater = group.workItems.filter((w: any) => w.maybeLater).length; // ✅ added
-
+ 
         return acc;
       }, []);
-
+ 
       this.subcontractorGroups = grouped;
-
+ 
       this.subcontractorGroups.forEach(sub => {
         sub.workItems.forEach((w: any) => this.loadQuoteAmount(w));
       });
@@ -293,11 +296,12 @@ this.isLoading = false;
      error: (err) => {
       console.error("Error loading subcontractor responses", err);
       this.isLoading = false;
-    } 
+    }
    
   });
-
+ 
 }
+ 
 
 isBellEnabled(rfq: any): boolean {
   const amt = rfq.quoteAmount;
