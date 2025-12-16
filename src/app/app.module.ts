@@ -2,7 +2,7 @@ import { APP_INITIALIZER, NgModule, provideBrowserGlobalErrorListeners } from '@
 import { BrowserModule } from '@angular/platform-browser';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
-
+import { MatDialogModule } from '@angular/material/dialog';
 import { AppRoutingModule } from './app-routing-module';
 import { App } from './app';
 import { ProjectList } from './component/projects/project-list/project-list';
@@ -44,6 +44,8 @@ import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
 import { MAT_DATE_FORMATS, DateAdapter } from '@angular/material/core';
 import { CustomDateAdapter } from './component/custom-date-adapter';
+import { ConfirmDialogComponent } from './confirm-dialog-component/confirm-dialog-component';
+
 
 export function MSALInstanceFactory(): PublicClientApplication {
   return (window as any).msalInstance;
@@ -65,6 +67,7 @@ export function initConfig(appConfig: AppConfigService) {
     AddWorkitem,
     AddSubcontractor,
     ViewProjects,
+    // ConfirmDialogComponent,
     // ProjectSummary,
   ],
   imports: [
@@ -72,6 +75,7 @@ export function initConfig(appConfig: AppConfigService) {
     CommonModule,
     RouterModule,
      BrowserAnimationsModule,
+     MatButtonModule,
     AppRoutingModule,
     FormsModule,
     ReactiveFormsModule,
@@ -80,7 +84,7 @@ export function initConfig(appConfig: AppConfigService) {
   NgxIntlTelInputModule,
       MatDatepickerModule,
       MatNativeDateModule,
-
+MatDialogModule,
 
     // Material
     MatTableModule,
