@@ -62,53 +62,41 @@ quoteForm!: FormGroup;
       this.fb.control<File | null>(null)
     ]);
   }
-  ngOnInit(): void {
-     this.quoteForm = this.fb.group({
+ngOnInit(): void {
+  this.quoteForm = this.fb.group({
     quoteAmount: ['', Validators.required],
     comments: ['', Validators.required],
   });
-    this.route.queryParams.subscribe(params => {
-      this.rfqId = params['rfqId'];
-      this.subId = params['subId'];
-      this.number = params['number'];
 
-      if (this.rfqId && this.subId) {
-        // ⭐ STEP 1 — RESTORE STATE BEFORE LOADING API
-        const stateKey = `rfq_state_${this.rfqId}_${this.subId}_${this.number}`;
-        const savedState = localStorage.getItem(stateKey);
+  this.route.queryParams.subscribe(params => {
+    this.rfqId = params['rfqId'];
+    this.subId = params['subId'];
+    this.number = params['number']; // RFQ number, not WorkItemID
 
-        if (savedState) {
-          const state = JSON.parse(savedState);
-
-          this.buttonsDisabled = state.buttonsDisabled ?? false;
-          this.isInterested = state.isInterested ?? false;
-          this.isQuoteSubmitted = state.isQuoteSubmitted ?? false;
-
-
-          // Restore file names (cannot restore actual File object)
-          if (state.selectedFileNames?.length > 0) {
-            this.selectedFiles = state.selectedFileNames.map(
-              (name: string) => ({ name } as File)
-            );
-          }
+    if (this.rfqId && this.subId) {
+      // Restore previous state
+      const stateKey = `rfq_state_${this.rfqId}_${this.subId}_${this.number}`;
+      const savedState = localStorage.getItem(stateKey);
+      if (savedState) {
+        const state = JSON.parse(savedState);
+        this.buttonsDisabled = state.buttonsDisabled ?? false;
+        this.isInterested = state.isInterested ?? false;
+        this.isQuoteSubmitted = state.isQuoteSubmitted ?? false;
+        if (state.selectedFileNames?.length > 0) {
+          this.selectedFiles = state.selectedFileNames.map((name: string) => ({ name } as File));
         }
-
-        // 👇 Existing logic — mark as viewed
-        if (this.number) {
-          this.rfqResponseService
-            .markAsViewed(this.rfqId, this.subId, this.number)
-            .subscribe();
-        }
-
-        // 👇 Load project details
-        this.loadProjectSummary(this.rfqId);
-        this.loadPreviousSubmissions()
-      } else {
-        this.isLoading = false;
-        this.errorMsg = 'Missing required parameters (rfqId or subId).';
       }
-    });
-  }
+
+      // Load project first
+      this.loadProjectSummary(this.rfqId);
+      this.loadPreviousSubmissions();
+    } else {
+      this.isLoading = false;
+      this.errorMsg = 'Missing required parameters (rfqId or subId).';
+    }
+  });
+}
+
   
 
 openQuotePanel() {
@@ -116,17 +104,14 @@ openQuotePanel() {
   this.rightSectionVisible = true;   // show right section when opening
 }
   
- loadProjectSummary(rfqId: string, workItemIds?: string[]) {
-  console.log("🔵 loadProjectSummary() CALLED", rfqId, workItemIds);
+loadProjectSummary(rfqId: string, workItemIds?: string[]) {
   this.isLoading = true;
 
   this.rfqResponseService.getProjectSummary(rfqId, workItemIds).subscribe({
     next: (res: any) => {
-      console.log("🟢 API RESPONSE:", res);
       this.isLoading = false;
 
-      if (!res) {
-        console.warn("⚠️ EMPTY RESPONSE from server");
+      if (!res || !res.project) {
         this.errorMsg = "No data returned from server.";
         this.project = null;
         this.workItems = [];
@@ -134,43 +119,30 @@ openQuotePanel() {
         return;
       }
 
-      // The backend returns lowercase: project + workItems
-      if (res.project) {
-        this.project = res.project;
-        this.workItems = res.workItems || [];
+      this.project = res.project;
+      this.workItems = res.workItems || [];
 
-        console.log("📌 Project Loaded:", this.project);
-        console.log("📌 Work Items Loaded:", this.workItems);
-
-        // auto-select first work item
-        if (this.workItems.length > 0) {
-          this.selectedWorkItem = this.workItems[0];
-          console.log("✅ Auto-selected Work Item:", this.selectedWorkItem);
-        } else {
-          console.warn("⚠️ No work items found");
-          this.selectedWorkItem = null;
-        }
-      } else {
-        console.warn("⚠️ PROJECT KEY NOT FOUND IN RESPONSE");
-        this.errorMsg = "No project data found.";
-        this.project = null;
-        this.workItems = [];
-        this.selectedWorkItem = null;
+      // auto-select first work item
+      if (this.workItems.length > 0) {
+        this.selectedWorkItem = this.workItems[0];
       }
 
-      // 🚀 Ensure link check always runs
+      // ⚡️ Mark all work items as viewed
+      this.workItems.forEach(wi => {
+        if (this.rfqId && this.subId) {
+          this.rfqResponseService.markAsViewed(this.rfqId, this.subId, wi.workItemID).subscribe();
+        }
+      });
+
+      // Optional: check link validity
       if (typeof this.checkLinkValidity === "function") {
-        console.log("🔧 Calling checkLinkValidity()");
         this.checkLinkValidity();
-      } else {
-        console.error("❌ checkLinkValidity() IS NOT DEFINED IN COMPONENT");
       }
     },
-
     error: err => {
       this.isLoading = false;
       this.errorMsg = "Failed to load project summary.";
-      console.error("🔴 ERROR loading project summary:", err);
+      console.error("Error loading project summary:", err);
     }
   });
 }
