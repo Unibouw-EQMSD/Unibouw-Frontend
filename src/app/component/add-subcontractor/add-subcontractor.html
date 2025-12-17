@@ -238,21 +238,16 @@
                   subcontractorForm.get('contactEmail')?.invalid
               }"
             />
+
             <div class="form-error-space">
               <span
-                *ngIf="
-      subcontractorForm.get('contactEmail')?.touched &&
-      subcontractorForm.get('contactEmail')?.errors?.['required']
-    "
+                *ngIf="subcontractorForm.get('contactEmail')?.errors?.['required'] && subcontractorForm.get('contactEmail')?.touched"
                 class="text-danger text-sm"
               >
                 This field is required.
               </span>
               <span
-                *ngIf="
-      subcontractorForm.get('contactEmail')?.touched &&
-      subcontractorForm.get('contactEmail')?.errors?.['email']
-    "
+                *ngIf="subcontractorForm.get('contactEmail')?.errors?.['pattern']"
                 class="text-danger text-sm"
               >
                 Enter a valid email address.
