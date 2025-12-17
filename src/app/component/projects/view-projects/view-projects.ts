@@ -134,7 +134,6 @@ setMaxDueDate(due: Date | string) {
   }
 
   ngOnInit(): void {
-   
     this.route.queryParams.subscribe(params => {
     if (params['tab'] === 'rfq') {
       this.selectedTab = 'rfq';

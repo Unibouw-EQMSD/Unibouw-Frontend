@@ -8,6 +8,7 @@
   import { ActivatedRoute, Router } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
 import { ConfirmDialogComponent } from '../../../confirm-dialog-component/confirm-dialog-component';
+import { Location } from '@angular/common';
 
 
   interface SubcontractorItem {
@@ -41,7 +42,7 @@ import { ConfirmDialogComponent } from '../../../confirm-dialog-component/confir
     showPreview = false;
   previewData: any = null;
   noSubMessage: string = "";
-editedEmailBody: string = '';
+   editedEmailBody: string = '';
 
     // subcontractors: (Subcontractors & { selected?: boolean })[] = [];
     showAll: boolean = false;
@@ -61,14 +62,24 @@ editedEmailBody: string = '';
       private projectService: projectService,
         private route: ActivatedRoute  ,
         private router: Router,
-          private dialog: MatDialog
+          private dialog: MatDialog,
+          private location: Location
 
 
     ) {}
 
     isLoader: boolean = false;
+    // minDate: Date = new Date();
+     minDate: string = '';
 
   ngOnInit() {
+
+    const today = new Date();
+  this.minDate = today.toISOString().split('T')[0]; // yyyy-MM-dd
+
+    console.log("minDate: ", this.minDate);
+
+
     // ⬅ SHOW DEFAULT MESSAGE ON PAGE LOAD (Add + Edit mode)
     this.noSubMessage = "Select a work item to view subcontractors.";
 
@@ -92,6 +103,10 @@ editedEmailBody: string = '';
     });
 
     this.loadProjects();
+  }
+
+  goBack(): void {
+    this.location.back();
   }
 
   confirmCancel() {
