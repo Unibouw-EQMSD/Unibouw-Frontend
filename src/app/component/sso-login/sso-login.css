@@ -1,4 +1,3 @@
-
 .login-container {
   height: 100vh;
   background: #0f2e3d;
@@ -32,7 +31,7 @@
 }
 
 .logo-section::after {
-  content: "";
+  content: '';
   position: absolute;
   bottom: -1px;
   left: 0;
@@ -40,9 +39,31 @@
   height: 100px;
   background: rgb(168 166 146);
   /* This ensures the shape closes at the bottom, removing the flat line */
-  clip-path: polygon(0% 100%, 0% 45%, 4% 48%, 11% 50%, 20% 51%, 24% 51%, 28% 50%, 39% 47%, 41% 46%,
-      50% 42%, 51% 41%, 56% 38%, 60% 36%, 65% 32%, 70% 27%, 75% 22%, 80% 17%, 85% 13%,
-      90% 10%, 95% 9%, 100% 10%, 100% 100%, 0% 100%);
+  clip-path: polygon(
+    0% 100%,
+    0% 45%,
+    4% 48%,
+    11% 50%,
+    20% 51%,
+    24% 51%,
+    28% 50%,
+    39% 47%,
+    41% 46%,
+    50% 42%,
+    51% 41%,
+    56% 38%,
+    60% 36%,
+    65% 32%,
+    70% 27%,
+    75% 22%,
+    80% 17%,
+    85% 13%,
+    90% 10%,
+    95% 9%,
+    100% 10%,
+    100% 100%,
+    0% 100%
+  );
   z-index: 2;
 }
 
@@ -57,9 +78,6 @@
   /* right: 100px; */
   bottom: 30px;
 }
-
-
-
 
 /* ====== Form Section ====== */
 .form-section {
@@ -89,7 +107,7 @@
   font-weight: 500;
 }
 
-input[type="email"] {
+input[type='email'] {
   width: 100%;
   padding: 10px 0;
   font-size: 1rem;
@@ -104,27 +122,26 @@ input[type="email"] {
 }
 
 /* Focus state */
-input[type="email"]:focus {
+input[type='email']:focus {
   border-bottom: 2px solid #1a3b4d;
   background-color: rgb(168, 166, 146) !important;
   /* prevent focus changing background */
 }
 
 /* Placeholder color */
-input[type="email"]::placeholder {
+input[type='email']::placeholder {
   color: #a0aec0;
   background-color: rgb(168, 166, 146) !important;
 }
 
 /* Autofill background (Chrome/Edge/Safari) */
-input[type="email"]:-webkit-autofill,
-input[type="email"]:-webkit-autofill:hover,
-input[type="email"]:-webkit-autofill:focus,
-input[type="email"]:-webkit-autofill:active {
+input[type='email']:-webkit-autofill,
+input[type='email']:-webkit-autofill:hover,
+input[type='email']:-webkit-autofill:focus,
+input[type='email']:-webkit-autofill:active {
   -webkit-box-shadow: 0 0 0px 1000px rgb(168, 166, 146) inset !important;
   -webkit-text-fill-color: #2d3748 !important;
 }
-
 
 /* ====== Microsoft Button ====== */
 .microsoft-btn {
@@ -182,79 +199,78 @@ input[type="email"]:-webkit-autofill:active {
   background: #ffb900;
 }
 
-
 /* Prashanth */
 .position-fixed {
-    position: fixed;
+  position: fixed;
 }
 .body-loginBG {
-    background-color: #0f2e3d;
-    min-height: 100vh;        /* Full viewport height */
-  display: flex;            /* Enable flexbox */
-  align-items: center;      /* Vertical center */
-  justify-content: center;  /* Horizontal center */
+  background-color: #0f2e3d;
+  min-height: 100vh; /* Full viewport height */
+  display: flex; /* Enable flexbox */
+  align-items: center; /* Vertical center */
+  justify-content: center; /* Horizontal center */
 }
 
 .max-w-md {
-    max-width: 28rem;
+  max-width: 28rem;
 }
 
 .w-full {
-    width: 100%;
+  width: 100%;
 }
 /* .min-h-screen {
     min-height: 100vh;
 } */
 .login-wrapper {
-    display: flex;
-    flex-basis: 100%;
-    width: 100%;
+  display: flex;
+  flex-basis: 100%;
+  width: 100%;
 }
 /* login style */
 .divloginContainer {
-    width: 420px !important;
+  width: 420px !important;
 }
 
 .divloginContainer .form-control,
 .divloginContainer.form-select {
-    border-bottom: solid 1px #031B24 !important;
+  border-bottom: solid 1px #031b24 !important;
 }
 
 .loginContainer {
-    padding: 2.5rem;
-    border-radius: 15px;
-    -webkit-box-shadow: -4px 0px 13px -5px rgba(0, 0, 0, .75);
-    -moz-box-shadow: -4px 0px 13px -5px rgba(0, 0, 0, .75);
-    box-shadow: -4px 0px 13px -5px rgba(0, 0, 0, .75);
-    transform: scale(1);
-    margin: 0 0px;
-    background-color: #A8A692 !important;
-    backdrop-filter: blur(10px);
-    /*  Frosted glass effect */
-    /* background-color: rgba(255, 255, 255, 0.1); Translucent white */
-    border: 1px solid rgba(255, 255, 255, 0.);
+  padding: 2.4rem;
+  border-radius: 15px;
+  -webkit-box-shadow: -4px 0px 13px -5px rgba(0, 0, 0, 0.75);
+  -moz-box-shadow: -4px 0px 13px -5px rgba(0, 0, 0, 0.75);
+  box-shadow: -4px 0px 13px -5px rgba(0, 0, 0, 0.75);
+  transform: scale(1);
+  margin: 0 0px;
+  background-color: #a8a692 !important;
+  backdrop-filter: blur(10px);
+  /*  Frosted glass effect */
+  /* background-color: rgba(255, 255, 255, 0.1); Translucent white */
+  border: 1px solid rgba(255, 255, 255, 0);
 }
 
 .logintxt {
-    color: #031B24;
-    font-size: 24px;
-    /* text-align: center; */
-    font-weight: 600;
-    margin-bottom: 2rem;
+  color: #031b24;
+  font-size: 24px;
+  /* text-align: center; */
+  font-weight: 600;
+  margin-bottom: 2rem;
 }
 
 .divLogo {
-    text-align: left !important;
-    background-color: #031B24;
-    padding: 1rem 1rem 2rem 2rem;
-    border-radius: 10px 0 122%;
-    margin: -2.5rem -2.5rem 0;
-    /* box-shadow: rgba(0, 0, 0, 0.4) 0px 5px, rgba(0, 0, 0, 0.3) 5px 10px, rgba(0, 0, 0, 0.2) 10px 15px, rgba(0, 0, 0, 0.1) 16px 20px, rgba(0, 0, 0, 0.05) 25px 25px; */
-    box-shadow: rgba(0, 0, 0, 0.15) 0px 15px 25px, rgba(0, 0, 0, 0.5) 0px 5px 12px;
+  text-align: left !important;
+  background-color: #031b24;
+  padding: 1rem 1rem 2rem 2rem;
+  border-radius: 10px 0 122%;
+  margin: -2.5rem -2.5rem 0;
+  /* box-shadow: rgba(0, 0, 0, 0.4) 0px 5px, rgba(0, 0, 0, 0.3) 5px 10px, rgba(0, 0, 0, 0.2) 10px 15px, rgba(0, 0, 0, 0.1) 16px 20px, rgba(0, 0, 0, 0.05) 25px 25px; */
+  box-shadow: rgba(0, 0, 0, 0.15) 0px 15px 25px, rgba(0, 0, 0, 0.5) 0px 5px 12px;
 }
 
 .divLogo img {
-    width: 220px !important;
+  width: 220px !important;
 }
 
 /* Change autocomplete styles in WebKit */
@@ -267,22 +283,21 @@ textarea:-webkit-autofill:focus,
 select:-webkit-autofill,
 select:-webkit-autofill:hover,
 select:-webkit-autofill:focus {
-    border: 0px solid #031B24;
-    border-bottom: 1px solid #031B24;
-    -webkit-text-fill-color: #031B24 !important;
-    -webkit-box-shadow: 0 0 0px 1000px #1B1B1C inset;
-    transition: background-color 5000s ease-in-out 0s;
+  border: 0px solid #031b24;
+  border-bottom: 1px solid #031b24;
+  -webkit-text-fill-color: #031b24 !important;
+  -webkit-box-shadow: 0 0 0px 1000px #1b1b1c inset;
+  transition: background-color 5000s ease-in-out 0s;
 }
 
-
 .toast-container.position-fixed.top-0.end-0.p-3 {
-    position: fixed;
+  position: fixed;
 }
 /* ====== Responsive ====== */
 @media (max-width: 480px) {
   .divloginContainer {
     width: 320px !important;
-}
+  }
   .login-container {
     padding: 10px;
   }
@@ -297,8 +312,21 @@ select:-webkit-autofill:focus {
 
   .logo-section::after {
     height: 80px;
-    clip-path: polygon(0% 100%, 0% 60%, 10% 55%, 20% 50%, 30% 45%, 40% 40%,
-        50% 35%, 60% 30%, 70% 25%, 80% 20%, 90% 15%, 100% 10%, 100% 100%);
+    clip-path: polygon(
+      0% 100%,
+      0% 60%,
+      10% 55%,
+      20% 50%,
+      30% 45%,
+      40% 40%,
+      50% 35%,
+      60% 30%,
+      70% 25%,
+      80% 20%,
+      90% 15%,
+      100% 10%,
+      100% 100%
+    );
   }
 
   .form-section {

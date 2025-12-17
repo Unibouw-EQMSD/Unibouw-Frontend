@@ -13,9 +13,9 @@ import { forkJoin } from 'rxjs/internal/observable/forkJoin';
   styleUrl: './subcontractor.css',
 })
 export class Subcontractor implements OnInit, AfterViewInit {
- displayedColumns: string[] = ['name', 'category','contactNumber', 'contactPerson', 'emailId'];
+  displayedColumns: string[] = ['name', 'category', 'contactNumber', 'contactPerson', 'emailId'];
   dataSource = new MatTableDataSource<Subcontractors>([]);
-  
+
   searchText = '';
   isAdmin = false;
 
@@ -29,7 +29,7 @@ export class Subcontractor implements OnInit, AfterViewInit {
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
-showPopup = false;
+  showPopup = false;
   popupMessage = '';
   popupError = false;
   constructor(
@@ -38,71 +38,62 @@ showPopup = false;
   ) {}
 
   ngOnInit() {
-
-     this.isAdmin = this.userService.isAdmin(); // Check role
-  this.updateDisplayedColumns();  
+    this.isAdmin = this.userService.isAdmin(); // Check role
+    this.updateDisplayedColumns();
 
     // Show skeleton first, then load table
-  this.isSkeletonLoading = true;
+    this.isSkeletonLoading = true;
 
-  setTimeout(() => {
-    this.isSkeletonLoading = false;
-    this.isLoading = true;
-    this.loadSubcontractors();
-  }, 1000);
-}
-
-  
-updateDisplayedColumns() {
-  if (this.isAdmin) {
-    if (!this.displayedColumns.includes('action')) {
-      this.displayedColumns.push('action');
-    }
-  } else {
-    this.displayedColumns = this.displayedColumns.filter(c => c !== 'action');
+    setTimeout(() => {
+      this.isSkeletonLoading = false;
+      this.isLoading = true;
+      this.loadSubcontractors();
+    }, 1000);
   }
-}
+
+  updateDisplayedColumns() {
+    if (this.isAdmin) {
+      if (!this.displayedColumns.includes('action')) {
+        this.displayedColumns.push('action');
+      }
+    } else {
+      this.displayedColumns = this.displayedColumns.filter((c) => c !== 'action');
+    }
+  }
 
   ngAfterViewInit() {
     this.dataSource.paginator = this.paginator;
     this.dataSource.sort = this.sort;
   }
 
-loadSubcontractors() {
-  this.isLoading = true;
+  loadSubcontractors() {
+    this.isLoading = true;
 
-  forkJoin({
-    subcontractors: this.subcontractorService.getSubcontractors(),
-    mappings: this.subcontractorService.getSubcontractorWorkItemMappings(),
-  }).subscribe({
-    next: ({ subcontractors, mappings }) => {
-      console.log('📦 Subcontractors:', subcontractors);
-      console.log('🔗 Mappings:', mappings);
+    forkJoin({
+      subcontractors: this.subcontractorService.getSubcontractors(),
+      mappings: this.subcontractorService.getSubcontractorWorkItemMappings(),
+    }).subscribe({
+      next: ({ subcontractors, mappings }) => {
+        // Merge: attach work items to subcontractors
+        const merged = subcontractors.map((sub) => {
+          const related = mappings
+            .filter((m) => m.subcontractorName?.trim() === sub.name?.trim())
+            .map((m) => m.workItemName)
+            .join(', ');
+          return { ...sub, category: related || '-' };
+        });
 
-      // Merge: attach work items to subcontractors
-      const merged = subcontractors.map((sub) => {
-        const related = mappings
-          .filter((m) => m.subcontractorName?.trim() === sub.name?.trim())
-          .map((m) => m.workItemName)
-          .join(', ');
-        return { ...sub, category: related || '-' };
-      });
-
-      console.log('✅ Merged Data:', merged);
-
-      this.dataSource.data = merged;
-      this.dataSource.paginator = this.paginator;
-      this.dataSource.sort = this.sort;
-      this.isLoading = false;
-    },
-    error: (err) => {
-      console.error('❌ API Error:', err);
-      this.isLoading = false;
-    },
-  });
-}
-
-
+        this.dataSource.data = merged;
+        this.dataSource.paginator = this.paginator;
+        this.dataSource.sort = this.sort;
+        this.isLoading = false;
+      },
+      error: (err) => {
+        console.error('❌ API Error:', err);
+        this.isLoading = false;
+      },
+    });
+  }
 
   applyFilter() {
     this.dataSource.filter = this.searchText.trim().toLowerCase();
@@ -125,11 +116,11 @@ loadSubcontractors() {
       next: () => this.showPopupMessage('Status updated successfully!'),
       error: () => {
         item.isActive = !newStatus;
-       this.showPopupMessage('Failed to update status. Please try again.', true);
+        this.showPopupMessage('Failed to update status. Please try again.', true);
       },
     });
   }
-    showPopupMessage(message: string, isError: boolean = false) {
+  showPopupMessage(message: string, isError: boolean = false) {
     this.popupMessage = message;
     this.popupError = isError;
     this.showPopup = true;

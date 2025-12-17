@@ -8,9 +8,8 @@ describe('SSOLogin', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [SSOLogin]
-    })
-    .compileComponents();
+      declarations: [SSOLogin],
+    }).compileComponents();
 
     fixture = TestBed.createComponent(SSOLogin);
     component = fixture.componentInstance;

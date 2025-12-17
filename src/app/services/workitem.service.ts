@@ -39,7 +39,7 @@ export class WorkitemService {
     this.workitemsUrl = `${this.apiURL}/WorkItems`;
   }
 
-  /** 🔐 Get Authorization Headers */
+  /* Get Authorization Headers */
   private async getHeaders(): Promise<HttpHeaders> {
     const accounts = this.msalService.instance.getAllAccounts();
     if (!accounts.length) throw new Error('No MSAL account found');
@@ -55,20 +55,17 @@ export class WorkitemService {
     });
   }
 
-  /** 📂 Get all work item categories */
+  /* Get all work item categories */
   getCategories(): Observable<WorkitemCategory[]> {
     return from(this.getHeaders()).pipe(
       switchMap((headers) =>
-        this.http.get<{ count: number; data: WorkitemCategory[] }>(
-          this.categoryUrl,
-          { headers }
-        )
+        this.http.get<{ count: number; data: WorkitemCategory[] }>(this.categoryUrl, { headers })
       ),
       map((res) => res.data || [])
     );
   }
 
-  /** 📂 Async version of getCategories */
+  /* Async version of getCategories */
   async getCategoriesAsync(): Promise<WorkitemCategory[]> {
     const headers = await this.getHeaders();
     const res = await this.http
@@ -79,7 +76,7 @@ export class WorkitemService {
     return res?.data || [];
   }
 
-  /** 🧩 Get work items by category ID */
+  /* Get work items by category ID */
   getWorkitems(categoryId: string): Observable<Workitem[]> {
     return from(this.getHeaders()).pipe(
       switchMap((headers) =>
@@ -101,7 +98,7 @@ export class WorkitemService {
     );
   }
 
-  /** 🔄 Update isActive status */
+  /* Update isActive status */
   updateIsActive(workitemId: string, isActive: boolean): Observable<any> {
     return from(this.getHeaders()).pipe(
       switchMap((headers) =>
@@ -112,7 +109,7 @@ export class WorkitemService {
     );
   }
 
-  /** 📝 Update description text */
+  /* Update description text */
   updateDescription(workItemID: string, description: string): Observable<any> {
     return from(this.getHeaders()).pipe(
       switchMap((headers) => {

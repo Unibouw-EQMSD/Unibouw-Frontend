@@ -6,10 +6,9 @@ import { AppConfigService } from './app.config.service';
 import { MsalService } from '@azure/msal-angular';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class ReminderService {
-
   private apiURL: string = '';
 
   constructor(
@@ -20,9 +19,7 @@ export class ReminderService {
     this.apiURL = this.appConfigService.getConfig().apiURL;
   }
 
-  /**
-   * ✅ Generate Auth Headers
-   */
+  /* Generate Auth Headers */
   private async getHeaders(): Promise<HttpHeaders> {
     const accounts = this.msalService.instance.getAllAccounts();
     if (!accounts.length) throw new Error('No MSAL account found');
@@ -38,34 +35,22 @@ export class ReminderService {
     });
   }
 
-  /**
-   * ✅ Update Global RFQ Reminder Configuration
+  /* Update Global RFQ Reminder Configuration
    * (Your old code used GET incorrectly — API should be POST)
    */
   updateGolbalReminderConfigSet(body: any): Observable<any> {
     return from(this.getHeaders()).pipe(
       switchMap((headers) =>
-        this.http.post<any>(
-          `${this.apiURL}/Common/UpdateRfqGolbalReminderSet`,
-          body,
-          { headers }
-        )
+        this.http.post<any>(`${this.apiURL}/Common/UpdateRfqGolbalReminderSet`, body, { headers })
       )
     );
   }
 
-getGlobalReminderConfig(): Observable<any> {
-  return from(this.getHeaders()).pipe(
-    switchMap((headers) =>
-      this.http.get<any>(
-        `${this.apiURL}/Common/GetRfqGolbalReminderSet`,
-        { headers }
+  getGlobalReminderConfig(): Observable<any> {
+    return from(this.getHeaders()).pipe(
+      switchMap((headers) =>
+        this.http.get<any>(`${this.apiURL}/Common/GetRfqGolbalReminderSet`, { headers })
       )
-    )
-  );
+    );
+  }
 }
-
-}
-
-
-

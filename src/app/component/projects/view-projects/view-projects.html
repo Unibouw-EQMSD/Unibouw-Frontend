@@ -1,7 +1,7 @@
 <app-header></app-header>
 <main id="main">
   <div class="container">
-    <!-- 🌟 SKELETON LOADING -->
+    <!-- SKELETON LOADING -->
     <!-- FULL PAGE SKELETON -->
     <div class="full-page-skeleton" *ngIf="isLoading">
       <!-- LEFT SIDE SKELETON -->
@@ -31,9 +31,15 @@
     </div>
 
     <div *ngIf="!isLoading">
-      <!-- 🔹 Page Header -->
+      <!-- Page Header -->
       <div class="pagetitle">
         <h1>{{ projectDetails.name }}</h1>
+        <i
+          class="fa fa-arrow-circle-left back-icon"
+          aria-hidden="true"
+          title="Back"
+          (click)="goBack()"
+        ></i>
       </div>
 
       <div class="project-details-container">
@@ -67,10 +73,6 @@
               <span class="label">Committed Date</span
               ><span class="value">{{ projectDetails.completionDate | date : 'dd-MM-yyyy' }}</span>
             </div>
-            <!-- <div class="detail-row">
-        <span class="label">Status</span>
-        <span class="value status">{{ projectDetails.status }}</span>
-      </div> -->
             <div class="detail-row">
               <span class="label">Status</span>
               <span
@@ -84,11 +86,6 @@
                 {{ projectDetails.status }}
               </span>
             </div>
-
-            <!-- <div class="detail-row">
-            <span class="label">Total Dimension</span
-            ><span class="value">{{ projectDetails.totalDimension }}</span>
-          </div> -->
             <div class="detail-row">
               <span class="label">Specification</span>
               <span class="value">
@@ -118,7 +115,7 @@
             </button>
           </div>
 
-          <!-- 🟢 TAB 1: RFQ RESPONSE (Accordion Section) -->
+          <!-- TAB 1: RFQ RESPONSE (Accordion Section) -->
           <div *ngIf="selectedTab === 'response'">
             <!-- GROUP OPTIONS -->
             <div class="rfq-header">
@@ -208,7 +205,7 @@
                       <tbody>
                         <!-- Loop through RFQs -->
                         <tr *ngFor="let rfq of getFilteredRfqs(work)">
-                          <!-- ✅ CHECK: Does this row have a Subcontractor? -->
+                          <!-- CHECK: Does this row have a Subcontractor? -->
                           <ng-container *ngIf="rfq.viewed; else noResponseTemplate">
                             <td (click)="markViewed(work, rfq)">
                               {{ rfq.name }}
@@ -236,8 +233,6 @@
                               (click)="markViewed(work, rfq)"
                             >
                               <ng-container *ngIf="rfq.quoteAmount && rfq.quoteAmount !== '-'">
-                                <!-- € {{ rfq.quoteAmount }} -->
-
                                 {{
                                   rfq.quoteAmount | currency : 'EUR' : 'symbol' : '1.2-2' : 'nl-NL'
                                 }}
@@ -261,7 +256,7 @@
                             </td>
                           </ng-container>
 
-                          <!-- ❌ FALLBACK: If RFQ exists but no Subcontractor (e.g. RFQ59) -->
+                          <!-- FALLBACK: If RFQ exists but no Subcontractor (e.g. RFQ59) -->
                           <ng-template #noResponseTemplate>
                             <td
                               colspan="9"
@@ -372,30 +367,10 @@
                           <td style="text-align: right; padding-right: 50px">
                             <!-- € {{ rfq.quoteAmount }} -->
                             <ng-container *ngIf="w.quoteAmount && w.quoteAmount !== '-'">
-                              € {{ w.quoteAmount }}
+                              {{ w.quoteAmount | currency : 'EUR' : 'symbol' : '1.2-2' : 'nl-NL' }}
                             </ng-container>
                           </td>
                           <td style="text-align: center">
-                            <!-- PDF Icon with Disabled Logic -->
-                            <!-- <i
-                              *ngIf="w.actions?.includes('pdf')"
-                              class="fa fa-file-pdf action-icon download-icon"
-                              [class.disabled-icon]="!w.responded"
-                              (click)="
-                                w.responded && downloadQuote($event, w.rfqId, sub.subcontractorId)
-                              "
-                              [title]="w.responded ? 'Download Quote' : 'No Quote Uploaded'"
-                            ></i>
-                            <i
-                              *ngIf="w.actions?.includes('lock')"
-                              class="fa fa-lock action-icon"
-                            ></i>
-                            <i
-                              class="fa fa-bell"
-                              title="Set Reminder"
-                              (click)="openReminderPopup(w)"
-                            ></i> -->
-
                             <i
                               class="fa fa-file-pdf action-icon download-icon"
                               *ngIf="w.actions?.includes('pdf')"
@@ -419,7 +394,7 @@
             </div>
           </div>
 
-          <!-- 🔵 TAB 2: RFQ (Mat Table Section) -->
+          <!-- TAB 2: RFQ (Mat Table Section) -->
           <div *ngIf="selectedTab === 'rfq'">
             <div class="button-container">
               <button type="button" class="addbtn" (click)="addRfq()">
@@ -485,7 +460,7 @@
             showFirstLastButtons
           >
           </mat-paginator>
-          <!-- 🟣 TAB 3: CONVERSATION -->
+          <!-- TAB 3: CONVERSATION -->
           <div *ngIf="selectedTab === 'conversation'">
             <h3>Conversation</h3>
             <p>No messages yet.</p>

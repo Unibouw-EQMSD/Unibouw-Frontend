@@ -1,29 +1,24 @@
-
-
 .search-box {
   margin: 20px 0;
   width: 100%;
-   display: flex;
+  display: flex;
   flex-direction: row;
   justify-content: space-between;
- 
 }
 
 .search-box input {
-   width: 250px;
+  width: 250px;
   padding: 6px 10px;
-  border: none;           
-  border-bottom: 1px solid #ccc; 
+  border: none;
+  border-bottom: 1px solid #ccc;
   font-size: 16px;
-  outline: none;          
+  outline: none;
   transition: border-color 0.3s;
 }
 
-
 .search-box input:focus {
-  border-bottom: 2px solid #905f33; 
+  border-bottom: 2px solid #905f33;
 }
-
 
 /* Edit icon */
 .edit-icon {
@@ -31,5 +26,3 @@
   cursor: pointer;
   margin-right: 10px;
 }
-
-

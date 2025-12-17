@@ -3,7 +3,7 @@ import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class UserService {
   private userSubject = new BehaviorSubject<any>(null);
@@ -40,11 +40,13 @@ export class UserService {
   getUserRoles(): string[] {
     const user = this.getUser();
     if (!user?.roles) return [];
-    return typeof user.roles === 'string' ? user.roles.split(',').map((r: string) => r.trim()) : user.roles;
+    return typeof user.roles === 'string'
+      ? user.roles.split(',').map((r: string) => r.trim())
+      : user.roles;
   }
 
   isAdmin(): boolean {
-    return this.getUserRoles().some(r => r.toLowerCase() === 'admin');
+    return this.getUserRoles().some((r) => r.toLowerCase() === 'admin');
   }
 
   clearUser() {

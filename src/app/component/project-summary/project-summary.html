@@ -3,19 +3,6 @@
     <h1>Quote Request (RFQ)</h1>
   </div>
 
-  <!-- <div class="rfq-status-banner" *ngIf="project">
-  <span class="status-badge" [ngClass]="buttonsDisabled ? 'expired' : 'active'">
-  {{ buttonsDisabled ? 'Expired' : 'Active' }}
-</span>
-
-<span class="banner-text">
- This RFQ link is valid until 
-{{ (rfq?.globalDueDate || rfq?.dueDate) | date:'dd MMMM yyyy' }},
-11:59 PM.
-  After this, you will not be able to submit or change your response.
-</span>
-</div> -->
-
   <div class="rfq-layout" *ngIf="project; else errorBlock">
     <!-- LEFT CARD: Project Details -->
     <aside class="left-card">
@@ -219,9 +206,8 @@
     </section>
   </div>
 </div>
-<!-- ============================= -->
+
 <!-- COMMENT MODAL -->
-<!-- ============================= -->
 <div class="comment-modal" *ngIf="showCommentModal">
   <div class="comment-modal-backdrop" (click)="closeCommentModal()"></div>
 

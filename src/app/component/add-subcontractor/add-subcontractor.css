@@ -4,27 +4,11 @@ form {
   flex-direction: column;
 }
 
- .form-card {
+.form-card {
   display: grid;
-  grid-template-columns: 2fr 1fr; 
+  grid-template-columns: 2fr 1fr;
   gap: 20px;
-} 
-
-/*.form-actions {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  width: 100%;
-  background-color: #fff; 
-  padding: 10px 20px;
-  box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
-  display: flex;
-  justify-content: flex-end;
-  gap: 10px;
-} */
-
-
-
+}
 
 .form-row {
   margin-bottom: 10px;
@@ -72,10 +56,6 @@ form {
   align-items: center;
 }
 
-
-
-
-
 .workitems-card {
   grid-column: 2 / 3;
   background: #fafafa;
@@ -90,15 +70,15 @@ form {
   align-items: center;
 }
 
-.is-invalid  {
+.is-invalid {
   border: none;
   border-bottom: 1px solid rgb(255, 0, 0) !important;
 }
 
-.is-invalid-textarea{
-border: none;
+.is-invalid-textarea {
+  border: none;
   border: 1px solid rgb(255, 0, 0) !important;
-} 
+}
 
 .full-width {
   flex-basis: 100% !important;
@@ -123,7 +103,7 @@ border: none;
   align-items: center;
   gap: 4px;
   background: #fff;
-  cursor:  pointer !important;
+  cursor: pointer !important;
 }
 
 .dropdown-arrow {
@@ -200,29 +180,32 @@ textarea {
 }
 
 .cancel-btn {
-    color: #dc3545;
-    background-color: transparent;
-    box-shadow: none !important;
+  color: #dc3545;
+  background-color: transparent;
+  box-shadow: none !important;
 }
 
 .cancel-btn:hover {
-    border: 1px solid #dc3545;
+  border: 1px solid #dc3545;
 }
 
-.submit-btn, .small-btn {
+.submit-btn,
+.small-btn {
   background: #f97316;
   color: white;
 }
 
 .reset-btn {
   border: 1px solid #003042;
-    background-color: #ffffff;
-    color: #003042 !important;
+  background-color: #ffffff;
+  color: #003042 !important;
 }
 
-.reset-btn:hover, .submit-btn:hover, .small-btn:hover {
+.reset-btn:hover,
+.submit-btn:hover,
+.small-btn:hover {
   background-color: #003042;
-    color: #ffffff !important;
+  color: #ffffff !important;
 }
 
 .fi {
@@ -245,7 +228,7 @@ textarea {
   background-color: #f5f5f5;
 }
 
-.country-code{
+.country-code {
   padding-right: 7px;
 }
 
@@ -256,11 +239,11 @@ textarea {
   left: 0;
   width: 180px;
   z-index: 99;
-  max-height: 200px;       
-  overflow-y: auto;       
+  max-height: 200px;
+  overflow-y: auto;
   overflow-x: hidden;
-  border: 1px solid #ddd; 
-  border-radius: 4px;      
+  border: 1px solid #ddd;
+  border-radius: 4px;
 }
 
 .count-badge {
@@ -271,17 +254,3 @@ textarea {
   font-size: 12px;
   margin-left: 6px;
 }
-
-
-
-
-/* @media (max-width: 900px) {
-  .form-row {
-    flex-direction: column;
-    gap: 8px;
-  }
-
-  .form-group {
-    min-width: 0;
-  }
-} */

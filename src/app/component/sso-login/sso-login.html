@@ -6,7 +6,7 @@
           <div class="divloginContainer">
             <div class="loginContainer">
               <div class="divLogo">
-                <img src="assets/images/unibouw.png" class="img-fluid" alt="unibouq">
+                <img src="assets/images/unibouw.png" class="img-fluid" alt="unibouq" />
               </div>
               <div class="logintxt mt-4">Login with SSO</div>
 
@@ -14,9 +14,20 @@
 
               <div class="input-group">
                 <label for="email" class="input-label">Email ID</label>
-                <input id="email" type="email" [(ngModel)]="email" name="email" #emailRef="ngModel" required
-                  (keyup.enter)="onSubmit(emailRef)" />
-                <div class="error-msg" *ngIf="emailRef.invalid && emailRef.touched" style="color: red">
+                <input
+                  id="email"
+                  type="email"
+                  [(ngModel)]="email"
+                  name="email"
+                  #emailRef="ngModel"
+                  required
+                  (keyup.enter)="onSubmit(emailRef)"
+                />
+                <div
+                  class="error-msg"
+                  *ngIf="emailRef.invalid && emailRef.touched"
+                  style="color: red"
+                >
                   Email is required
                 </div>
               </div>
@@ -31,7 +42,6 @@
                 Sign in with Microsoft
               </button>
               <!-- Form -->
-
             </div>
           </div>
         </div>
@@ -41,3 +51,4 @@
   <!-- <button type="submit" (click)="onLoginClick()" style="background-color: grey; margin: 3px auto">
       Test Login
     </button> -->
+</div>

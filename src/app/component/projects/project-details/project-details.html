@@ -5,14 +5,14 @@
       <h1>Projects</h1>
     </div>
 
-    <!-- 🦴 Skeleton Loader -->
+    <!-- Skeleton Loader -->
     <div *ngIf="!isSkeletonLoading" class="skeleton-container">
       <div class="skeleton-box"></div>
     </div>
 
-    <!-- 📋 Table Section -->
+    <!-- Table Section -->
     <div class="table-container" *ngIf="isSkeletonLoading">
-      <!-- 🔍 Search -->
+      <!-- Search -->
       <mat-form-field appearance="fill" class="search-box full-width">
         <input matInput [(ngModel)]="searchText" (input)="applyFilter()" placeholder="Search" />
         <button
@@ -126,7 +126,7 @@
         </table>
       </div>
 
-      <!-- 📄 Paginator -->
+      <!-- Paginator -->
       <mat-paginator
         [pageSize]="pageSize"
         [pageSizeOptions]="pageSizeOptions"

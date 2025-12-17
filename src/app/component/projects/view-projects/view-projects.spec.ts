@@ -1,5 +1,4 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-
 import { ViewProjects } from './view-projects';
 
 describe('ViewProjects', () => {
@@ -8,9 +7,8 @@ describe('ViewProjects', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ViewProjects]
-    })
-    .compileComponents();
+      declarations: [ViewProjects],
+    }).compileComponents();
 
     fixture = TestBed.createComponent(ViewProjects);
     component = fixture.componentInstance;

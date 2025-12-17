@@ -4,13 +4,13 @@ import { Component } from '@angular/core';
   selector: 'app-add-workitem',
   standalone: false,
   templateUrl: './add-workitem.html',
-  styleUrl: './add-workitem.css'
+  styleUrl: './add-workitem.css',
 })
 export class AddWorkitem {
-workitem = {
+  workitem = {
     code: '',
     workitem: '',
-    description: ''
+    description: '',
   };
 
   onSubmit() {

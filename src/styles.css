@@ -13,17 +13,19 @@ body {
   background-color: #f5f5f9;
 }
 
-   html, body {
-       height: 100% !important;
-       margin: 0;
-    padding: 0;
-   }
+html,
+body {
+  height: 100% !important;
+  margin: 0;
+  padding: 0;
+}
 
-     app-root, app-sso-login {
-       height: 100% !important;
-       display: flex;
-       flex-direction: column;
-   }
+app-root,
+app-sso-login {
+  height: 100% !important;
+  display: flex;
+  flex-direction: column;
+}
 
 .navbar-brand {
   padding: 8px 0 0;
@@ -122,10 +124,8 @@ body {
   }
 }
 
-
 .standardLabel {
   font-weight: 300 !important;
-
 }
 
 .unibouwLabel {
@@ -161,7 +161,6 @@ body {
 
 .mat-mdc-button:not(:disabled) {
   color: #ff7f32 !important;
-
 }
 
 .mat-mdc-form-field-focus-overlay {
@@ -207,7 +206,6 @@ body {
 .mdc-text-field--filled:not(.mdc-text-field--disabled) {
   background-color: #ffffff !important;
 }
-
 
 mat-icon.notranslate.material-icons.mat-ligature-font.mat-icon-no-color {
   font-size: 16px !important;
@@ -333,7 +331,7 @@ th {
 }
 
 tr.inactive td {
-  opacity: .6;
+  opacity: 0.6;
   color: #888;
 }
 
@@ -386,7 +384,6 @@ td.inactive {
   order: 1;
   /* appears first after input */
   color: #ff7f32 !important;
-
 }
 
 .input-wrapper .edit-icon mat-icon {
@@ -550,7 +547,6 @@ button.mat-raised-button {
 }
 
 @keyframes fadeInOut {
-
   0%,
   100% {
     opacity: 0;
@@ -650,13 +646,12 @@ button.mat-raised-button {
 
 .mat-mdc-select-value,
 .mdc-list-item__primary-text {
-  font-size: .875rem !important;
+  font-size: 0.875rem !important;
 }
 
 .mat-mdc-paginator-range-actions button {
   font-size: 14px !important;
 }
-
 
 .position-fixed {
   position: fixed;
@@ -680,7 +675,7 @@ button.mat-raised-button {
 }
 
 .mat-mdc-header-row {
-  padding: .5rem .5rem !important;
+  padding: 0.5rem 0.5rem !important;
   height: 40px !important;
   background-color: #fff !important;
 }
@@ -715,15 +710,20 @@ tbody tr:nth-of-type(odd) {
   border: solid 1px #ffffff !important;
   border-bottom: 1px solid #ddd !important;
 }
-.mdc-notched-outline__leading, .mat-mdc-notch-piece {border: 0 !important;}
+.mdc-notched-outline__leading,
+.mat-mdc-notch-piece {
+  border: 0 !important;
+}
 
+.cdk-global-overlay-wrapper {
+  justify-content: right !important;
+  align-items: flex-start !important;
+}
 
-    .cdk-global-overlay-wrapper{
-      justify-content: right !important;
-        align-items: flex-start !important;
-    }
-  
-
-
-
-    
+.back-icon {
+  padding-right: 10px;
+  padding-top: 8px;
+  font-size: 22px;
+  color: #ff7f32;
+  cursor: pointer;
+}

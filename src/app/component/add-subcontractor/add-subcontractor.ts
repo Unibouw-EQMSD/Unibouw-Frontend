@@ -5,20 +5,20 @@ import { SubcontractorService } from '../../services/subcontractor.service';
 import { Router } from '@angular/router';
 import { countryList } from '../../shared/countries';
 import { Subscription } from 'rxjs';
+import { Location } from '@angular/common';
 
 @Component({
   selector: 'app-add-subcontractor',
   standalone: false,
   templateUrl: './add-subcontractor.html',
-  styleUrls: ['./add-subcontractor.css']
+  styleUrls: ['./add-subcontractor.css'],
 })
-
 export class AddSubcontractor implements OnInit {
   subcontractorForm: FormGroup;
   countryList = countryList;
-  countries = countryList.map(c => c.name);
+  countries = countryList.map((c) => c.name);
   isDropdownOpen = false;
-  selectedCountry = countryList.find(c => c.code === '+33') || countryList[0]; // default
+  selectedCountry = countryList.find((c) => c.code === '+33') || countryList[0]; // default
   workitems: Workitem[] = [];
   selectedWorkitems: Workitem[] = [];
   selectionsByCategory = new Map<string, Workitem[]>(); // preserve selections per category
@@ -27,7 +27,7 @@ export class AddSubcontractor implements OnInit {
   persons: any[] = [];
   categories: WorkitemCategory[] = [
     { categoryID: '213cf69b-627e-4962-83ec-53463c8664d2', categoryName: 'Unibouw' },
-    { categoryID: '60a1a614-05fd-402d-81b3-3ba05fdd2d8a', categoryName: 'Standard' }
+    { categoryID: '60a1a614-05fd-402d-81b3-3ba05fdd2d8a', categoryName: 'Standard' },
   ];
   selectedCategoryId: string = '';
   attachments: File[] = [];
@@ -37,20 +37,37 @@ export class AddSubcontractor implements OnInit {
   popupMessage: string = '';
   popupError: boolean = false;
   showPopup: boolean = false;
-  
+
   constructor(
     private fb: FormBuilder,
     private router: Router,
     private workItemService: WorkitemService,
-    private subcontractorService: SubcontractorService
+    private subcontractorService: SubcontractorService,
+    private location: Location
   ) {
     this.subcontractorForm = this.fb.group({
       name: ['', [Validators.required, Validators.pattern(/^(?=.*\S)[a-zA-Z0-9 ]+$/)]],
       location: ['', [Validators.required, Validators.pattern(/\S+/)]],
       country: ['', Validators.required],
       registeredDate: [''],
-      email: ['', [Validators.required, Validators.pattern(/^[a-zA-Z0-9]+([._%+-]?[a-zA-Z0-9]+)*@[a-zA-Z0-9-]+(\.[a-zA-Z]{2,})+$/)]],
-      contactEmail: ['', [Validators.required, Validators.pattern(/^[a-zA-Z0-9]+([._%+-]?[a-zA-Z0-9]+)*@[a-zA-Z0-9-]+(\.[a-zA-Z]{2,})+$/)]],
+      email: [
+        '',
+        [
+          Validators.required,
+          Validators.pattern(
+            /^[a-zA-Z0-9]+([._%+-]?[a-zA-Z0-9]+)*@[a-zA-Z0-9-]+(\.[a-zA-Z]{2,})+$/
+          ),
+        ],
+      ],
+      contactEmail: [
+        '',
+        [
+          Validators.required,
+          Validators.pattern(
+            /^[a-zA-Z0-9]+([._%+-]?[a-zA-Z0-9]+)*@[a-zA-Z0-9-]+(\.[a-zA-Z]{2,})+$/
+          ),
+        ],
+      ],
       status: ['Active', Validators.required],
       officeAddress: ['', Validators.required],
       billingAddress: [''],
@@ -58,7 +75,7 @@ export class AddSubcontractor implements OnInit {
       countryCode: [this.selectedCountry.code],
       contactNumber: ['', [Validators.required, Validators.pattern(/^[0-9]{10,15}$/)]],
       contactPerson: ['', Validators.required],
-      attachments: [null]
+      attachments: [null],
     });
   }
 
@@ -91,8 +108,14 @@ export class AddSubcontractor implements OnInit {
     });
   }
 
+  goBack(): void {
+    this.location.back();
+  }
+
   /** Dropdown logic */
-  toggleDropdown() { this.isDropdownOpen = !this.isDropdownOpen; }
+  toggleDropdown() {
+    this.isDropdownOpen = !this.isDropdownOpen;
+  }
 
   selectCountry(country: any) {
     this.selectedCountry = country;
@@ -108,10 +131,10 @@ export class AddSubcontractor implements OnInit {
 
   /** Load workitems per category */
   loadWorkitems() {
-    this.workItemService.getWorkitems(this.selectedCategoryId).subscribe(items => {
+    this.workItemService.getWorkitems(this.selectedCategoryId).subscribe((items) => {
       this.workitems = (items || [])
-        .filter(w => w.isActive !== false)
-        .map(w => ({ ...w, categoryID: this.selectedCategoryId }))
+        .filter((w) => w.isActive !== false)
+        .map((w) => ({ ...w, categoryID: this.selectedCategoryId }))
         .sort((a, b) => a.name.localeCompare(b.name));
 
       // Restore selections for this category
@@ -129,17 +152,19 @@ export class AddSubcontractor implements OnInit {
   toggleWorkitem(event: any, item: Workitem) {
     const itemWithCategory = { ...item, categoryID: this.selectedCategoryId };
     if (event.target.checked) {
-      if (!this.selectedWorkitems.some(w => w.workItemID === item.workItemID)) {
+      if (!this.selectedWorkitems.some((w) => w.workItemID === item.workItemID)) {
         this.selectedWorkitems.push(itemWithCategory);
       }
     } else {
-      this.selectedWorkitems = this.selectedWorkitems.filter(w => w.workItemID !== item.workItemID);
+      this.selectedWorkitems = this.selectedWorkitems.filter(
+        (w) => w.workItemID !== item.workItemID
+      );
     }
     this.selectionsByCategory.set(this.selectedCategoryId, this.selectedWorkitems);
   }
 
   isSelected(w: Workitem): boolean {
-    return this.selectedWorkitems.some(sw => sw.workItemID === w.workItemID);
+    return this.selectedWorkitems.some((sw) => sw.workItemID === w.workItemID);
   }
 
   getSelectedCount(categoryId: string): number {
@@ -150,7 +175,7 @@ export class AddSubcontractor implements OnInit {
   filteredWorkitems() {
     if (!this.workitemSearch) return this.workitems;
     const term = this.workitemSearch.toLowerCase();
-    return this.workitems.filter(w => w.name.toLowerCase().includes(term));
+    return this.workitems.filter((w) => w.name.toLowerCase().includes(term));
   }
 
   /** File uploads */
@@ -184,8 +209,8 @@ export class AddSubcontractor implements OnInit {
 
   loadPersons(): void {
     this.subcontractorService.getPersons().subscribe({
-      next: (res: any[]) => this.persons = res,
-      error: (err: any) => console.error('Error fetching persons:', err)
+      next: (res: any[]) => (this.persons = res),
+      error: (err: any) => console.error('Error fetching persons:', err),
     });
   }
 
@@ -193,64 +218,62 @@ export class AddSubcontractor implements OnInit {
 
   /** Form submission */
   onSubmit() {
-   this.submitAttempted = true;
+    this.submitAttempted = true;
 
-  // Mark the form fields as touched so validation errors appear
-  this.subcontractorForm.markAllAsTouched();
+    // Mark the form fields as touched so validation errors appear
+    this.subcontractorForm.markAllAsTouched();
 
-  const allSelectedWorkitems = Array.from(this.selectionsByCategory.values()).flat();
-if (allSelectedWorkitems.length === 0 || this.subcontractorForm.invalid) {
-    return;
-}
+    const allSelectedWorkitems = Array.from(this.selectionsByCategory.values()).flat();
+    if (allSelectedWorkitems.length === 0 || this.subcontractorForm.invalid) {
+      return;
+    }
 
-  const formValue = this.subcontractorForm.value;
+    const formValue = this.subcontractorForm.value;
 
-  const payload = {
-    erp_ID: formValue.erpId?.trim() || '',
-    name: formValue.name?.trim(),
-    rating: formValue.rating || 0,
-    emailID: formValue.email,                    // main subcontractor email
-    phoneNumber1: this.selectedCountry.code + ' ' + formValue.contactNumber,
-    phoneNumber2: '',                             // optional
-    location: formValue.location,
-    country: formValue.country,
-    officeAddress: formValue.officeAddress,
-    billingAddress: formValue.sameAsOffice
-      ? formValue.officeAddress
-      : (formValue.billingAddress || ''),
-    personID: null,           
-    workItemIDs: Array.from(
-          new Set(
-            Array.from(this.selectionsByCategory.values())
-              .flat()
-              .map(w => w.workItemID)
-          )
-        ),
-    contactName: formValue.contactPerson,
-    contactEmailID: formValue.contactEmail,
-    contactPhone: this.selectedCountry.code + formValue.contactNumber
-  };
-  this.subcontractorService.createSubcontractor(payload).subscribe({
-  next: (res) => {
-    console.log("API SUCCESS:", res);
-    this.handleSuccess(res, formValue.attachments || []);
-  },
-  error: (err) => {
-    console.error("API ERROR:", err);   // 👈 FULL LOG
-     if (err.status === 409 && err.error?.field === "email") {
-    // Set field-level error on email form control
-    this.subcontractorForm.get('email')?.setErrors({
-      emailExists: err.error.message || 'Email already exists.'
+    const payload = {
+      erp_ID: formValue.erpId?.trim() || '',
+      name: formValue.name?.trim(),
+      rating: formValue.rating || 0,
+      emailID: formValue.email, // main subcontractor email
+      phoneNumber1: this.selectedCountry.code + ' ' + formValue.contactNumber,
+      phoneNumber2: '', // optional
+      location: formValue.location,
+      country: formValue.country,
+      officeAddress: formValue.officeAddress,
+      billingAddress: formValue.sameAsOffice
+        ? formValue.officeAddress
+        : formValue.billingAddress || '',
+      personID: null,
+      workItemIDs: Array.from(
+        new Set(
+          Array.from(this.selectionsByCategory.values())
+            .flat()
+            .map((w) => w.workItemID)
+        )
+      ),
+      contactName: formValue.contactPerson,
+      contactEmailID: formValue.contactEmail,
+      contactPhone: this.selectedCountry.code + formValue.contactNumber,
+    };
+    this.subcontractorService.createSubcontractor(payload).subscribe({
+      next: (res) => {
+        this.handleSuccess(res, formValue.attachments || []);
+      },
+      error: (err) => {
+        console.error('API ERROR:', err); // 👈 FULL LOG
+        if (err.status === 409 && err.error?.field === 'email') {
+          // Set field-level error on email form control
+          this.subcontractorForm.get('email')?.setErrors({
+            emailExists: err.error.message || 'Email already exists.',
+          });
+
+          return; // Don't show popup for field errors
+        }
+        // For other errors, show popup
+        this.handleError(err);
+      },
     });
-
-    return; // Don't show popup for field errors
   }
-  // For other errors, show popup
-    this.handleError(err);
-  }
-});
-
-}
 
   private handleSuccess(res: any, files: File[]) {
     const subcontractorID = res?.subcontractorID || res?.id;
@@ -264,7 +287,7 @@ if (allSelectedWorkitems.length === 0 || this.subcontractorForm.invalid) {
         error: (uploadErr) => {
           console.error('File upload failed:', uploadErr);
           this.showPopupMessage('File upload failed.', true);
-        }
+        },
       });
     } else {
       this.showPopupMessage('Subcontractor created successfully!');
@@ -277,7 +300,7 @@ if (allSelectedWorkitems.length === 0 || this.subcontractorForm.invalid) {
     const errorMessage =
       err?.error?.message ||
       err?.error?.error ||
-      JSON.stringify(err?.error?.errors) ||  // show validation errors
+      JSON.stringify(err?.error?.errors) || // show validation errors
       err?.message ||
       'Failed to create Subcontractor. Please try again.';
     this.showPopupMessage(errorMessage, true);
@@ -288,19 +311,19 @@ if (allSelectedWorkitems.length === 0 || this.subcontractorForm.invalid) {
     setTimeout(() => this.router.navigate(['/subcontractor']), 1000);
   }
 
-onReset() {
-  this.subcontractorForm.reset();
-  this.subcontractorForm.patchValue({ status: 'Active', country: '' });
-  this.submitAttempted = false;
-  this.selectedWorkitems = [];
-  this.selectedCountry = countryList.find(c => c.code === '+33') || countryList[0];
-  this.uploadedFiles = [];
+  onReset() {
+    this.subcontractorForm.reset();
+    this.subcontractorForm.patchValue({ status: 'Active', country: '' });
+    this.submitAttempted = false;
+    this.selectedWorkitems = [];
+    this.selectedCountry = countryList.find((c) => c.code === '+33') || countryList[0];
+    this.uploadedFiles = [];
 
-  const fileInput = document.querySelector<HTMLInputElement>('#fileInput');
-  if (fileInput) fileInput.value = '';
+    const fileInput = document.querySelector<HTMLInputElement>('#fileInput');
+    if (fileInput) fileInput.value = '';
 
-  this.selectionsByCategory.clear();
-}
+    this.selectionsByCategory.clear();
+  }
 
   onCancel() {
     this.router.navigate(['/subcontractor']);
@@ -313,4 +336,3 @@ onReset() {
     setTimeout(() => (this.showPopup = false), 3000);
   }
 }
- 

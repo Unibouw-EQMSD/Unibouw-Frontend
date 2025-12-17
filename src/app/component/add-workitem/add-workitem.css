@@ -1,5 +1,5 @@
 .form-card {
- margin: 1rem auto;
+  margin: 1rem auto;
   width: 90%;
   overflow-x: auto;
   background: #fff;
@@ -39,7 +39,7 @@ label {
 }
 
 .form-control:focus {
-  border-bottom: 2px solid #f97316; /* orange highlight */
+  border-bottom: 2px solid #f97316;
 }
 
 .form-actions {
@@ -58,11 +58,11 @@ label {
 }
 
 .cancel-btn {
-  background: #4b5563; /* gray */
+  background: #4b5563;
   color: white;
 }
 
 .submit-btn {
-  background: #f97316; /* orange */
+  background: #f97316;
   color: white;
 }
