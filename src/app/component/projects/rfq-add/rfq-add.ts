@@ -120,20 +120,23 @@ editedEmailBody: string = '';
 
 
 onCancelConfirmed() {
-  const projectId =
-    this.projects.length ? this.projects[0].projectID : null;
-
   // reset state
-  this.selectedProject = projectId;
   this.selectedTab = 'standard';
   this.selectedWorkItems = [];
   this.subcontractors = [];
 
-  if (projectId) {
-this.router.navigate(['view-projects', projectId], {
-  queryParams: { tab: 'rfq' }
-});  }
+  if (!this.projectId) {
+    console.error('❌ Project ID missing on cancel');
+    return;
+  }
+
+  // ✅ ALWAYS go back to the SAME project RFQ tab
+  this.router.navigate(
+    ['view-projects', this.projectId],
+    { queryParams: { tab: 'rfq' } }
+  );
 }
+
 loadRfqForEdit(rfqId: string) {
   this.rfqIdForEdit = rfqId;
   this.isLoader = true;

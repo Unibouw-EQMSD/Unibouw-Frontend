@@ -39,6 +39,8 @@ export class ProjectSummary implements OnInit {
   isInterested = false;
   buttonsDisabled = false;
   expandedId: string | number | null = null;
+maxFileSize = 10 * 1024 * 1024; // 10 MB
+fileSizeError = '';
 
 today = '';
 dueDate = '';
@@ -316,11 +318,23 @@ confirmNotInterested(wi: any) {
     this.attachments.push(this.fb.control(null));
   }
 
-  onFileSelected(event: any) {
-  const file = event.target.files[0];
-  if (file) {
-    this.selectedFiles = [file]; // store single file
+ onFileSelected(event: any) {
+  this.fileSizeError = '';
+
+  const files: FileList = event.target.files;
+  if (!files || files.length === 0) return;
+
+  const file = files[0];
+
+  // ❌ SIZE CHECK
+  if (file.size > this.maxFileSize) {
+    this.fileSizeError = 'File size must not exceed 10 MB.';
+    event.target.value = ''; // reset input
+    return;
   }
+
+  // ✅ VALID FILE
+  this.selectedFiles = [file];
 }
 
 removeFile(inputRef: HTMLInputElement) {

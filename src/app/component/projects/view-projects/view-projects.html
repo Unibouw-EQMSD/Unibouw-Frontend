@@ -478,13 +478,12 @@
               <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
             </table>
           </div>
-          <mat-paginator
-            *ngIf="selectedTab === 'rfq'"
-            [pageSize]="pageSize"
-            [pageSizeOptions]="pageSizeOptions"
-            showFirstLastButtons
-          >
-          </mat-paginator>
+         <mat-paginator
+  [hidden]="selectedTab !== 'rfq'"
+  [pageSize]="pageSize"
+  [pageSizeOptions]="pageSizeOptions"
+  showFirstLastButtons>
+</mat-paginator>
           <!-- 🟣 TAB 3: CONVERSATION -->
           <div *ngIf="selectedTab === 'conversation'">
             <h3>Conversation</h3>

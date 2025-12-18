@@ -266,6 +266,11 @@
                       <input #fileInput type="file" (change)="onFileSelected($event)" />
                       <button type="button" class="delete-btn" (click)="removeFile(fileInput)"><i class="fa fa-trash"></i></button>
                     </div>
+                    <small class="hint">Maximum file size: 10 MB</small>
+
+<div class="error" *ngIf="fileSizeError">
+  {{ fileSizeError }}
+</div>
                     <div class="error" *ngIf="formSubmitted && selectedFiles.length === 0">Please upload at least one file.</div>
                   </div>
 
