@@ -13,7 +13,12 @@
     </div>
     <div class="pagetitle" *ngIf="rfqIdForEdit">
       <h1>Edit RFQ</h1>
-      <button class="btn submit-btn" (click)="goBack()">Back</button>
+      <i
+        class="fa fa-arrow-circle-left back-icon"
+        aria-hidden="true"
+        title="Back"
+        (click)="goBack()"
+      ></i>
     </div>
 
     <div class="pagetitle" *ngIf="!rfqIdForEdit">

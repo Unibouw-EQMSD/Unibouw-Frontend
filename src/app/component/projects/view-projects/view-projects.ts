@@ -142,6 +142,8 @@ export class ViewProjects {
   }
 
   ngOnInit(): void {
+    this.setDefaultValues();
+
     this.route.queryParams.subscribe((params) => {
       if (params['tab'] === 'rfq') {
         this.selectedTab = 'rfq';
@@ -795,4 +797,42 @@ export class ViewProjects {
   addCustomDate() {
     this.customReminderDates.push(null);
   }
+
+  // ------------------ Reminder Popup ------------------
+
+  showLogConvoPopup = false;
+  conversationType: string = 'Email';
+  conversationDateTime: string = '';
+  conversationSubject: string = '';
+  conversationText: string = '';
+
+  setDefaultValues() {
+    const now = new Date();
+
+    // format for datetime-local => YYYY-MM-DDTHH:mm
+    this.conversationDateTime = now.toISOString().slice(0, 16);
+    this.conversationSubject = '';
+    this.conversationType = 'Email';
+  }
+
+  openLogConvo() {
+    this.showLogConvoPopup = true;
+  }
+
+  closeLogConvo() {
+    this.showLogConvoPopup = false;
+    this.setDefaultValues();
+    this.conversationType = 'Email';
+    this.conversationSubject = '';
+    this.conversationText = '';
+  }
+
+  resetLogConvo() {
+    this.setDefaultValues();
+    this.conversationType = 'Email';
+    this.conversationSubject = '';
+    this.conversationText = '';
+  }
+
+  saveLogConvo() {}
 }
