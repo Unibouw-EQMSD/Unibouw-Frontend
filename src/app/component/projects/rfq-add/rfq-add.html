@@ -63,22 +63,35 @@
         <!-- Left column: Workitems + Tabs -->
         <div class="left-section" *ngIf="!rfqIdForEdit">
           <!-- Tabs -->
-          <div class="tabs">
-            <button
-              mat-button
-              (click)="selectedTab = 'unibouw'"
-              [class.active]="selectedTab === 'unibouw'"
-            >
-              Unibouw
-            </button>
-            <button
-              mat-button
-              (click)="selectedTab = 'standard'"
-              [class.active]="selectedTab === 'standard'"
-            >
-              Standard
-            </button>
-          </div>
+        <div class="tabs">
+  <button
+    mat-button
+    (click)="selectedTab = 'unibouw'"
+    [class.active]="selectedTab === 'unibouw'"
+  >
+    Unibouw
+    <span
+      class="count-badge"
+      *ngIf="getSelectedCountByTab('unibouw') > 0"
+    >
+      {{ getSelectedCountByTab('unibouw') }}
+    </span>
+  </button>
+
+  <button
+    mat-button
+    (click)="selectedTab = 'standard'"
+    [class.active]="selectedTab === 'standard'"
+  >
+    Standard
+    <span
+      class="count-badge"
+      *ngIf="getSelectedCountByTab('standard') > 0"
+    >
+      {{ getSelectedCountByTab('standard') }}
+    </span>
+  </button>
+</div>
 
           <!-- Workitems Table -->
           <div class="workitems-section">
@@ -90,24 +103,21 @@
                 </tr>
               </thead>
               <tbody>
-                <tr
-                  *ngFor="
-                    let item of selectedTab === 'standard' ? standardWorkitems : unibouwWorkitems
-                  "
-                  [class.selected]="isWorkItemSelected(item)"
-                >
-                  <td>
-                    <input
-                      type="radio"
-                      name="workitem"
-                      [value]="item"
-                      [checked]="isWorkItemSelected(item)"
-                      (change)="onWorkitemSelect(item)"
-                      class="cursor-pointer"
-                    />
-                  </td>
-                  <td>{{ item.name }}</td>
-                </tr>
+               <tr
+  *ngFor="let item of selectedTab === 'standard' ? standardWorkitems : unibouwWorkitems"
+  [class.selected]="isWorkItemSelected(item)"
+>
+  <td>
+    <input
+      type="checkbox"
+      [value]="item"
+      [checked]="isWorkItemSelected(item)"
+      (change)="onWorkitemToggle(item, $event.target.checked)"
+      class="cursor-pointer"
+    />
+  </td>
+  <td>{{ item.name }}</td>
+</tr>
               </tbody>
             </table>
           </div>
@@ -443,9 +453,15 @@
           <div class="detail-value">{{ previewData?.projectName }}</div>
         </div>
         <div class="detail-item">
-          <div class="detail-label">Work Item</div>
-          <div class="detail-value">{{ previewData?.workItemName }}</div>
-        </div>
+  <div class="detail-label">Work Item(s)</div>
+  <div class="detail-value">
+    <ul class="workitem-list">
+      <li *ngFor="let wi of previewData?.workItems">
+        {{ wi }}
+      </li>
+    </ul>
+  </div>
+</div>
         <div class="detail-item">
           <div class="detail-label">Due Date</div>
           <div class="detail-value">

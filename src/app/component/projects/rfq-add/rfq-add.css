@@ -329,6 +329,15 @@
   border-left: 4px solid #fd7e14; /* Orange accent color */
 }
 
+.count-badge {
+  background: #ff8b00;
+  padding: 2px 8px;
+  border-radius: 10px;
+  color: white;
+  font-size: 12px;
+  margin-left: 6px;
+}
+
 .btn {
   padding: 6px 30px;
   border-radius: 6px;
