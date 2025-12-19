@@ -128,6 +128,12 @@
         <!-- Right column: Subcontractors -->
         <div class="subcontractors-card" *ngIf="!rfqIdForEdit">
           <div
+            *ngIf="globalDateError"
+            style="margin-top: 6px; color: #dc3545; font-size: 13px; font-weight: 500"
+          >
+            Select at least one subcontractor to apply the due date
+          </div>
+          <div
             class="card-header"
             style="
               display: flex;
@@ -265,6 +271,12 @@
         </div>
 
         <div class="subcontractors-card" *ngIf="rfqIdForEdit" style="width: 100%">
+          <div
+            *ngIf="globalDateError"
+            style="margin-top: 6px; color: #dc3545; font-size: 13px; font-weight: 500"
+          >
+            Select at least one subcontractor to apply the due date
+          </div>
           <div
             class="card-header"
             style="

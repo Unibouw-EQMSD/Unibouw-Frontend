@@ -31,7 +31,7 @@ export class RfqAdd {
   projects: any[] = [];
   selectedProject: string = '';
   selectedTab: 'standard' | 'unibouw' = 'unibouw';
-  globalDueDate: string = '';
+  globalDueDate: any = '';
   createdDate: Date = new Date();
   selectedDueDate: string = '';
   standardWorkitems: Workitem[] = [];
@@ -51,6 +51,8 @@ export class RfqAdd {
   rfqNumber: string = 'N/A';
   createdDateDisplay: string = 'N/A'; // DD/MM/YYYY format for display
   workItemName: string = 'N/A';
+  globalDateError = false;
+
   constructor(
     private workitemService: WorkitemService,
     private subcontractorService: SubcontractorService,
@@ -121,6 +123,10 @@ export class RfqAdd {
         this.onCancelConfirmed();
       }
     });
+  }
+
+  hasSelectedSubcontractor(): boolean {
+    return this.subcontractors?.some((s) => s.selected);
   }
 
   onCancelConfirmed() {
@@ -529,12 +535,14 @@ export class RfqAdd {
   }
 
   /* Apply the global due date to all listed subcontractors */
-  applyGlobalDate() {
-    if (!this.globalDueDate) return;
 
-    this.subcontractors.forEach((sub) => {
-      sub.dueDate = this.globalDueDate; // always update listed subcontractor
-    });
+  applyGlobalDate() {
+    //No subcontractor selected
+    if (!this.hasSelectedSubcontractor()) {
+      this.globalDateError = true;
+      this.globalDueDate = null; // reset
+      return;
+    }
   }
 
   onProjectChange(event: Event) {
