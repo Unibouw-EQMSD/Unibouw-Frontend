@@ -122,7 +122,13 @@ export class ViewProjects {
     }
   }
 
-  @ViewChild(MatPaginator) paginator!: MatPaginator;
+  @ViewChild(MatPaginator)
+  set paginator(p: MatPaginator) {
+    if (p) {
+      this.dataSource.paginator = p;
+      p.firstPage();
+    }
+  }
   @ViewChild(MatSort) sort!: MatSort;
 
   workItems: WorkItem[] = [];
@@ -148,11 +154,13 @@ export class ViewProjects {
         this.loadRfqData(); // reload table
       }
     });
+
     // Capture the project ID from the route
     this.projectId = this.route.snapshot.paramMap.get('id') || '';
     if (this.projectId) {
       this.loadRfqData();
       this.loadProjectDetails(this.projectId);
+      this.loadRfqResponseSummary(this.projectId);
     }
   }
 
@@ -165,10 +173,10 @@ export class ViewProjects {
       this.checkAndTriggerReminder();
     }, 60000); // check every 60 seconds
   }
-  ngAfterViewInit() {
-    this.dataSource.paginator = this.paginator;
-    this.dataSource.sort = this.sort;
-  }
+  // ngAfterViewInit() {
+  //   this.dataSource.paginator = this.paginator;
+  //   this.dataSource.sort = this.sort;
+  // }
   checkAndTriggerReminder() {
     this.sendReminder();
   }
@@ -428,19 +436,13 @@ export class ViewProjects {
 
     this.rfqService.getRfqByProjectId(this.projectId).subscribe({
       next: (res: any) => {
-        const rfqs = Array.isArray(res) ? res : [res];
+        const rfqs = Array.isArray(res) ? res : [];
         this.rfqList = rfqs;
 
-        if (rfqs.length > 0) {
-          this.selectedRfqId = rfqs[0].rfqID;
-          this.loadRfqResponseSummary(this.projectId);
-        }
-
-        // Fetch workitem-info for each RFQ
         const infoRequests = rfqs.map((r) => this.rfqService.getWorkItemInfo(r.rfqID));
 
         forkJoin(infoRequests).subscribe((infoResults: any[]) => {
-          this.dataSource.data = rfqs.map((item, index) => {
+          const tableData = rfqs.map((item, index) => {
             const info = infoResults[index] || {};
 
             return {
@@ -451,24 +453,33 @@ export class ViewProjects {
               rfqSent: item.rfqSent || 0,
               quoteReceived: item.quoteReceived || 0,
               quoteAmount: item.quoteAmount || '-',
-              //  Use EXACT swagger response
               workItem: info.workItem || '-',
               subcontractorCount: info.subcontractorCount ?? 0,
               status: item.status || 'N/A',
             };
           });
 
+          // ✅ SET DATA
+          this.dataSource.data = tableData;
+
+          // ✅ BIND paginator & sort HERE (after view exists)
+          setTimeout(() => {
+            this.dataSource.paginator = this.paginator;
+            this.dataSource.sort = this.sort;
+
+            this.paginator.length = tableData.length;
+            this.paginator.firstPage();
+          });
+
           this.isLoading = false;
         });
       },
-
       error: () => {
         this.dataSource.data = [];
         this.isLoading = false;
       },
     });
   }
-
   formatDate(dateString: string): string {
     if (!dateString) return '-';
     const date = new Date(dateString);

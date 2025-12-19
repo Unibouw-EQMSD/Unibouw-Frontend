@@ -33,14 +33,17 @@ export class RfqResponseService {
     });
   }
   /* Fetch Project Summary */
-  getProjectSummary(rfqId: string, workItemIds?: string[]) {
-    const params = new URLSearchParams();
-    params.append('rfqId', rfqId);
+  getProjectSummary(rfqId: string, subId: string, workItemIds?: string[]) {
+    let url = `${this.apiURL}/RfqResponse/GetProjectSummary?rfqId=${rfqId}&subId=${subId}`;
+
     if (workItemIds && workItemIds.length) {
-      workItemIds.forEach((id) => params.append('workItemIds', id));
+      // append multiple workItemIds
+      workItemIds.forEach((id) => {
+        url += `&workItemIds=${id}`;
+      });
     }
 
-    return this.http.get(`${this.apiURL}/RfqResponse/GetProjectSummary?${params.toString()}`);
+    return this.http.get(url);
   }
 
   getResponsesByProjectId(projectId: string) {
@@ -83,7 +86,9 @@ export class RfqResponseService {
     rfqId: string,
     subcontractorId: string,
     workItemId: string,
-    status: string
+    status: string,
+    reason?: any,
+    p0?: any
   ): Observable<any> {
     const formData = new FormData();
     formData.append('rfqId', rfqId);
@@ -91,8 +96,14 @@ export class RfqResponseService {
     formData.append('workItemId', workItemId);
     formData.append('status', status);
 
+    // ✅ Only for Not Interested
+    if (reason) {
+      formData.append('reason', JSON.stringify(reason));
+    }
+
     return this.http.post(`${this.apiURL}/RfqResponse/submit`, formData);
   }
+
   // ✅ Upload file (if you add this later)
   uploadQuoteFile(rfqId: string, subId: string, file: File, totalAmount: number, comment: string) {
     const formData = new FormData();

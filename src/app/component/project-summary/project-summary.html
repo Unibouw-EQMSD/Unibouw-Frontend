@@ -1,13 +1,19 @@
 <div class="container" *ngIf="!isLoading; else loading">
-  <div class="page-header">
+  <div class="page-header header-with-meta">
     <h1>Quote Request (RFQ)</h1>
+    <div class="due-meta">
+      <i class="fa fa-clock"></i>
+      <span>Due Date:</span>
+      <strong>{{ rfq?.globalDueDate || rfq?.dueDate | date : 'dd-MM-yyyy' }}</strong>
+    </div>
   </div>
 
   <div class="rfq-layout" *ngIf="project; else errorBlock">
-    <!-- LEFT CARD: Project Details -->
+    <!-- LEFT: Project Details -->
     <aside class="left-card">
-      <div class="details-card" style="width: 180px">
+      <div class="details-card">
         <h3>Project Details</h3>
+
         <div class="detail-row">
           <span class="label">Project Code</span>
           <span class="value">{{ project.number || '—' }}</span>
@@ -38,10 +44,7 @@
             {{ project.status || 'In Progress' }}
           </span>
         </div>
-        <div class="detail-row" *ngIf="project.totalDimension">
-          <span class="label">Total Dimension</span>
-          <span class="value">{{ project.totalDimension }}</span>
-        </div>
+
         <div class="detail-row" *ngIf="project.sharepointURL">
           <span class="label">Specification</span>
           <span class="value">
@@ -54,179 +57,294 @@
       </div>
     </aside>
 
-    <!-- RIGHT CARD: RFQ Details -->
-    <section class="right-card" style="width: 100%">
+    <!-- RIGHT: RFQ Details -->
+    <section class="right-card">
       <div class="panel">
-        <div class="two-col">
-          <div class="rfq-field">
-            <label>Workitem Code</label>
-            <input type="text" [value]="selectedWorkItem?.number || '—'" readonly />
-          </div>
-          <div class="rfq-field">
-            <label>Workitem</label>
-            <input type="text" [value]="selectedWorkItem?.name || '—'" readonly />
-          </div>
-        </div>
-        <div style="margin: 18px 0 12px 0; border-bottom: 1px solid #ececec"></div>
-        <!-- Share your interest buttons row -->
-        <div
-          style="
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 12px;
-            margin-bottom: 18px;
-          "
-        >
-          <!-- Left: Interest Buttons -->
-          <div style="display: flex; align-items: center; gap: 12px">
-            <span style="font-weight: 500; color: #22223b">Share your Interest</span>
-            <button
-              class="btn-primary"
-              type="button"
-              (click)="submitInterest('Interested')"
-              [disabled]="buttonsDisabled"
-            >
-              Interested
-            </button>
-            <button
-              class="btn-ghost"
-              type="button"
-              (click)="submitInterest('Maybe Later')"
-              [disabled]="buttonsDisabled"
-            >
-              Maybe Later
-            </button>
-            <button
-              class="btn-ghost"
-              type="button"
-              (click)="submitInterest('Not Interested')"
-              [disabled]="buttonsDisabled"
-            >
-              Not Interested
-            </button>
-          </div>
+        <h3>RFQ Details</h3>
 
-          <!-- Right: Submit Quote Button -->
-          <button class="btn-primary" type="button" (click)="openQuotePanel()">
-            {{ isQuoteSubmitted ? 'Resubmit Quote' : 'Submit Quote' }}
-          </button>
-        </div>
-
-        <!-- Quote Details Panel -->
-        <div *ngIf="showQuotePanel" class="quote-details-panel">
-          <h4>Quote Details</h4>
-          <div style="display: flex; gap: 18px; flex-wrap: wrap">
-            <!-- Previous Submissions -->
-            <div style="flex: 1.8">
-              <span style="font-weight: 500; color: #22223b; font-size: 15px"
-                >Previous Submissions</span
-              >
-              <!-- Repeat this block for each previous quote -->
-              <div class="previous-submission-row" *ngFor="let submission of previousSubmissions">
-                <div>
-                  <div class="submission-label">Submitted on</div>
-                  <div class="submission-value">{{ submission.date | date : 'dd-MM-yyyy' }}</div>
+        <div class="rfq-list">
+          <!-- One card per work item -->
+          <div class="rfq-row" *ngFor="let wi of workItems">
+            <div class="rfq-row-head">
+              <div class="two-col compact">
+                <div class="rfq-field">
+                  <label>Workitem Code</label>
+                  <div class="description-box">{{ wi.number || '—' }}</div>
                 </div>
-                <div>
-                  <div class="submission-label">Total Quote Amount</div>
-                  <div class="submission-value" style="text-align: right">
-                    <!-- {{ submission.amount | currency : 'EUR' }} -->
-                    {{ submission.amount | currency : 'EUR' : 'symbol' : '1.2-2' : 'nl-NL' }}
-                  </div>
-                </div>
-                <div>
-                  <div class="submission-label">Attachment</div>
-                  <div class="submission-value">
-                    <a (click)="downloadSubmission(submission)" style="cursor: pointer">
-                      <i class="fa fa-file-pdf attachment-icon"></i>
-                    </a>
-                  </div>
-                </div>
-                <div>
-                  <div class="submission-label">Comment</div>
-                  <div class="submission-value">
-                    <i
-                      class="fa fa-comment-dots comment-icon"
-                      (click)="openCommentModal(submission.comment)"
-                    >
-                    </i>
-                  </div>
-                </div>
-              </div>
-              <!-- End repeat -->
-            </div>
-            <!-- Submit Quote Form -->
-            <form [formGroup]="quoteForm" style="flex: 1; min-width: 260px">
-              <div class="rfq-field" *ngIf="rightSectionVisible">
-                <label>Total Quote Amount <span class="text-danger"> *</span></label>
-                <input type="text" formControlName="quoteAmount" placeholder="Enter amount" />
-                <div
-                  class="error"
-                  *ngIf="formSubmitted && quoteForm.get('quoteAmount')?.errors?.['required']"
-                >
-                  Quote amount is required.
+                <div class="rfq-field">
+                  <label>Work Item</label>
+                  <div class="description-box">{{ wi.name || '—' }}</div>
                 </div>
               </div>
 
-              <div class="rfq-field" *ngIf="rightSectionVisible">
-                <label>Attachments <span class="text-danger"> *</span></label>
-                <div class="attachments-container">
-                  <input #fileInput type="file" (change)="onFileSelected($event)" />
-                  <button type="button" class="delete-btn" (click)="removeFile(fileInput)">
-                    <i class="fa fa-trash"></i>
+              <div class="interest-actions">
+                <div class="interest-label">Share your Interest</div>
+
+                <div class="interest-row nowrap">
+                  <!-- Interested -->
+                  <button
+                    class="btn-primary"
+                    type="button"
+                    (click)="submitInterest('Interested', wi)"
+                    [disabled]="wi.buttonsDisabled"
+                  >
+                    Interested
                   </button>
-                </div>
-                <div class="error" *ngIf="formSubmitted && selectedFiles.length === 0">
-                  Please upload at least one file.
+
+                  <!-- Maybe Later -->
+                  <div class="dropdown">
+                    <button
+                      class="btn-ghost"
+                      type="button"
+                      (click)="toggleInterestDropdown(wi, 'maybe', $event)"
+                      [disabled]="wi.buttonsDisabled || isRfqExpired"
+                    >
+                      Maybe Later <i class="fa fa-chevron-down"></i>
+                    </button>
+
+                    <div
+                      class="dropdown-panel"
+                      *ngIf="isOpen(wi, 'maybe')"
+                      (click)="$event.stopPropagation()"
+                    >
+                      <div class="rfq-field">
+                        <label>When would you like to revisit this RFQ?</label>
+
+                        <input
+                          type="date"
+                          class="text-input"
+                          [(ngModel)]="wi.maybeLaterDate"
+                          [ngModelOptions]="{ standalone: true }"
+                          [min]="today"
+                          [max]="dueDate"
+                          [disabled]="isRfqExpired"
+                        />
+                      </div>
+
+                      <div class="error" *ngIf="maybeLaterError">
+                        {{ maybeLaterError }}
+                      </div>
+
+                      <div style="text-align: right">
+                        <button
+                          class="btn-primary"
+                          type="button"
+                          (click)="confirmMaybeLater(wi)"
+                          [disabled]="isRfqExpired"
+                        >
+                          Confirm
+                        </button>
+                      </div>
+
+                      <div class="expired-msg" *ngIf="isRfqExpired">This RFQ link has expired.</div>
+                    </div>
+                  </div>
+
+                  <!-- Not Interested -->
+                  <div class="dropdown">
+                    <button
+                      class="btn-ghost"
+                      [class.dropdown-open]="isOpen(wi, 'not')"
+                      type="button"
+                      (click)="toggleInterestDropdown(wi, 'not', $event)"
+                      [disabled]="wi.buttonsDisabled"
+                    >
+                      Not Interested <i class="fa fa-chevron-down"></i>
+                    </button>
+
+                    <div
+                      class="dropdown-panel"
+                      *ngIf="isOpen(wi, 'not')"
+                      (click)="$event.stopPropagation()"
+                    >
+                      <!-- Reason dropdown -->
+                      <div class="rfq-field">
+                        <label>Reason for Not Interested *</label>
+
+                        <select
+                          class="text-input"
+                          [(ngModel)]="wi.notInterested.reason"
+                          [ngModelOptions]="{ standalone: true }"
+                          [disabled]="wi.notInterested?.submitted"
+                        >
+                          <option value="">-- Select reason --</option>
+                          <option *ngFor="let r of notInterestedReasons" [value]="r">
+                            {{ r }}
+                          </option>
+                        </select>
+                      </div>
+
+                      <!-- Other comment -->
+                      <div class="rfq-field" *ngIf="wi.notInterested.reason === 'Anders'">
+                        <label>Please provide your reason *</label>
+                        <textarea
+                          rows="3"
+                          maxlength="300"
+                          [(ngModel)]="wi.notInterested.comment"
+                          [ngModelOptions]="{ standalone: true }"
+                          [readonly]="wi.notInterested?.submitted"
+                          placeholder="Max 300 characters"
+                        ></textarea>
+                      </div>
+
+                      <!-- Error -->
+                      <div class="error" *ngIf="wi.notInterestedError">
+                        {{ wi.notInterestedError }}
+                      </div>
+
+                      <!-- Submit -->
+                      <div style="text-align: right">
+                        <button
+                          class="btn-primary"
+                          type="button"
+                          (click)="confirmNotInterested(wi)"
+                          [disabled]="isRfqExpired || wi.notInterested?.submitted"
+                        >
+                          Submit
+                        </button>
+                      </div>
+
+                      <div class="expired-msg" *ngIf="isRfqExpired">
+                        This RFQ link has expired. You can no longer change your response.
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
 
-              <div class="rfq-field" *ngIf="rightSectionVisible">
-                <label>Comments <span class="text-danger"> *</span></label>
-                <textarea placeholder="Add Comments" rows="3" formControlName="comments"></textarea>
-                <div
-                  class="error"
-                  *ngIf="formSubmitted && quoteForm.get('comments')?.errors?.['required']"
-                >
-                  Comments are required.
-                </div>
-              </div>
-
-              <div style="margin-top: 10px; text-align: right" *ngIf="rightSectionVisible">
-                <button class="btn-primary" type="button" (click)="submitQuoteFile()">
-                  Submit
+              <div class="cta">
+                <button class="btn-primary" type="button" (click)="toggleRow(wi)">
+                  {{ wi.isQuoteSubmitted ? 'Resubmit Quote' : 'Submit Quote' }}
+                </button>
+                <button class="chev-btn" type="button" (click)="toggleRow(wi)">
+                  <i
+                    class="fa"
+                    [ngClass]="expandedId === wi.workItemID ? 'fa-chevron-up' : 'fa-chevron-down'"
+                  >
+                  </i>
                 </button>
               </div>
-            </form>
+            </div>
+
+            <!-- Expanded quote panel -->
+            <div
+              class="quote-details-panel"
+              *ngIf="expandedId === wi.workItemID && wi.status === 'Interested'"
+            >
+              <div class="quote-grid">
+                <!-- Previous Submissions -->
+                <div class="prev-col" *ngIf="wi.previousSubmissions?.length">
+                  <span class="section-title">Previous Submissions</span>
+
+                  <div class="previous-submission-row" *ngFor="let s of wi.previousSubmissions">
+                    <div>
+                      <div class="submission-label">Submitted on</div>
+                      <div class="submission-value">{{ s.date | date : 'dd-MM-yyyy' }}</div>
+                    </div>
+                    <div>
+                      <div class="submission-label">Total Quote Amount</div>
+                      <div class="submission-value" style="text-align: right">
+                        {{ s.amount | currency : 'EUR' : 'symbol' : '1.2-2' : 'nl-NL' }}
+                      </div>
+                    </div>
+                    <div>
+                      <div class="submission-label">Attachment</div>
+                      <div class="submission-value">
+                        <a style="cursor: pointer" (click)="downloadSubmission(s)"
+                          ><i class="fa fa-file-pdf attachment-icon"></i
+                        ></a>
+                      </div>
+                    </div>
+                    <div>
+                      <div class="submission-label">Comment</div>
+                      <div class="submission-value">
+                        <i
+                          class="fa fa-comment-dots comment-icon"
+                          (click)="openCommentModal(s.comment)"
+                        ></i>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Submit Quote -->
+                <form class="submit-col" [formGroup]="quoteForm">
+                  <span class="section-title">Submit Quote</span>
+
+                  <div class="rfq-field">
+                    <label>Total Quote Amount</label>
+                    <input type="text" formControlName="quoteAmount" placeholder="Enter amount" />
+                    <div
+                      class="error"
+                      *ngIf="formSubmitted && quoteForm.get('quoteAmount')?.errors?.['required']"
+                    >
+                      Quote amount is required.
+                    </div>
+                  </div>
+
+                  <div class="rfq-field">
+                    <label>Attachments</label>
+                    <div class="attachments-container">
+                      <input #fileInput type="file" (change)="onFileSelected($event)" />
+                      <button type="button" class="delete-btn" (click)="removeFile(fileInput)">
+                        <i class="fa fa-trash"></i>
+                      </button>
+                    </div>
+                    <small class="hint">Maximum file size: 10 MB</small>
+                    <div class="error" *ngIf="fileSizeError">
+                      {{ fileSizeError }}
+                    </div>
+                    <div class="error" *ngIf="fileSizeError">
+                      {{ fileSizeError }}
+                    </div>
+                    <div class="error" *ngIf="formSubmitted && selectedFiles.length === 0">
+                      Please upload at least one file.
+                    </div>
+                  </div>
+
+                  <div class="rfq-field">
+                    <label>Comments</label>
+                    <textarea
+                      rows="3"
+                      formControlName="comments"
+                      placeholder="Add Comments"
+                    ></textarea>
+                    <div
+                      class="error"
+                      *ngIf="formSubmitted && quoteForm.get('comments')?.errors?.['required']"
+                    >
+                      Comments are required.
+                    </div>
+                  </div>
+
+                  <div style="text-align: right; margin-top: 10px">
+                    <button class="btn-primary" type="button" (click)="submitQuoteFile(wi)">
+                      Submit
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
           </div>
+          <!-- /rfq-row -->
         </div>
-        <!-- End Quote Details Panel -->
       </div>
     </section>
   </div>
 </div>
 
-<!-- COMMENT MODAL -->
+<!-- Comment Modal -->
 <div class="comment-modal" *ngIf="showCommentModal">
   <div class="comment-modal-backdrop" (click)="closeCommentModal()"></div>
-
   <div class="comment-modal-content">
     <h3>Comments</h3>
-
-    <div class="comment-text">
-      {{ selectedComment || 'No comments available.' }}
-    </div>
-
+    <div class="comment-text">{{ selectedComment || 'No comments available.' }}</div>
     <button class="close-btn" (click)="closeCommentModal()">Close</button>
   </div>
 </div>
 
-<!-- Loading/Error templates (unchanged) -->
 <ng-template #loading>
-  <div class="loading text-center p-5">
-    <h3>Loading project details...</h3>
-  </div>
+  <div class="loading text-center p-5"><h3>Loading project details...</h3></div>
 </ng-template>
 <ng-template #errorBlock>
   <div class="error text-center p-5 text-danger">

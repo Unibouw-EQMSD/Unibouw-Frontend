@@ -2,20 +2,27 @@
   display: grid;
   grid-template-columns: 2fr 1fr; /* left = form, right = workitems */
   gap: 20px;
-} 
+}
 
-
-.formcontainer{
-      background: #fff !important;
-      padding: 20px;
-      border-radius: 20px !important;
-
+.formcontainer {
+  background: #fff !important;
+  padding: 20px;
+  border-radius: 20px !important;
 }
 .custom-dropdown {
   width: 100%;
   max-height: 150px !important; /* adjust height as needed */
   overflow-y: auto !important;
   display: block !important; /* ensures height works correctly */
+}
+
+.count-badge {
+  background: #ff8b00;
+  padding: 2px 8px;
+  border-radius: 10px;
+  color: white;
+  font-size: 12px;
+  margin-left: 6px;
 }
 
 .project-name {
@@ -89,7 +96,6 @@
   background: #aaa;
 }
 
-
 .subcontractors-card {
   background: #fafafa;
   border-radius: 10px;
@@ -129,7 +135,7 @@
 }
 
 .form-actions {
-  grid-column: 1 / -1; 
+  grid-column: 1 / -1;
   display: flex;
   justify-content: flex-end;
   gap: 10px;
@@ -149,7 +155,6 @@
   inset: 0;
   background: rgba(0, 0, 0, 0.3);
   z-index: 999;
- 
 }
 
 /* Centered modal */
@@ -161,23 +166,33 @@
   max-height: 85vh;
   background: #fff;
   border-radius: 10px;
-  box-shadow: 0 20px 60px rgba(0,0,0,.3);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
   display: flex;
   flex-direction: column;
   overflow: hidden;
   z-index: 1000;
 }
 
-.modal-header, .modal-footer {
+.modal-header,
+.modal-footer {
   padding: 16px 20px;
   background: #fff;
   border-bottom: 1px solid #eee;
 }
 
-.modal-footer { border-top: 1px solid #eee; border-bottom: 0;text-align:end; }
+.modal-footer {
+  border-top: 1px solid #eee;
+  border-bottom: 0;
+  text-align: end;
+}
 
-.modal-body { padding: 16px 20px; overflow: auto; }
-.modal-btn {margin: 0 2px;}
+.modal-body {
+  padding: 16px 20px;
+  overflow: auto;
+}
+.modal-btn {
+  margin: 0 2px;
+}
 .modal-title {
   font-size: 18px;
   font-weight: 600;
@@ -199,7 +214,9 @@
   gap: 16px;
   margin-bottom: 16px;
 }
-.kpi { padding: 6px 0; }
+.kpi {
+  padding: 6px 0;
+}
 .kpi-label {
   color: #6b7280;
   font-size: 12px;
@@ -239,7 +256,8 @@
   border-collapse: collapse;
   margin-bottom: 18px;
 }
-.preview-table th, .preview-table td {
+.preview-table th,
+.preview-table td {
   padding: 10px 8px;
   border-bottom: 1px solid #e5e7eb;
   text-align: left;
@@ -249,7 +267,6 @@
   font-weight: 700;
 }
 
-
 /* --- New Preview Modal Styles --- */
 
 .preview-modal {
@@ -257,7 +274,7 @@
   width: 90%;
   height: 440px;
   max-width: 700px; /* Adjust width as needed */
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
 }
 
 .preview-modal .modal-header {
@@ -338,13 +355,13 @@
 }
 
 .cancel-btn {
-    color: #dc3545;
-    background-color: transparent;
-    box-shadow: none !important;
+  color: #dc3545;
+  background-color: transparent;
+  box-shadow: none !important;
 }
 
 .cancel-btn:hover {
-    border: 1px solid #dc3545;
+  border: 1px solid #dc3545;
 }
 
 .submit-btn {
@@ -354,13 +371,14 @@
 
 .reset-btn {
   border: 1px solid #003042;
-    background-color: #ffffff;
-    color: #003042 !important;
+  background-color: #ffffff;
+  color: #003042 !important;
 }
 
-.reset-btn:hover, .submit-btn:hover{
+.reset-btn:hover,
+.submit-btn:hover {
   background-color: #003042;
-    color: #ffffff !important;
+  color: #ffffff !important;
 }
 
 .action-section .action-title {

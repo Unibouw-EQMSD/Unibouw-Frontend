@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import {
   FormArray,
   FormBuilder,
@@ -15,11 +15,19 @@ import { ActivatedRoute } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { registerLocaleData } from '@angular/common';
 import localeNl from '@angular/common/locales/nl';
+import { FormsModule } from '@angular/forms';
+import { HostListener } from '@angular/core';
+
+interface NotInterestedData {
+  reason: string;
+  comment?: string;
+  submitted: boolean;
+}
 
 @Component({
   selector: 'app-project-summary',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, FormsModule],
   templateUrl: './project-summary.html',
   styleUrls: ['./project-summary.css'],
 })
@@ -35,6 +43,27 @@ export class ProjectSummary implements OnInit {
   number!: string;
   isInterested = false;
   buttonsDisabled = false;
+  expandedId: string | number | null = null;
+  maxFileSize = 10 * 1024 * 1024; // 10 MB
+  fileSizeError = '';
+  today = '';
+  dueDate = '';
+  maybeLaterError = '';
+  isRfqExpired = false;
+  notInterestedReasons = [
+    'Onvoldoende capaciteit / planning zit vol',
+    'Geen interesse in het project / past niet binnen strategie',
+    'Project is te groot',
+    'Project is te klein',
+    'Technisch niet passend bij onze expertise',
+    'Tijdslijnen zijn te krap',
+    'Locatie te ver / logistiek niet rendabel',
+    'Te veel concurrentie / lage kans op gunning',
+    'Problemen met beschikbaarheid materialen',
+    'Negatieve ervaring uit eerdere samenwerking',
+    'Andere lopende offertes/projecten hebben voorrang',
+    'Anders',
+  ];
   rfq: any;
   attachments!: FormArray<FormControl<File | null>>;
   selectedFiles: (File | null)[] = [];
@@ -44,6 +73,7 @@ export class ProjectSummary implements OnInit {
 
   isQuoteSubmitted = false;
   quoteForm!: FormGroup;
+  @ViewChild('fileInput') fileInput!: ElementRef<HTMLInputElement>;
 
   // Previous submissions
   previousSubmissions: {
@@ -55,6 +85,8 @@ export class ProjectSummary implements OnInit {
   selectedComment: string = '';
   showCommentModal: boolean = false;
   formSubmitted: boolean = false;
+  openDropdown: { id: string | number | null; type: '' | 'maybe' | 'not' } = { id: null, type: '' };
+
   constructor(
     private route: ActivatedRoute,
     private rfqResponseService: RfqResponseService,
@@ -92,6 +124,11 @@ export class ProjectSummary implements OnInit {
           }
         }
 
+        // Existing logic — mark as viewed
+        if (this.number) {
+          this.rfqResponseService.markAsViewed(this.rfqId, this.subId, this.number).subscribe();
+        }
+
         // Load project first
         this.loadProjectSummary(this.rfqId);
         this.loadPreviousSubmissions();
@@ -107,47 +144,154 @@ export class ProjectSummary implements OnInit {
     this.rightSectionVisible = true; // show right section when opening
   }
 
-  loadProjectSummary(rfqId: string, workItemIds?: string[]) {
+  private toDateInputValue(date: Date): string {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  }
+
+  loadProjectSummary(rfqId: string) {
     this.isLoading = true;
 
-    this.rfqResponseService.getProjectSummary(rfqId, workItemIds).subscribe({
+    const workItemIdsParam = this.route.snapshot.queryParamMap.get('workItemIds');
+    const workItemIds = workItemIdsParam ? workItemIdsParam.split(',') : [];
+
+    this.rfqResponseService.getProjectSummary(rfqId, this.subId, workItemIds).subscribe({
       next: (res: any) => {
         this.isLoading = false;
 
         if (!res || !res.project) {
-          this.errorMsg = 'No data returned from server.';
-          this.project = null;
-          this.workItems = [];
-          this.selectedWorkItem = null;
+          this.errorMsg = 'No project data found.';
           return;
         }
 
         this.project = res.project;
+        this.rfq = res.rfq;
+
+        /* =====================================================
+             ✅ DATE HANDLING (TIMEZONE SAFE)
+             ===================================================== */
+
+        // TODAY (YYYY-MM-DD)
+        const now = new Date();
+        this.today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(
+          now.getDate()
+        ).padStart(2, '0')}`;
+
+        // RFQ DUE DATE (DATE ONLY)
+        const rawDueDate = this.rfq?.globalDueDate || this.rfq?.dueDate || this.rfq?.DueDate;
+
+        if (rawDueDate) {
+          const dateOnly = rawDueDate.split('T')[0];
+          this.dueDate = dateOnly;
+
+          const endOfDue = new Date(`${dateOnly}T23:59:59`);
+          this.isRfqExpired = new Date() > endOfDue;
+        } else {
+          this.dueDate = '';
+          this.isRfqExpired = false;
+        }
+
+        /* ===================================================== */
+
         this.workItems = res.workItems || [];
 
-        // auto-select first work item
-        if (this.workItems.length > 0) {
-          this.selectedWorkItem = this.workItems[0];
-        }
-
-        // ⚡️ Mark all work items as viewed
-        this.workItems.forEach((wi) => {
-          if (this.rfqId && this.subId) {
-            this.rfqResponseService.markAsViewed(this.rfqId, this.subId, wi.workItemID).subscribe();
-          }
-        });
-
-        // Optional: check link validity
-        if (typeof this.checkLinkValidity === 'function') {
-          this.checkLinkValidity();
-        }
+        console.log('TODAY:', this.today);
+        console.log('RFQ DUE DATE:', this.dueDate);
       },
       error: (err) => {
         this.isLoading = false;
         this.errorMsg = 'Failed to load project summary.';
-        console.error('Error loading project summary:', err);
+        console.error(err);
       },
     });
+  }
+
+  toggleRow(wi: any) {
+    this.expandedId = this.expandedId === wi.workItemID ? null : wi.workItemID;
+  }
+
+  toggleInterestDropdown(wi: any, type: 'maybe' | 'not', ev: MouseEvent) {
+    ev.stopPropagation();
+
+    // ✅ INIT NOT INTERESTED MODEL
+    if (type === 'not' && !wi.notInterested) {
+      wi.notInterested = {
+        reason: '',
+        comment: '',
+        submitted: false,
+      };
+      wi.notInterestedError = '';
+    }
+
+    this.openDropdown =
+      this.openDropdown.id === wi.workItemID && this.openDropdown.type === type
+        ? { id: null, type: '' }
+        : { id: wi.workItemID, type };
+  }
+
+  isOpen(wi: any, type: 'maybe' | 'not') {
+    return this.openDropdown.id === wi.workItemID && this.openDropdown.type === type;
+  }
+
+  closeDropdowns() {
+    this.openDropdown = { id: null, type: '' };
+  }
+
+  // Outside click: close
+  @HostListener('document:click')
+  onDocClick() {
+    this.closeDropdowns();
+  }
+
+  confirmMaybeLater(wi: any) {
+    this.maybeLaterError = '';
+
+    if (this.isRfqExpired) {
+      this.maybeLaterError = 'This RFQ link has expired.';
+      return;
+    }
+
+    if (!wi.maybeLaterDate) {
+      this.maybeLaterError = 'Please select a date.';
+      return;
+    }
+
+    if (wi.maybeLaterDate < this.today) {
+      this.maybeLaterError = 'Date cannot be in the past.';
+      return;
+    }
+
+    if (wi.maybeLaterDate > this.dueDate) {
+      this.maybeLaterError = 'Date must be on or before RFQ due date.';
+      return;
+    }
+
+    wi.status = 'Maybe Later';
+
+    this.submitInterest('Maybe Later', wi);
+
+    alert('Your preference has been recorded.');
+  }
+
+  confirmNotInterested(wi: any) {
+    const reason = wi.notInterested?.reason?.trim();
+    const comment = wi.notInterested?.comment?.trim();
+
+    if (!reason) {
+      alert('Please select a reason.');
+      return;
+    }
+
+    if (reason === 'Anders' && !comment) {
+      alert('Please enter a reason.');
+      return;
+    }
+
+    // ✅ Proceed
+    this.submitInterest('Not Interested', wi);
+    this.closeDropdowns();
   }
 
   addMore() {
@@ -155,66 +299,27 @@ export class ProjectSummary implements OnInit {
   }
 
   onFileSelected(event: any) {
-    const file = event.target.files[0];
-    if (file) {
-      this.selectedFiles = [file]; // store single file
+    this.fileSizeError = '';
+
+    const files: FileList = event.target.files;
+    if (!files || files.length === 0) return;
+
+    const file = files[0];
+
+    // ❌ SIZE CHECK
+    if (file.size > this.maxFileSize) {
+      this.fileSizeError = 'File size must not exceed 10 MB.';
+      event.target.value = ''; // reset input
+      return;
     }
+
+    // ✅ VALID FILE
+    this.selectedFiles = [file];
   }
 
   removeFile(inputRef: HTMLInputElement) {
     this.selectedFiles = []; // clear the array
     inputRef.value = ''; // clear the input
-  }
-
-  submitQuoteFile() {
-    this.formSubmitted = true; // enable error messages
-
-    // Validate form fields
-    if (this.quoteForm.invalid) {
-      alert('Please fill all required fields.');
-      return;
-    }
-    const file = this.selectedFiles[0];
-    if (!file) return;
-
-    const formValues = this.quoteForm.getRawValue();
-    const totalAmount = Number(formValues.quoteAmount || 0);
-    const comment = formValues.comments;
-
-    const key = `rfq_prev_submissions_${this.rfqId}_${this.subId}`;
-    const previous = JSON.parse(localStorage.getItem(key) || '[]');
-
-    this.rfqResponseService
-      .uploadQuoteFile(this.rfqId, this.subId, file, totalAmount, comment)
-      .subscribe({
-        next: () => {
-          alert(this.isQuoteSubmitted ? 'Quote re-submitted!' : 'Quote submitted!');
-
-          // Mark submitted
-          this.isQuoteSubmitted = true;
-
-          const newSubmission = {
-            date: new Date().toISOString(),
-            amount: totalAmount,
-            attachmentUrl: URL.createObjectURL(file),
-            fileName: file.name,
-            comment: comment,
-          };
-
-          previous.unshift(newSubmission);
-          localStorage.setItem(key, JSON.stringify(previous));
-          this.isQuoteSubmitted = true;
-
-          // Keep summary hidden after submit
-          this.rightSectionVisible = false;
-          this.hideRightSummaryCard = true;
-          this.previousSubmissions.unshift(newSubmission);
-
-          // Reset form & file
-          this.selectedFiles = [];
-          this.quoteForm.reset();
-        },
-      });
   }
 
   openCommentModal(comment: string | null | undefined) {
@@ -264,42 +369,123 @@ export class ProjectSummary implements OnInit {
     });
   }
 
-  submitInterest(status: string) {
-    if (!this.selectedWorkItem) return;
+  private pickWorkItem(wi?: any) {
+    if (wi) this.selectedWorkItem = wi;
+    return this.selectedWorkItem;
+  }
 
-    const key = `rfq_state_${this.rfqId}_${this.subId}_${this.selectedWorkItem.workItemID}`;
-    const saved = JSON.parse(localStorage.getItem(key) || '{}');
+  submitInterest(status: string, wi?: any) {
+    const target = this.pickWorkItem(wi);
+    if (!target) return;
 
-    // mark viewed in backend
+    const key = `rfq_state_${this.rfqId}_${this.subId}_${target.workItemID}`;
+
+    // 🔹 mark viewed
+    this.rfqResponseService.markAsViewed(this.rfqId, this.subId, target.workItemID).subscribe();
+
+    // 🔹 per-row state
+    target.status = status;
+    target.viewed = true;
+    target.buttonsDisabled = status === 'Interested';
+
+    // 🔹 expand quote panel
+    if (status === 'Interested') {
+      this.expandedId = target.workItemID;
+    } else if (this.expandedId === target.workItemID) {
+      this.expandedId = null;
+    }
+
+    // 🔹 reason payload (ONLY for Not Interested)
+    const reasonPayload =
+      status === 'Not Interested'
+        ? {
+            reason: target.notInterested?.reason || '',
+            comment: target.notInterested?.comment || '',
+          }
+        : null;
+
     this.rfqResponseService
-      .markAsViewed(this.rfqId, this.subId, this.selectedWorkItem.workItemID)
-      .subscribe();
-
-    // button disable only for Interested
-    this.buttonsDisabled = status === 'Interested';
-
-    this.rfqResponseService
-      .submitRfqResponse(this.rfqId, this.subId, this.selectedWorkItem.workItemID, status)
+      .submitRfqResponse(this.rfqId, this.subId, target.workItemID, status, reasonPayload, null)
       .subscribe({
-        next: (res) => {
+        next: () => {
           alert(`Your response "${status}" was recorded successfully!`);
 
-          this.isInterested = status === 'Interested';
-          this.selectedWorkItem.viewed = true;
-
-          // Save state to localStorage
-          saved.status = status;
-          saved.viewed = true;
-          saved.isInterested = this.isInterested;
-          saved.buttonsDisabled = this.buttonsDisabled;
-
-          localStorage.setItem(key, JSON.stringify(saved));
+          localStorage.setItem(
+            key,
+            JSON.stringify({
+              status,
+              viewed: true,
+              buttonsDisabled: target.buttonsDisabled,
+              notInterested: reasonPayload,
+            })
+          );
         },
-        error: (err) => {
+        error: () => {
           alert('Failed to submit response.');
-          if (status === 'Interested') {
-            this.buttonsDisabled = false;
+          target.buttonsDisabled = false;
+        },
+      });
+  }
+
+  submitQuoteFile(wi?: any) {
+    const target = this.pickWorkItem(wi);
+    if (!target) return;
+
+    this.formSubmitted = true;
+
+    if (this.quoteForm.invalid) {
+      alert('Please fill all required fields.');
+      return;
+    }
+
+    const file = this.selectedFiles[0];
+    if (!file) return;
+
+    const { quoteAmount, comments } = this.quoteForm.getRawValue();
+    const totalAmount = Number(quoteAmount || 0);
+
+    // ✅ PER-WORKITEM KEY
+    const key = `rfq_prev_submissions_${this.rfqId}_${this.subId}_${target.workItemID}`;
+    const previous = JSON.parse(localStorage.getItem(key) || '[]');
+
+    this.rfqResponseService
+      .uploadQuoteFile(this.rfqId, this.subId, file, totalAmount, comments)
+      .subscribe({
+        next: () => {
+          alert(this.isQuoteSubmitted ? 'Quote re-submitted!' : 'Quote submitted!');
+
+          this.isQuoteSubmitted = true;
+          target.isQuoteSubmitted = true;
+
+          const newSubmission = {
+            date: new Date().toISOString(),
+            amount: totalAmount,
+            attachmentUrl: URL.createObjectURL(file),
+            fileName: file.name,
+            comment: comments,
+          };
+
+          // ✅ SAVE
+          previous.unshift(newSubmission);
+          localStorage.setItem(key, JSON.stringify(previous));
+
+          // ✅ UPDATE UI IMMEDIATELY
+          if (!target.previousSubmissions) {
+            target.previousSubmissions = [];
           }
+          target.previousSubmissions.unshift(newSubmission);
+
+          // ✅ RESET FORM
+          this.quoteForm.reset({ quoteAmount: '', comments: '' });
+          this.selectedFiles = [];
+          this.formSubmitted = false;
+
+          // ✅ CLEAR FILE INPUT (THIS IS THE KEY FIX)
+          if (this.fileInput) {
+            this.fileInput.nativeElement.value = '';
+          }
+          this.rightSectionVisible = false;
+          this.hideRightSummaryCard = true;
         },
       });
   }
@@ -321,6 +507,8 @@ export class ProjectSummary implements OnInit {
 
     const now = new Date();
     const dueDate = new Date(this.rfq.globalDueDate || this.rfq.dueDate);
+
+    console.log('Checking validity:', dueDate);
 
     if (now > dueDate) {
       this.buttonsDisabled = true;
