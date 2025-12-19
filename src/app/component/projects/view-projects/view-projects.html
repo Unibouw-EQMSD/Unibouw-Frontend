@@ -353,16 +353,16 @@
                           <td>{{ w.rfqNumber }}</td>
                           <td style="text-align: center">
                             <i class="fa fa-check-circle success" *ngIf="w.viewed"></i>
-                            <i class="fa fa-times fail" *ngIf="!w.viewed"></i>
+                            <!-- <i class="fa fa-times fail" *ngIf="!w.viewed"></i> -->
                           </td>
 
                           <td style="text-align: center">
                             <i class="fa fa-check-circle success" *ngIf="w.interested"></i>
-                            <i class="fa fa-times fail" *ngIf="!w.interested"></i>
+                            <i class="fa fa-times fail" *ngIf="w.notInterested"></i>
                           </td>
                           <td style="text-align: center">
                             <i class="fa fa-check-circle success" *ngIf="w.maybeLater"></i>
-                            <i class="fa fa-times fail" *ngIf="!w.maybeLater"></i>
+                            <!-- <i class="fa fa-times fail" *ngIf="!w.maybeLater"></i> -->
                           </td>
                           <td style="text-align: right; padding-right: 50px">
                             <!-- € {{ rfq.quoteAmount }} -->

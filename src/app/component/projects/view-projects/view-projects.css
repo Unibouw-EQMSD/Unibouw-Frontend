@@ -248,6 +248,8 @@
   font-weight: 100;
   color: #6c757d;
   height: 45px;
+  background-color: #f8f8f8;
+  border-bottom: 1px solid #dedede;
 }
 
 .work-item-header span {
@@ -417,8 +419,6 @@
   padding: 3px 8px;
   margin-bottom: 10px;
   font-size: 14px;
-  background-color: #f8f8f8;
-  border-bottom: 1px solid #dedede;
 }
 
 .rfq-summary div {
