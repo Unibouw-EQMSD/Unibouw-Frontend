@@ -431,55 +431,57 @@ export class ViewProjects {
     });
   }
 
-  loadRfqData(): void {
-    this.isLoading = true;
+loadRfqData(): void {
+  this.isLoading = true;
 
-    this.rfqService.getRfqByProjectId(this.projectId).subscribe({
-      next: (res: any) => {
-        const rfqs = Array.isArray(res) ? res : [];
-        this.rfqList = rfqs;
+  this.rfqService.getRfqByProjectId(this.projectId).subscribe({
+    next: (rfqs: any[]) => {
 
-        const infoRequests = rfqs.map((r) => this.rfqService.getWorkItemInfo(r.rfqID));
+      const infoRequests = rfqs.map(r =>
+        this.rfqService.getWorkItemInfo(r.rfqID)
+      );
 
-        forkJoin(infoRequests).subscribe((infoResults: any[]) => {
-          const tableData = rfqs.map((item, index) => {
-            const info = infoResults[index] || {};
+      forkJoin(infoRequests).subscribe((infoResults: any[]) => {
 
-            return {
-              id: item.rfqID,
-              customer: item.customerName || '—',
-              rfqSentDate: this.formatDate(item.sentDate),
-              dueDate: this.formatDate(item.dueDate),
-              rfqSent: item.rfqSent || 0,
-              quoteReceived: item.quoteReceived || 0,
-              quoteAmount: item.quoteAmount || '-',
-              workItem: info.workItem || '-',
-              subcontractorCount: info.subcontractorCount ?? 0,
-              status: item.status || 'N/A',
-            };
-          });
+        const tableData = rfqs.map((item, index) => {
+          const info = infoResults[index] || {};
 
-          // ✅ SET DATA
-          this.dataSource.data = tableData;
+          return {
+            id: item.rfqID,
+            customer: item.customerName || '—',
+            rfqSentDate: this.formatDate(item.sentDate),
+            dueDate: this.formatDate(item.dueDate),
+            rfqSent: item.rfqSent || 0,
+            quoteReceived: item.quoteReceived || 0,
+            quoteAmount: '-',
 
-          // ✅ BIND paginator & sort HERE (after view exists)
-          setTimeout(() => {
-            this.dataSource.paginator = this.paginator;
-            this.dataSource.sort = this.sort;
+            // ✅ NOW RETURNS ALL WORK ITEMS
+            workItem: info.workItem || '-',
 
-            this.paginator.length = tableData.length;
-            this.paginator.firstPage();
-          });
-
-          this.isLoading = false;
+            subcontractorCount: info.subcontractorCount ?? 0,
+            status: item.status || 'N/A'
+          };
         });
-      },
-      error: () => {
-        this.dataSource.data = [];
+
+        this.dataSource.data = tableData;
+
+        setTimeout(() => {
+          this.dataSource.paginator = this.paginator;
+          this.dataSource.sort = this.sort;
+          this.paginator.length = tableData.length;
+          this.paginator.firstPage();
+        });
+
         this.isLoading = false;
-      },
-    });
-  }
+      });
+    },
+    error: () => {
+      this.dataSource.data = [];
+      this.isLoading = false;
+    }
+  });
+}
+
   formatDate(dateString: string): string {
     if (!dateString) return '-';
     const date = new Date(dateString);

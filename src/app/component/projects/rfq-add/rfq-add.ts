@@ -126,9 +126,8 @@ export class RfqAdd {
   }
 
   hasSelectedSubcontractor(): boolean {
-    return this.subcontractors?.some((s) => s.selected);
-  }
-
+  return this.subcontractors?.some(s => s.selected);
+}
   onCancelConfirmed() {
     // reset state
     this.selectedTab = 'standard';
@@ -536,14 +535,31 @@ export class RfqAdd {
 
   /* Apply the global due date to all listed subcontractors */
 
-  applyGlobalDate() {
-    //No subcontractor selected
-    if (!this.hasSelectedSubcontractor()) {
-      this.globalDateError = true;
-      this.globalDueDate = null; // reset
-      return;
-    }
+ applyGlobalDate() {
+  // Reset error
+  this.globalDateError = false;
+
+  // No subcontractor selected → show error & revert date
+  if (!this.hasSelectedSubcontractor()) {
+    this.globalDateError = true;
+
+    // 🔥 IMPORTANT: revert the picked date
+    this.globalDueDate = null;
+
+    return;
   }
+
+  // No date → nothing to apply
+  if (!this.globalDueDate) return;
+
+  // ✅ Apply date to all selected subcontractors
+  this.subcontractors
+    .filter(s => s.selected)
+    .forEach(sub => {
+      sub.dueDate = this.globalDueDate!;
+    });
+}
+
 
   onProjectChange(event: Event) {
     const projectId = (event.target as HTMLSelectElement).value;

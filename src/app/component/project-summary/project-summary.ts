@@ -124,10 +124,7 @@ export class ProjectSummary implements OnInit {
           }
         }
 
-        // Existing logic — mark as viewed
-        if (this.number) {
-          this.rfqResponseService.markAsViewed(this.rfqId, this.subId, this.number).subscribe();
-        }
+        
 
         // Load project first
         this.loadProjectSummary(this.rfqId);
@@ -152,61 +149,72 @@ export class ProjectSummary implements OnInit {
   }
 
   loadProjectSummary(rfqId: string) {
-    this.isLoading = true;
+  this.isLoading = true;
 
-    const workItemIdsParam = this.route.snapshot.queryParamMap.get('workItemIds');
-    const workItemIds = workItemIdsParam ? workItemIdsParam.split(',') : [];
+  const workItemIdsParam = this.route.snapshot.queryParamMap.get('workItemIds');
+  const workItemIds = workItemIdsParam ? workItemIdsParam.split(',') : [];
 
-    this.rfqResponseService.getProjectSummary(rfqId, this.subId, workItemIds).subscribe({
-      next: (res: any) => {
-        this.isLoading = false;
+  this.rfqResponseService.getProjectSummary(rfqId, this.subId, workItemIds).subscribe({
+    next: (res: any) => {
+      this.isLoading = false;
 
-        if (!res || !res.project) {
-          this.errorMsg = 'No project data found.';
-          return;
-        }
+      if (!res || !res.project) {
+        this.errorMsg = 'No project data found.';
+        return;
+      }
 
-        this.project = res.project;
-        this.rfq = res.rfq;
+      this.project = res.project;
+      this.rfq = res.rfq;
 
-        /* =====================================================
-             ✅ DATE HANDLING (TIMEZONE SAFE)
-             ===================================================== */
+      /* =====================================================
+           ✅ DATE HANDLING (TIMEZONE SAFE)
+         ===================================================== */
 
-        // TODAY (YYYY-MM-DD)
-        const now = new Date();
-        this.today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(
-          now.getDate()
-        ).padStart(2, '0')}`;
+      const now = new Date();
+      this.today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(
+        now.getDate()
+      ).padStart(2, '0')}`;
 
-        // RFQ DUE DATE (DATE ONLY)
-        const rawDueDate = this.rfq?.globalDueDate || this.rfq?.dueDate || this.rfq?.DueDate;
+      const rawDueDate = this.rfq?.globalDueDate || this.rfq?.dueDate || this.rfq?.DueDate;
 
-        if (rawDueDate) {
-          const dateOnly = rawDueDate.split('T')[0];
-          this.dueDate = dateOnly;
+      if (rawDueDate) {
+        const dateOnly = rawDueDate.split('T')[0];
+        this.dueDate = dateOnly;
 
-          const endOfDue = new Date(`${dateOnly}T23:59:59`);
-          this.isRfqExpired = new Date() > endOfDue;
-        } else {
-          this.dueDate = '';
-          this.isRfqExpired = false;
-        }
+        const endOfDue = new Date(`${dateOnly}T23:59:59`);
+        this.isRfqExpired = new Date() > endOfDue;
+      } else {
+        this.dueDate = '';
+        this.isRfqExpired = false;
+      }
 
-        /* ===================================================== */
+      /* ===================================================== */
 
-        this.workItems = res.workItems || [];
+      this.workItems = res.workItems || [];
 
-        console.log('TODAY:', this.today);
-        console.log('RFQ DUE DATE:', this.dueDate);
-      },
-      error: (err) => {
-        this.isLoading = false;
-        this.errorMsg = 'Failed to load project summary.';
-        console.error(err);
-      },
-    });
-  }
+      // 🔥🔥🔥 ADD ONLY THIS BLOCK 🔥🔥🔥
+      this.workItems.forEach((w: any) => {
+        this.rfqResponseService
+          .markAsViewed(this.rfqId, this.subId, w.workItemID)
+          .subscribe({
+            error: () => {
+              // ❌ do NOT disable UI
+              // ✅ just show error message
+              this.errorMsg = 'Failed to mark RFQ as viewed.';
+            }
+          });
+      });
+
+      console.log('TODAY:', this.today);
+      console.log('RFQ DUE DATE:', this.dueDate);
+    },
+    error: (err) => {
+      this.isLoading = false;
+      this.errorMsg = 'Failed to load project summary.';
+      console.error(err);
+    },
+  });
+}
 
   toggleRow(wi: any) {
     this.expandedId = this.expandedId === wi.workItemID ? null : wi.workItemID;

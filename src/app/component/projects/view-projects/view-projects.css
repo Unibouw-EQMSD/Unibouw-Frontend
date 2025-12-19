@@ -220,6 +220,7 @@
   background-color: #ffffff;
   padding: 8px;
   border-radius: 10px;
+  overflow: auto;
 }
 
 .rfq-header {
