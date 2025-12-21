@@ -59,7 +59,7 @@
 .subcontractors-card {
   min-height: 350px; /* You can tweak height */
   max-height: 450px;
-  overflow-y: auto;
+  overflow-y: hidden;
   padding-right: 8px;
   box-sizing: border-box;
 }
@@ -70,6 +70,8 @@
   border-radius: 8px;
   padding: 10px;
   background: #fff;
+  height: 52vh;
+  overflow-y: auto;
 }
 
 .subcontractors-card {
@@ -134,13 +136,46 @@
   gap: 8px;
 }
 
-.form-actions {
+/* .form-actions {
   grid-column: 1 / -1;
   display: flex;
   justify-content: flex-end;
   gap: 10px;
   margin-top: 15px;
   margin-bottom: 40px;
+} */
+
+.form-actions {
+  position: fixed;
+  bottom: 0;
+  right: 0;
+  left: 0;
+
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+
+  padding: 12px 24px;
+  background: #fff;
+  border-top: 1px solid #e5e7eb;
+  z-index: 1000;
+}
+
+.form-actions1 {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+
+  width: 100%;
+  background: #ffffff;
+  z-index: 1200;
+
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+
+  padding: 12px 24px;
+  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.08);
 }
 
 .page-wrap.blurred {

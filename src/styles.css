@@ -105,13 +105,91 @@ app-sso-login {
   height: 300px;
 }
 
+.full-page-skeleton {
+  padding: 16px;
+}
+
 .skeleton-box {
-  width: 80%;
-  height: 200px;
-  background: linear-gradient(90deg, #e0e0e0 25%, #f5f5f5 50%, #e0e0e0 75%);
+  width: 100%;
+  height: 340px;
+  background: linear-gradient(90deg, #eeeeee 25%, #f5f5f5 37%, #eeeeee 63%);
   background-size: 400% 100%;
   animation: skeleton-loading 1.2s infinite;
   border-radius: 10px;
+}
+
+.skeleton {
+  background: linear-gradient(90deg, #eeeeee 25%, #f5f5f5 37%, #eeeeee 63%);
+  background-size: 400% 100%;
+  animation: shimmer 1.4s ease infinite;
+  border-radius: 4px;
+}
+
+.skeleton-add {
+  width: 230px;
+  height: 38px;
+  margin-top: 10px;
+}
+
+/* Search */
+.skeleton-search {
+  width: 280px;
+  height: 40px;
+  margin-bottom: 20px;
+}
+
+.skeleton-table-header2 {
+  display: grid;
+  grid-template-columns: 2fr 2fr;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+/* Table header */
+.skeleton-table-header3 {
+  display: grid;
+  grid-template-columns: 2fr 2fr 2fr;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.arrow-left {
+  padding-right: 7px;
+  font-size: 14px;
+  color: rgb(74, 74, 74);
+  cursor: pointer;
+}
+
+.back-icon {
+  padding-right: 10px;
+  padding-top: 8px;
+  font-size: 22px;
+  color: #ff7f32;
+  cursor: pointer;
+}
+
+.noData {
+  text-align: center;
+  padding-top: 100px;
+  color: #888;
+  font-weight: 600;
+}
+
+.skeleton-table-header6 {
+  display: grid;
+  grid-template-columns: 2fr 2fr 2fr 2fr 2fr 2fr;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+.skeleton-table-header8 {
+  display: grid;
+  grid-template-columns: 2fr 2fr 2fr 2fr 2fr 2fr 2fr 2fr;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.th {
+  height: 40px;
 }
 
 @keyframes skeleton-loading {
@@ -720,10 +798,11 @@ tbody tr:nth-of-type(odd) {
   align-items: flex-start !important;
 }
 
-.back-icon {
-  padding-right: 10px;
-  padding-top: 8px;
-  font-size: 22px;
-  color: #ff7f32;
-  cursor: pointer;
+.mat-mdc-icon-button {
+  cursor: pointer !important;
+}
+
+.mat-mdc-paginator-range-label,
+.mat-mdc-paginator-page-size-label {
+  cursor: default !important;
 }

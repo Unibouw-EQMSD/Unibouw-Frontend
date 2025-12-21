@@ -12,18 +12,39 @@
       <br /><br />
     </div>
     <div class="pagetitle" *ngIf="rfqIdForEdit">
-      <h1>Edit RFQ</h1>
-      <button class="btn submit-btn" (click)="goBack()">Back</button>
-    </div>
-
-    <div class="pagetitle" *ngIf="!rfqIdForEdit">
-      <h1>Add RFQ</h1>
-      <i
+      <h1>
+        <i
+          class="fa fa-arrow-left arrow-left"
+          aria-hidden="true"
+          title="Back"
+          (click)="goBack()"
+        ></i
+        >Edit RFQ
+      </h1>
+      <!-- <i
         class="fa fa-arrow-circle-left back-icon"
         aria-hidden="true"
         title="Back"
         (click)="goBack()"
-      ></i>
+      ></i> -->
+    </div>
+
+    <div class="pagetitle" *ngIf="!rfqIdForEdit">
+      <h1>
+        <i
+          class="fa fa-arrow-left arrow-left"
+          aria-hidden="true"
+          title="Back"
+          (click)="goBack()"
+        ></i
+        >Add RFQ
+      </h1>
+      <!-- <i
+        class="fa fa-arrow-circle-left back-icon"
+        aria-hidden="true"
+        title="Back"
+        (click)="goBack()"
+      ></i> -->
     </div>
 
     <div class="formcontainer">
@@ -362,7 +383,7 @@
           </div>
 
           <!-- List -->
-          <div class="checkbox-list" style="max-height: 400px; overflow-y: auto">
+          <div class="checkbox-list" style="max-height: 315px; overflow-y: auto">
             <div
               *ngFor="let sub of subcontractors; let i = index"
               style="

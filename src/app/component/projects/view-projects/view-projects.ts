@@ -173,10 +173,7 @@ export class ViewProjects {
       this.checkAndTriggerReminder();
     }, 60000); // check every 60 seconds
   }
-  // ngAfterViewInit() {
-  //   this.dataSource.paginator = this.paginator;
-  //   this.dataSource.sort = this.sort;
-  // }
+
   checkAndTriggerReminder() {
     this.sendReminder();
   }
@@ -184,21 +181,21 @@ export class ViewProjects {
   reminderType: string = 'default';
 
   loadProjectDetails(id: string) {
-    this.isLoading = true;
+    // this.isLoading = true;
     this.projectService.getProjectById(id).subscribe({
       next: (res) => {
         this.projectDetails = res;
-        this.isLoading = false;
+        // this.isLoading = false;
       },
       error: (err) => {
         console.error('■ Error fetching project details:', err);
-        this.isLoading = false;
+        //  this.isLoading = false;
       },
     });
   }
 
   loadRfqResponseSummary(projectId: string) {
-    this.isLoading = true;
+    // this.isLoading = true;
     /* 1️⃣ WORK-ITEM GROUPED API              */
     this.rfqResponseService.getResponsesByProjectId(projectId).subscribe({
       next: (res: any[]) => {
@@ -243,11 +240,11 @@ export class ViewProjects {
         this.workItems.forEach((work) => {
           work.rfqs.forEach((rfq) => this.loadQuoteAmount(rfq));
         });
-        this.isLoading = false;
+        //this.isLoading = false;
       },
       error: (err) => {
         console.error('Error loading work item responses', err);
-        this.isLoading = false;
+        //  this.isLoading = false;
       },
     });
 
@@ -307,11 +304,11 @@ export class ViewProjects {
         this.subcontractorGroups.forEach((sub) => {
           sub.workItems.forEach((w: any) => this.loadQuoteAmount(w));
         });
-        this.isLoading = false;
+        // this.isLoading = false;
       },
       error: (err) => {
         console.error('Error loading subcontractor responses', err);
-        this.isLoading = false;
+        // this.isLoading = false;
       },
     });
   }
@@ -431,56 +428,52 @@ export class ViewProjects {
     });
   }
 
-loadRfqData(): void {
-  this.isLoading = true;
+  loadRfqData(): void {
+    // this.isLoading = true;
 
-  this.rfqService.getRfqByProjectId(this.projectId).subscribe({
-    next: (rfqs: any[]) => {
+    this.rfqService.getRfqByProjectId(this.projectId).subscribe({
+      next: (rfqs: any[]) => {
+        const infoRequests = rfqs.map((r) => this.rfqService.getWorkItemInfo(r.rfqID));
 
-      const infoRequests = rfqs.map(r =>
-        this.rfqService.getWorkItemInfo(r.rfqID)
-      );
+        forkJoin(infoRequests).subscribe((infoResults: any[]) => {
+          const tableData = rfqs.map((item, index) => {
+            const info = infoResults[index] || {};
 
-      forkJoin(infoRequests).subscribe((infoResults: any[]) => {
+            return {
+              id: item.rfqID,
+              customer: item.customerName || '—',
+              rfqSentDate: this.formatDate(item.sentDate),
+              dueDate: this.formatDate(item.dueDate),
+              rfqSent: item.rfqSent || 0,
+              quoteReceived: item.quoteReceived || 0,
+              quoteAmount: '-',
 
-        const tableData = rfqs.map((item, index) => {
-          const info = infoResults[index] || {};
+              // ✅ NOW RETURNS ALL WORK ITEMS
+              workItem: info.workItem || '-',
 
-          return {
-            id: item.rfqID,
-            customer: item.customerName || '—',
-            rfqSentDate: this.formatDate(item.sentDate),
-            dueDate: this.formatDate(item.dueDate),
-            rfqSent: item.rfqSent || 0,
-            quoteReceived: item.quoteReceived || 0,
-            quoteAmount: '-',
+              subcontractorCount: info.subcontractorCount ?? 0,
+              status: item.status || 'N/A',
+            };
+          });
 
-            // ✅ NOW RETURNS ALL WORK ITEMS
-            workItem: info.workItem || '-',
+          this.dataSource.data = tableData;
 
-            subcontractorCount: info.subcontractorCount ?? 0,
-            status: item.status || 'N/A'
-          };
+          setTimeout(() => {
+            this.dataSource.paginator = this.paginator;
+            this.dataSource.sort = this.sort;
+            this.paginator.length = tableData.length;
+            this.paginator.firstPage();
+          });
+
+          //this.isLoading = false;
         });
-
-        this.dataSource.data = tableData;
-
-        setTimeout(() => {
-          this.dataSource.paginator = this.paginator;
-          this.dataSource.sort = this.sort;
-          this.paginator.length = tableData.length;
-          this.paginator.firstPage();
-        });
-
-        this.isLoading = false;
-      });
-    },
-    error: () => {
-      this.dataSource.data = [];
-      this.isLoading = false;
-    }
-  });
-}
+      },
+      error: () => {
+        this.dataSource.data = [];
+        //this.isLoading = false;
+      },
+    });
+  }
 
   formatDate(dateString: string): string {
     if (!dateString) return '-';
@@ -786,7 +779,7 @@ loadRfqData(): void {
           alert('Failed to send reminder: ' + (error?.error || error));
         },
         complete: () => {
-          this.isLoading = false; // 🔥 Stop loader
+          this.isLoading = false;
           this.showReminderPopup = false;
         },
       });

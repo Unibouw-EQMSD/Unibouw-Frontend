@@ -253,6 +253,16 @@
   border-bottom: 1px solid #dedede;
 }
 
+.table-scroll {
+  height: calc(100vh - 370px);
+  overflow: auto;
+}
+
+.table-scroll1 {
+  height: calc(57vh - 10px);
+  overflow: auto;
+}
+
 .work-item-header span {
   color: #f97316; /* orange highlight for work item name */
 }

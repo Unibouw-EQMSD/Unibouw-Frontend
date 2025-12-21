@@ -2,13 +2,21 @@
 <main id="main">
   <div class="container">
     <div class="pagetitle">
-      <h1>Add Subcontractors</h1>
-      <i
+      <h1>
+        <i
+          class="fa fa-arrow-left arrow-left"
+          aria-hidden="true"
+          title="Back"
+          (click)="goBack()"
+        ></i>
+        Add Subcontractors
+      </h1>
+      <!-- <i
         class="fa fa-arrow-circle-left back-icon"
         aria-hidden="true"
         title="Back"
         (click)="goBack()"
-      ></i>
+      ></i> -->
     </div>
 
     <div class="form-card scroll">
@@ -121,6 +129,7 @@
             <select
               formControlName="country"
               class="form-control"
+              style="cursor: pointer !important"
               [ngClass]="{
                 'is-invalid':
                   subcontractorForm.get('country')?.touched &&
@@ -263,7 +272,11 @@
 
           <div class="form-group">
             <label>Status <span class="text-danger">*</span></label>
-            <select formControlName="status" class="form-control">
+            <select
+              formControlName="status"
+              class="form-control"
+              style="cursor: pointer !important"
+            >
               <option value="Active">Active</option>
               <option value="Inactive">Inactive</option>
             </select>
@@ -302,7 +315,12 @@
             <div class="form-billing-row">
               <label>Billing Address</label>
               <div class="checkbox-inline">
-                <input type="checkbox" formControlName="sameAsOffice" id="sameAsOffice" />
+                <input
+                  type="checkbox"
+                  formControlName="sameAsOffice"
+                  id="sameAsOffice"
+                  style="cursor: pointer !important"
+                />
                 <label for="sameAsOffice" class="form-checkbox-label">Same as Office Address</label>
               </div>
             </div>
@@ -357,7 +375,7 @@
 
           <ng-container *ngIf="workitems.length > 0; else noWorkitems">
             <!-- <label *ngFor="let w of workitems" style="font-size: 15px"> -->
-            <label *ngFor="let w of filteredWorkitems()" style="font-size: 15px">
+            <label *ngFor="let w of filteredWorkitems()" style="font-size: 15px; cursor: pointer">
               <input
                 type="checkbox"
                 [checked]="isSelected(w)"
