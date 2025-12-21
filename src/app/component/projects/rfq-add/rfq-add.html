@@ -2,19 +2,6 @@
 
 <main id="main">
   <div class="container">
-    <!-- FULL PAGE SKELETON -->
-    <div *ngIf="isLoader" class="full-page-skeleton">
-      <div class="skeleton-search skeleton"></div>
-
-      <div class="skeleton-table-header3">
-        <div class="skeleton th skeleton"></div>
-        <div class="skeleton th skeleton"></div>
-        <div class="skeleton th skeleton"></div>
-      </div>
-
-      <div class="skeleton-box"></div>
-    </div>
-
     <div class="pagetitle" *ngIf="rfqIdForEdit">
       <h1>
         <i
@@ -37,6 +24,19 @@
         ></i
         >Add RFQ
       </h1>
+    </div>
+
+    <!-- FULL PAGE SKELETON -->
+    <div *ngIf="isLoader" class="full-page-skeleton">
+      <div class="skeleton-search skeleton"></div>
+
+      <div class="skeleton-table-header3">
+        <div class="skeleton th skeleton"></div>
+        <div class="skeleton th skeleton"></div>
+        <div class="skeleton th skeleton"></div>
+      </div>
+
+      <div class="skeleton-box"></div>
     </div>
 
     <div class="formcontainer" *ngIf="!isLoader">
