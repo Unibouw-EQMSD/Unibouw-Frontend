@@ -114,8 +114,13 @@
             </button>
           </div>
 
+          <!-- Workitems Loader -->
+          <div class="workitems-loader" *ngIf="isLoader">
+            <mat-spinner diameter="40"></mat-spinner>
+          </div>
+
           <!-- Workitems Table -->
-          <div class="workitems-section">
+          <div class="workitems-section" *ngIf="!isLoader">
             <table class="workitems-table">
               <thead>
                 <tr>

@@ -126,8 +126,8 @@ export class RfqAdd {
   }
 
   hasSelectedSubcontractor(): boolean {
-  return this.subcontractors?.some(s => s.selected);
-}
+    return this.subcontractors?.some((s) => s.selected);
+  }
   onCancelConfirmed() {
     // reset state
     this.selectedTab = 'standard';
@@ -412,8 +412,14 @@ export class RfqAdd {
     });
   }
 
+  private sortWorkItemsAsc(items: Workitem[]): Workitem[] {
+    return items.sort((a, b) => a.name.localeCompare(b.name));
+  }
+
   async loadCategoriesAndWorkitems() {
     try {
+      this.isLoader = true;
+
       const categories: WorkitemCategory[] = await lastValueFrom(
         this.workitemService.getCategories()
       );
@@ -422,6 +428,7 @@ export class RfqAdd {
 
       if (!standardCategory || !unibouwCategory) {
         console.error('Required categories not found');
+        this.isLoader = false;
         return;
       }
 
@@ -430,13 +437,20 @@ export class RfqAdd {
         this.workitemService.getWorkitems(unibouwCategory.categoryID),
       ]).subscribe({
         next: ([standard, unibouw]: [Workitem[], Workitem[]]) => {
-          this.standardWorkitems = standard || [];
-          this.unibouwWorkitems = unibouw || [];
+          this.standardWorkitems = this.sortWorkItemsAsc(standard || []);
+          this.unibouwWorkitems = this.sortWorkItemsAsc(unibouw || []);
         },
-        error: (err) => console.error('Error loading workitems:', err),
+        error: (err) => {
+          console.error('Error loading workitems:', err);
+          this.isLoader = false;
+        },
+        complete: () => {
+          this.isLoader = false;
+        },
       });
     } catch (err) {
       console.error('Error loading categories:', err);
+      this.isLoader = false;
     }
   }
 
@@ -535,31 +549,30 @@ export class RfqAdd {
 
   /* Apply the global due date to all listed subcontractors */
 
- applyGlobalDate() {
-  // Reset error
-  this.globalDateError = false;
+  applyGlobalDate() {
+    // Reset error
+    this.globalDateError = false;
 
-  // No subcontractor selected → show error & revert date
-  if (!this.hasSelectedSubcontractor()) {
-    this.globalDateError = true;
+    // No subcontractor selected → show error & revert date
+    if (!this.hasSelectedSubcontractor()) {
+      this.globalDateError = true;
 
-    // 🔥 IMPORTANT: revert the picked date
-    this.globalDueDate = null;
+      // 🔥 IMPORTANT: revert the picked date
+      this.globalDueDate = null;
 
-    return;
+      return;
+    }
+
+    // No date → nothing to apply
+    if (!this.globalDueDate) return;
+
+    // ✅ Apply date to all selected subcontractors
+    this.subcontractors
+      .filter((s) => s.selected)
+      .forEach((sub) => {
+        sub.dueDate = this.globalDueDate!;
+      });
   }
-
-  // No date → nothing to apply
-  if (!this.globalDueDate) return;
-
-  // ✅ Apply date to all selected subcontractors
-  this.subcontractors
-    .filter(s => s.selected)
-    .forEach(sub => {
-      sub.dueDate = this.globalDueDate!;
-    });
-}
-
 
   onProjectChange(event: Event) {
     const projectId = (event.target as HTMLSelectElement).value;

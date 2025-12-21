@@ -104,7 +104,7 @@
         </div>
 
         <!-- RIGHT: TAB CONTENT -->
-        <div class="rfq-card">
+        <div class="rfq-card" *ngIf="!isLoading">
           <!-- 🔹 Tabs -->
           <div class="tabs">
             <button [class.active]="selectedTab === 'response'" (click)="selectedTab = 'response'">
