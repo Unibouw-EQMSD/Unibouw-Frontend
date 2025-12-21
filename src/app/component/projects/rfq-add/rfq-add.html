@@ -2,15 +2,19 @@
 
 <main id="main">
   <div class="container">
-    <!-- 🦴 Skeleton Loader -->
-    <div *ngIf="isLoader" class="skeleton-wrapper">
-      <div class="skeleton skeleton-box"></div>
-      <br /><br />
-      <div class="skeleton skeleton-box"></div>
-      <br /><br />
-      <div class="skeleton skeleton-box"></div>
-      <br /><br />
+    <!-- FULL PAGE SKELETON -->
+    <div *ngIf="isLoader" class="full-page-skeleton">
+      <div class="skeleton-search skeleton"></div>
+
+      <div class="skeleton-table-header3">
+        <div class="skeleton th skeleton"></div>
+        <div class="skeleton th skeleton"></div>
+        <div class="skeleton th skeleton"></div>
+      </div>
+
+      <div class="skeleton-box"></div>
     </div>
+
     <div class="pagetitle" *ngIf="rfqIdForEdit">
       <h1>
         <i
