@@ -25,12 +25,6 @@
         ></i
         >Edit RFQ
       </h1>
-      <!-- <i
-        class="fa fa-arrow-circle-left back-icon"
-        aria-hidden="true"
-        title="Back"
-        (click)="goBack()"
-      ></i> -->
     </div>
 
     <div class="pagetitle" *ngIf="!rfqIdForEdit">
@@ -43,17 +37,11 @@
         ></i
         >Add RFQ
       </h1>
-      <!-- <i
-        class="fa fa-arrow-circle-left back-icon"
-        aria-hidden="true"
-        title="Back"
-        (click)="goBack()"
-      ></i> -->
     </div>
 
-    <div class="formcontainer">
+    <div class="formcontainer" *ngIf="!isLoader">
       <!-- Header Section -->
-      <div style="display: flex">
+      <div style="display: flex" *ngIf="!isLoader">
         <div
           style="
             display: flex;
@@ -445,7 +433,7 @@
         </div>
 
         <!-- Footer Buttons -->
-        <div class="form-actions main-actions">
+        <div class="form-actions main-actions" *ngIf="!isLoader">
           <button type="button" class="btn cancel-btn" (click)="confirmCancel()">Cancel</button>
           <button type="button" class="btn submit-btn" (click)="openPreview()">Preview</button>
           <button
