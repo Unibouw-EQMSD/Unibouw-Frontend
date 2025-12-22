@@ -149,72 +149,85 @@ export class ProjectSummary implements OnInit {
   }
 
   loadProjectSummary(rfqId: string) {
-  this.isLoading = true;
+    this.isLoading = true;
 
-  const workItemIdsParam = this.route.snapshot.queryParamMap.get('workItemIds');
-  const workItemIds = workItemIdsParam ? workItemIdsParam.split(',') : [];
+    const workItemIdsParam = this.route.snapshot.queryParamMap.get('workItemIds');
+    const workItemIds = workItemIdsParam ? workItemIdsParam.split(',') : [];
 
-  this.rfqResponseService.getProjectSummary(rfqId, this.subId, workItemIds).subscribe({
-    next: (res: any) => {
-      this.isLoading = false;
+    this.rfqResponseService.getProjectSummary(rfqId, this.subId, workItemIds).subscribe({
+      next: (res: any) => {
+        this.isLoading = false;
 
-      if (!res || !res.project) {
-        this.errorMsg = 'No project data found.';
-        return;
-      }
+        if (!res?.project) {
+          this.errorMsg = 'No project data found.';
+          return;
+        }
 
-      this.project = res.project;
-      this.rfq = res.rfq;
+        this.project = res.project;
+        this.rfq = res.rfq;
+        this.workItems = res.workItems || [];
 
-      /* =====================================================
-           ✅ DATE HANDLING (TIMEZONE SAFE)
-         ===================================================== */
+        /* ================= DATE HANDLING ================= */
 
-      const now = new Date();
-      this.today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(
-        now.getDate()
-      ).padStart(2, '0')}`;
+        const now = new Date();
+        this.today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(
+          2,
+          '0'
+        )}-${String(now.getDate()).padStart(2, '0')}`;
 
-      const rawDueDate = this.rfq?.globalDueDate || this.rfq?.dueDate || this.rfq?.DueDate;
+        const rawDueDate =
+          this.rfq?.globalDueDate || this.rfq?.dueDate || this.rfq?.DueDate;
 
-      if (rawDueDate) {
-        const dateOnly = rawDueDate.split('T')[0];
-        this.dueDate = dateOnly;
+        if (rawDueDate) {
+          const dateOnly = rawDueDate.split('T')[0];
+          this.dueDate = dateOnly;
+          this.isRfqExpired = new Date() > new Date(`${dateOnly}T23:59:59`);
+        }
 
-        const endOfDue = new Date(`${dateOnly}T23:59:59`);
-        this.isRfqExpired = new Date() > endOfDue;
-      } else {
-        this.dueDate = '';
-        this.isRfqExpired = false;
-      }
+        /* ================================================= */
 
-      /* ===================================================== */
+        /* 🔥🔥🔥 RESTORE STATE AFTER REFRESH (KEY FIX) 🔥🔥🔥 */
 
-      this.workItems = res.workItems || [];
+        this.workItems.forEach((w: any) => {
+          const stateKey = `rfq_state_${this.rfqId}_${this.subId}_${w.workItemID}`;
+          const savedState = localStorage.getItem(stateKey);
 
-      // 🔥🔥🔥 ADD ONLY THIS BLOCK 🔥🔥🔥
-      this.workItems.forEach((w: any) => {
-        this.rfqResponseService
-          .markAsViewed(this.rfqId, this.subId, w.workItemID)
-          .subscribe({
-            error: () => {
-              // ❌ do NOT disable UI
-              // ✅ just show error message
-              this.errorMsg = 'Failed to mark RFQ as viewed.';
+          if (savedState) {
+            const state = JSON.parse(savedState);
+
+            w.status = state.status;
+            w.viewed = state.viewed;
+            w.buttonsDisabled = state.buttonsDisabled || false;
+
+            if (state.notInterested) {
+              w.notInterested = {
+                reason: state.notInterested.reason || '',
+                comment: state.notInterested.comment || '',
+                submitted: true,
+              };
             }
-          });
-      });
 
-      console.log('TODAY:', this.today);
-      console.log('RFQ DUE DATE:', this.dueDate);
-    },
-    error: (err) => {
-      this.isLoading = false;
-      this.errorMsg = 'Failed to load project summary.';
-      console.error(err);
-    },
-  });
-}
+            if (state.status === 'Interested') {
+              w.isQuoteSubmitted = true;
+              this.expandedId = w.workItemID;
+            }
+          }
+
+          const subKey = `rfq_prev_submissions_${this.rfqId}_${this.subId}_${w.workItemID}`;
+          w.previousSubmissions = JSON.parse(localStorage.getItem(subKey) || '[]');
+
+          this.rfqResponseService
+            .markAsViewed(this.rfqId, this.subId, w.workItemID)
+            .subscribe();
+        });
+      },
+      error: (err) => {
+        this.isLoading = false;
+        this.errorMsg = 'Failed to load project summary.';
+        console.error(err);
+      },
+    });
+  }
 
   toggleRow(wi: any) {
     this.expandedId = this.expandedId === wi.workItemID ? null : wi.workItemID;

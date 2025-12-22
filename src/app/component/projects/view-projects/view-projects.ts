@@ -193,32 +193,53 @@ export class ViewProjects {
       },
     });
   }
+loadRfqResponseSummary(projectId: string) {
 
-  loadRfqResponseSummary(projectId: string) {
-    // this.isLoading = true;
-    /* 1️⃣ WORK-ITEM GROUPED API              */
-    this.rfqResponseService.getResponsesByProjectId(projectId).subscribe({
-      next: (res: any[]) => {
-        this.workItems = res.map((w) => ({
-          workItemId: w.workItemId,
-          name: w.workItemName,
-          requestsSent: w.subcontractors.length,
-          notResponded: w.subcontractors.filter((s: any) => !s.responded).length,
-          interested: w.subcontractors.filter((s: any) => s.interested).length,
-          notInterested: w.subcontractors.filter((s: any) => s.notInterested).length,
-          viewed: w.subcontractors.filter((s: any) => s.viewed).length,
-          maybeLater: w.subcontractors.filter((s: any) => s.maybeLater).length, // ✅ added
-          open: false,
-          searchText: '',
-          pageSize: 10,
-          currentPage: 1,
-          totalPages: 1,
-          currentStart: 1,
-          currentEnd: 10,
-          rfqs: w.subcontractors.map((s: any) => ({
+  /* ===============================
+     1️⃣ WORK ITEM GROUPED (FIXED)
+     =============================== */
+
+  this.rfqResponseService.getResponsesByProjectId(projectId).subscribe({
+    next: (res: any[]) => {
+
+      const workItemMap = new Map<string, any>();
+
+      res.forEach((w) => {
+
+        // 🔹 Create work item ONCE
+        if (!workItemMap.has(w.workItemId)) {
+          workItemMap.set(w.workItemId, {
+            workItemId: w.workItemId,
+            name: w.workItemName,
+            open: false,
+            searchText: '',
+            pageSize: 10,
+            currentPage: 1,
+            totalPages: 1,
+            currentStart: 1,
+            currentEnd: 10,
+
+            // counters
+            requestsSent: 0,
+            notResponded: 0,
+            interested: 0,
+            notInterested: 0,
+            viewed: 0,
+            maybeLater: 0,
+
+            rfqs: []
+          });
+        }
+
+        const workItem = workItemMap.get(w.workItemId);
+
+        // 🔹 Push RFQs (flattened from API response)
+        w.subcontractors.forEach((s: any) => {
+
+          workItem.rfqs.push({
             subcontractorId: s.subcontractorId,
             rfqId: s.rfqId,
-            workItemId: w.workItemId, // 🔥 REQUIRED
+            workItemId: w.workItemId,
             documentId: s.documentId,
             rfqNumber: w.rfqNumber,
             name: s.name,
@@ -226,92 +247,108 @@ export class ViewProjects {
             date: s.date || '—',
             responded: s.responded,
             interested: s.interested,
-            notInterested: s.notInterested, // ⭐ FIXED
+            notInterested: s.notInterested,
             viewed: s.viewed,
             maybeLater: s.maybeLater,
             quote: s.quote || '—',
-            actions: ['pdf', 'chat'],
-            quoteAmount: '-', // initialize
-            dueDate: s.dueDate,
-          })),
-        }));
-
-        // load quote amounts
-        this.workItems.forEach((work) => {
-          work.rfqs.forEach((rfq) => this.loadQuoteAmount(rfq));
-        });
-        //this.isLoading = false;
-      },
-      error: (err) => {
-        console.error('Error loading work item responses', err);
-        //  this.isLoading = false;
-      },
-    });
-
-    /*  SUBCONTRACTOR GROUPED API          */
-    this.rfqResponseService.getResponsesByProjectSubcontractors(projectId).subscribe({
-      next: (res: any[]) => {
-        const grouped = res.reduce((acc: any[], item: any) => {
-          let group = acc.find((g) => g.subcontractorId === item.subcontractorId);
-          if (!group) {
-            group = {
-              subcontractorId: item.subcontractorId,
-              subcontractorName: item.subcontractorName,
-              open: false,
-              searchText: '',
-              workItems: [],
-              requestsSent: 0,
-              notResponded: 0,
-              interested: 0,
-              notInterested: 0,
-              viewed: 0,
-              maybeLater: 0, // ✅ added
-            };
-            acc.push(group);
-          }
-
-          group.workItems.push({
-            workItemId: item.workItemId,
-            workItemName: item.workItemName,
-            rfqId: item.rfqId,
-            documentId: item.documentId,
-            rfqNumber: item.rfqNumber,
-            date: item.date,
-            responded: item.responded,
-            interested: item.interested,
-            notInterested: item.notInterested,
-
-            viewed: item.viewed,
-            maybeLater: item.maybeLater, // ✅ added
-            subcontractorId: item.subcontractorId,
-            rating: 0,
             quoteAmount: '-',
-            actions: ['pdf'],
+            dueDate: s.dueDate,
+            actions: ['pdf', 'chat'],
           });
 
-          group.requestsSent = group.workItems.length;
-          group.notResponded = group.workItems.filter((w: any) => !w.responded).length;
-          group.interested = group.workItems.filter((w: any) => w.interested).length;
-          group.notInterested = group.workItems.filter((w: any) => w.notInterested).length;
-          group.viewed = group.workItems.filter((w: any) => w.viewed).length;
-          group.maybeLater = group.workItems.filter((w: any) => w.maybeLater).length; // ✅ added
-
-          return acc;
-        }, []);
-
-        this.subcontractorGroups = grouped;
-
-        this.subcontractorGroups.forEach((sub) => {
-          sub.workItems.forEach((w: any) => this.loadQuoteAmount(w));
         });
-        // this.isLoading = false;
-      },
-      error: (err) => {
-        console.error('Error loading subcontractor responses', err);
-        // this.isLoading = false;
-      },
-    });
-  }
+
+        // 🔹 Recalculate counters
+        workItem.requestsSent = workItem.rfqs.length;
+        workItem.notResponded = workItem.rfqs.filter((r: any) => !r.responded).length;
+        workItem.interested = workItem.rfqs.filter((r: any) => r.interested).length;
+        workItem.notInterested = workItem.rfqs.filter((r: any) => r.notInterested).length;
+        workItem.viewed = workItem.rfqs.filter((r: any) => r.viewed).length;
+        workItem.maybeLater = workItem.rfqs.filter((r: any) => r.maybeLater).length;
+
+      });
+
+      // 🔹 Final array (ONE accordion per work item)
+      this.workItems = Array.from(workItemMap.values());
+
+      // 🔹 Load quote amounts
+      this.workItems.forEach((work) => {
+        work.rfqs.forEach((rfq: any) => this.loadQuoteAmount(rfq));
+      });
+    },
+
+    error: (err) => {
+      console.error('Error loading work item responses', err);
+    },
+  });
+
+  /* ===============================
+     2️⃣ SUBCONTRACTOR GROUPED (UNCHANGED ✅)
+     =============================== */
+
+  this.rfqResponseService.getResponsesByProjectSubcontractors(projectId).subscribe({
+    next: (res: any[]) => {
+
+      const grouped = res.reduce((acc: any[], item: any) => {
+
+        let group = acc.find((g) => g.subcontractorId === item.subcontractorId);
+
+        if (!group) {
+          group = {
+            subcontractorId: item.subcontractorId,
+            subcontractorName: item.subcontractorName,
+            open: false,
+            searchText: '',
+            workItems: [],
+            requestsSent: 0,
+            notResponded: 0,
+            interested: 0,
+            notInterested: 0,
+            viewed: 0,
+            maybeLater: 0,
+          };
+          acc.push(group);
+        }
+
+        group.workItems.push({
+          workItemId: item.workItemId,
+          workItemName: item.workItemName,
+          rfqId: item.rfqId,
+          documentId: item.documentId,
+          rfqNumber: item.rfqNumber,
+          date: item.date,
+          responded: item.responded,
+          interested: item.interested,
+          notInterested: item.notInterested,
+          viewed: item.viewed,
+          maybeLater: item.maybeLater,
+          subcontractorId: item.subcontractorId,
+          rating: 0,
+          quoteAmount: '-',
+          actions: ['pdf'],
+        });
+
+        group.requestsSent = group.workItems.length;
+        group.notResponded = group.workItems.filter((w: any) => !w.responded).length;
+        group.interested = group.workItems.filter((w: any) => w.interested).length;
+        group.notInterested = group.workItems.filter((w: any) => w.notInterested).length;
+        group.viewed = group.workItems.filter((w: any) => w.viewed).length;
+        group.maybeLater = group.workItems.filter((w: any) => w.maybeLater).length;
+
+        return acc;
+      }, []);
+
+      this.subcontractorGroups = grouped;
+
+      this.subcontractorGroups.forEach((sub) => {
+        sub.workItems.forEach((w: any) => this.loadQuoteAmount(w));
+      });
+    },
+    error: (err) => {
+      console.error('Error loading subcontractor responses', err);
+    },
+  });
+}
 
   isBellEnabled(rfq: any): boolean {
     const amt = rfq.quoteAmount;
