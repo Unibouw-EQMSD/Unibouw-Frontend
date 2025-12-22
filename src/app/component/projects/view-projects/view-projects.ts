@@ -13,6 +13,8 @@ import { ReminderService } from '../../../services/reminder.service';
 import { registerLocaleData } from '@angular/common';
 import localeNl from '@angular/common/locales/nl';
 import { Location } from '@angular/common';
+import { switchMap } from 'rxjs/operators';
+import { of } from 'rxjs';
 
 interface RfqResponse {
   name: string;
@@ -50,6 +52,21 @@ interface WorkItem {
   currentStart: number;
   currentEnd: number;
   rfqs: RfqResponse[];
+}
+
+// log-conversation.model.ts
+interface LogConversation {
+  // LogConversationID: string | null;
+  ProjectID: string;
+  RfqID: string;
+  SubcontractorID: string;
+  ProjectManagerID: string;
+  ConversationType: string;
+  Subject: string;
+  Message: string;
+  MessageDateTime: Date;
+  CreatedBy: string;
+  CreatedOn: Date;
 }
 
 export const MY_FORMATS = {
@@ -110,6 +127,7 @@ export class ViewProjects {
   reminderEmailBody: string = '';
   minDate: Date = new Date();
   maxDate!: Date;
+  convoSubcontractors: { id: string; name: string }[] = [];
 
   setMaxDueDate(due: Date | string) {
     if (typeof due === 'string') {
@@ -420,6 +438,7 @@ export class ViewProjects {
     work.viewed = work.rfqs.filter((r) => r.viewed).length;
     work.maybeLater = work.rfqs.filter((r) => r.maybeLater).length; // <--- add this
   }
+
   triggerViewOnLoad() {
     if (!this.workItems?.length) return;
 
@@ -480,6 +499,7 @@ export class ViewProjects {
     const date = new Date(dateString);
     return date.toLocaleDateString('en-GB'); // dd/MM/yyyy
   }
+
   applyFilter(event: Event) {
     const filterValue = (event.target as HTMLInputElement).value.trim().toLowerCase();
     this.dataSource.filter = filterValue;
@@ -492,6 +512,7 @@ export class ViewProjects {
       alert(`Downloading RFQ: ${element.customerName}`);
     }
   }
+
   goToPage(page: number) {
     if (page >= 1 && page <= this.totalPages) {
       this.currentPage = page;
@@ -509,6 +530,7 @@ export class ViewProjects {
 
     this.updatePagedItems();
   }
+
   getFilteredRfqs(work: WorkItem) {
     const term = (work.searchText || '').trim().toLowerCase();
     let list = work.rfqs;
@@ -553,6 +575,7 @@ export class ViewProjects {
       this.updatePagedItems();
     }
   }
+
   enableEdit(item: any) {
     item.isEditingDueDate = true;
   }
@@ -800,5 +823,206 @@ export class ViewProjects {
   // Add a new custom reminder date
   addCustomDate() {
     this.customReminderDates.push(null);
+  }
+
+  //------------ Conversation -----------------
+  showLogConvoPopup = false;
+  conversationType: string = 'Email';
+  conversationDateTime: string = '';
+  conversationSubject: string = '';
+  conversationText: string = '';
+  selectedSubId: string | null = null;
+  conversationsData: any[] = [];
+  pmSubConversationData: any[] = [];
+  selectedIndex: number = 0; // default first item active
+  subject: string = '';
+  messageText: string = '';
+
+  onSubClick(subId: string, index: number): void {
+    this.selectedIndex = index;
+    this.loadConversationBySub(subId);
+  }
+
+  loadConversationSubcontractors() {
+    // Prevent reloading if already loaded
+    if (this.convoSubcontractors.length > 0) return;
+
+    this.isLoading = true;
+
+    this.rfqResponseService.getResponsesByProjectSubcontractors(this.projectId).subscribe({
+      next: (res: any[]) => {
+        const map = new Map<string, string>();
+
+        res.forEach((item) => {
+          if (!map.has(item.subcontractorId)) {
+            map.set(item.subcontractorId, item.subcontractorName);
+          }
+        });
+
+        this.convoSubcontractors = Array.from(map, ([id, name]) => ({ id, name })).sort((a, b) =>
+          a.name.localeCompare(b.name)
+        ); // ✅ ASC sort
+
+        this.isLoading = false;
+      },
+      error: (err) => {
+        console.error('Error loading conversation subcontractors', err);
+        this.isLoading = false;
+      },
+    });
+  }
+
+  loadConversationBySub(selectedSubId: string): void {
+    if (!selectedSubId) return;
+
+    this.projectService
+      .getConversationByProjectAndSubcontractor(this.projectId, selectedSubId)
+      .pipe(
+        switchMap((res: any[]) => {
+          this.conversationsData = res;
+          console.log('conversationsData---------:', res);
+
+          if (!res || res.length === 0) {
+            // No draft conversation → return empty observable
+            this.pmSubConversationData = [];
+            return of([]);
+          }
+
+          const draftConvo = res[0];
+
+          return this.projectService.getConversation(
+            draftConvo.projectID,
+            draftConvo.rfqID,
+            draftConvo.subcontractorID
+          );
+        })
+      )
+      .subscribe({
+        next: (res) => {
+          this.pmSubConversationData = res;
+          console.log('pmSubConversationData---------:', res);
+        },
+        error: (err) => {
+          console.error('■ Error loading conversation:', err);
+        },
+      });
+  }
+
+  setDefaultValues() {
+    const now = new Date();
+    // format for datetime-local => YYYY-MM-DDTHH:mm
+    this.conversationDateTime = now.toISOString().slice(0, 16);
+    this.conversationSubject = '';
+    this.conversationType = 'Email';
+  }
+
+  openLogConvo() {
+    this.setDefaultValues();
+    this.showLogConvoPopup = true;
+  }
+
+  closeLogConvo() {
+    this.showLogConvoPopup = false;
+    this.setDefaultValues();
+    this.conversationType = 'Email';
+    this.conversationSubject = '';
+    this.conversationText = '';
+  }
+
+  resetLogConvo() {
+    this.setDefaultValues();
+    this.conversationType = 'Email';
+    this.conversationSubject = '';
+    this.conversationText = '';
+  }
+
+  saveLogConvo() {
+    if (!this.conversationsData?.length) {
+      alert('No Data captured!!!');
+      return;
+    }
+
+    const draftConvo = this.conversationsData[0];
+
+    const payload: LogConversation = {
+      ProjectID: draftConvo.projectID,
+      RfqID: draftConvo.rfqID,
+      SubcontractorID: draftConvo.subcontractorID,
+      ProjectManagerID: draftConvo.projectManagerID,
+      ConversationType: this.conversationType || 'Email',
+      Subject: this.conversationSubject || '',
+      Message: this.conversationText || '',
+      MessageDateTime: new Date(this.conversationDateTime || new Date()),
+      CreatedBy: draftConvo.createdBy,
+      CreatedOn: new Date(),
+    };
+
+    this.projectService.createLogConversation(payload).subscribe({
+      next: (res) => {
+        console.log('Log conversation saved:', res);
+        alert('Conversation logged successfully!');
+        this.closeLogConvo();
+        this.resetLogConvo();
+        this.loadConversationBySub(this.selectedSubId!);
+      },
+      error: (err) => {
+        console.error('Error saving conversation:', err);
+        alert('Failed to save conversation. Please try again.');
+      },
+    });
+  }
+
+  sendMessage() {
+    if (!this.messageText?.trim()) return;
+
+    // Ensure there is at least one conversation draft
+    if (!this.conversationsData?.length) {
+      alert('No conversation data available.');
+      return;
+    }
+
+    const draftConvo = this.conversationsData[0];
+
+    const payload = {
+      ProjectID: draftConvo.projectID,
+      RfqID: draftConvo.rfqID,
+      WorkItemID: null, // or assign specific WorkItemID if applicable
+      SubcontractorID: draftConvo.subcontractorID,
+      SenderType: 'PM',
+      MessageText: this.messageText,
+      Subject: this.subject || '',
+      CreatedBy: draftConvo.createdBy, // logged-in PM email
+    };
+
+    this.projectService.addRfqConversationMessage(payload).subscribe({
+      next: (res) => {
+        console.log('Conversation saved:', res);
+
+        // Update UI immediately
+        this.pmSubConversationData.push({
+          ...res,
+          senderType: 'PM',
+          messageDateTime: new Date(res.MessageDateTime || new Date()),
+        });
+
+        // Optional: sort messages by date
+        this.pmSubConversationData.sort(
+          (a, b) => new Date(a.messageDateTime).getTime() - new Date(b.messageDateTime).getTime()
+        );
+
+        // Reset input fields and close popup
+        this.closeLogConvo();
+        this.resetLogConvo();
+
+        // Reload conversation from server for latest state
+        this.loadConversationBySub(this.selectedSubId!);
+
+        alert('Conversation logged successfully!');
+      },
+      error: (err) => {
+        console.error('Error saving conversation:', err);
+        alert('Failed to save conversation. Please try again.');
+      },
+    });
   }
 }
