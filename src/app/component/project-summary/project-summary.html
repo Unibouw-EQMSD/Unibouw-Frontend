@@ -216,8 +216,9 @@
                 <button class="btn-primary" type="button" (click)="toggleRow(wi)">
                   {{ wi.isQuoteSubmitted ? 'Resubmit Quote' : 'Submit Quote' }}
                 </button>
-                <button class="chev-btn" type="button" (click)="toggleRow(wi)">
+                <button class="chev-btn" type="button" *ngIf="wi.isInterested"  (click)="toggleRow(wi)">
                   <i
+                  
                     class="fa"
                     [ngClass]="expandedId === wi.workItemID ? 'fa-chevron-up' : 'fa-chevron-down'"
                   >

@@ -129,8 +129,25 @@ export class ViewProjects {
       p.firstPage();
     }
   }
-  @ViewChild(MatSort) sort!: MatSort;
+@ViewChild(MatSort)
+set sort(s: MatSort) {
+  if (s) {
+    this.dataSource.sort = s;
 
+    // Map displayed column names to actual properties
+  this.dataSource.sortingDataAccessor = (row, column) => {
+  switch (column) {
+    case 'workitem': return row.workItem;
+    case 'rfqSentDate': return row.rfqSentDate;
+    case 'dueDate': return row.dueDate;
+    case 'totalSubcontractors': return row.subcontractorCount;
+    case 'quoteRecieved': return row.quoteReceived;
+    case 'status': return row.status;
+    default: return '';
+  }
+};
+  }
+}
   workItems: WorkItem[] = [];
 
   constructor(
@@ -164,6 +181,31 @@ export class ViewProjects {
     }
   }
 
+
+  ngAfterViewInit() {
+  this.dataSource.sort = this.sort;
+  this.dataSource.paginator = this.paginator;
+
+  // Full sorting for all columns
+  this.dataSource.sortingDataAccessor = (item, property) => {
+    switch (property) {
+      case 'workitem':
+        return item.workItem?.toLowerCase() || '';
+      case 'rfqSentDate':
+        return item.rfqSentDate ? new Date(item.rfqSentDate) : new Date(0);
+      case 'dueDate':
+        return item.dueDate ? new Date(item.dueDate) : new Date(0);
+      case 'totalSubcontractors':
+        return item.subcontractorCount || 0;
+      case 'quoteRecieved':
+        return item.quoteReceived || 0;
+      case 'status':
+        return item.status?.toLowerCase() || '';
+      default:
+        return '';
+    }
+  };
+}
   goBack(): void {
     this.location.back();
   }
@@ -465,52 +507,84 @@ loadRfqResponseSummary(projectId: string) {
     });
   }
 
-  loadRfqData(): void {
-    // this.isLoading = true;
+loadRfqData(): void {
+  this.rfqService.getRfqByProjectId(this.projectId).subscribe({
+    next: (rfqs: any[]) => {
+      const infoRequests = rfqs.map((r) => this.rfqService.getWorkItemInfo(r.rfqID));
 
-    this.rfqService.getRfqByProjectId(this.projectId).subscribe({
-      next: (rfqs: any[]) => {
-        const infoRequests = rfqs.map((r) => this.rfqService.getWorkItemInfo(r.rfqID));
+      forkJoin(infoRequests).subscribe((infoResults: any[]) => {
+        const tableData = rfqs.map((item, index) => {
+          const info = infoResults[index] || {};
 
-        forkJoin(infoRequests).subscribe((infoResults: any[]) => {
-          const tableData = rfqs.map((item, index) => {
-            const info = infoResults[index] || {};
-
-            return {
-              id: item.rfqID,
-              customer: item.customerName || '—',
-              rfqSentDate: this.formatDate(item.sentDate),
-              dueDate: this.formatDate(item.dueDate),
-              rfqSent: item.rfqSent || 0,
-              quoteReceived: item.quoteReceived || 0,
-              quoteAmount: '-',
-
-              // ✅ NOW RETURNS ALL WORK ITEMS
-              workItem: info.workItem || '-',
-
-              subcontractorCount: info.subcontractorCount ?? 0,
-              status: item.status || 'N/A',
-            };
-          });
-
-          this.dataSource.data = tableData;
-
-          setTimeout(() => {
-            this.dataSource.paginator = this.paginator;
-            this.dataSource.sort = this.sort;
-            this.paginator.length = tableData.length;
-            this.paginator.firstPage();
-          });
-
-          //this.isLoading = false;
+          return {
+            id: item.rfqID,
+            customer: item.customerName || '—',
+            rfqSentDate: this.formatDate(item.sentDate),
+            dueDate: this.formatDate(item.dueDate),
+            rfqSent: item.rfqSent || 0,
+            quoteReceived: item.quoteReceived || 0,
+            quoteAmount: '-',
+            workItem: info.workItem || '-',
+            subcontractorCount: info.subcontractorCount ?? 0,
+            status: item.status || 'N/A',
+          };
         });
-      },
-      error: () => {
-        this.dataSource.data = [];
-        //this.isLoading = false;
-      },
-    });
-  }
+
+        // Assign data
+        this.dataSource.data = tableData;
+
+        // Assign paginator and sort immediately after data assignment
+        this.dataSource.paginator = this.paginator;
+        this.dataSource.sort = this.sort;
+
+        // Custom sorting for all columns
+        this.dataSource.sortingDataAccessor = (item, property) => {
+          switch (property) {
+            case 'workitem':
+              return item.workItem?.toLowerCase() || '';
+            case 'rfqSentDate':
+              return item.rfqSentDate ? new Date(item.rfqSentDate) : new Date(0);
+            case 'dueDate':
+              return item.dueDate ? new Date(item.dueDate) : new Date(0);
+            case 'totalSubcontractors':
+              return item.subcontractorCount || 0;
+            case 'quoteRecieved':
+              return item.quoteReceived || 0;
+            case 'status':
+              return item.status?.toLowerCase() || '';
+            default:
+              return '';
+          }
+        };
+
+        // Optional: reset paginator
+        this.paginator.firstPage();
+      });
+    },
+    error: () => {
+      this.dataSource.data = [];
+    },
+  });
+}
+deleteRfq(rfqId: string) {
+  const confirmDelete = confirm('Are you sure you want to delete this RFQ?');
+
+  if (!confirmDelete) return;
+
+  this.rfqService.deleteRfq(rfqId).subscribe({
+    next: () => {
+      // remove row from table without reload
+      this.dataSource.data = this.dataSource.data.filter(
+        (r: any) => r.id !== rfqId
+      );
+    },
+    error: (err) => {
+      console.error('Failed to delete RFQ', err);
+      alert('Failed to delete RFQ');
+    },
+  });
+}
+
 
   formatDate(dateString: string): string {
     if (!dateString) return '-';
@@ -598,29 +672,23 @@ loadRfqResponseSummary(projectId: string) {
     item.dueDate = newDate;
   }
 
-  loadQuoteAmount(rfq: any) {
-    if (!rfq.subcontractorId) {
-      console.warn('⚠ Missing subcontractorId for RFQ:', rfq.rfqId);
-      rfq.quoteAmount = '-';
-      return;
-    }
+ loadQuoteAmount(rfq: any) {
+  if (!rfq.subcontractorId || !rfq.workItemId) {
+    rfq.quoteAmount = '-';
+    return;
+  }
 
-    this.rfqResponseService.getQuoteAmount(rfq.rfqId, rfq.subcontractorId).subscribe({
+  this.rfqResponseService.getQuoteAmount(rfq.rfqId, rfq.subcontractorId, rfq.workItemId)
+    .subscribe({
       next: (res: any) => {
-        rfq.quoteAmount = res.quoteAmount || '-';
-        const index = this.dataSource.data.findIndex((d) => d.id === rfq.rfqId);
-        if (index >= 0) {
-          this.dataSource.data[index].quoteAmount = rfq.quoteAmount;
-          this.dataSource._updateChangeSubscription();
-        }
+        rfq.quoteAmount = res?.quoteAmount ?? '-';
       },
       error: (err) => {
         console.error('❌ Error fetching quote amount:', err);
         rfq.quoteAmount = '-';
       },
     });
-  }
-
+}
   downloadQuote(event: Event, documentId: string) {
     event.stopPropagation();
 
