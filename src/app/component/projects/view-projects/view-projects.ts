@@ -567,24 +567,20 @@ loadRfqData(): void {
   });
 }
 deleteRfq(rfqId: string) {
-  const confirmDelete = confirm('Are you sure you want to delete this RFQ?');
-
-  if (!confirmDelete) return;
+  if (!confirm('Are you sure you want to delete this RFQ?')) return;
 
   this.rfqService.deleteRfq(rfqId).subscribe({
     next: () => {
-      // remove row from table without reload
+      alert('RFQ deleted successfully.');
       this.dataSource.data = this.dataSource.data.filter(
         (r: any) => r.id !== rfqId
       );
     },
     error: (err) => {
-      console.error('Failed to delete RFQ', err);
-      alert('Failed to delete RFQ');
-    },
+      alert(err?.error?.message || 'Unable to delete RFQ.');
+    }
   });
 }
-
 
   formatDate(dateString: string): string {
     if (!dateString) return '-';
