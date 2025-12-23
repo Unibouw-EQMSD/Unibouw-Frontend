@@ -149,72 +149,85 @@ export class ProjectSummary implements OnInit {
   }
 
   loadProjectSummary(rfqId: string) {
-  this.isLoading = true;
+    this.isLoading = true;
 
-  const workItemIdsParam = this.route.snapshot.queryParamMap.get('workItemIds');
-  const workItemIds = workItemIdsParam ? workItemIdsParam.split(',') : [];
+    const workItemIdsParam = this.route.snapshot.queryParamMap.get('workItemIds');
+    const workItemIds = workItemIdsParam ? workItemIdsParam.split(',') : [];
 
-  this.rfqResponseService.getProjectSummary(rfqId, this.subId, workItemIds).subscribe({
-    next: (res: any) => {
-      this.isLoading = false;
+    this.rfqResponseService.getProjectSummary(rfqId, this.subId, workItemIds).subscribe({
+      next: (res: any) => {
+        this.isLoading = false;
 
-      if (!res || !res.project) {
-        this.errorMsg = 'No project data found.';
-        return;
-      }
+        if (!res?.project) {
+          this.errorMsg = 'No project data found.';
+          return;
+        }
 
-      this.project = res.project;
-      this.rfq = res.rfq;
+        this.project = res.project;
+        this.rfq = res.rfq;
+        this.workItems = res.workItems || [];
 
-      /* =====================================================
-           ✅ DATE HANDLING (TIMEZONE SAFE)
-         ===================================================== */
+        /* ================= DATE HANDLING ================= */
 
-      const now = new Date();
-      this.today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(
-        now.getDate()
-      ).padStart(2, '0')}`;
+        const now = new Date();
+        this.today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(
+          2,
+          '0'
+        )}-${String(now.getDate()).padStart(2, '0')}`;
 
-      const rawDueDate = this.rfq?.globalDueDate || this.rfq?.dueDate || this.rfq?.DueDate;
+        const rawDueDate =
+          this.rfq?.globalDueDate || this.rfq?.dueDate || this.rfq?.DueDate;
 
-      if (rawDueDate) {
-        const dateOnly = rawDueDate.split('T')[0];
-        this.dueDate = dateOnly;
+        if (rawDueDate) {
+          const dateOnly = rawDueDate.split('T')[0];
+          this.dueDate = dateOnly;
+          this.isRfqExpired = new Date() > new Date(`${dateOnly}T23:59:59`);
+        }
 
-        const endOfDue = new Date(`${dateOnly}T23:59:59`);
-        this.isRfqExpired = new Date() > endOfDue;
-      } else {
-        this.dueDate = '';
-        this.isRfqExpired = false;
-      }
+        /* ================================================= */
 
-      /* ===================================================== */
+        /* 🔥🔥🔥 RESTORE STATE AFTER REFRESH (KEY FIX) 🔥🔥🔥 */
 
-      this.workItems = res.workItems || [];
+        this.workItems.forEach((w: any) => {
+          const stateKey = `rfq_state_${this.rfqId}_${this.subId}_${w.workItemID}`;
+          const savedState = localStorage.getItem(stateKey);
 
-      // 🔥🔥🔥 ADD ONLY THIS BLOCK 🔥🔥🔥
-      this.workItems.forEach((w: any) => {
-        this.rfqResponseService
-          .markAsViewed(this.rfqId, this.subId, w.workItemID)
-          .subscribe({
-            error: () => {
-              // ❌ do NOT disable UI
-              // ✅ just show error message
-              this.errorMsg = 'Failed to mark RFQ as viewed.';
+          if (savedState) {
+            const state = JSON.parse(savedState);
+
+            w.status = state.status;
+            w.viewed = state.viewed;
+            w.buttonsDisabled = state.buttonsDisabled || false;
+
+            if (state.notInterested) {
+              w.notInterested = {
+                reason: state.notInterested.reason || '',
+                comment: state.notInterested.comment || '',
+                submitted: true,
+              };
             }
-          });
-      });
 
-      console.log('TODAY:', this.today);
-      console.log('RFQ DUE DATE:', this.dueDate);
-    },
-    error: (err) => {
-      this.isLoading = false;
-      this.errorMsg = 'Failed to load project summary.';
-      console.error(err);
-    },
-  });
-}
+            if (state.status === 'Interested') {
+              w.isQuoteSubmitted = true;
+              this.expandedId = w.workItemID;
+            }
+          }
+
+          const subKey = `rfq_prev_submissions_${this.rfqId}_${this.subId}_${w.workItemID}`;
+          w.previousSubmissions = JSON.parse(localStorage.getItem(subKey) || '[]');
+
+          this.rfqResponseService
+            .markAsViewed(this.rfqId, this.subId, w.workItemID)
+            .subscribe();
+        });
+      },
+      error: (err) => {
+        this.isLoading = false;
+        this.errorMsg = 'Failed to load project summary.';
+        console.error(err);
+      },
+    });
+  }
 
   toggleRow(wi: any) {
     this.expandedId = this.expandedId === wi.workItemID ? null : wi.workItemID;
@@ -382,121 +395,129 @@ export class ProjectSummary implements OnInit {
     return this.selectedWorkItem;
   }
 
-  submitInterest(status: string, wi?: any) {
-    const target = this.pickWorkItem(wi);
-    if (!target) return;
+ submitInterest(status: string, wi?: any) {
+  const target = this.pickWorkItem(wi);
+  if (!target) return;
 
-    const key = `rfq_state_${this.rfqId}_${this.subId}_${target.workItemID}`;
+  // mark viewed
+  this.rfqResponseService.markAsViewed(this.rfqId, this.subId, target.workItemID).subscribe();
 
-    // 🔹 mark viewed
-    this.rfqResponseService.markAsViewed(this.rfqId, this.subId, target.workItemID).subscribe();
+  // per-row state
+  target.status = status;
+  target.viewed = true;
+  target.buttonsDisabled = status === 'Interested';
 
-    // 🔹 per-row state
-    target.status = status;
-    target.viewed = true;
-    target.buttonsDisabled = status === 'Interested';
+  // ✅ track interest per work item
+  target.isInterested = status === 'Interested';
 
-    // 🔹 expand quote panel
-    if (status === 'Interested') {
-      this.expandedId = target.workItemID;
-    } else if (this.expandedId === target.workItemID) {
-      this.expandedId = null;
-    }
-
-    // 🔹 reason payload (ONLY for Not Interested)
-    const reasonPayload =
-      status === 'Not Interested'
-        ? {
-            reason: target.notInterested?.reason || '',
-            comment: target.notInterested?.comment || '',
-          }
-        : null;
-
-    this.rfqResponseService
-      .submitRfqResponse(this.rfqId, this.subId, target.workItemID, status, reasonPayload, null)
-      .subscribe({
-        next: () => {
-          alert(`Your response "${status}" was recorded successfully!`);
-
-          localStorage.setItem(
-            key,
-            JSON.stringify({
-              status,
-              viewed: true,
-              buttonsDisabled: target.buttonsDisabled,
-              notInterested: reasonPayload,
-            })
-          );
-        },
-        error: () => {
-          alert('Failed to submit response.');
-          target.buttonsDisabled = false;
-        },
-      });
+  // expand quote panel automatically only if Interested
+  if (status === 'Interested') {
+    this.expandedId = target.workItemID;
+  } else if (this.expandedId === target.workItemID) {
+    this.expandedId = null;
   }
 
-  submitQuoteFile(wi?: any) {
-    const target = this.pickWorkItem(wi);
-    if (!target) return;
+  const reasonPayload =
+    status === 'Not Interested'
+      ? { reason: target.notInterested?.reason || '', comment: target.notInterested?.comment || '' }
+      : null;
 
-    this.formSubmitted = true;
+  this.rfqResponseService
+    .submitRfqResponse(this.rfqId, this.subId, target.workItemID, status, reasonPayload, null)
+    .subscribe({
+      next: () => {
+        alert(`Your response "${status}" was recorded successfully!`);
+        const key = `rfq_state_${this.rfqId}_${this.subId}_${target.workItemID}`;
+        localStorage.setItem(
+          key,
+          JSON.stringify({
+            status,
+            viewed: true,
+            buttonsDisabled: target.buttonsDisabled,
+            notInterested: reasonPayload,
+          })
+        );
+      },
+      error: () => {
+        alert('Failed to submit response.');
+        target.buttonsDisabled = false;
+        target.isInterested = false; // rollback on error
+      },
+    });
+}
 
-    if (this.quoteForm.invalid) {
-      alert('Please fill all required fields.');
-      return;
-    }
+ submitQuoteFile(wi?: any) {
+  const target = this.pickWorkItem(wi);
+  if (!target) return;
 
-    const file = this.selectedFiles[0];
-    if (!file) return;
+  this.formSubmitted = true;
 
-    const { quoteAmount, comments } = this.quoteForm.getRawValue();
-    const totalAmount = Number(quoteAmount || 0);
-
-    // ✅ PER-WORKITEM KEY
-    const key = `rfq_prev_submissions_${this.rfqId}_${this.subId}_${target.workItemID}`;
-    const previous = JSON.parse(localStorage.getItem(key) || '[]');
-
-    this.rfqResponseService
-      .uploadQuoteFile(this.rfqId, this.subId, file, totalAmount, comments)
-      .subscribe({
-        next: () => {
-          alert(this.isQuoteSubmitted ? 'Quote re-submitted!' : 'Quote submitted!');
-
-          this.isQuoteSubmitted = true;
-          target.isQuoteSubmitted = true;
-
-          const newSubmission = {
-            date: new Date().toISOString(),
-            amount: totalAmount,
-            attachmentUrl: URL.createObjectURL(file),
-            fileName: file.name,
-            comment: comments,
-          };
-
-          // ✅ SAVE
-          previous.unshift(newSubmission);
-          localStorage.setItem(key, JSON.stringify(previous));
-
-          // ✅ UPDATE UI IMMEDIATELY
-          if (!target.previousSubmissions) {
-            target.previousSubmissions = [];
-          }
-          target.previousSubmissions.unshift(newSubmission);
-
-          // ✅ RESET FORM
-          this.quoteForm.reset({ quoteAmount: '', comments: '' });
-          this.selectedFiles = [];
-          this.formSubmitted = false;
-
-          // ✅ CLEAR FILE INPUT (THIS IS THE KEY FIX)
-          if (this.fileInput) {
-            this.fileInput.nativeElement.value = '';
-          }
-          this.rightSectionVisible = false;
-          this.hideRightSummaryCard = true;
-        },
-      });
+  if (this.quoteForm.invalid) {
+    alert('Please fill all required fields.');
+    return;
   }
+
+  const file = this.selectedFiles[0];
+  if (!file) return;
+
+  const { quoteAmount, comments } = this.quoteForm.getRawValue();
+  const totalAmount = Number(quoteAmount || 0);
+
+  // ✅ PER-WORKITEM KEY
+  const key = `rfq_prev_submissions_${this.rfqId}_${this.subId}_${target.workItemID}`;
+  const previous = JSON.parse(localStorage.getItem(key) || '[]');
+
+  // 🔴 CRITICAL FIX — PASS workItemID
+  this.rfqResponseService
+    .uploadQuoteFile(
+      this.rfqId,
+      this.subId,
+      target.workItemID,     // ✅ REQUIRED
+      file,
+      totalAmount,
+      comments
+    )
+    .subscribe({
+      next: () => {
+        alert(this.isQuoteSubmitted ? 'Quote re-submitted!' : 'Quote submitted!');
+
+        this.isQuoteSubmitted = true;
+        target.isQuoteSubmitted = true;
+
+        const newSubmission = {
+          date: new Date().toISOString(),
+          amount: totalAmount,
+          attachmentUrl: URL.createObjectURL(file),
+          fileName: file.name,
+          comment: comments,
+        };
+
+        previous.unshift(newSubmission);
+        localStorage.setItem(key, JSON.stringify(previous));
+
+        if (!target.previousSubmissions) {
+          target.previousSubmissions = [];
+        }
+        target.previousSubmissions.unshift(newSubmission);
+
+        // ✅ RESET FORM
+        this.quoteForm.reset({ quoteAmount: '', comments: '' });
+        this.selectedFiles = [];
+        this.formSubmitted = false;
+
+        // ✅ CLEAR FILE INPUT
+        if (this.fileInput) {
+          this.fileInput.nativeElement.value = '';
+        }
+
+        this.rightSectionVisible = false;
+        this.hideRightSummaryCard = true;
+      },
+      error: () => {
+        alert('Failed to upload quote');
+      }
+    });
+}
 
   statusClass(status?: string) {
     if (!status) return '';

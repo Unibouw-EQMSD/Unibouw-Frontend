@@ -40,7 +40,18 @@ export class Subcontractor implements OnInit, AfterViewInit {
   ngOnInit() {
     this.isAdmin = this.userService.isAdmin(); // Check role
     this.updateDisplayedColumns();
-
+this.dataSource.sortingDataAccessor = (item, property) => {
+  switch (property) {
+    case 'contactNumber':
+      return item.phoneNumber1 || '';
+    case 'contactPerson':
+      return item.personName || '';
+    case 'emailId':
+      return item.emailID || '';
+    default:
+      return (item as any)[property] || '';
+  }
+};
     // Show skeleton first, then load table
     this.isSkeletonLoading = true;
 
