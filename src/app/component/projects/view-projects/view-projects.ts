@@ -54,6 +54,22 @@ interface WorkItem {
   rfqs: RfqResponse[];
 }
 
+interface RFQConversationMessage {
+  ConversationMessageID?: string;
+  ProjectID: string;
+  RfqID: string;
+  WorkItemID?: string | null;
+  SubcontractorID: string;
+  ProjectManagerID?: string;
+  SenderType: 'PM' | 'Subcontractor';
+  MessageText: string;
+  Subject?: string;
+  MessageDateTime?: Date;
+  Status?: string;
+  CreatedBy: string;
+  CreatedOn?: Date;
+}
+
 // log-conversation.model.ts
 interface LogConversation {
   // LogConversationID: string | null;
@@ -959,11 +975,20 @@ export class ViewProjects {
 
     this.projectService.createLogConversation(payload).subscribe({
       next: (res) => {
-        console.log('Log conversation saved:', res);
+        // Push to UI immediately
+        this.pmSubConversationData.push({
+          ...res,
+          senderType: 'PM', // or 'Subcontractor' based on your logic
+          messageDateTime: new Date(res.MessageDateTime || new Date()),
+        });
+
+        // Sort by datetime
+        this.pmSubConversationData.sort(
+          (a, b) => new Date(a.messageDateTime).getTime() - new Date(b.messageDateTime).getTime()
+        );
+
+        this.afterMessageSent(); // reset & close popup
         alert('Conversation logged successfully!');
-        this.closeLogConvo();
-        this.resetLogConvo();
-        this.loadConversationBySub(this.selectedSubId!);
       },
       error: (err) => {
         console.error('Error saving conversation:', err);
@@ -975,7 +1000,6 @@ export class ViewProjects {
   sendMessage() {
     if (!this.messageText?.trim()) return;
 
-    // Ensure there is at least one conversation draft
     if (!this.conversationsData?.length) {
       alert('No conversation data available.');
       return;
@@ -983,46 +1007,62 @@ export class ViewProjects {
 
     const draftConvo = this.conversationsData[0];
 
-    const payload = {
+    const payload: RFQConversationMessage = {
       ProjectID: draftConvo.projectID,
       RfqID: draftConvo.rfqID,
-      WorkItemID: null, // or assign specific WorkItemID if applicable
+      WorkItemID: null,
       SubcontractorID: draftConvo.subcontractorID,
       SenderType: 'PM',
       MessageText: this.messageText,
       Subject: this.subject || '',
-      CreatedBy: draftConvo.createdBy, // logged-in PM email
+      CreatedBy: draftConvo.createdBy,
     };
 
-    this.projectService.addRfqConversationMessage(payload).subscribe({
-      next: (res) => {
-        console.log('Conversation saved:', res);
+    this.projectService
+      .addRfqConversationMessage(payload)
+      .pipe(
+        switchMap((res) => {
+          // Update UI immediately
+          this.pmSubConversationData.push({
+            ...res,
+            senderType: 'PM',
+            messageDateTime: new Date(res.MessageDateTime || new Date()),
+          });
 
-        // Update UI immediately
-        this.pmSubConversationData.push({
-          ...res,
-          senderType: 'PM',
-          messageDateTime: new Date(res.MessageDateTime || new Date()),
-        });
+          // Sort messages by date
+          this.pmSubConversationData.sort(
+            (a, b) => new Date(a.messageDateTime).getTime() - new Date(b.messageDateTime).getTime()
+          );
 
-        // Optional: sort messages by date
-        this.pmSubConversationData.sort(
-          (a, b) => new Date(a.messageDateTime).getTime() - new Date(b.messageDateTime).getTime()
-        );
+          // Send email
+          return this.projectService.sendMail({
+            subcontractorID: draftConvo.subcontractorID,
+            subject: this.subject,
+            body: this.messageText,
+          });
+        })
+      )
+      .subscribe({
+        next: (mailSuccess) => {
+          if (mailSuccess) console.log('Mail sent successfully');
 
-        // Reset input fields and close popup
-        this.closeLogConvo();
-        this.resetLogConvo();
+          this.messageText = '';
+          this.subject = '';
+          // Reset inputs, close popup, reload conversation
+          this.afterMessageSent();
+          alert('Conversation logged successfully!');
+        },
+        error: (err) => {
+          console.error('Error sending message or mail:', err);
+          alert('Failed to save conversation. Please try again.');
+        },
+      });
+  }
 
-        // Reload conversation from server for latest state
-        this.loadConversationBySub(this.selectedSubId!);
-
-        alert('Conversation logged successfully!');
-      },
-      error: (err) => {
-        console.error('Error saving conversation:', err);
-        alert('Failed to save conversation. Please try again.');
-      },
-    });
+  // Helper method for reset, close, reload
+  private afterMessageSent() {
+    this.closeLogConvo();
+    this.resetLogConvo();
+    if (this.selectedSubId) this.loadConversationBySub(this.selectedSubId);
   }
 }

@@ -23,7 +23,7 @@ export interface RFQConversationMessage {
   ConversationMessageID?: string;
   ProjectID: string;
   RfqID: string;
-  WorkItemID: string;
+  WorkItemID?: string | null;
   SubcontractorID: string;
   ProjectManagerID?: string;
   SenderType: 'PM' | 'Subcontractor';
@@ -48,6 +48,12 @@ export interface LogConversation {
   MessageDateTime: Date;
   CreatedBy: string;
   CreatedOn: Date;
+}
+
+export interface SendMailRequest {
+  subcontractorID: string;
+  subject: string;
+  body: string; // message body (HTML or text)
 }
 
 export type SenderType = 'PM' | 'Subcontractor';
@@ -174,6 +180,15 @@ export class projectService {
         )
       ),
       map((res) => res.data) // return the created message
+    );
+  }
+
+  sendMail(payload: SendMailRequest): Observable<boolean> {
+    return from(this.getHeaders()).pipe(
+      switchMap((headers) =>
+        this.http.post<{ success: boolean }>(`${this.apiURL}/Email/send-mail`, payload, { headers })
+      ),
+      map((res) => res.success)
     );
   }
 }

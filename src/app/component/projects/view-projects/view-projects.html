@@ -544,49 +544,45 @@
                     *ngFor="let convo of pmSubConversationData"
                     [ngClass]="convo.senderType === 'PM' ? 'right' : 'left'"
                   >
-                    <!-- Subcontractor meta -->
-                    <div class="message-meta" *ngIf="convo.senderType !== 'PM'">
+                    <!-- Subcontractor Meta -->
+                    <ng-container *ngIf="convo.senderType !== 'PM'">
+                      <div class="message-meta">
+                        <!-- Date/Time -->
+                        <span class="message-time">
+                          {{ convo.messageDateTime | date : 'MMM d, y h:mm a' }}
+                        </span>
+
+                        <!-- Conversation Type Icon -->
+                        <ng-container [ngSwitch]="convo.conversationType?.toLowerCase()">
+                          <i
+                            *ngSwitchCase="'phone'"
+                            class="fa fa-phone convoType-icon"
+                            aria-hidden="true"
+                          ></i>
+                          <i
+                            *ngSwitchCase="'email'"
+                            class="fa fa-envelope convoType-icon"
+                            aria-hidden="true"
+                          ></i>
+                          <i
+                            *ngSwitchCase="'meeting'"
+                            class="fa-sharp fa-regular fa-handshake convoType-icon"
+                            aria-hidden="true"
+                          ></i>
+                          <ng-container *ngSwitchDefault></ng-container>
+                        </ng-container>
+
+                        <!-- Reply Button -->
+                        <button class="reply-btn">Reply</button>
+                      </div>
+                    </ng-container>
+
+                    <!-- PM Meta -->
+                    <ng-container *ngIf="convo.senderType === 'PM'">
                       <span class="message-time">
                         {{ convo.messageDateTime | date : 'MMM d, y h:mm a' }}
                       </span>
-
-                      <!-- Conversation Type Icon -->
-                      <ng-container [ngSwitch]="convo.conversationType?.toLowerCase()">
-                        <!-- Phone -->
-                        <i
-                          *ngSwitchCase="'phone'"
-                          class="fa fa-phone convoType-icon"
-                          aria-hidden="true"
-                        >
-                        </i>
-
-                        <!-- Email -->
-                        <i
-                          *ngSwitchCase="'email'"
-                          class="fa fa-envelope convoType-icon"
-                          aria-hidden="true"
-                        >
-                        </i>
-
-                        <!-- Meeting -->
-                        <i
-                          *ngSwitchCase="'meeting'"
-                          class="fa-sharp fa-regular fa-handshake convoType-icon"
-                          aria-hidden="true"
-                        >
-                        </i>
-
-                        <!-- Other / Default -->
-                        <ng-container *ngSwitchDefault></ng-container>
-                      </ng-container>
-
-                      <button class="reply-btn">Reply</button>
-                    </div>
-
-                    <!-- PM time -->
-                    <span class="message-time" *ngIf="convo.senderType === 'PM'">
-                      {{ convo.messageDateTime | date : 'MMM d, y h:mm a' }}
-                    </span>
+                    </ng-container>
 
                     <!-- Message Bubble -->
                     <div class="message" [ngClass]="convo.senderType === 'PM' ? 'user' : 'bot'">
