@@ -147,14 +147,15 @@ export class ProjectSummary implements OnInit {
     const day = String(date.getDate()).padStart(2, '0');
     return `${year}-${month}-${day}`;
   }
+loadProjectSummary(rfqId: string) {
+  this.isLoading = true;
 
-  loadProjectSummary(rfqId: string) {
-    this.isLoading = true;
+  const workItemIdsParam = this.route.snapshot.queryParamMap.get('workItemIds');
+  const workItemIds = workItemIdsParam ? workItemIdsParam.split(',') : [];
 
-    const workItemIdsParam = this.route.snapshot.queryParamMap.get('workItemIds');
-    const workItemIds = workItemIdsParam ? workItemIdsParam.split(',') : [];
-
-    this.rfqResponseService.getProjectSummary(rfqId, this.subId, workItemIds).subscribe({
+  this.rfqResponseService
+    .getProjectSummary(rfqId, this.subId, workItemIds)
+    .subscribe({
       next: (res: any) => {
         this.isLoading = false;
 
@@ -184,9 +185,7 @@ export class ProjectSummary implements OnInit {
           this.isRfqExpired = new Date() > new Date(`${dateOnly}T23:59:59`);
         }
 
-        /* ================================================= */
-
-        /* 🔥🔥🔥 RESTORE STATE AFTER REFRESH (KEY FIX) 🔥🔥🔥 */
+        /* ================= RESTORE STATE ================= */
 
         this.workItems.forEach((w: any) => {
           const stateKey = `rfq_state_${this.rfqId}_${this.subId}_${w.workItemID}`;
@@ -195,9 +194,12 @@ export class ProjectSummary implements OnInit {
           if (savedState) {
             const state = JSON.parse(savedState);
 
-            w.status = state.status;
-            w.viewed = state.viewed;
-            w.buttonsDisabled = state.buttonsDisabled || false;
+            // ✅ RESTORE EXACT FLAGS (NO INFERENCE)
+            w.isQuoteSubmitted = !!state.isQuoteSubmitted;
+            w.isInterested = !!state.isInterested;
+            w.status = state.status || w.status;
+            w.viewed = !!state.viewed;
+            w.buttonsDisabled = !!state.buttonsDisabled;
 
             if (state.notInterested) {
               w.notInterested = {
@@ -207,15 +209,21 @@ export class ProjectSummary implements OnInit {
               };
             }
 
-            if (state.status === 'Interested') {
-              w.isQuoteSubmitted = true;
+            // ✅ Restore chevron only if interested
+            if (w.isInterested) {
               this.expandedId = w.workItemID;
             }
+          } else {
+            // Defaults (important for first load)
+            w.isQuoteSubmitted = false;
+            w.isInterested = false;
           }
 
+          /* ===== Restore previous submissions ===== */
           const subKey = `rfq_prev_submissions_${this.rfqId}_${this.subId}_${w.workItemID}`;
           w.previousSubmissions = JSON.parse(localStorage.getItem(subKey) || '[]');
 
+          /* ===== Mark as viewed (server-side) ===== */
           this.rfqResponseService
             .markAsViewed(this.rfqId, this.subId, w.workItemID)
             .subscribe();
@@ -227,7 +235,7 @@ export class ProjectSummary implements OnInit {
         console.error(err);
       },
     });
-  }
+}
 
   toggleRow(wi: any) {
     this.expandedId = this.expandedId === wi.workItemID ? null : wi.workItemID;

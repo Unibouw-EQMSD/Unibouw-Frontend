@@ -209,10 +209,10 @@ updateRfq(
         );
     }
 
-    deleteRfq(rfqId: string) {
+deleteRfq(rfqId: string) {
   return from(this.getHeaders()).pipe(
-    switchMap((headers) =>
-      this.http.delete(`${this.apiURL}/Rfq/${rfqId}`, { headers })
+    switchMap(headers =>
+      this.http.post(`${this.apiURL}/Rfq/delete/${rfqId}`, {}, { headers })
     )
   );
 }
