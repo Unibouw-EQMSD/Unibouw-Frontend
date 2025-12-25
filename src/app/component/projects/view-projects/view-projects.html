@@ -586,7 +586,8 @@
 
                     <!-- Message Bubble -->
                     <div class="message" [ngClass]="convo.senderType === 'PM' ? 'user' : 'bot'">
-                      {{ convo.messageText }}
+                      <!-- {{ convo.messageText }} -->
+                      {{ convo.messageText || convo.message || convo.Message }}
                     </div>
                   </div>
                 </div>

@@ -13,7 +13,7 @@ import { ReminderService } from '../../../services/reminder.service';
 import { registerLocaleData } from '@angular/common';
 import localeNl from '@angular/common/locales/nl';
 import { Location } from '@angular/common';
-import { switchMap } from 'rxjs/operators';
+import { switchMap, finalize } from 'rxjs/operators';
 import { of } from 'rxjs';
 
 interface RfqResponse {
@@ -55,34 +55,33 @@ interface WorkItem {
 }
 
 interface RFQConversationMessage {
-  ConversationMessageID?: string;
-  ProjectID: string;
-  RfqID: string;
-  WorkItemID?: string | null;
-  SubcontractorID: string;
-  ProjectManagerID?: string;
-  SenderType: 'PM' | 'Subcontractor';
-  MessageText: string;
-  Subject?: string;
-  MessageDateTime?: Date;
-  Status?: string;
-  CreatedBy: string;
-  CreatedOn?: Date;
+  conversationMessageID?: string;
+  projectID: string;
+  rfqID: string;
+  workItemID?: string | null;
+  subcontractorID: string;
+  projectManagerID?: string;
+  senderType: 'PM' | 'Subcontractor';
+  messageText: string;
+  subject?: string;
+  messageDateTime?: Date;
+  status?: string;
+  createdBy: string;
+  createdOn?: Date;
 }
 
 // log-conversation.model.ts
 interface LogConversation {
-  // LogConversationID: string | null;
-  ProjectID: string;
-  RfqID: string;
-  SubcontractorID: string;
-  ProjectManagerID: string;
-  ConversationType: string;
-  Subject: string;
-  Message: string;
-  MessageDateTime: Date;
-  CreatedBy: string;
-  CreatedOn: Date;
+  projectID: string;
+  rfqID: string;
+  subcontractorID: string;
+  projectManagerID: string;
+  conversationType: string;
+  subject: string;
+  message: string;
+  messageDateTime: Date;
+  createdBy: string;
+  createdOn: Date;
 }
 
 export const MY_FORMATS = {
@@ -844,7 +843,7 @@ export class ViewProjects {
   //------------ Conversation -----------------
   showLogConvoPopup = false;
   conversationType: string = 'Email';
-  conversationDateTime: string = '';
+  conversationDateTime: Date | null = null;
   conversationSubject: string = '';
   conversationText: string = '';
   selectedSubId: string | null = null;
@@ -926,8 +925,7 @@ export class ViewProjects {
 
   setDefaultValues() {
     const now = new Date();
-    // format for datetime-local => YYYY-MM-DDTHH:mm
-    this.conversationDateTime = now.toISOString().slice(0, 16);
+    this.conversationDateTime = new Date();
     this.conversationSubject = '';
     this.conversationType = 'Email';
   }
@@ -953,48 +951,64 @@ export class ViewProjects {
   }
 
   saveLogConvo() {
+    if (!this.conversationText?.trim() || this.isLoading) return;
+
     if (!this.conversationsData?.length) {
-      alert('No Data captured!!!');
+      alert('No conversation data available.');
       return;
     }
+
+    this.isLoading = true;
 
     const draftConvo = this.conversationsData[0];
 
     const payload: LogConversation = {
-      ProjectID: draftConvo.projectID,
-      RfqID: draftConvo.rfqID,
-      SubcontractorID: draftConvo.subcontractorID,
-      ProjectManagerID: draftConvo.projectManagerID,
-      ConversationType: this.conversationType || 'Email',
-      Subject: this.conversationSubject || '',
-      Message: this.conversationText || '',
-      MessageDateTime: new Date(this.conversationDateTime || new Date()),
-      CreatedBy: draftConvo.createdBy,
-      CreatedOn: new Date(),
+      projectID: draftConvo.projectID,
+      rfqID: draftConvo.rfqID,
+      subcontractorID: draftConvo.subcontractorID,
+      projectManagerID: draftConvo.projectManagerID,
+      conversationType: this.conversationType || 'Email',
+      subject: this.conversationSubject || '',
+      message: this.conversationText,
+      messageDateTime: this.conversationDateTime ?? new Date(),
+      createdBy: draftConvo.createdBy,
+      createdOn: new Date(),
     };
 
-    this.projectService.createLogConversation(payload).subscribe({
-      next: (res) => {
-        // Push to UI immediately
-        this.pmSubConversationData.push({
-          ...res,
-          senderType: 'PM', // or 'Subcontractor' based on your logic
-          messageDateTime: new Date(res.MessageDateTime || new Date()),
-        });
+    this.projectService
+      .createLogConversation(payload)
+      .pipe(
+        switchMap((res) => {
+          this.pmSubConversationData.push({
+            ...res,
+            messageText: res.message,
+            senderType: 'Subcontractor',
+            messageDateTime: res.messageDateTime,
+          });
 
-        // Sort by datetime
-        this.pmSubConversationData.sort(
-          (a, b) => new Date(a.messageDateTime).getTime() - new Date(b.messageDateTime).getTime()
-        );
+          this.pmSubConversationData.sort(
+            (a, b) => new Date(a.messageDateTime).getTime() - new Date(b.messageDateTime).getTime()
+          );
 
-        this.afterMessageSent(); // reset & close popup
-        alert('Conversation logged successfully!');
-      },
-      error: (err) => {
-        console.error('Error saving conversation:', err);
-        alert('Failed to save conversation. Please try again.');
-      },
-    });
+          // If later you want to send mail, plug it here
+          // return this.projectService.sendMail({...});
+
+          return of(true);
+        }),
+        finalize(() => {
+          this.isLoading = false;
+        })
+      )
+      .subscribe({
+        next: () => {
+          this.afterMessageSent();
+          alert('Conversation logged successfully!');
+        },
+        error: (err) => {
+          console.error('Error saving conversation:', err);
+          alert('Failed to save conversation. Please try again.');
+        },
+      });
   }
 
   sendMessage() {
@@ -1005,17 +1019,19 @@ export class ViewProjects {
       return;
     }
 
+    this.isLoading = true;
+
     const draftConvo = this.conversationsData[0];
 
     const payload: RFQConversationMessage = {
-      ProjectID: draftConvo.projectID,
-      RfqID: draftConvo.rfqID,
-      WorkItemID: null,
-      SubcontractorID: draftConvo.subcontractorID,
-      SenderType: 'PM',
-      MessageText: this.messageText,
-      Subject: this.subject || '',
-      CreatedBy: draftConvo.createdBy,
+      projectID: draftConvo.projectID,
+      rfqID: draftConvo.rfqID,
+      workItemID: null,
+      subcontractorID: draftConvo.subcontractorID,
+      senderType: 'PM',
+      messageText: this.messageText,
+      subject: this.subject || '',
+      createdBy: draftConvo.createdBy,
     };
 
     this.projectService
@@ -1026,7 +1042,7 @@ export class ViewProjects {
           this.pmSubConversationData.push({
             ...res,
             senderType: 'PM',
-            messageDateTime: new Date(res.MessageDateTime || new Date()),
+            messageDateTime: new Date(res.messageDateTime || new Date()),
           });
 
           // Sort messages by date
@@ -1040,6 +1056,9 @@ export class ViewProjects {
             subject: this.subject,
             body: this.messageText,
           });
+        }),
+        finalize(() => {
+          this.isLoading = false;
         })
       )
       .subscribe({

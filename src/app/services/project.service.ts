@@ -20,34 +20,33 @@ export interface projectdetails {
 }
 
 export interface RFQConversationMessage {
-  ConversationMessageID?: string;
-  ProjectID: string;
-  RfqID: string;
-  WorkItemID?: string | null;
-  SubcontractorID: string;
-  ProjectManagerID?: string;
-  SenderType: 'PM' | 'Subcontractor';
-  MessageText: string;
-  Subject?: string;
-  MessageDateTime?: Date;
-  Status?: string;
-  CreatedBy: string;
-  CreatedOn?: Date;
+  conversationMessageID?: string;
+  projectID: string;
+  rfqID: string;
+  workItemID?: string | null;
+  subcontractorID: string;
+  projectManagerID?: string;
+  senderType: 'PM' | 'Subcontractor';
+  messageText: string;
+  subject?: string;
+  messageDateTime?: Date;
+  status?: string;
+  createdBy: string;
+  createdOn?: Date;
 }
 
 // log-conversation.model.ts
 export interface LogConversation {
-  // LogConversationID: string | null;
-  ProjectID: string;
-  RfqID: string;
-  SubcontractorID: string;
-  ProjectManagerID: string;
-  ConversationType: string;
-  Subject: string;
-  Message: string;
-  MessageDateTime: Date;
-  CreatedBy: string;
-  CreatedOn: Date;
+  projectID: string;
+  rfqID: string;
+  subcontractorID: string;
+  projectManagerID: string;
+  conversationType: string;
+  subject: string;
+  message: string;
+  messageDateTime: Date;
+  createdBy: string;
+  createdOn: Date;
 }
 
 export interface SendMailRequest {
