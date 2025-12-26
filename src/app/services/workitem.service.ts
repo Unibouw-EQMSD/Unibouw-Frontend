@@ -14,6 +14,7 @@ export interface Workitem {
   isActive?: boolean;
   isEditing?: boolean;
   showSavedMsg?: boolean;
+   selectedSubcontractorCount?: number;
 }
 
 export interface WorkitemCategory {
