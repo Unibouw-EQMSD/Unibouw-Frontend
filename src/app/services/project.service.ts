@@ -19,6 +19,52 @@ export interface projectdetails {
   editItem?: boolean;
 }
 
+export interface RFQConversationMessage {
+  conversationMessageID?: string;
+  projectID: string;
+  rfqID: string;
+  workItemID?: string | null;
+  subcontractorID: string;
+  projectManagerID?: string;
+  senderType: 'PM' | 'Subcontractor';
+  messageText: string;
+  subject?: string;
+  messageDateTime?: Date;
+  status?: string;
+  createdBy: string;
+  createdOn?: Date;
+}
+
+// log-conversation.model.ts
+export interface LogConversation {
+  projectID: string;
+  rfqID: string;
+  subcontractorID: string;
+  projectManagerID: string;
+  conversationType: string;
+  subject: string;
+  message: string;
+  messageDateTime: Date;
+  createdBy: string;
+  createdOn: Date;
+}
+
+export interface SendMailRequest {
+  subcontractorID: string;
+  subject: string;
+  body: string; // message body (HTML or text)
+}
+
+export type SenderType = 'PM' | 'Subcontractor';
+
+export interface ConversationMessageDto {
+  messageID: string;
+  senderType: SenderType;
+  messageText: string;
+  messageDateTime: string;
+  subject?: string;
+}
+
 @Injectable({ providedIn: 'root' })
 export class projectService {
   apiURL: string = '';
@@ -79,6 +125,69 @@ export class projectService {
           editItem: false,
         }))
       )
+    );
+  }
+
+  getConversationByProjectAndSubcontractor(
+    projectId: string,
+    subcontractorId: string
+  ): Observable<projectdetails[]> {
+    return from(this.getHeaders()).pipe(
+      switchMap((headers) =>
+        this.http.get<{ count: number; data: projectdetails[] }>(
+          `${this.apiURL}/RFQConversationMessage/GetConvoByProjectAndSubcontractor`,
+          {
+            headers,
+            params: {
+              projectId,
+              subcontractorId,
+            },
+          }
+        )
+      ),
+      map((res) => res.data) //extract messages list
+    );
+  }
+
+  createLogConversation(payload: LogConversation): Observable<LogConversation> {
+    return from(this.getHeaders()).pipe(
+      switchMap((headers) =>
+        this.http.post<{ message: string; data: LogConversation }>(
+          `${this.apiURL}/RFQConversationMessage/AddLogConversation`,
+          payload, // 👈 direct payload
+          { headers }
+        )
+      ),
+      map((res) => res.data)
+    );
+  }
+
+  getConversation(projectId: string, rfqId: string, subId: string) {
+    return this.http.get<ConversationMessageDto[]>(
+      `${this.apiURL}/RFQConversationMessage/conversation`,
+      { params: { projectId, rfqId, subcontractorId: subId } }
+    );
+  }
+
+  addRfqConversationMessage(message: RFQConversationMessage): Observable<RFQConversationMessage> {
+    return from(this.getHeaders()).pipe(
+      switchMap((headers) =>
+        this.http.post<{ message: string; data: RFQConversationMessage }>(
+          `${this.apiURL}/RFQConversationMessage/AddRFQConversationMessage`,
+          message,
+          { headers }
+        )
+      ),
+      map((res) => res.data) // return the created message
+    );
+  }
+
+  sendMail(payload: SendMailRequest): Observable<boolean> {
+    return from(this.getHeaders()).pipe(
+      switchMap((headers) =>
+        this.http.post<{ success: boolean }>(`${this.apiURL}/Email/send-mail`, payload, { headers })
+      ),
+      map((res) => res.success)
     );
   }
 }

@@ -117,7 +117,7 @@
 
             <button
               [class.active]="selectedTab === 'conversation'"
-              (click)="selectedTab = 'conversation'"
+              (click)="selectedTab = 'conversation'; loadConversationSubcontractors()"
             >
               Conversation
             </button>
@@ -511,8 +511,150 @@
           </mat-paginator>
           <!-- TAB 3: CONVERSATION -->
           <div *ngIf="selectedTab === 'conversation'">
-            <h3>Conversation</h3>
-            <p>No messages yet.</p>
+            <div class="noData" *ngIf="!convoSubcontractors || convoSubcontractors.length === 0">
+              No Conversation.
+            </div>
+            <div class="chat-container" *ngIf="(convoSubcontractors?.length ?? 0) > 0">
+              <!-- LEFT SIDEBAR -->
+              <div class="chat-sidebar">
+                <div class="sidebar-list" *ngIf="(convoSubcontractors?.length ?? 0) > 0">
+                  <div
+                    class="sidebar-item"
+                    *ngFor="let sub of convoSubcontractors ?? []; let i = index"
+                    [class.active]="selectedIndex === i"
+                    (click)="onSubClick(sub.id, i)"
+                  >
+                    {{ sub.name }}
+                  </div>
+                </div>
+
+                <!-- Button moved to bottom -->
+                <button class="log-btn" (click)="openLogConvo()">Log conversation</button>
+              </div>
+
+              <!-- RIGHT CHAT AREA -->
+              <div class="chat-content">
+                <!-- Loader -->
+                <div *ngIf="isSpinLoading" class="chat-loader">
+                  <mat-spinner diameter="40"></mat-spinner>
+                </div>
+
+                <ng-container *ngIf="!isLoading">
+                  <!-- Scrollable MESSAGES -->
+                  <div class="chat-messages">
+                    <!-- No Data -->
+                    <div
+                      class="noData"
+                      *ngIf="
+                        !isSpinLoading &&
+                        (!pmSubConversationData || pmSubConversationData.length === 0)
+                      "
+                    >
+                      No Conversation
+                    </div>
+
+                    <!-- Chat Messages -->
+                    <div
+                      class="message-row"
+                      *ngFor="let convo of pmSubConversationData"
+                      [ngClass]="convo.senderType === 'PM' ? 'right' : 'left'"
+                    >
+                      <!-- Subcontractor Meta -->
+                      <ng-container *ngIf="convo.senderType !== 'PM'">
+                        <div class="message-meta">
+                          <!-- Date/Time -->
+                          <span class="message-time">
+                            {{ convo.messageDateTime | date : 'MMM d, y h:mm a' }}
+                          </span>
+
+                          <!-- Conversation Type Icon -->
+                          <ng-container [ngSwitch]="convo.conversationType?.toLowerCase()">
+                            <i
+                              *ngSwitchCase="'phone'"
+                              class="fa fa-phone convoType-icon"
+                              aria-hidden="true"
+                            ></i>
+                            <i
+                              *ngSwitchCase="'email'"
+                              class="fa fa-envelope convoType-icon"
+                              aria-hidden="true"
+                            ></i>
+                            <i
+                              *ngSwitchCase="'meeting'"
+                              class="fa-sharp fa-regular fa-handshake convoType-icon"
+                              aria-hidden="true"
+                            ></i>
+                            <ng-container *ngSwitchDefault></ng-container>
+                          </ng-container>
+
+                          <!-- Reply Button -->
+                          <button class="reply-btn">Reply</button>
+                        </div>
+                      </ng-container>
+
+                      <!-- PM Meta -->
+                      <ng-container *ngIf="convo.senderType === 'PM'">
+                        <span class="message-time">
+                          {{ convo.messageDateTime | date : 'MMM d, y h:mm a' }}
+                        </span>
+                      </ng-container>
+
+                      <!-- Message Bubble -->
+                      <div class="message" [ngClass]="convo.senderType === 'PM' ? 'user' : 'bot'">
+                        <!-- {{ convo.messageText }} -->
+                        {{ convo.messageText || convo.message || convo.Message }}
+                      </div>
+                    </div>
+                  </div>
+                </ng-container>
+                <!-- INPUT AREA -->
+                <div class="chat-input">
+                  <!-- Row 1: Attachments -->
+                  <div class="attachment-row" *ngIf="attachments.length">
+                    <div class="file-chip" *ngFor="let file of attachments; let i = index">
+                      {{ file.name }}
+                      <span class="remove" (click)="removeFile(i)" title="Remove">✕</span>
+                    </div>
+                  </div>
+
+                  <!-- Row 2: Subject + Message + Actions -->
+                  <div class="input-row">
+                    <input
+                      type="text"
+                      class="subject-input"
+                      placeholder="Enter Subject"
+                      [(ngModel)]="subject"
+                    />
+
+                    <input
+                      type="text"
+                      class="message-input"
+                      placeholder="Enter your message..."
+                      [(ngModel)]="messageText"
+                    />
+
+                    <!-- Hidden file input -->
+                    <input
+                      type="file"
+                      #fileInput
+                      multiple
+                      hidden
+                      (change)="onFileSelected($event)"
+                    />
+
+                    <!-- Attach icon -->
+                    <i
+                      class="fa fa-paperclip attach-icon"
+                      title="Attach"
+                      (click)="fileInput.click()"
+                    ></i>
+
+                    <!-- Send icon -->
+                    <i class="fa fa-paper-plane send-icon" title="Send" (click)="sendMessage()"></i>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -631,3 +773,60 @@
   </div>
 </main>
 <app-footer></app-footer>
+
+<!-- Log Conversation Popup Modal -->
+<div class="custom-modal-backdrop" *ngIf="showLogConvoPopup"></div>
+
+<div class="custom-modal" *ngIf="showLogConvoPopup">
+  <div class="modal-content-box">
+    <!-- Modal Header -->
+    <div class="modal-header">
+      <p class="modal-title">Log Conversation</p>
+      <!-- Close Icon -->
+      <button class="modal-close" title="Close" (click)="closeLogConvo()" aria-label="Close">
+        &times;
+      </button>
+    </div>
+
+    <!-- Modal Body -->
+    <div class="modal-body">
+      <!-- Conversation Type-->
+      <div class="row">
+        <label class="label">Conversation Type</label>
+        <div class="time-wrapper">
+          <select class="drop-down-type" [(ngModel)]="conversationType">
+            <option>Email</option>
+            <option>Meeting</option>
+            <option>Phone</option>
+            <option>Other</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Date & Time -->
+      <div class="row">
+        <label class="label">Date & Time</label>
+        <div class="time-wrapper">
+          <input type="datetime-local" class="date-time-input" [(ngModel)]="conversationDateTime" />
+        </div>
+      </div>
+      <!-- Add Subject -->
+      <div class="modal-section">
+        <label class="label block">Subject</label>
+        <input type="text" class="input-text" [(ngModel)]="conversationSubject" />
+      </div>
+      <!-- Add Conversation -->
+      <div class="modal-section">
+        <label class="label block">Add Conversation</label>
+        <textarea class="add-convo-textarea" rows="4" [(ngModel)]="conversationText"></textarea>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="modal-footer">
+      <button class="btn cancel-btn" (click)="closeLogConvo()">Cancel</button>
+      <button class="btn reset-btn" (click)="resetLogConvo()">Reset</button>
+      <button class="btn submit-btn" (click)="saveLogConvo()">Save</button>
+    </div>
+  </div>
+</div>

@@ -13,6 +13,8 @@ import { ReminderService } from '../../../services/reminder.service';
 import { registerLocaleData } from '@angular/common';
 import localeNl from '@angular/common/locales/nl';
 import { Location } from '@angular/common';
+import { switchMap, finalize } from 'rxjs/operators';
+import { of } from 'rxjs';
 
 interface RfqResponse {
   name: string;
@@ -50,6 +52,36 @@ interface WorkItem {
   currentStart: number;
   currentEnd: number;
   rfqs: RfqResponse[];
+}
+
+interface RFQConversationMessage {
+  conversationMessageID?: string;
+  projectID: string;
+  rfqID: string;
+  workItemID?: string | null;
+  subcontractorID: string;
+  projectManagerID?: string;
+  senderType: 'PM' | 'Subcontractor';
+  messageText: string;
+  subject?: string;
+  messageDateTime?: Date;
+  status?: string;
+  createdBy: string;
+  createdOn?: Date;
+}
+
+// log-conversation.model.ts
+interface LogConversation {
+  projectID: string;
+  rfqID: string;
+  subcontractorID: string;
+  projectManagerID: string;
+  conversationType: string;
+  subject: string;
+  message: string;
+  messageDateTime: Date;
+  createdBy: string;
+  createdOn: Date;
 }
 
 export const MY_FORMATS = {
@@ -102,6 +134,7 @@ export class ViewProjects {
   ];
   dataSource = new MatTableDataSource<any>([]);
   isLoading = false;
+  isSpinLoading = false;
   rfqs: Rfq[] = []; // <-- Add this line
   duedate: Date | null = null;
   GlobalReminderConfig: any = null;
@@ -110,6 +143,7 @@ export class ViewProjects {
   reminderEmailBody: string = '';
   minDate: Date = new Date();
   maxDate!: Date;
+  convoSubcontractors: { id: string; name: string }[] = [];
 
   setMaxDueDate(due: Date | string) {
     if (typeof due === 'string') {
@@ -499,6 +533,7 @@ loadRfqResponseSummary(projectId: string) {
     work.viewed = work.rfqs.filter((r) => r.viewed).length;
     work.maybeLater = work.rfqs.filter((r) => r.maybeLater).length; // <--- add this
   }
+
   triggerViewOnLoad() {
     if (!this.workItems?.length) return;
 
@@ -587,6 +622,7 @@ deleteRfq(rfqId: string) {
     const date = new Date(dateString);
     return date.toLocaleDateString('en-GB'); // dd/MM/yyyy
   }
+
   applyFilter(event: Event) {
     const filterValue = (event.target as HTMLInputElement).value.trim().toLowerCase();
     this.dataSource.filter = filterValue;
@@ -599,6 +635,7 @@ deleteRfq(rfqId: string) {
       alert(`Downloading RFQ: ${element.customerName}`);
     }
   }
+
   goToPage(page: number) {
     if (page >= 1 && page <= this.totalPages) {
       this.currentPage = page;
@@ -616,6 +653,7 @@ deleteRfq(rfqId: string) {
 
     this.updatePagedItems();
   }
+
   getFilteredRfqs(work: WorkItem) {
     const term = (work.searchText || '').trim().toLowerCase();
     let list = work.rfqs;
@@ -660,6 +698,7 @@ deleteRfq(rfqId: string) {
       this.updatePagedItems();
     }
   }
+
   enableEdit(item: any) {
     item.isEditingDueDate = true;
   }
@@ -901,5 +940,279 @@ deleteRfq(rfqId: string) {
   // Add a new custom reminder date
   addCustomDate() {
     this.customReminderDates.push(null);
+  }
+
+  //------------ Conversation -----------------
+  showLogConvoPopup = false;
+  conversationType: string = 'Email';
+  conversationDateTime: Date | null = null;
+  conversationSubject: string = '';
+  conversationText: string = '';
+  selectedSubId: string | null = null;
+  conversationsData: any[] = [];
+  pmSubConversationData: any[] = [];
+  selectedIndex: number = 0; // default first item active
+  subject: string = '';
+  messageText: string = '';
+  attachments: File[] = [];
+
+  onFileSelected(event: Event) {
+    const input = event.target as HTMLInputElement;
+
+    if (!input.files?.length) return;
+
+    for (let i = 0; i < input.files.length; i++) {
+      this.attachments.push(input.files[i]);
+    }
+
+    // reset input so same file can be selected again
+    input.value = '';
+  }
+
+  removeFile(index: number) {
+    this.attachments.splice(index, 1);
+  }
+
+  onSubClick(subId: string, index: number): void {
+    this.selectedIndex = index;
+    // show spinner
+    this.isSpinLoading = true;
+    // clear old messages
+    this.pmSubConversationData = [];
+    // load new conversation
+    this.loadConversationBySub(subId);
+
+    // hide spinner after .4 seconds
+    setTimeout(() => {
+      this.isSpinLoading = false;
+    }, 400);
+  }
+
+  loadConversationSubcontractors() {
+    // Prevent reloading if already loaded
+    if (this.convoSubcontractors.length > 0) return;
+
+    this.isLoading = true;
+
+    this.rfqResponseService.getResponsesByProjectSubcontractors(this.projectId).subscribe({
+      next: (res: any[]) => {
+        const map = new Map<string, string>();
+
+        res.forEach((item) => {
+          if (!map.has(item.subcontractorId)) {
+            map.set(item.subcontractorId, item.subcontractorName);
+          }
+        });
+
+        this.convoSubcontractors = Array.from(map, ([id, name]) => ({ id, name })).sort((a, b) =>
+          a.name.localeCompare(b.name)
+        ); // ✅ ASC sort
+
+        this.isLoading = false;
+      },
+      error: (err) => {
+        console.error('Error loading conversation subcontractors', err);
+        this.isLoading = false;
+      },
+    });
+  }
+
+  loadConversationBySub(selectedSubId: string): void {
+    if (!selectedSubId) return;
+
+    this.projectService
+      .getConversationByProjectAndSubcontractor(this.projectId, selectedSubId)
+      .pipe(
+        switchMap((res: any[]) => {
+          this.conversationsData = res;
+          console.log('conversationsData---------:', res);
+
+          if (!res || res.length === 0) {
+            // No draft conversation → return empty observable
+            this.pmSubConversationData = [];
+            return of([]);
+          }
+
+          const draftConvo = res[0];
+
+          return this.projectService.getConversation(
+            draftConvo.projectID,
+            draftConvo.rfqID,
+            draftConvo.subcontractorID
+          );
+        })
+      )
+      .subscribe({
+        next: (res) => {
+          this.pmSubConversationData = res;
+          console.log('pmSubConversationData---------:', res);
+        },
+        error: (err) => {
+          console.error('■ Error loading conversation:', err);
+        },
+      });
+  }
+
+  setDefaultValues() {
+    const now = new Date();
+    this.conversationDateTime = new Date();
+    this.conversationSubject = '';
+    this.conversationType = 'Email';
+  }
+
+  openLogConvo() {
+    this.setDefaultValues();
+    this.showLogConvoPopup = true;
+  }
+
+  closeLogConvo() {
+    this.showLogConvoPopup = false;
+    this.setDefaultValues();
+    this.conversationType = 'Email';
+    this.conversationSubject = '';
+    this.conversationText = '';
+  }
+
+  resetLogConvo() {
+    this.setDefaultValues();
+    this.conversationType = 'Email';
+    this.conversationSubject = '';
+    this.conversationText = '';
+  }
+
+  saveLogConvo() {
+    if (!this.conversationText?.trim() || this.isLoading) return;
+
+    if (!this.conversationsData?.length) {
+      alert('No conversation data available.');
+      return;
+    }
+
+    this.isLoading = true;
+
+    const draftConvo = this.conversationsData[0];
+
+    const payload: LogConversation = {
+      projectID: draftConvo.projectID,
+      rfqID: draftConvo.rfqID,
+      subcontractorID: draftConvo.subcontractorID,
+      projectManagerID: draftConvo.projectManagerID,
+      conversationType: this.conversationType || 'Email',
+      subject: this.conversationSubject || '',
+      message: this.conversationText,
+      messageDateTime: this.conversationDateTime ?? new Date(),
+      createdBy: draftConvo.createdBy,
+      createdOn: new Date(),
+    };
+
+    this.projectService
+      .createLogConversation(payload)
+      .pipe(
+        switchMap((res) => {
+          this.pmSubConversationData.push({
+            ...res,
+            messageText: res.message,
+            senderType: 'Subcontractor',
+            messageDateTime: res.messageDateTime,
+          });
+
+          this.pmSubConversationData.sort(
+            (a, b) => new Date(a.messageDateTime).getTime() - new Date(b.messageDateTime).getTime()
+          );
+
+          // If later you want to send mail, plug it here
+          // return this.projectService.sendMail({...});
+
+          return of(true);
+        }),
+        finalize(() => {
+          this.isLoading = false;
+        })
+      )
+      .subscribe({
+        next: () => {
+          this.afterMessageSent();
+          alert('Conversation logged successfully!');
+        },
+        error: (err) => {
+          console.error('Error saving conversation:', err);
+          alert('Failed to save conversation. Please try again.');
+        },
+      });
+  }
+
+  sendMessage() {
+    // Allow subject OR message
+    if (!this.messageText?.trim() && !this.subject?.trim()) return;
+
+    if (!this.conversationsData?.length) {
+      alert('No conversation data available.');
+      return;
+    }
+
+    this.isLoading = true;
+
+    const draftConvo = this.conversationsData[0];
+
+    const payload: RFQConversationMessage = {
+      projectID: draftConvo.projectID,
+      rfqID: draftConvo.rfqID,
+      workItemID: null,
+      subcontractorID: draftConvo.subcontractorID,
+      senderType: 'PM',
+      messageText: this.messageText,
+      subject: this.subject || '',
+      createdBy: draftConvo.createdBy,
+    };
+
+    this.projectService
+      .addRfqConversationMessage(payload)
+      .pipe(
+        switchMap((res) => {
+          // Update UI immediately
+          this.pmSubConversationData.push({
+            ...res,
+            senderType: 'PM',
+            messageDateTime: new Date(res.messageDateTime || new Date()),
+          });
+
+          // Sort messages by date
+          this.pmSubConversationData.sort(
+            (a, b) => new Date(a.messageDateTime).getTime() - new Date(b.messageDateTime).getTime()
+          );
+
+          // Send email
+          return this.projectService.sendMail({
+            subcontractorID: draftConvo.subcontractorID,
+            subject: this.subject,
+            body: this.messageText,
+          });
+        }),
+        finalize(() => {
+          this.isLoading = false;
+        })
+      )
+      .subscribe({
+        next: (mailSuccess) => {
+          if (mailSuccess) console.log('Mail sent successfully');
+
+          this.messageText = '';
+          this.subject = '';
+          // Reset inputs, close popup, reload conversation
+          this.afterMessageSent();
+          alert('Conversation logged successfully!');
+        },
+        error: (err) => {
+          console.error('Error sending message or mail:', err);
+          alert('Failed to save conversation. Please try again.');
+        },
+      });
+  }
+
+  // Helper method for reset, close, reload
+  private afterMessageSent() {
+    this.closeLogConvo();
+    this.resetLogConvo();
+    if (this.selectedSubId) this.loadConversationBySub(this.selectedSubId);
   }
 }
