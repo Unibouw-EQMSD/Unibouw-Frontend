@@ -528,86 +528,124 @@
 
               <!-- RIGHT CHAT AREA -->
               <div class="chat-content">
-                <!-- Scrollable MESSAGES -->
-                <div class="chat-messages">
-                  <!-- No Data -->
-                  <div
-                    class="noData"
-                    *ngIf="!pmSubConversationData || pmSubConversationData.length === 0"
-                  >
-                    No Conversation
-                  </div>
+                <!-- Loader -->
+                <div *ngIf="isSpinLoading" class="chat-loader">
+                  <mat-spinner diameter="40"></mat-spinner>
+                </div>
 
-                  <!-- Chat Messages -->
-                  <div
-                    class="message-row"
-                    *ngFor="let convo of pmSubConversationData"
-                    [ngClass]="convo.senderType === 'PM' ? 'right' : 'left'"
-                  >
-                    <!-- Subcontractor Meta -->
-                    <ng-container *ngIf="convo.senderType !== 'PM'">
-                      <div class="message-meta">
-                        <!-- Date/Time -->
+                <ng-container *ngIf="!isLoading">
+                  <!-- Scrollable MESSAGES -->
+                  <div class="chat-messages">
+                    <!-- No Data -->
+                    <div
+                      class="noData"
+                      *ngIf="
+                        !isSpinLoading &&
+                        (!pmSubConversationData || pmSubConversationData.length === 0)
+                      "
+                    >
+                      No Conversation
+                    </div>
+
+                    <!-- Chat Messages -->
+                    <div
+                      class="message-row"
+                      *ngFor="let convo of pmSubConversationData"
+                      [ngClass]="convo.senderType === 'PM' ? 'right' : 'left'"
+                    >
+                      <!-- Subcontractor Meta -->
+                      <ng-container *ngIf="convo.senderType !== 'PM'">
+                        <div class="message-meta">
+                          <!-- Date/Time -->
+                          <span class="message-time">
+                            {{ convo.messageDateTime | date : 'MMM d, y h:mm a' }}
+                          </span>
+
+                          <!-- Conversation Type Icon -->
+                          <ng-container [ngSwitch]="convo.conversationType?.toLowerCase()">
+                            <i
+                              *ngSwitchCase="'phone'"
+                              class="fa fa-phone convoType-icon"
+                              aria-hidden="true"
+                            ></i>
+                            <i
+                              *ngSwitchCase="'email'"
+                              class="fa fa-envelope convoType-icon"
+                              aria-hidden="true"
+                            ></i>
+                            <i
+                              *ngSwitchCase="'meeting'"
+                              class="fa-sharp fa-regular fa-handshake convoType-icon"
+                              aria-hidden="true"
+                            ></i>
+                            <ng-container *ngSwitchDefault></ng-container>
+                          </ng-container>
+
+                          <!-- Reply Button -->
+                          <button class="reply-btn">Reply</button>
+                        </div>
+                      </ng-container>
+
+                      <!-- PM Meta -->
+                      <ng-container *ngIf="convo.senderType === 'PM'">
                         <span class="message-time">
                           {{ convo.messageDateTime | date : 'MMM d, y h:mm a' }}
                         </span>
+                      </ng-container>
 
-                        <!-- Conversation Type Icon -->
-                        <ng-container [ngSwitch]="convo.conversationType?.toLowerCase()">
-                          <i
-                            *ngSwitchCase="'phone'"
-                            class="fa fa-phone convoType-icon"
-                            aria-hidden="true"
-                          ></i>
-                          <i
-                            *ngSwitchCase="'email'"
-                            class="fa fa-envelope convoType-icon"
-                            aria-hidden="true"
-                          ></i>
-                          <i
-                            *ngSwitchCase="'meeting'"
-                            class="fa-sharp fa-regular fa-handshake convoType-icon"
-                            aria-hidden="true"
-                          ></i>
-                          <ng-container *ngSwitchDefault></ng-container>
-                        </ng-container>
-
-                        <!-- Reply Button -->
-                        <button class="reply-btn">Reply</button>
+                      <!-- Message Bubble -->
+                      <div class="message" [ngClass]="convo.senderType === 'PM' ? 'user' : 'bot'">
+                        <!-- {{ convo.messageText }} -->
+                        {{ convo.messageText || convo.message || convo.Message }}
                       </div>
-                    </ng-container>
-
-                    <!-- PM Meta -->
-                    <ng-container *ngIf="convo.senderType === 'PM'">
-                      <span class="message-time">
-                        {{ convo.messageDateTime | date : 'MMM d, y h:mm a' }}
-                      </span>
-                    </ng-container>
-
-                    <!-- Message Bubble -->
-                    <div class="message" [ngClass]="convo.senderType === 'PM' ? 'user' : 'bot'">
-                      <!-- {{ convo.messageText }} -->
-                      {{ convo.messageText || convo.message || convo.Message }}
                     </div>
                   </div>
-                </div>
-
+                </ng-container>
                 <!-- INPUT AREA -->
                 <div class="chat-input">
-                  <input type="text" placeholder="Enter Subject" [(ngModel)]="subject" />
-                  <input
-                    type="text"
-                    placeholder="Enter your message..."
-                    [(ngModel)]="messageText"
-                  />
-                  <!-- <button class="send-btn">➤</button> -->
-                  <i class="fa fa-paperclip attach-icon" aria-hidden="true" title="Attach"></i>
-                  <i
-                    class="fa fa-paper-plane send-icon"
-                    aria-hidden="true"
-                    title="Send"
-                    (click)="sendMessage()"
-                  ></i>
+                  <!-- Row 1: Attachments -->
+                  <div class="attachment-row" *ngIf="attachments.length">
+                    <div class="file-chip" *ngFor="let file of attachments; let i = index">
+                      {{ file.name }}
+                      <span class="remove" (click)="removeFile(i)" title="Remove">✕</span>
+                    </div>
+                  </div>
+
+                  <!-- Row 2: Subject + Message + Actions -->
+                  <div class="input-row">
+                    <input
+                      type="text"
+                      class="subject-input"
+                      placeholder="Enter Subject"
+                      [(ngModel)]="subject"
+                    />
+
+                    <input
+                      type="text"
+                      class="message-input"
+                      placeholder="Enter your message..."
+                      [(ngModel)]="messageText"
+                    />
+
+                    <!-- Hidden file input -->
+                    <input
+                      type="file"
+                      #fileInput
+                      multiple
+                      hidden
+                      (change)="onFileSelected($event)"
+                    />
+
+                    <!-- Attach icon -->
+                    <i
+                      class="fa fa-paperclip attach-icon"
+                      title="Attach"
+                      (click)="fileInput.click()"
+                    ></i>
+
+                    <!-- Send icon -->
+                    <i class="fa fa-paper-plane send-icon" title="Send" (click)="sendMessage()"></i>
+                  </div>
                 </div>
               </div>
             </div>

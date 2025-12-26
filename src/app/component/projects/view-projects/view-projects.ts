@@ -134,6 +134,7 @@ export class ViewProjects {
   ];
   dataSource = new MatTableDataSource<any>([]);
   isLoading = false;
+  isSpinLoading = false;
   rfqs: Rfq[] = []; // <-- Add this line
   duedate: Date | null = null;
   GlobalReminderConfig: any = null;
@@ -852,10 +853,38 @@ export class ViewProjects {
   selectedIndex: number = 0; // default first item active
   subject: string = '';
   messageText: string = '';
+  attachments: File[] = [];
+
+  onFileSelected(event: Event) {
+    const input = event.target as HTMLInputElement;
+
+    if (!input.files?.length) return;
+
+    for (let i = 0; i < input.files.length; i++) {
+      this.attachments.push(input.files[i]);
+    }
+
+    // reset input so same file can be selected again
+    input.value = '';
+  }
+
+  removeFile(index: number) {
+    this.attachments.splice(index, 1);
+  }
 
   onSubClick(subId: string, index: number): void {
     this.selectedIndex = index;
+    // show spinner
+    this.isSpinLoading = true;
+    // clear old messages
+    this.pmSubConversationData = [];
+    // load new conversation
     this.loadConversationBySub(subId);
+
+    // hide spinner after .4 seconds
+    setTimeout(() => {
+      this.isSpinLoading = false;
+    }, 400);
   }
 
   loadConversationSubcontractors() {
@@ -1012,7 +1041,8 @@ export class ViewProjects {
   }
 
   sendMessage() {
-    if (!this.messageText?.trim()) return;
+    // Allow subject OR message
+    if (!this.messageText?.trim() && !this.subject?.trim()) return;
 
     if (!this.conversationsData?.length) {
       alert('No conversation data available.');

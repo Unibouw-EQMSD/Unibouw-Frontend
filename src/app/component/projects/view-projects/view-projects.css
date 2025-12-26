@@ -860,7 +860,7 @@
 
 .sidebar-item {
   padding: 10px;
-  cursor: pointer;
+  cursor: pointer !important;
 }
 
 .sidebar-item.active {
@@ -951,25 +951,78 @@
   background: #d9ecff;
 }
 
-/* INPUT */
+/* INPUT CONTAINER */
 .chat-input {
   border-radius: 8px;
   display: flex;
-  gap: 10px;
+  flex-direction: column; /* 🔑 stack rows */
+  gap: 8px;
   padding: 10px;
   border: 1px solid #ddd;
   margin: 0px 12px 12px;
 }
 
+/* Row 1 – Attachments */
+.attachment-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.file-chip {
+  background: #f3f4f6;
+  border-radius: 14px;
+  padding: 4px 10px;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+}
+
+.file-chip .remove {
+  margin-left: 6px;
+  cursor: pointer;
+  font-weight: bold;
+  color: #dc2626;
+}
+
+/* Row 2 – Inputs + Icons */
+.input-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* Inputs */
 .chat-input input {
-  flex: 1;
   padding: 10px;
-  /* border: 1px solid #ccc; */
   border-radius: 4px;
   outline: none;
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
+.subject-input {
+  width: 200px;
+}
+
+.message-input {
+  flex: 1;
+}
+
+/* Icons */
+.attach-icon {
+  font-size: 20px;
+  cursor: pointer;
+  padding-top: 4px;
+}
+
+.send-icon {
+  font-size: 20px;
+  cursor: pointer;
+  padding-top: 4px;
+  padding-right: 6px;
+}
+
+/* Existing styles preserved */
 .send-btn {
   padding: 10px 15px;
   background: #f57c00;
@@ -1000,18 +1053,11 @@
   color: #ffffff !important;
 }
 
-.attach-icon {
-  font-size: 20px;
-  padding-top: 12px;
-  padding-right: 12px;
-  cursor: pointer;
-}
-
-.send-icon {
-  font-size: 20px;
-  padding-top: 12px;
-  padding-right: 18px;
-  cursor: pointer;
+.chat-loader {
+  height: calc(100vh - 320px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 /* ------------Conversation End ---------------- */
