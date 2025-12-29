@@ -13,8 +13,8 @@ import { ReminderService } from '../../../services/reminder.service';
 import { registerLocaleData } from '@angular/common';
 import localeNl from '@angular/common/locales/nl';
 import { Location } from '@angular/common';
-import { switchMap, finalize } from 'rxjs/operators';
-import { of } from 'rxjs';
+import { switchMap, finalize, map } from 'rxjs/operators';
+import { Observable, of } from 'rxjs';
 
 interface RfqResponse {
   name: string;
@@ -80,6 +80,11 @@ interface LogConversation {
   subject: string;
   message: string;
   messageDateTime: Date;
+}
+
+interface UploadResult {
+  res: RFQConversationMessage;
+  paths: string[];
 }
 
 export const MY_FORMATS = {
@@ -1136,7 +1141,6 @@ export class ViewProjects {
   }
 
   sendMessage() {
-    // Allow subject OR message
     if (!this.messageText?.trim() && !this.subject?.trim()) return;
 
     if (!this.conversationsData?.length) {
@@ -1162,42 +1166,59 @@ export class ViewProjects {
     this.projectService
       .addRfqConversationMessage(payload)
       .pipe(
-        switchMap((res) => {
-          // Update UI immediately
+        // ⭐ FIX: Explicit return type
+        switchMap((res: RFQConversationMessage): Observable<UploadResult> => {
+          if (!res.conversationMessageID) {
+            throw new Error('ConversationMessageID missing');
+          }
+
+          // ✅ IMPORTANT: clone attachments to avoid async clearing
+          const filesToUpload = [...this.attachments];
+
           this.pmSubConversationData.push({
             ...res,
             senderType: 'PM',
             messageDateTime: new Date(res.messageDateTime || new Date()),
           });
 
-          // Sort messages by date
           this.pmSubConversationData.sort(
             (a, b) => new Date(a.messageDateTime).getTime() - new Date(b.messageDateTime).getTime()
           );
 
-          // Send email
-          return this.projectService.sendMail({
+          return this.projectService
+            .uploadAttachmentFiles(res.conversationMessageID, filesToUpload)
+            .pipe(
+              map((paths: string[]) => ({
+                res,
+                paths,
+              }))
+            );
+        }),
+
+        switchMap(({ res, paths }) =>
+          this.projectService.sendMail({
             subcontractorID: draftConvo.subcontractorID,
             subject: this.subject,
             body: this.messageText,
-          });
-        }),
+            attachmentFilePaths: paths,
+          })
+        ),
+
         finalize(() => {
           this.isLoading = false;
         })
       )
       .subscribe({
-        next: (mailSuccess) => {
-          if (mailSuccess) console.log('Mail sent successfully');
-
+        next: () => {
           this.messageText = '';
           this.subject = '';
-          // Reset inputs, close popup, reload conversation
+          this.attachments = [];
+
           this.afterMessageSent();
           alert('Conversation logged successfully!');
         },
         error: (err) => {
-          console.error('Error sending message or mail:', err);
+          console.error('Error sending message:', err);
           alert('Failed to save conversation. Please try again.');
         },
       });

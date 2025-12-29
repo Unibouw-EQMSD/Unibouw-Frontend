@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { map, switchMap, from, Observable } from 'rxjs';
+import { map, switchMap, from, Observable, of, forkJoin } from 'rxjs';
 import { environment } from '../../environments/environment';
 import { MsalService } from '@azure/msal-angular';
 import { AppConfigService } from './app.config.service';
@@ -51,6 +51,11 @@ export interface SendMailRequest {
   subcontractorID: string;
   subject: string;
   body: string; // message body (HTML or text)
+  attachmentFilePaths?: string[]; // optional
+}
+
+interface UploadAttachmentResponse {
+  filePath: string;
 }
 
 export type SenderType = 'PM' | 'Subcontractor';
@@ -186,6 +191,34 @@ export class projectService {
         this.http.post<{ success: boolean }>(`${this.apiURL}/Email/send-mail`, payload, { headers })
       ),
       map((res) => res.success)
+    );
+  }
+
+  uploadAttachmentFiles(conversationMessageId: string, files: File[]): Observable<string[]> {
+    if (!files || files.length === 0) {
+      return of([]);
+    }
+
+    return from(this.getHeaders()).pipe(
+      switchMap((headers) => {
+        const uploadRequests = files.map((file) => {
+          const formData = new FormData();
+          formData.append('file', file); // ✅ backend expects "file"
+
+          return this.http
+            .post<UploadAttachmentResponse>(
+              `${this.apiURL}/RFQConversationMessage/AddAttachmentAsync/${conversationMessageId}`,
+              formData,
+              { headers }
+            )
+            .pipe(
+              map((res) => res.filePath) // ✅ return uploaded file path
+            );
+        });
+
+        // ✅ wait for all uploads & return string[]
+        return forkJoin(uploadRequests);
+      })
     );
   }
 }
