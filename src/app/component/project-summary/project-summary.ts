@@ -17,11 +17,23 @@ import { registerLocaleData } from '@angular/common';
 import localeNl from '@angular/common/locales/nl';
 import { FormsModule } from '@angular/forms';
 import { HostListener } from '@angular/core';
+import { finalize, switchMap, tap } from 'rxjs';
 
 interface NotInterestedData {
   reason: string;
   comment?: string;
   submitted: boolean;
+}
+
+interface LogConversation {
+  projectID: string;
+  rfqID?: string | null;
+  subcontractorID: string;
+  projectManagerID: string;
+  conversationType: string;
+  subject: string;
+  message: string;
+  messageDateTime: Date;
 }
 
 @Component({
@@ -90,6 +102,7 @@ export class ProjectSummary implements OnInit {
   constructor(
     private route: ActivatedRoute,
     private rfqResponseService: RfqResponseService,
+    private projectService: projectService,
     private fb: FormBuilder,
     private http: HttpClient
   ) {
@@ -124,8 +137,6 @@ export class ProjectSummary implements OnInit {
           }
         }
 
-        
-
         // Load project first
         this.loadProjectSummary(this.rfqId);
         this.loadPreviousSubmissions();
@@ -147,15 +158,13 @@ export class ProjectSummary implements OnInit {
     const day = String(date.getDate()).padStart(2, '0');
     return `${year}-${month}-${day}`;
   }
-loadProjectSummary(rfqId: string) {
-  this.isLoading = true;
+  loadProjectSummary(rfqId: string) {
+    this.isLoading = true;
 
-  const workItemIdsParam = this.route.snapshot.queryParamMap.get('workItemIds');
-  const workItemIds = workItemIdsParam ? workItemIdsParam.split(',') : [];
+    const workItemIdsParam = this.route.snapshot.queryParamMap.get('workItemIds');
+    const workItemIds = workItemIdsParam ? workItemIdsParam.split(',') : [];
 
-  this.rfqResponseService
-    .getProjectSummary(rfqId, this.subId, workItemIds)
-    .subscribe({
+    this.rfqResponseService.getProjectSummary(rfqId, this.subId, workItemIds).subscribe({
       next: (res: any) => {
         this.isLoading = false;
 
@@ -171,13 +180,11 @@ loadProjectSummary(rfqId: string) {
         /* ================= DATE HANDLING ================= */
 
         const now = new Date();
-        this.today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(
-          2,
-          '0'
-        )}-${String(now.getDate()).padStart(2, '0')}`;
+        this.today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(
+          now.getDate()
+        ).padStart(2, '0')}`;
 
-        const rawDueDate =
-          this.rfq?.globalDueDate || this.rfq?.dueDate || this.rfq?.DueDate;
+        const rawDueDate = this.rfq?.globalDueDate || this.rfq?.dueDate || this.rfq?.DueDate;
 
         if (rawDueDate) {
           const dateOnly = rawDueDate.split('T')[0];
@@ -224,9 +231,7 @@ loadProjectSummary(rfqId: string) {
           w.previousSubmissions = JSON.parse(localStorage.getItem(subKey) || '[]');
 
           /* ===== Mark as viewed (server-side) ===== */
-          this.rfqResponseService
-            .markAsViewed(this.rfqId, this.subId, w.workItemID)
-            .subscribe();
+          this.rfqResponseService.markAsViewed(this.rfqId, this.subId, w.workItemID).subscribe();
         });
       },
       error: (err) => {
@@ -235,7 +240,7 @@ loadProjectSummary(rfqId: string) {
         console.error(err);
       },
     });
-}
+  }
 
   toggleRow(wi: any) {
     this.expandedId = this.expandedId === wi.workItemID ? null : wi.workItemID;
@@ -304,10 +309,15 @@ loadProjectSummary(rfqId: string) {
     alert('Your preference has been recorded.');
   }
 
-  confirmNotInterested(wi: any) {
-    const reason = wi.notInterested?.reason?.trim();
-    const comment = wi.notInterested?.comment?.trim();
+  confirmNotInterested(wi: any): void {
+    const reason = wi?.notInterested?.reason?.trim();
+    const comment = wi?.notInterested?.comment?.trim();
 
+    const rfqId = this.rfqId;
+    const subId = this.subId;
+    const workItemName = wi?.name || '';
+
+    // Validations
     if (!reason) {
       alert('Please select a reason.');
       return;
@@ -318,9 +328,45 @@ loadProjectSummary(rfqId: string) {
       return;
     }
 
-    // ✅ Proceed
-    this.submitInterest('Not Interested', wi);
-    this.closeDropdowns();
+    const message = `
+        Not Interested – Confirmation
+
+        Work Item Name : ${workItemName}
+        Reason         : ${reason}
+        Comment        : ${comment?.trim() || 'No additional comments provided.'}     
+        `.trim();
+
+    const payload: LogConversation = {
+      projectID: '1A60151B-B4DF-44DF-BCE0-0EF8A0BDA4A2',
+      rfqID: null,
+      subcontractorID: subId,
+      projectManagerID: '34522246-1C79-4A2A-83FF-06283E1DD82D',
+      conversationType: 'Email',
+      subject: 'Marked as Not Interested',
+      message,
+      messageDateTime: new Date(),
+    };
+
+    this.isLoading = true;
+
+    this.projectService
+      .createLogConversation(payload)
+      .pipe(
+        tap((res) => console.log('Log conversation saved:', res)),
+        finalize(() => (this.isLoading = false))
+      )
+      .subscribe({
+        next: () => {
+          alert('Conversation logged successfully!');
+          // Proceed only after successful save
+          this.submitInterest('Not Interested', wi);
+          this.closeDropdowns();
+        },
+        error: (err) => {
+          console.error('Error saving conversation:', err);
+          alert('Failed to save conversation. Please try again.');
+        },
+      });
   }
 
   addMore() {
@@ -403,129 +449,132 @@ loadProjectSummary(rfqId: string) {
     return this.selectedWorkItem;
   }
 
- submitInterest(status: string, wi?: any) {
-  const target = this.pickWorkItem(wi);
-  if (!target) return;
+  submitInterest(status: string, wi?: any) {
+    const target = this.pickWorkItem(wi);
+    if (!target) return;
 
-  // mark viewed
-  this.rfqResponseService.markAsViewed(this.rfqId, this.subId, target.workItemID).subscribe();
+    // mark viewed
+    this.rfqResponseService.markAsViewed(this.rfqId, this.subId, target.workItemID).subscribe();
 
-  // per-row state
-  target.status = status;
-  target.viewed = true;
-  target.buttonsDisabled = status === 'Interested';
+    // per-row state
+    target.status = status;
+    target.viewed = true;
+    target.buttonsDisabled = status === 'Interested';
 
-  // ✅ track interest per work item
-  target.isInterested = status === 'Interested';
+    // ✅ track interest per work item
+    target.isInterested = status === 'Interested';
 
-  // expand quote panel automatically only if Interested
-  if (status === 'Interested') {
-    this.expandedId = target.workItemID;
-  } else if (this.expandedId === target.workItemID) {
-    this.expandedId = null;
+    // expand quote panel automatically only if Interested
+    if (status === 'Interested') {
+      this.expandedId = target.workItemID;
+    } else if (this.expandedId === target.workItemID) {
+      this.expandedId = null;
+    }
+
+    const reasonPayload =
+      status === 'Not Interested'
+        ? {
+            reason: target.notInterested?.reason || '',
+            comment: target.notInterested?.comment || '',
+          }
+        : null;
+
+    this.rfqResponseService
+      .submitRfqResponse(this.rfqId, this.subId, target.workItemID, status, reasonPayload, null)
+      .subscribe({
+        next: () => {
+          alert(`Your response "${status}" was recorded successfully!`);
+          const key = `rfq_state_${this.rfqId}_${this.subId}_${target.workItemID}`;
+          localStorage.setItem(
+            key,
+            JSON.stringify({
+              status,
+              viewed: true,
+              buttonsDisabled: target.buttonsDisabled,
+              notInterested: reasonPayload,
+            })
+          );
+        },
+        error: () => {
+          alert('Failed to submit response.');
+          target.buttonsDisabled = false;
+          target.isInterested = false; // rollback on error
+        },
+      });
   }
 
-  const reasonPayload =
-    status === 'Not Interested'
-      ? { reason: target.notInterested?.reason || '', comment: target.notInterested?.comment || '' }
-      : null;
+  submitQuoteFile(wi?: any) {
+    const target = this.pickWorkItem(wi);
+    if (!target) return;
 
-  this.rfqResponseService
-    .submitRfqResponse(this.rfqId, this.subId, target.workItemID, status, reasonPayload, null)
-    .subscribe({
-      next: () => {
-        alert(`Your response "${status}" was recorded successfully!`);
-        const key = `rfq_state_${this.rfqId}_${this.subId}_${target.workItemID}`;
-        localStorage.setItem(
-          key,
-          JSON.stringify({
-            status,
-            viewed: true,
-            buttonsDisabled: target.buttonsDisabled,
-            notInterested: reasonPayload,
-          })
-        );
-      },
-      error: () => {
-        alert('Failed to submit response.');
-        target.buttonsDisabled = false;
-        target.isInterested = false; // rollback on error
-      },
-    });
-}
+    this.formSubmitted = true;
 
- submitQuoteFile(wi?: any) {
-  const target = this.pickWorkItem(wi);
-  if (!target) return;
+    if (this.quoteForm.invalid) {
+      alert('Please fill all required fields.');
+      return;
+    }
 
-  this.formSubmitted = true;
+    const file = this.selectedFiles[0];
+    if (!file) return;
 
-  if (this.quoteForm.invalid) {
-    alert('Please fill all required fields.');
-    return;
+    const { quoteAmount, comments } = this.quoteForm.getRawValue();
+    const totalAmount = Number(quoteAmount || 0);
+
+    // ✅ PER-WORKITEM KEY
+    const key = `rfq_prev_submissions_${this.rfqId}_${this.subId}_${target.workItemID}`;
+    const previous = JSON.parse(localStorage.getItem(key) || '[]');
+
+    // 🔴 CRITICAL FIX — PASS workItemID
+    this.rfqResponseService
+      .uploadQuoteFile(
+        this.rfqId,
+        this.subId,
+        target.workItemID, // ✅ REQUIRED
+        file,
+        totalAmount,
+        comments
+      )
+      .subscribe({
+        next: () => {
+          alert(this.isQuoteSubmitted ? 'Quote re-submitted!' : 'Quote submitted!');
+
+          this.isQuoteSubmitted = true;
+          target.isQuoteSubmitted = true;
+
+          const newSubmission = {
+            date: new Date().toISOString(),
+            amount: totalAmount,
+            attachmentUrl: URL.createObjectURL(file),
+            fileName: file.name,
+            comment: comments,
+          };
+
+          previous.unshift(newSubmission);
+          localStorage.setItem(key, JSON.stringify(previous));
+
+          if (!target.previousSubmissions) {
+            target.previousSubmissions = [];
+          }
+          target.previousSubmissions.unshift(newSubmission);
+
+          // ✅ RESET FORM
+          this.quoteForm.reset({ quoteAmount: '', comments: '' });
+          this.selectedFiles = [];
+          this.formSubmitted = false;
+
+          // ✅ CLEAR FILE INPUT
+          if (this.fileInput) {
+            this.fileInput.nativeElement.value = '';
+          }
+
+          this.rightSectionVisible = false;
+          this.hideRightSummaryCard = true;
+        },
+        error: () => {
+          alert('Failed to upload quote');
+        },
+      });
   }
-
-  const file = this.selectedFiles[0];
-  if (!file) return;
-
-  const { quoteAmount, comments } = this.quoteForm.getRawValue();
-  const totalAmount = Number(quoteAmount || 0);
-
-  // ✅ PER-WORKITEM KEY
-  const key = `rfq_prev_submissions_${this.rfqId}_${this.subId}_${target.workItemID}`;
-  const previous = JSON.parse(localStorage.getItem(key) || '[]');
-
-  // 🔴 CRITICAL FIX — PASS workItemID
-  this.rfqResponseService
-    .uploadQuoteFile(
-      this.rfqId,
-      this.subId,
-      target.workItemID,     // ✅ REQUIRED
-      file,
-      totalAmount,
-      comments
-    )
-    .subscribe({
-      next: () => {
-        alert(this.isQuoteSubmitted ? 'Quote re-submitted!' : 'Quote submitted!');
-
-        this.isQuoteSubmitted = true;
-        target.isQuoteSubmitted = true;
-
-        const newSubmission = {
-          date: new Date().toISOString(),
-          amount: totalAmount,
-          attachmentUrl: URL.createObjectURL(file),
-          fileName: file.name,
-          comment: comments,
-        };
-
-        previous.unshift(newSubmission);
-        localStorage.setItem(key, JSON.stringify(previous));
-
-        if (!target.previousSubmissions) {
-          target.previousSubmissions = [];
-        }
-        target.previousSubmissions.unshift(newSubmission);
-
-        // ✅ RESET FORM
-        this.quoteForm.reset({ quoteAmount: '', comments: '' });
-        this.selectedFiles = [];
-        this.formSubmitted = false;
-
-        // ✅ CLEAR FILE INPUT
-        if (this.fileInput) {
-          this.fileInput.nativeElement.value = '';
-        }
-
-        this.rightSectionVisible = false;
-        this.hideRightSummaryCard = true;
-      },
-      error: () => {
-        alert('Failed to upload quote');
-      }
-    });
-}
 
   statusClass(status?: string) {
     if (!status) return '';

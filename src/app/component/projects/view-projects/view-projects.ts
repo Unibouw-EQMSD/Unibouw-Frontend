@@ -73,15 +73,13 @@ interface RFQConversationMessage {
 // log-conversation.model.ts
 interface LogConversation {
   projectID: string;
-  rfqID: string;
+  rfqID?: string | null;
   subcontractorID: string;
   projectManagerID: string;
   conversationType: string;
   subject: string;
   message: string;
   messageDateTime: Date;
-  createdBy: string;
-  createdOn: Date;
 }
 
 export const MY_FORMATS = {
@@ -163,25 +161,32 @@ export class ViewProjects {
       p.firstPage();
     }
   }
-@ViewChild(MatSort)
-set sort(s: MatSort) {
-  if (s) {
-    this.dataSource.sort = s;
+  @ViewChild(MatSort)
+  set sort(s: MatSort) {
+    if (s) {
+      this.dataSource.sort = s;
 
-    // Map displayed column names to actual properties
-  this.dataSource.sortingDataAccessor = (row, column) => {
-  switch (column) {
-    case 'workitem': return row.workItem;
-    case 'rfqSentDate': return row.rfqSentDate;
-    case 'dueDate': return row.dueDate;
-    case 'totalSubcontractors': return row.subcontractorCount;
-    case 'quoteRecieved': return row.quoteReceived;
-    case 'status': return row.status;
-    default: return '';
+      // Map displayed column names to actual properties
+      this.dataSource.sortingDataAccessor = (row, column) => {
+        switch (column) {
+          case 'workitem':
+            return row.workItem;
+          case 'rfqSentDate':
+            return row.rfqSentDate;
+          case 'dueDate':
+            return row.dueDate;
+          case 'totalSubcontractors':
+            return row.subcontractorCount;
+          case 'quoteRecieved':
+            return row.quoteReceived;
+          case 'status':
+            return row.status;
+          default:
+            return '';
+        }
+      };
+    }
   }
-};
-  }
-}
   workItems: WorkItem[] = [];
 
   constructor(
@@ -215,31 +220,30 @@ set sort(s: MatSort) {
     }
   }
 
-
   ngAfterViewInit() {
-  this.dataSource.sort = this.sort;
-  this.dataSource.paginator = this.paginator;
+    this.dataSource.sort = this.sort;
+    this.dataSource.paginator = this.paginator;
 
-  // Full sorting for all columns
-  this.dataSource.sortingDataAccessor = (item, property) => {
-    switch (property) {
-      case 'workitem':
-        return item.workItem?.toLowerCase() || '';
-      case 'rfqSentDate':
-        return item.rfqSentDate ? new Date(item.rfqSentDate) : new Date(0);
-      case 'dueDate':
-        return item.dueDate ? new Date(item.dueDate) : new Date(0);
-      case 'totalSubcontractors':
-        return item.subcontractorCount || 0;
-      case 'quoteRecieved':
-        return item.quoteReceived || 0;
-      case 'status':
-        return item.status?.toLowerCase() || '';
-      default:
-        return '';
-    }
-  };
-}
+    // Full sorting for all columns
+    this.dataSource.sortingDataAccessor = (item, property) => {
+      switch (property) {
+        case 'workitem':
+          return item.workItem?.toLowerCase() || '';
+        case 'rfqSentDate':
+          return item.rfqSentDate ? new Date(item.rfqSentDate) : new Date(0);
+        case 'dueDate':
+          return item.dueDate ? new Date(item.dueDate) : new Date(0);
+        case 'totalSubcontractors':
+          return item.subcontractorCount || 0;
+        case 'quoteRecieved':
+          return item.quoteReceived || 0;
+        case 'status':
+          return item.status?.toLowerCase() || '';
+        default:
+          return '';
+      }
+    };
+  }
   goBack(): void {
     this.location.back();
   }
@@ -269,162 +273,154 @@ set sort(s: MatSort) {
       },
     });
   }
-loadRfqResponseSummary(projectId: string) {
-
-  /* ===============================
+  loadRfqResponseSummary(projectId: string) {
+    /* ===============================
      1️⃣ WORK ITEM GROUPED (FIXED)
      =============================== */
 
-  this.rfqResponseService.getResponsesByProjectId(projectId).subscribe({
-    next: (res: any[]) => {
+    this.rfqResponseService.getResponsesByProjectId(projectId).subscribe({
+      next: (res: any[]) => {
+        const workItemMap = new Map<string, any>();
 
-      const workItemMap = new Map<string, any>();
+        res.forEach((w) => {
+          // 🔹 Create work item ONCE
+          if (!workItemMap.has(w.workItemId)) {
+            workItemMap.set(w.workItemId, {
+              workItemId: w.workItemId,
+              name: w.workItemName,
+              open: false,
+              searchText: '',
+              pageSize: 10,
+              currentPage: 1,
+              totalPages: 1,
+              currentStart: 1,
+              currentEnd: 10,
 
-      res.forEach((w) => {
+              // counters
+              requestsSent: 0,
+              notResponded: 0,
+              interested: 0,
+              notInterested: 0,
+              viewed: 0,
+              maybeLater: 0,
 
-        // 🔹 Create work item ONCE
-        if (!workItemMap.has(w.workItemId)) {
-          workItemMap.set(w.workItemId, {
-            workItemId: w.workItemId,
-            name: w.workItemName,
-            open: false,
-            searchText: '',
-            pageSize: 10,
-            currentPage: 1,
-            totalPages: 1,
-            currentStart: 1,
-            currentEnd: 10,
+              rfqs: [],
+            });
+          }
 
-            // counters
-            requestsSent: 0,
-            notResponded: 0,
-            interested: 0,
-            notInterested: 0,
-            viewed: 0,
-            maybeLater: 0,
+          const workItem = workItemMap.get(w.workItemId);
 
-            rfqs: []
-          });
-        }
-
-        const workItem = workItemMap.get(w.workItemId);
-
-        // 🔹 Push RFQs (flattened from API response)
-        w.subcontractors.forEach((s: any) => {
-
-          workItem.rfqs.push({
-            subcontractorId: s.subcontractorId,
-            rfqId: s.rfqId,
-            workItemId: w.workItemId,
-            documentId: s.documentId,
-            rfqNumber: w.rfqNumber,
-            name: s.name,
-            rating: s.rating || 0,
-            date: s.date || '—',
-            responded: s.responded,
-            interested: s.interested,
-            notInterested: s.notInterested,
-            viewed: s.viewed,
-            maybeLater: s.maybeLater,
-            quote: s.quote || '—',
-            quoteAmount: '-',
-            dueDate: s.dueDate,
-            actions: ['pdf', 'chat'],
+          // 🔹 Push RFQs (flattened from API response)
+          w.subcontractors.forEach((s: any) => {
+            workItem.rfqs.push({
+              subcontractorId: s.subcontractorId,
+              rfqId: s.rfqId,
+              workItemId: w.workItemId,
+              documentId: s.documentId,
+              rfqNumber: w.rfqNumber,
+              name: s.name,
+              rating: s.rating || 0,
+              date: s.date || '—',
+              responded: s.responded,
+              interested: s.interested,
+              notInterested: s.notInterested,
+              viewed: s.viewed,
+              maybeLater: s.maybeLater,
+              quote: s.quote || '—',
+              quoteAmount: '-',
+              dueDate: s.dueDate,
+              actions: ['pdf', 'chat'],
+            });
           });
 
+          // 🔹 Recalculate counters
+          workItem.requestsSent = workItem.rfqs.length;
+          workItem.notResponded = workItem.rfqs.filter((r: any) => !r.responded).length;
+          workItem.interested = workItem.rfqs.filter((r: any) => r.interested).length;
+          workItem.notInterested = workItem.rfqs.filter((r: any) => r.notInterested).length;
+          workItem.viewed = workItem.rfqs.filter((r: any) => r.viewed).length;
+          workItem.maybeLater = workItem.rfqs.filter((r: any) => r.maybeLater).length;
         });
 
-        // 🔹 Recalculate counters
-        workItem.requestsSent = workItem.rfqs.length;
-        workItem.notResponded = workItem.rfqs.filter((r: any) => !r.responded).length;
-        workItem.interested = workItem.rfqs.filter((r: any) => r.interested).length;
-        workItem.notInterested = workItem.rfqs.filter((r: any) => r.notInterested).length;
-        workItem.viewed = workItem.rfqs.filter((r: any) => r.viewed).length;
-        workItem.maybeLater = workItem.rfqs.filter((r: any) => r.maybeLater).length;
+        // 🔹 Final array (ONE accordion per work item)
+        this.workItems = Array.from(workItemMap.values());
 
-      });
+        // 🔹 Load quote amounts
+        this.workItems.forEach((work) => {
+          work.rfqs.forEach((rfq: any) => this.loadQuoteAmount(rfq));
+        });
+      },
 
-      // 🔹 Final array (ONE accordion per work item)
-      this.workItems = Array.from(workItemMap.values());
+      error: (err) => {
+        console.error('Error loading work item responses', err);
+      },
+    });
 
-      // 🔹 Load quote amounts
-      this.workItems.forEach((work) => {
-        work.rfqs.forEach((rfq: any) => this.loadQuoteAmount(rfq));
-      });
-    },
-
-    error: (err) => {
-      console.error('Error loading work item responses', err);
-    },
-  });
-
-  /* ===============================
+    /* ===============================
      2️⃣ SUBCONTRACTOR GROUPED (UNCHANGED ✅)
      =============================== */
 
-  this.rfqResponseService.getResponsesByProjectSubcontractors(projectId).subscribe({
-    next: (res: any[]) => {
+    this.rfqResponseService.getResponsesByProjectSubcontractors(projectId).subscribe({
+      next: (res: any[]) => {
+        const grouped = res.reduce((acc: any[], item: any) => {
+          let group = acc.find((g) => g.subcontractorId === item.subcontractorId);
 
-      const grouped = res.reduce((acc: any[], item: any) => {
+          if (!group) {
+            group = {
+              subcontractorId: item.subcontractorId,
+              subcontractorName: item.subcontractorName,
+              open: false,
+              searchText: '',
+              workItems: [],
+              requestsSent: 0,
+              notResponded: 0,
+              interested: 0,
+              notInterested: 0,
+              viewed: 0,
+              maybeLater: 0,
+            };
+            acc.push(group);
+          }
 
-        let group = acc.find((g) => g.subcontractorId === item.subcontractorId);
-
-        if (!group) {
-          group = {
+          group.workItems.push({
+            workItemId: item.workItemId,
+            workItemName: item.workItemName,
+            rfqId: item.rfqId,
+            documentId: item.documentId,
+            rfqNumber: item.rfqNumber,
+            date: item.date,
+            responded: item.responded,
+            interested: item.interested,
+            notInterested: item.notInterested,
+            viewed: item.viewed,
+            maybeLater: item.maybeLater,
             subcontractorId: item.subcontractorId,
-            subcontractorName: item.subcontractorName,
-            open: false,
-            searchText: '',
-            workItems: [],
-            requestsSent: 0,
-            notResponded: 0,
-            interested: 0,
-            notInterested: 0,
-            viewed: 0,
-            maybeLater: 0,
-          };
-          acc.push(group);
-        }
+            rating: 0,
+            quoteAmount: '-',
+            actions: ['pdf'],
+          });
 
-        group.workItems.push({
-          workItemId: item.workItemId,
-          workItemName: item.workItemName,
-          rfqId: item.rfqId,
-          documentId: item.documentId,
-          rfqNumber: item.rfqNumber,
-          date: item.date,
-          responded: item.responded,
-          interested: item.interested,
-          notInterested: item.notInterested,
-          viewed: item.viewed,
-          maybeLater: item.maybeLater,
-          subcontractorId: item.subcontractorId,
-          rating: 0,
-          quoteAmount: '-',
-          actions: ['pdf'],
+          group.requestsSent = group.workItems.length;
+          group.notResponded = group.workItems.filter((w: any) => !w.responded).length;
+          group.interested = group.workItems.filter((w: any) => w.interested).length;
+          group.notInterested = group.workItems.filter((w: any) => w.notInterested).length;
+          group.viewed = group.workItems.filter((w: any) => w.viewed).length;
+          group.maybeLater = group.workItems.filter((w: any) => w.maybeLater).length;
+
+          return acc;
+        }, []);
+
+        this.subcontractorGroups = grouped;
+
+        this.subcontractorGroups.forEach((sub) => {
+          sub.workItems.forEach((w: any) => this.loadQuoteAmount(w));
         });
-
-        group.requestsSent = group.workItems.length;
-        group.notResponded = group.workItems.filter((w: any) => !w.responded).length;
-        group.interested = group.workItems.filter((w: any) => w.interested).length;
-        group.notInterested = group.workItems.filter((w: any) => w.notInterested).length;
-        group.viewed = group.workItems.filter((w: any) => w.viewed).length;
-        group.maybeLater = group.workItems.filter((w: any) => w.maybeLater).length;
-
-        return acc;
-      }, []);
-
-      this.subcontractorGroups = grouped;
-
-      this.subcontractorGroups.forEach((sub) => {
-        sub.workItems.forEach((w: any) => this.loadQuoteAmount(w));
-      });
-    },
-    error: (err) => {
-      console.error('Error loading subcontractor responses', err);
-    },
-  });
-}
+      },
+      error: (err) => {
+        console.error('Error loading subcontractor responses', err);
+      },
+    });
+  }
 
   isBellEnabled(rfq: any): boolean {
     const amt = rfq.quoteAmount;
@@ -542,80 +538,78 @@ loadRfqResponseSummary(projectId: string) {
     });
   }
 
-loadRfqData(): void {
-  this.rfqService.getRfqByProjectId(this.projectId).subscribe({
-    next: (rfqs: any[]) => {
-      const infoRequests = rfqs.map((r) => this.rfqService.getWorkItemInfo(r.rfqID));
+  loadRfqData(): void {
+    this.rfqService.getRfqByProjectId(this.projectId).subscribe({
+      next: (rfqs: any[]) => {
+        const infoRequests = rfqs.map((r) => this.rfqService.getWorkItemInfo(r.rfqID));
 
-      forkJoin(infoRequests).subscribe((infoResults: any[]) => {
-        const tableData = rfqs.map((item, index) => {
-          const info = infoResults[index] || {};
+        forkJoin(infoRequests).subscribe((infoResults: any[]) => {
+          const tableData = rfqs.map((item, index) => {
+            const info = infoResults[index] || {};
 
-          return {
-            id: item.rfqID,
-            customer: item.customerName || '—',
-            rfqSentDate: this.formatDate(item.sentDate),
-            dueDate: this.formatDate(item.dueDate),
-            rfqSent: item.rfqSent || 0,
-            quoteReceived: item.quoteReceived || 0,
-            quoteAmount: '-',
-            workItem: info.workItem || '-',
-            subcontractorCount: info.subcontractorCount ?? 0,
-            status: item.status || 'N/A',
+            return {
+              id: item.rfqID,
+              customer: item.customerName || '—',
+              rfqSentDate: this.formatDate(item.sentDate),
+              dueDate: this.formatDate(item.dueDate),
+              rfqSent: item.rfqSent || 0,
+              quoteReceived: item.quoteReceived || 0,
+              quoteAmount: '-',
+              workItem: info.workItem || '-',
+              subcontractorCount: info.subcontractorCount ?? 0,
+              status: item.status || 'N/A',
+            };
+          });
+
+          // Assign data
+          this.dataSource.data = tableData;
+
+          // Assign paginator and sort immediately after data assignment
+          this.dataSource.paginator = this.paginator;
+          this.dataSource.sort = this.sort;
+
+          // Custom sorting for all columns
+          this.dataSource.sortingDataAccessor = (item, property) => {
+            switch (property) {
+              case 'workitem':
+                return item.workItem?.toLowerCase() || '';
+              case 'rfqSentDate':
+                return item.rfqSentDate ? new Date(item.rfqSentDate) : new Date(0);
+              case 'dueDate':
+                return item.dueDate ? new Date(item.dueDate) : new Date(0);
+              case 'totalSubcontractors':
+                return item.subcontractorCount || 0;
+              case 'quoteRecieved':
+                return item.quoteReceived || 0;
+              case 'status':
+                return item.status?.toLowerCase() || '';
+              default:
+                return '';
+            }
           };
+
+          // Optional: reset paginator
+          this.paginator.firstPage();
         });
+      },
+      error: () => {
+        this.dataSource.data = [];
+      },
+    });
+  }
+  deleteRfq(rfqId: string) {
+    if (!confirm('Are you sure you want to delete this RFQ?')) return;
 
-        // Assign data
-        this.dataSource.data = tableData;
-
-        // Assign paginator and sort immediately after data assignment
-        this.dataSource.paginator = this.paginator;
-        this.dataSource.sort = this.sort;
-
-        // Custom sorting for all columns
-        this.dataSource.sortingDataAccessor = (item, property) => {
-          switch (property) {
-            case 'workitem':
-              return item.workItem?.toLowerCase() || '';
-            case 'rfqSentDate':
-              return item.rfqSentDate ? new Date(item.rfqSentDate) : new Date(0);
-            case 'dueDate':
-              return item.dueDate ? new Date(item.dueDate) : new Date(0);
-            case 'totalSubcontractors':
-              return item.subcontractorCount || 0;
-            case 'quoteRecieved':
-              return item.quoteReceived || 0;
-            case 'status':
-              return item.status?.toLowerCase() || '';
-            default:
-              return '';
-          }
-        };
-
-        // Optional: reset paginator
-        this.paginator.firstPage();
-      });
-    },
-    error: () => {
-      this.dataSource.data = [];
-    },
-  });
-}
-deleteRfq(rfqId: string) {
-  if (!confirm('Are you sure you want to delete this RFQ?')) return;
-
-  this.rfqService.deleteRfq(rfqId).subscribe({
-    next: () => {
-      alert('RFQ deleted successfully.');
-      this.dataSource.data = this.dataSource.data.filter(
-        (r: any) => r.id !== rfqId
-      );
-    },
-    error: (err) => {
-      alert(err?.error?.message || 'Unable to delete RFQ.');
-    }
-  });
-}
+    this.rfqService.deleteRfq(rfqId).subscribe({
+      next: () => {
+        alert('RFQ deleted successfully.');
+        this.dataSource.data = this.dataSource.data.filter((r: any) => r.id !== rfqId);
+      },
+      error: (err) => {
+        alert(err?.error?.message || 'Unable to delete RFQ.');
+      },
+    });
+  }
 
   formatDate(dateString: string): string {
     if (!dateString) return '-';
@@ -707,23 +701,24 @@ deleteRfq(rfqId: string) {
     item.dueDate = newDate;
   }
 
- loadQuoteAmount(rfq: any) {
-  if (!rfq.subcontractorId || !rfq.workItemId) {
-    rfq.quoteAmount = '-';
-    return;
-  }
+  loadQuoteAmount(rfq: any) {
+    if (!rfq.subcontractorId || !rfq.workItemId) {
+      rfq.quoteAmount = '-';
+      return;
+    }
 
-  this.rfqResponseService.getQuoteAmount(rfq.rfqId, rfq.subcontractorId, rfq.workItemId)
-    .subscribe({
-      next: (res: any) => {
-        rfq.quoteAmount = res?.quoteAmount ?? '-';
-      },
-      error: (err) => {
-        console.error('❌ Error fetching quote amount:', err);
-        rfq.quoteAmount = '-';
-      },
-    });
-}
+    this.rfqResponseService
+      .getQuoteAmount(rfq.rfqId, rfq.subcontractorId, rfq.workItemId)
+      .subscribe({
+        next: (res: any) => {
+          rfq.quoteAmount = res?.quoteAmount ?? '-';
+        },
+        error: (err) => {
+          console.error('❌ Error fetching quote amount:', err);
+          rfq.quoteAmount = '-';
+        },
+      });
+  }
   downloadQuote(event: Event, documentId: string) {
     event.stopPropagation();
 
@@ -1094,15 +1089,14 @@ deleteRfq(rfqId: string) {
 
     const payload: LogConversation = {
       projectID: draftConvo.projectID,
-      rfqID: draftConvo.rfqID,
+      //rfqID: draftConvo.rfqID,
+      rfqID: null,
       subcontractorID: draftConvo.subcontractorID,
       projectManagerID: draftConvo.projectManagerID,
       conversationType: this.conversationType || 'Email',
       subject: this.conversationSubject || '',
       message: this.conversationText,
       messageDateTime: this.conversationDateTime ?? new Date(),
-      createdBy: draftConvo.createdBy,
-      createdOn: new Date(),
     };
 
     this.projectService

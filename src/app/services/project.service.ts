@@ -38,15 +38,13 @@ export interface RFQConversationMessage {
 // log-conversation.model.ts
 export interface LogConversation {
   projectID: string;
-  rfqID: string;
+  rfqID?: string | null;
   subcontractorID: string;
   projectManagerID: string;
   conversationType: string;
   subject: string;
   message: string;
   messageDateTime: Date;
-  createdBy: string;
-  createdOn: Date;
 }
 
 export interface SendMailRequest {
