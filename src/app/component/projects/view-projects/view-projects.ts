@@ -1,4 +1,10 @@
-import { ChangeDetectorRef, Component, ViewChild } from '@angular/core';
+import {
+  ChangeDetectorRef,
+  Component,
+  ViewChild,
+  ElementRef,
+  AfterViewChecked,
+} from '@angular/core';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
 import { MatTableDataSource } from '@angular/material/table';
@@ -13,8 +19,8 @@ import { ReminderService } from '../../../services/reminder.service';
 import { registerLocaleData } from '@angular/common';
 import localeNl from '@angular/common/locales/nl';
 import { Location } from '@angular/common';
-import { switchMap, finalize } from 'rxjs/operators';
-import { of } from 'rxjs';
+import { switchMap, finalize, map } from 'rxjs/operators';
+import { Observable, of } from 'rxjs';
 
 interface RfqResponse {
   name: string;
@@ -82,6 +88,11 @@ interface LogConversation {
   messageDateTime: Date;
 }
 
+interface UploadResult {
+  res: RFQConversationMessage;
+  paths: string[];
+}
+
 export const MY_FORMATS = {
   parse: {
     dateInput: 'DD-MM-YYYY',
@@ -100,7 +111,7 @@ export const MY_FORMATS = {
   templateUrl: './view-projects.html',
   styleUrls: ['./view-projects.css'],
 })
-export class ViewProjects {
+export class ViewProjects implements AfterViewChecked {
   projectId!: string;
   projectDetails: any;
   projectData?: projectdetails;
@@ -149,9 +160,20 @@ export class ViewProjects {
       const [day, month, year] = due.split('-').map(Number);
       this.maxDate = new Date(year, month - 1, day);
     } else {
-      // it's already a Date
       this.maxDate = new Date(due); // clone to avoid reference issues
     }
+  }
+
+  @ViewChild('chatMessages') private chatMessages!: ElementRef;
+  ngAfterViewChecked(): void {
+    this.scrollToBottom();
+  }
+
+  private scrollToBottom(): void {
+    try {
+      const el = this.chatMessages.nativeElement;
+      el.scrollTop = el.scrollHeight;
+    } catch {}
   }
 
   @ViewChild(MatPaginator)
@@ -187,6 +209,7 @@ export class ViewProjects {
       };
     }
   }
+
   workItems: WorkItem[] = [];
 
   constructor(
@@ -244,6 +267,7 @@ export class ViewProjects {
       }
     };
   }
+
   goBack(): void {
     this.location.back();
   }
@@ -273,11 +297,11 @@ export class ViewProjects {
       },
     });
   }
+
   loadRfqResponseSummary(projectId: string) {
     /* ===============================
      1️⃣ WORK ITEM GROUPED (FIXED)
      =============================== */
-
     this.rfqResponseService.getResponsesByProjectId(projectId).subscribe({
       next: (res: any[]) => {
         const workItemMap = new Map<string, any>();
@@ -295,7 +319,6 @@ export class ViewProjects {
               totalPages: 1,
               currentStart: 1,
               currentEnd: 10,
-
               // counters
               requestsSent: 0,
               notResponded: 0,
@@ -303,7 +326,6 @@ export class ViewProjects {
               notInterested: 0,
               viewed: 0,
               maybeLater: 0,
-
               rfqs: [],
             });
           }
@@ -357,9 +379,8 @@ export class ViewProjects {
     });
 
     /* ===============================
-     2️⃣ SUBCONTRACTOR GROUPED (UNCHANGED ✅)
+     2️⃣ SUBCONTRACTOR GROUPED 
      =============================== */
-
     this.rfqResponseService.getResponsesByProjectSubcontractors(projectId).subscribe({
       next: (res: any[]) => {
         const grouped = res.reduce((acc: any[], item: any) => {
@@ -446,7 +467,6 @@ export class ViewProjects {
     return true;
   }
 
-  // In your component
   onDatepickerOpened() {
     document.body.style.overflow = 'hidden';
   }
@@ -457,25 +477,19 @@ export class ViewProjects {
   markViewed(rfq: any, parent: any) {
     if (rfq.viewed) return;
 
-    this.rfqResponseService
-      .markAsViewed(
-        rfq.rfqId,
-        rfq.subcontractorId,
-        rfq.workItemId // 🔥 correct source
-      )
-      .subscribe({
-        next: () => {
-          rfq.viewed = true;
+    this.rfqResponseService.markAsViewed(rfq.rfqId, rfq.subcontractorId, rfq.workItemId).subscribe({
+      next: () => {
+        rfq.viewed = true;
 
-          // Update parent summary ONLY if parent has workItems (subcontractor view)
-          if (parent.workItems) {
-            parent.viewed = parent.workItems.filter((w: any) => w.viewed).length;
-          }
+        // Update parent summary ONLY if parent has workItems (subcontractor view)
+        if (parent.workItems) {
+          parent.viewed = parent.workItems.filter((w: any) => w.viewed).length;
+        }
 
-          this.cdr.detectChanges();
-        },
-        error: () => console.error('Failed to mark viewed'),
-      });
+        this.cdr.detectChanges();
+      },
+      error: () => console.error('Failed to mark viewed'),
+    });
   }
 
   markMaybeLater(work: WorkItem, rfq: any) {
@@ -597,6 +611,7 @@ export class ViewProjects {
       },
     });
   }
+
   deleteRfq(rfqId: string) {
     if (!confirm('Are you sure you want to delete this RFQ?')) return;
 
@@ -719,6 +734,7 @@ export class ViewProjects {
         },
       });
   }
+
   downloadQuote(event: Event, documentId: string) {
     event.stopPropagation();
 
@@ -946,7 +962,6 @@ export class ViewProjects {
   selectedSubId: string | null = null;
   conversationsData: any[] = [];
   pmSubConversationData: any[] = [];
-  selectedIndex: number = 0; // default first item active
   subject: string = '';
   messageText: string = '';
   attachments: File[] = [];
@@ -968,40 +983,52 @@ export class ViewProjects {
     this.attachments.splice(index, 1);
   }
 
-  onSubClick(subId: string, index: number): void {
-    this.selectedIndex = index;
-    // show spinner
-    this.isSpinLoading = true;
-    // clear old messages
-    this.pmSubConversationData = [];
-    // load new conversation
-    this.loadConversationBySub(subId);
+  selectedSubcontractorId: string | null = null;
+  selectedIndex: number = 0; // default first item active
 
-    // hide spinner after .4 seconds
-    setTimeout(() => {
-      this.isSpinLoading = false;
-    }, 400);
+  onSubClick(subId: string, index: number): void {
+    if (this.selectedSubcontractorId === subId) return;
+
+    this.selectedIndex = index;
+    this.selectedSubcontractorId = subId;
+    this.isSpinLoading = true;
+    this.pmSubConversationData = [];
+    this.loadConversationBySub(subId);
   }
 
-  loadConversationSubcontractors() {
-    // Prevent reloading if already loaded
-    if (this.convoSubcontractors.length > 0) return;
-
+  loadConversationSubcontractors(force = false) {
+    // Prevent reload unless forced
+    if (!force && this.convoSubcontractors.length > 0) {
+      return;
+    }
     this.isLoading = true;
 
-    this.rfqResponseService.getResponsesByProjectSubcontractors(this.projectId).subscribe({
+    this.rfqResponseService.getSubcontractorsByLatestMessage(this.projectId).subscribe({
       next: (res: any[]) => {
-        const map = new Map<string, string>();
+        this.convoSubcontractors = res.map((item) => ({
+          id: item.subcontractorID,
+          name: item.subcontractorName,
+        }));
 
-        res.forEach((item) => {
-          if (!map.has(item.subcontractorId)) {
-            map.set(item.subcontractorId, item.subcontractorName);
-          }
-        });
+        if (this.convoSubcontractors.length === 0) {
+          this.isLoading = false;
+          return;
+        }
 
-        this.convoSubcontractors = Array.from(map, ([id, name]) => ({ id, name })).sort((a, b) =>
-          a.name.localeCompare(b.name)
-        ); // ✅ ASC sort
+        // Preserve selected subcontractor if possible
+        const existingIndex = this.selectedSubcontractorId
+          ? this.convoSubcontractors.findIndex((s) => s.id === this.selectedSubcontractorId)
+          : -1;
+
+        if (existingIndex >= 0) {
+          this.selectedIndex = existingIndex;
+        } else {
+          this.selectedIndex = 0;
+          this.selectedSubcontractorId = this.convoSubcontractors[0].id;
+        }
+
+        this.isSpinLoading = true;
+        this.loadConversationBySub(this.selectedSubcontractorId!);
 
         this.isLoading = false;
       },
@@ -1012,38 +1039,40 @@ export class ViewProjects {
     });
   }
 
-  loadConversationBySub(selectedSubId: string): void {
-    if (!selectedSubId) return;
+  loadConversationBySub(subId: string): void {
+    if (!subId) {
+      this.isSpinLoading = false;
+      return;
+    }
 
     this.projectService
-      .getConversationByProjectAndSubcontractor(this.projectId, selectedSubId)
+      .getConversationByProjectAndSubcontractor(this.projectId, subId)
       .pipe(
         switchMap((res: any[]) => {
           this.conversationsData = res;
-          console.log('conversationsData---------:', res);
 
           if (!res || res.length === 0) {
-            // No draft conversation → return empty observable
             this.pmSubConversationData = [];
             return of([]);
           }
 
-          const draftConvo = res[0];
-
+          const draft = res[0];
           return this.projectService.getConversation(
-            draftConvo.projectID,
-            draftConvo.rfqID,
-            draftConvo.subcontractorID
+            draft.projectID,
+            draft.rfqID,
+            draft.subcontractorID
           );
-        })
+        }),
+        finalize(() => (this.isSpinLoading = false))
       )
       .subscribe({
         next: (res) => {
           this.pmSubConversationData = res;
-          console.log('pmSubConversationData---------:', res);
+          setTimeout(() => this.scrollToBottom(), 0);
         },
         error: (err) => {
           console.error('■ Error loading conversation:', err);
+          this.isSpinLoading = false;
         },
       });
   }
@@ -1110,12 +1139,7 @@ export class ViewProjects {
             messageDateTime: res.messageDateTime,
           });
 
-          this.pmSubConversationData.sort(
-            (a, b) => new Date(a.messageDateTime).getTime() - new Date(b.messageDateTime).getTime()
-          );
-
-          // If later you want to send mail, plug it here
-          // return this.projectService.sendMail({...});
+          setTimeout(() => this.scrollToBottom(), 0);
 
           return of(true);
         }),
@@ -1136,7 +1160,6 @@ export class ViewProjects {
   }
 
   sendMessage() {
-    // Allow subject OR message
     if (!this.messageText?.trim() && !this.subject?.trim()) return;
 
     if (!this.conversationsData?.length) {
@@ -1162,51 +1185,69 @@ export class ViewProjects {
     this.projectService
       .addRfqConversationMessage(payload)
       .pipe(
-        switchMap((res) => {
-          // Update UI immediately
+        // ⭐ FIX: Explicit return type
+        switchMap((res: RFQConversationMessage): Observable<UploadResult> => {
+          if (!res.conversationMessageID) {
+            throw new Error('ConversationMessageID missing');
+          }
+
+          // ✅ IMPORTANT: clone attachments to avoid async clearing
+          const filesToUpload = [...this.attachments];
+
           this.pmSubConversationData.push({
             ...res,
             senderType: 'PM',
             messageDateTime: new Date(res.messageDateTime || new Date()),
           });
 
-          // Sort messages by date
           this.pmSubConversationData.sort(
             (a, b) => new Date(a.messageDateTime).getTime() - new Date(b.messageDateTime).getTime()
           );
 
-          // Send email
-          return this.projectService.sendMail({
+          return this.projectService
+            .uploadAttachmentFiles(res.conversationMessageID, filesToUpload)
+            .pipe(
+              map((paths: string[]) => ({
+                res,
+                paths,
+              }))
+            );
+        }),
+
+        switchMap(({ res, paths }) =>
+          this.projectService.sendMail({
             subcontractorID: draftConvo.subcontractorID,
             subject: this.subject,
             body: this.messageText,
-          });
-        }),
+            attachmentFilePaths: paths,
+          })
+        ),
+
         finalize(() => {
           this.isLoading = false;
         })
       )
       .subscribe({
-        next: (mailSuccess) => {
-          if (mailSuccess) console.log('Mail sent successfully');
-
+        next: () => {
           this.messageText = '';
           this.subject = '';
-          // Reset inputs, close popup, reload conversation
+          this.attachments = [];
+
           this.afterMessageSent();
           alert('Conversation logged successfully!');
         },
         error: (err) => {
-          console.error('Error sending message or mail:', err);
+          console.error('Error sending message:', err);
           alert('Failed to save conversation. Please try again.');
         },
       });
   }
 
   // Helper method for reset, close, reload
-  private afterMessageSent() {
+  private afterMessageSent(): void {
+    // Reload list and keep active subcontractor
+    this.loadConversationSubcontractors(true);
     this.closeLogConvo();
     this.resetLogConvo();
-    if (this.selectedSubId) this.loadConversationBySub(this.selectedSubId);
   }
 }
