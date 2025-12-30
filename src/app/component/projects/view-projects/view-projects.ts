@@ -1,4 +1,10 @@
-import { ChangeDetectorRef, Component, ViewChild } from '@angular/core';
+import {
+  ChangeDetectorRef,
+  Component,
+  ViewChild,
+  ElementRef,
+  AfterViewChecked,
+} from '@angular/core';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
 import { MatTableDataSource } from '@angular/material/table';
@@ -105,7 +111,7 @@ export const MY_FORMATS = {
   templateUrl: './view-projects.html',
   styleUrls: ['./view-projects.css'],
 })
-export class ViewProjects {
+export class ViewProjects implements AfterViewChecked {
   projectId!: string;
   projectDetails: any;
   projectData?: projectdetails;
@@ -157,6 +163,19 @@ export class ViewProjects {
       // it's already a Date
       this.maxDate = new Date(due); // clone to avoid reference issues
     }
+  }
+
+  @ViewChild('chatMessages') private chatMessages!: ElementRef;
+
+  ngAfterViewChecked(): void {
+    this.scrollToBottom();
+  }
+
+  private scrollToBottom(): void {
+    try {
+      const el = this.chatMessages.nativeElement;
+      el.scrollTop = el.scrollHeight;
+    } catch {}
   }
 
   @ViewChild(MatPaginator)
@@ -1093,7 +1112,10 @@ export class ViewProjects {
         finalize(() => (this.isSpinLoading = false))
       )
       .subscribe({
-        next: (res) => (this.pmSubConversationData = res),
+        next: (res) => {
+          this.pmSubConversationData = res;
+          setTimeout(() => this.scrollToBottom(), 0);
+        },
         error: (err) => {
           console.error('■ Error loading conversation:', err);
           this.isSpinLoading = false;
