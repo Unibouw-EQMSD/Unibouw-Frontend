@@ -106,24 +106,24 @@ export class RfqResponseService {
 
   // ✅ Upload file (if you add this later)
   uploadQuoteFile(
-  rfqId: string,
-  subId: string,
-  workItemId: string,   // ✅ ADD THIS
-  file: File,
-  totalAmount: number,
-  comment: string
-) {
-  const formData = new FormData();
-  formData.append('file', file);
-  formData.append('totalAmount', totalAmount.toString());
-  formData.append('comment', comment);
-  formData.append('workItemId', workItemId); // ✅ REQUIRED
+    rfqId: string,
+    subId: string,
+    workItemId: string, // ✅ ADD THIS
+    file: File,
+    totalAmount: number,
+    comment: string
+  ) {
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('totalAmount', totalAmount.toString());
+    formData.append('comment', comment);
+    formData.append('workItemId', workItemId); // ✅ REQUIRED
 
-  return this.http.post(
-    `${this.apiURL}/RfqResponse/UploadQuote?rfqId=${rfqId}&subcontractorId=${subId}&workItemId=${workItemId}`,
-    formData
-  );
-}
+    return this.http.post(
+      `${this.apiURL}/RfqResponse/UploadQuote?rfqId=${rfqId}&subcontractorId=${subId}&workItemId=${workItemId}`,
+      formData
+    );
+  }
 
   getPreviousSubmissions(rfqId: string, subId: string): Observable<any[]> {
     return this.http.get<any[]>(
@@ -141,16 +141,27 @@ export class RfqResponseService {
       )
     );
   }
-getQuoteAmount(rfqId: string, subId: string, workItemId: string): Observable<any> {
-  return from(this.getHeaders()).pipe(
-    switchMap((headers) =>
-      this.http.get<any>(
-        `${this.apiURL}/RfqResponse/GetQuoteAmount?rfqId=${rfqId}&subcontractorId=${subId}&workItemId=${workItemId}`,
-        { headers }
+
+  getSubcontractorsByLatestMessage(projectId: string): Observable<any> {
+    return from(this.getHeaders()).pipe(
+      switchMap((headers) =>
+        this.http.get<any>(`${this.apiURL}/RfqResponse/subcontractors/latest/${projectId}`, {
+          headers,
+        })
       )
-    )
-  );
-}
+    );
+  }
+
+  getQuoteAmount(rfqId: string, subId: string, workItemId: string): Observable<any> {
+    return from(this.getHeaders()).pipe(
+      switchMap((headers) =>
+        this.http.get<any>(
+          `${this.apiURL}/RfqResponse/GetQuoteAmount?rfqId=${rfqId}&subcontractorId=${subId}&workItemId=${workItemId}`,
+          { headers }
+        )
+      )
+    );
+  }
   markAsViewed(rfqId: string, subcontractorId: string, workItemId: string): Observable<any> {
     return this.http.post(
       `${this.apiURL}/RfqResponse/mark-viewed`,

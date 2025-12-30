@@ -951,7 +951,6 @@ export class ViewProjects {
   selectedSubId: string | null = null;
   conversationsData: any[] = [];
   pmSubConversationData: any[] = [];
-  selectedIndex: number = 0; // default first item active
   subject: string = '';
   messageText: string = '';
   attachments: File[] = [];
@@ -973,40 +972,90 @@ export class ViewProjects {
     this.attachments.splice(index, 1);
   }
 
-  onSubClick(subId: string, index: number): void {
-    this.selectedIndex = index;
-    // show spinner
-    this.isSpinLoading = true;
-    // clear old messages
-    this.pmSubConversationData = [];
-    // load new conversation
-    this.loadConversationBySub(subId);
+  selectedSubcontractorId: string | null = null;
+  selectedIndex: number = 0; // default first item active
 
-    // hide spinner after .4 seconds
-    setTimeout(() => {
-      this.isSpinLoading = false;
-    }, 400);
+  // onSubClick(subId: string, index: number): void {
+  //   this.selectedIndex = index;
+  //   // show spinner
+  //   this.isSpinLoading = true;
+  //   // clear old messages
+  //   this.pmSubConversationData = [];
+  //   // load new conversation
+  //   this.loadConversationBySub(subId);
+
+  //   // hide spinner after .4 seconds
+  //   setTimeout(() => {
+  //     this.isSpinLoading = false;
+  //   }, 400);
+  // }
+
+  onSubClick(subId: string, index: number): void {
+    if (this.selectedSubcontractorId === subId) return;
+
+    this.selectedIndex = index;
+    this.selectedSubcontractorId = subId;
+
+    this.isSpinLoading = true;
+    this.pmSubConversationData = [];
+
+    this.loadConversationBySub(subId);
   }
 
-  loadConversationSubcontractors() {
-    // Prevent reloading if already loaded
-    if (this.convoSubcontractors.length > 0) return;
-
+  loadConversationSubcontractors(force = false) {
+    // Prevent reload unless forced
+    if (!force && this.convoSubcontractors.length > 0) {
+      return;
+    }
     this.isLoading = true;
 
-    this.rfqResponseService.getResponsesByProjectSubcontractors(this.projectId).subscribe({
+    this.rfqResponseService.getSubcontractorsByLatestMessage(this.projectId).subscribe({
       next: (res: any[]) => {
-        const map = new Map<string, string>();
+        this.convoSubcontractors = res.map((item) => ({
+          id: item.subcontractorID,
+          name: item.subcontractorName,
+        }));
 
-        res.forEach((item) => {
-          if (!map.has(item.subcontractorId)) {
-            map.set(item.subcontractorId, item.subcontractorName);
-          }
-        });
+        if (this.convoSubcontractors.length === 0) {
+          this.isLoading = false;
+          return;
+        }
 
-        this.convoSubcontractors = Array.from(map, ([id, name]) => ({ id, name })).sort((a, b) =>
-          a.name.localeCompare(b.name)
-        ); // ✅ ASC sort
+        // 🔥 Preserve selected subcontractor if possible
+        const existingIndex = this.selectedSubcontractorId
+          ? this.convoSubcontractors.findIndex((s) => s.id === this.selectedSubcontractorId)
+          : -1;
+
+        if (existingIndex >= 0) {
+          this.selectedIndex = existingIndex;
+        } else {
+          this.selectedIndex = 0;
+          this.selectedSubcontractorId = this.convoSubcontractors[0].id;
+        }
+
+        this.isSpinLoading = true;
+        this.loadConversationBySub(this.selectedSubcontractorId!);
+
+        // Auto-select first subcontractor & load its conversation
+        // if (this.convoSubcontractors.length > 0) {
+        //   this.isSpinLoading = true;
+        //   this.selectedSubcontractorId = this.convoSubcontractors[0].id;
+        //   this.loadConversationBySub(this.selectedSubcontractorId);
+        // }
+
+        // Keep selected subcontractor if possible
+        // const stillExists = this.convoSubcontractors.find(
+        //   (s) => s.id === this.selectedSubcontractorId
+        // );
+
+        // if (!stillExists && this.convoSubcontractors.length > 0) {
+        //   this.selectedSubcontractorId = this.convoSubcontractors[0].id;
+        // }
+
+        // if (this.selectedSubcontractorId) {
+        //   this.isSpinLoading = true;
+        //   this.loadConversationBySub(this.selectedSubcontractorId);
+        // }
 
         this.isLoading = false;
       },
@@ -1017,38 +1066,37 @@ export class ViewProjects {
     });
   }
 
-  loadConversationBySub(selectedSubId: string): void {
-    if (!selectedSubId) return;
+  loadConversationBySub(subId: string): void {
+    if (!subId) {
+      this.isSpinLoading = false;
+      return;
+    }
 
     this.projectService
-      .getConversationByProjectAndSubcontractor(this.projectId, selectedSubId)
+      .getConversationByProjectAndSubcontractor(this.projectId, subId)
       .pipe(
         switchMap((res: any[]) => {
           this.conversationsData = res;
-          console.log('conversationsData---------:', res);
 
           if (!res || res.length === 0) {
-            // No draft conversation → return empty observable
             this.pmSubConversationData = [];
             return of([]);
           }
 
-          const draftConvo = res[0];
-
+          const draft = res[0];
           return this.projectService.getConversation(
-            draftConvo.projectID,
-            draftConvo.rfqID,
-            draftConvo.subcontractorID
+            draft.projectID,
+            draft.rfqID,
+            draft.subcontractorID
           );
-        })
+        }),
+        finalize(() => (this.isSpinLoading = false))
       )
       .subscribe({
-        next: (res) => {
-          this.pmSubConversationData = res;
-          console.log('pmSubConversationData---------:', res);
-        },
+        next: (res) => (this.pmSubConversationData = res),
         error: (err) => {
           console.error('■ Error loading conversation:', err);
+          this.isSpinLoading = false;
         },
       });
   }
@@ -1225,9 +1273,10 @@ export class ViewProjects {
   }
 
   // Helper method for reset, close, reload
-  private afterMessageSent() {
+  private afterMessageSent(): void {
+    // Reload list and keep active subcontractor
+    this.loadConversationSubcontractors(true);
     this.closeLogConvo();
     this.resetLogConvo();
-    if (this.selectedSubId) this.loadConversationBySub(this.selectedSubId);
   }
 }
