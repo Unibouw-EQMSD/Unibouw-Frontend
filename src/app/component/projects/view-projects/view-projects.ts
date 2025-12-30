@@ -160,13 +160,11 @@ export class ViewProjects implements AfterViewChecked {
       const [day, month, year] = due.split('-').map(Number);
       this.maxDate = new Date(year, month - 1, day);
     } else {
-      // it's already a Date
       this.maxDate = new Date(due); // clone to avoid reference issues
     }
   }
 
   @ViewChild('chatMessages') private chatMessages!: ElementRef;
-
   ngAfterViewChecked(): void {
     this.scrollToBottom();
   }
@@ -211,6 +209,7 @@ export class ViewProjects implements AfterViewChecked {
       };
     }
   }
+
   workItems: WorkItem[] = [];
 
   constructor(
@@ -268,6 +267,7 @@ export class ViewProjects implements AfterViewChecked {
       }
     };
   }
+
   goBack(): void {
     this.location.back();
   }
@@ -297,11 +297,11 @@ export class ViewProjects implements AfterViewChecked {
       },
     });
   }
+
   loadRfqResponseSummary(projectId: string) {
     /* ===============================
      1️⃣ WORK ITEM GROUPED (FIXED)
      =============================== */
-
     this.rfqResponseService.getResponsesByProjectId(projectId).subscribe({
       next: (res: any[]) => {
         const workItemMap = new Map<string, any>();
@@ -319,7 +319,6 @@ export class ViewProjects implements AfterViewChecked {
               totalPages: 1,
               currentStart: 1,
               currentEnd: 10,
-
               // counters
               requestsSent: 0,
               notResponded: 0,
@@ -327,7 +326,6 @@ export class ViewProjects implements AfterViewChecked {
               notInterested: 0,
               viewed: 0,
               maybeLater: 0,
-
               rfqs: [],
             });
           }
@@ -381,9 +379,8 @@ export class ViewProjects implements AfterViewChecked {
     });
 
     /* ===============================
-     2️⃣ SUBCONTRACTOR GROUPED (UNCHANGED ✅)
+     2️⃣ SUBCONTRACTOR GROUPED 
      =============================== */
-
     this.rfqResponseService.getResponsesByProjectSubcontractors(projectId).subscribe({
       next: (res: any[]) => {
         const grouped = res.reduce((acc: any[], item: any) => {
@@ -470,7 +467,6 @@ export class ViewProjects implements AfterViewChecked {
     return true;
   }
 
-  // In your component
   onDatepickerOpened() {
     document.body.style.overflow = 'hidden';
   }
@@ -481,25 +477,19 @@ export class ViewProjects implements AfterViewChecked {
   markViewed(rfq: any, parent: any) {
     if (rfq.viewed) return;
 
-    this.rfqResponseService
-      .markAsViewed(
-        rfq.rfqId,
-        rfq.subcontractorId,
-        rfq.workItemId // 🔥 correct source
-      )
-      .subscribe({
-        next: () => {
-          rfq.viewed = true;
+    this.rfqResponseService.markAsViewed(rfq.rfqId, rfq.subcontractorId, rfq.workItemId).subscribe({
+      next: () => {
+        rfq.viewed = true;
 
-          // Update parent summary ONLY if parent has workItems (subcontractor view)
-          if (parent.workItems) {
-            parent.viewed = parent.workItems.filter((w: any) => w.viewed).length;
-          }
+        // Update parent summary ONLY if parent has workItems (subcontractor view)
+        if (parent.workItems) {
+          parent.viewed = parent.workItems.filter((w: any) => w.viewed).length;
+        }
 
-          this.cdr.detectChanges();
-        },
-        error: () => console.error('Failed to mark viewed'),
-      });
+        this.cdr.detectChanges();
+      },
+      error: () => console.error('Failed to mark viewed'),
+    });
   }
 
   markMaybeLater(work: WorkItem, rfq: any) {
@@ -621,6 +611,7 @@ export class ViewProjects implements AfterViewChecked {
       },
     });
   }
+
   deleteRfq(rfqId: string) {
     if (!confirm('Are you sure you want to delete this RFQ?')) return;
 
@@ -743,6 +734,7 @@ export class ViewProjects implements AfterViewChecked {
         },
       });
   }
+
   downloadQuote(event: Event, documentId: string) {
     event.stopPropagation();
 
@@ -994,30 +986,13 @@ export class ViewProjects implements AfterViewChecked {
   selectedSubcontractorId: string | null = null;
   selectedIndex: number = 0; // default first item active
 
-  // onSubClick(subId: string, index: number): void {
-  //   this.selectedIndex = index;
-  //   // show spinner
-  //   this.isSpinLoading = true;
-  //   // clear old messages
-  //   this.pmSubConversationData = [];
-  //   // load new conversation
-  //   this.loadConversationBySub(subId);
-
-  //   // hide spinner after .4 seconds
-  //   setTimeout(() => {
-  //     this.isSpinLoading = false;
-  //   }, 400);
-  // }
-
   onSubClick(subId: string, index: number): void {
     if (this.selectedSubcontractorId === subId) return;
 
     this.selectedIndex = index;
     this.selectedSubcontractorId = subId;
-
     this.isSpinLoading = true;
     this.pmSubConversationData = [];
-
     this.loadConversationBySub(subId);
   }
 
@@ -1040,7 +1015,7 @@ export class ViewProjects implements AfterViewChecked {
           return;
         }
 
-        // 🔥 Preserve selected subcontractor if possible
+        // Preserve selected subcontractor if possible
         const existingIndex = this.selectedSubcontractorId
           ? this.convoSubcontractors.findIndex((s) => s.id === this.selectedSubcontractorId)
           : -1;
@@ -1054,27 +1029,6 @@ export class ViewProjects implements AfterViewChecked {
 
         this.isSpinLoading = true;
         this.loadConversationBySub(this.selectedSubcontractorId!);
-
-        // Auto-select first subcontractor & load its conversation
-        // if (this.convoSubcontractors.length > 0) {
-        //   this.isSpinLoading = true;
-        //   this.selectedSubcontractorId = this.convoSubcontractors[0].id;
-        //   this.loadConversationBySub(this.selectedSubcontractorId);
-        // }
-
-        // Keep selected subcontractor if possible
-        // const stillExists = this.convoSubcontractors.find(
-        //   (s) => s.id === this.selectedSubcontractorId
-        // );
-
-        // if (!stillExists && this.convoSubcontractors.length > 0) {
-        //   this.selectedSubcontractorId = this.convoSubcontractors[0].id;
-        // }
-
-        // if (this.selectedSubcontractorId) {
-        //   this.isSpinLoading = true;
-        //   this.loadConversationBySub(this.selectedSubcontractorId);
-        // }
 
         this.isLoading = false;
       },
@@ -1185,12 +1139,7 @@ export class ViewProjects implements AfterViewChecked {
             messageDateTime: res.messageDateTime,
           });
 
-          this.pmSubConversationData.sort(
-            (a, b) => new Date(a.messageDateTime).getTime() - new Date(b.messageDateTime).getTime()
-          );
-
-          // If later you want to send mail, plug it here
-          // return this.projectService.sendMail({...});
+          setTimeout(() => this.scrollToBottom(), 0);
 
           return of(true);
         }),
