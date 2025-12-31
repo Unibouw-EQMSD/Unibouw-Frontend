@@ -306,7 +306,7 @@ export class ProjectSummary implements OnInit {
 
     this.submitInterest('Maybe Later', wi);
 
-    alert('Your preference has been recorded.');
+    // alert('Your preference has been recorded.');
   }
 
   confirmNotInterested(wi: any): void {
@@ -535,7 +535,7 @@ export class ProjectSummary implements OnInit {
         comments
       )
       .subscribe({
-        next: () => {
+        next: (res: any) => {
           alert(this.isQuoteSubmitted ? 'Quote re-submitted!' : 'Quote submitted!');
 
           this.isQuoteSubmitted = true;
@@ -544,6 +544,8 @@ export class ProjectSummary implements OnInit {
           const newSubmission = {
             date: new Date().toISOString(),
             amount: totalAmount,
+                    documentId: res.documentId,   // ✅ STORE THIS
+
             attachmentUrl: URL.createObjectURL(file),
             fileName: file.name,
             comment: comments,
