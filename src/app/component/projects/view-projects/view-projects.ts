@@ -133,6 +133,7 @@ export class ViewProjects implements AfterViewChecked {
   selectedRfqId: string = '';
   subcontractorGroups: any[] = [];
   displayedColumns: string[] = [
+    'number',
     'workitem',
     'rfqSentDate',
     'dueDate',
@@ -563,6 +564,7 @@ actions: item.documentId ? ['pdf'] : [],
 
             return {
               id: item.rfqID,
+              number:item.rfqNumber,
               customer: item.customerName || '—',
               rfqSentDate: this.formatDate(item.sentDate),
               dueDate: this.formatDate(item.dueDate),
