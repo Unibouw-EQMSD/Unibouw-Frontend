@@ -9,6 +9,7 @@
   </div>
 
   <div class="rfq-layout" *ngIf="project; else errorBlock">
+    
     <!-- LEFT: Project Details -->
     <aside class="left-card">
       <div class="details-card">
@@ -66,16 +67,26 @@
           <!-- One card per work item -->
           <div class="rfq-row" *ngFor="let wi of workItems">
             <div class="rfq-row-head">
-              <div class="two-col compact">
-                <div class="rfq-field">
-                  <label>Workitem Code</label>
-                  <div class="description-box">{{ wi.number || '—' }}</div>
-                </div>
-                <div class="rfq-field">
-                  <label>Work Item</label>
-                  <div class="description-box">{{ wi.name || '—' }}</div>
-                </div>
-              </div>
+
+  <!-- COLUMN 1 -->
+  <div class="workitem-meta">
+    <div class="status-badge" *ngIf="wi.status">
+      <span class="badge" [ngClass]="wi.status.toLowerCase().replace(' ', '-')">
+        {{ wi.status }}
+      </span>
+    </div>
+
+    <div class="two-col compact">
+      <div class="rfq-field">
+        <label>Workitem Code</label>
+        <div class="description-box">{{ wi.number || '—' }}</div>
+      </div>
+      <div class="rfq-field">
+        <label>Work Item</label>
+        <div class="description-box">{{ wi.name || '—' }}</div>
+      </div>
+    </div>
+  </div>
 
               <div class="interest-actions">
                 <div class="interest-label">Share your Interest</div>
@@ -212,19 +223,18 @@
                 </div>
               </div>
 
-              <div class="cta">
-                <button class="btn-primary" type="button" (click)="toggleRow(wi)">
-                  {{ wi.isQuoteSubmitted ? 'Resubmit Quote' : 'Submit Quote' }}
-                </button>
-                <button class="chev-btn" type="button" *ngIf="wi.isInterested"  (click)="toggleRow(wi)">
-                  <i
-                  
-                    class="fa"
-                    [ngClass]="expandedId === wi.workItemID ? 'fa-chevron-up' : 'fa-chevron-down'"
-                  >
-                  </i>
-                </button>
-              </div>
+            <div class="cta" *ngIf="wi.status === 'Interested'">
+  <button class="btn-primary" type="button" (click)="toggleRow(wi)">
+    {{ wi.isQuoteSubmitted ? 'Resubmit Quote' : 'Submit Quote' }}
+  </button>
+
+  <button class="chev-btn" type="button" (click)="toggleRow(wi)">
+    <i
+      class="fa"
+      [ngClass]="expandedId === wi.workItemID ? 'fa-chevron-up' : 'fa-chevron-down'">
+    </i>
+  </button>
+</div>
             </div>
 
             <!-- Expanded quote panel -->
