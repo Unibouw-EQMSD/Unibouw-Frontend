@@ -7,6 +7,12 @@
       <strong>{{ rfq?.globalDueDate || rfq?.dueDate | date : 'dd-MM-yyyy' }}</strong>
     </div>
   </div>
+  <div
+  class="expired-banner"
+  *ngIf="isRfqExpired"
+>
+  This RFQ link has expired. You can no longer respond.
+</div>
 
   <div class="rfq-layout" *ngIf="project; else errorBlock">
     
@@ -46,13 +52,11 @@
           </span>
         </div>
 
-        <div class="detail-row" *ngIf="project.sharepointURL">
+        <div class="detail-row">
           <span class="label">Specification</span>
           <span class="value">
-            <ng-container *ngFor="let file of project.sharepointURL.split(','); let last = last">
-              <a [href]="file" target="_blank">{{ file.split('/').pop() }}</a
-              ><span *ngIf="!last">, </span>
-            </ng-container>
+            <a [href]="project.sharepointURL" target="_blank">Project Files</a>
+
           </span>
         </div>
       </div>
@@ -97,7 +101,7 @@
                     class="btn-ghost"
                     type="button"
                     (click)="submitInterest('Interested', wi)"
-                    [disabled]="wi.buttonsDisabled"
+                    [disabled]="wi.buttonsDisabled|| isRfqExpired"
                   >
                     Interested
                   </button>
@@ -158,7 +162,7 @@
                       [class.dropdown-open]="isOpen(wi, 'not')"
                       type="button"
                       (click)="toggleInterestDropdown(wi, 'not', $event)"
-                      [disabled]="wi.buttonsDisabled"
+                      [disabled]="wi.buttonsDisabled|| isRfqExpired"
                     >
                       Not Interested <i class="fa fa-chevron-down"></i>
                     </button>
@@ -224,11 +228,11 @@
               </div>
 
             <div class="cta" *ngIf="wi.status === 'Interested'">
-  <button class="btn-primary" type="button" (click)="toggleRow(wi)">
+  <button class="btn-primary" type="button" (click)="toggleRow(wi)" [disabled]="isRfqExpired">
     {{ wi.isQuoteSubmitted ? 'Resubmit Quote' : 'Submit Quote' }}
   </button>
 
-  <button class="chev-btn" type="button" (click)="toggleRow(wi)">
+  <button class="chev-btn" type="button" (click)="toggleRow(wi)" [disabled]="isRfqExpired">
     <i
       class="fa"
       [ngClass]="expandedId === wi.workItemID ? 'fa-chevron-up' : 'fa-chevron-down'">
@@ -296,7 +300,8 @@
                   <div class="rfq-field">
                     <label>Attachments</label>
                     <div class="attachments-container">
-                      <input #fileInput type="file" (change)="onFileSelected($event)" />
+                      <input #fileInput type="file" (change)="onFileSelected($event)"   [disabled]="isRfqExpired"
+/>
                       <button type="button"       *ngIf="selectedFiles.length > 0"
  class="delete-btn" (click)="removeFile(fileInput)">
                         <i class="fa fa-trash"></i>
@@ -306,9 +311,7 @@
                     <div class="error" *ngIf="fileSizeError">
                       {{ fileSizeError }}
                     </div>
-                    <div class="error" *ngIf="fileSizeError">
-                      {{ fileSizeError }}
-                    </div>
+                   
                     <div class="error" *ngIf="formSubmitted && selectedFiles.length === 0">
                       Please upload at least one file.
                     </div>
@@ -330,7 +333,7 @@
                   </div>
 
                   <div style="text-align: right; margin-top: 10px">
-                    <button class="btn-primary" type="button" (click)="submitQuoteFile(wi)">
+                    <button class="btn-primary" type="button" (click)="submitQuoteFile(wi)"  [disabled]="isRfqExpired">
                       Submit
                     </button>
                   </div>

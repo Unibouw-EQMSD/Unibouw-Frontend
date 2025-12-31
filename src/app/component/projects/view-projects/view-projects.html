@@ -445,6 +445,10 @@
                     No RFQs available.
                   </td>
                 </tr>
+                 <ng-container matColumnDef="number">
+                  <th mat-header-cell *matHeaderCellDef mat-sort-header>RFQ ID</th>
+                  <td mat-cell *matCellDef="let row">{{ row.number }}</td>
+                </ng-container>
                 <ng-container matColumnDef="workitem">
                   <th mat-header-cell *matHeaderCellDef mat-sort-header>WorkItem</th>
                   <td mat-cell *matCellDef="let row">{{ row.workItem }}</td>
