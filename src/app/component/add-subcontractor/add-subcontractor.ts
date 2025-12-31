@@ -2,6 +2,7 @@ import { Component, HostListener, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { WorkitemService, Workitem, WorkitemCategory } from '../../services/workitem.service';
 import { SubcontractorService } from '../../services/subcontractor.service';
+import { UserService } from '../../services/User.service.';
 import { Router } from '@angular/router';
 import { countryList } from '../../shared/countries';
 import { Subscription } from 'rxjs';
@@ -38,11 +39,56 @@ export class AddSubcontractor implements OnInit {
   popupError: boolean = false;
   showPopup: boolean = false;
 
+  private buildTeamsMessage(payload: any): string {
+    const CATEGORY_MAP: Record<string, string> = {
+      '213cf69b-627e-4962-83ec-53463c8664d2': 'Unibouw',
+      '60a1a614-05fd-402d-81b3-3ba05fdd2d8a': 'Standard',
+    };
+
+    const allWorkItems = Array.from(this.selectionsByCategory.values()).flat();
+
+    const grouped = allWorkItems.reduce((acc: any, item: any) => {
+      const category = CATEGORY_MAP[item.categoryID] ?? 'Others';
+
+      if (!acc[category]) acc[category] = [];
+      acc[category].push(item.name);
+
+      return acc;
+    }, {});
+
+    const workItemsText = Object.entries(grouped)
+      .map(([category, items]: any) => {
+        const list = items.map((name: string, i: number) => `  ${i + 1}. ${name}`).join('\n');
+
+        return `${category}\n${list}`;
+      })
+      .join('\n\n');
+
+    return `
+📩 **New Subcontractor Created**
+
+      \`\`\`
+      Subcontractor Name : ${payload.name}
+      Email              : ${payload.emailID}
+      Location           : ${payload.location}
+      Country            : ${payload.country}
+      Contact Name       : ${payload.contactName}
+      Contact Email      : ${payload.contactEmailID}
+      Contact Phone      : ${payload.phoneNumber1}
+      Office Address     : ${payload.officeAddress}
+
+      Work Items:
+      ${workItemsText}
+      \`\`\`
+      `.trim();
+  }
+
   constructor(
     private fb: FormBuilder,
     private router: Router,
     private workItemService: WorkitemService,
     private subcontractorService: SubcontractorService,
+    private userService: UserService,
     private location: Location
   ) {
     this.subcontractorForm = this.fb.group({
@@ -289,12 +335,22 @@ export class AddSubcontractor implements OnInit {
       contactEmailID: formValue.contactEmail,
       contactPhone: this.selectedCountry.code + formValue.contactNumber,
     };
+
     this.subcontractorService.createSubcontractor(payload).subscribe({
       next: (res) => {
         this.handleSuccess(res, formValue.attachments || []);
+
+        // 🔔 Send MS Teams notification
+        const teamsMessage = this.buildTeamsMessage(payload);
+
+        this.userService.sendMsTeamsNotification(teamsMessage).subscribe({
+          next: () => console.log('Teams notification sent'),
+          error: (err: any) => console.error('Teams notification failed', err),
+        });
       },
       error: (err) => {
-        console.error('API ERROR:', err); // 👈 FULL LOG
+        console.error('API ERROR:', err);
+
         if (err.status === 409 && err.error?.field) {
           const field = err.error.field;
           const message = err.error.message || 'Already exists.';
@@ -311,16 +367,6 @@ export class AddSubcontractor implements OnInit {
             });
           }
         }
-
-        // if (err.status === 409 && err.error?.field === 'email') {
-        //   // Set field-level error on email form control
-        //   this.subcontractorForm.get('email')?.setErrors({
-        //     emailExists: err.error.message || 'Email already exists.',
-        //   });
-        //   return; // Don't show popup for field errors
-        // }
-        // For other errors, show popup
-        //this.handleError(err);
       },
     });
   }

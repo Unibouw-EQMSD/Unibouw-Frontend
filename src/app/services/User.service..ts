@@ -1,13 +1,41 @@
 // user.service.ts
 import { Injectable } from '@angular/core';
-import { BehaviorSubject } from 'rxjs';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { MsalService } from '@azure/msal-angular';
+import { AppConfigService } from './app.config.service';
+import { BehaviorSubject, switchMap, from, Observable } from 'rxjs';
 
 @Injectable({
   providedIn: 'root',
 })
 export class UserService {
+  private apiURL: string = '';
   private userSubject = new BehaviorSubject<any>(null);
   public user$ = this.userSubject.asObservable();
+
+  constructor(
+    private http: HttpClient,
+    private msalService: MsalService,
+    private appConfigService: AppConfigService
+  ) {
+    this.apiURL = this.appConfigService.getConfig().apiURL;
+  }
+
+  /** 🔐 Get Authorization Headers */
+  private async getHeaders(): Promise<HttpHeaders> {
+    const accounts = this.msalService.instance.getAllAccounts();
+    if (!accounts.length) throw new Error('No MSAL account found');
+
+    const result = await this.msalService.instance.acquireTokenSilent({
+      account: accounts[0],
+      scopes: ['api://96b6d570-73e9-4669-98d6-745f22f4acc0/Api.Read'],
+    });
+
+    return new HttpHeaders({
+      Accept: '*/*',
+      Authorization: `Bearer ${result.accessToken}`,
+    });
+  }
 
   setUser(user: any) {
     this.userSubject.next(user);
@@ -52,5 +80,18 @@ export class UserService {
   clearUser() {
     this.userSubject.next(null);
     localStorage.removeItem('user_data');
+  }
+
+  /* send MsTeams Notification */
+  sendMsTeamsNotification(message: string): Observable<any> {
+    const body = { message };
+
+    return from(this.getHeaders()).pipe(
+      switchMap((headers) =>
+        this.http.post(`${this.apiURL}/MsTeamsNotification/ms-teams-notification`, body, {
+          headers: headers.set('Content-Type', 'application/json'),
+        })
+      )
+    );
   }
 }
