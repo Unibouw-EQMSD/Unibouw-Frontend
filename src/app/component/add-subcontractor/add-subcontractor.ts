@@ -55,7 +55,10 @@ export class AddSubcontractor implements OnInit {
           Validators.pattern(/^(?=.*\S)[A-Za-z .\-&]+$/),
         ],
       ],
-      location: ['', [Validators.required, Validators.pattern(/\S+/)]],
+      location: [
+        '',
+        [Validators.required, Validators.maxLength(100), Validators.pattern(/^[A-Za-z0-9,\-\s]+$/)],
+      ],
       country: ['', Validators.required],
       registeredDate: [''],
       email: [
@@ -72,18 +75,40 @@ export class AddSubcontractor implements OnInit {
         '',
         [
           Validators.required,
+          Validators.maxLength(100),
           Validators.pattern(
             /^[a-zA-Z0-9]+([._%+-]?[a-zA-Z0-9]+)*@[a-zA-Z0-9-]+(\.[a-zA-Z]{2,})+$/
           ),
         ],
       ],
       status: ['Active', Validators.required],
-      officeAddress: ['', Validators.required],
-      billingAddress: [''],
+      officeAddress: [
+        '',
+        [
+          Validators.required,
+          Validators.minLength(10),
+          Validators.maxLength(300),
+          Validators.pattern(/^[A-Za-z0-9,.\-\/\s\r\n]+$/),
+        ],
+      ],
+      billingAddress: [
+        '',
+        [
+          Validators.minLength(10),
+          Validators.maxLength(300),
+          Validators.pattern(/^[A-Za-z0-9,.\-\/\s\r\n]+$/),
+        ],
+      ],
       sameAsOffice: [false],
       countryCode: [this.selectedCountry.code],
-      contactNumber: ['', [Validators.required, Validators.pattern(/^[0-9]{10,15}$/)]],
-      contactPerson: ['', Validators.required],
+      contactNumber: ['', [Validators.required, Validators.pattern(/^[0-9]{8,15}$/)]],
+      contactPerson: [
+        '',
+        Validators.required,
+        Validators.minLength(3),
+        Validators.maxLength(150),
+        Validators.pattern(/^(?=.*\S)[A-Za-z.\-\s]+$/),
+      ],
       attachments: [null],
     });
   }
@@ -270,16 +295,32 @@ export class AddSubcontractor implements OnInit {
       },
       error: (err) => {
         console.error('API ERROR:', err); // 👈 FULL LOG
-        if (err.status === 409 && err.error?.field === 'email') {
-          // Set field-level error on email form control
-          this.subcontractorForm.get('email')?.setErrors({
-            emailExists: err.error.message || 'Email already exists.',
-          });
+        if (err.status === 409 && err.error?.field) {
+          const field = err.error.field;
+          const message = err.error.message || 'Already exists.';
 
-          return; // Don't show popup for field errors
+          if (field === 'email') {
+            this.subcontractorForm.get('email')?.setErrors({
+              emailExists: message,
+            });
+          }
+
+          if (field === 'name') {
+            this.subcontractorForm.get('name')?.setErrors({
+              nameExists: message,
+            });
+          }
         }
+
+        // if (err.status === 409 && err.error?.field === 'email') {
+        //   // Set field-level error on email form control
+        //   this.subcontractorForm.get('email')?.setErrors({
+        //     emailExists: err.error.message || 'Email already exists.',
+        //   });
+        //   return; // Don't show popup for field errors
+        // }
         // For other errors, show popup
-        this.handleError(err);
+        //this.handleError(err);
       },
     });
   }
