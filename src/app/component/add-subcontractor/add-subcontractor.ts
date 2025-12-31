@@ -46,7 +46,15 @@ export class AddSubcontractor implements OnInit {
     private location: Location
   ) {
     this.subcontractorForm = this.fb.group({
-      name: ['', [Validators.required, Validators.pattern(/^(?=.*\S)[a-zA-Z0-9 ]+$/)]],
+      name: [
+        '',
+        [
+          Validators.required,
+          Validators.minLength(3),
+          Validators.maxLength(150),
+          Validators.pattern(/^(?=.*\S)[A-Za-z .\-&]+$/),
+        ],
+      ],
       location: ['', [Validators.required, Validators.pattern(/\S+/)]],
       country: ['', Validators.required],
       registeredDate: [''],
@@ -54,6 +62,7 @@ export class AddSubcontractor implements OnInit {
         '',
         [
           Validators.required,
+          Validators.maxLength(100),
           Validators.pattern(
             /^[a-zA-Z0-9]+([._%+-]?[a-zA-Z0-9]+)*@[a-zA-Z0-9-]+(\.[a-zA-Z]{2,})+$/
           ),

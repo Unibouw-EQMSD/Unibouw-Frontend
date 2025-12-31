@@ -4,25 +4,25 @@
   <div class="container">
     <div class="pagetitle" *ngIf="rfqIdForEdit">
       <h1>
-        <i
+        <!-- <i
           class="fa fa-arrow-left arrow-left"
           aria-hidden="true"
           title="Back"
           (click)="goBack()"
-        ></i
-        >Edit RFQ
+        ></i> -->
+        Edit RFQ
       </h1>
     </div>
 
     <div class="pagetitle" *ngIf="!rfqIdForEdit">
       <h1>
-        <i
+        <!-- <i
           class="fa fa-arrow-left arrow-left"
           aria-hidden="true"
           title="Back"
           (click)="goBack()"
-        ></i
-        >Add RFQ
+        ></i> -->
+        Add RFQ
       </h1>
     </div>
 
@@ -252,7 +252,12 @@
               [style.background-color]="i % 2 === 0 ? '#fcfcfc' : '#f0f2f5'"
             >
               <div style="width: 30px; display: flex; justify-content: center">
-                <input type="checkbox" [(ngModel)]="sub.selected" style="cursor: pointer" />
+                <input
+                  type="checkbox"
+                  [(ngModel)]="sub.selected"
+                  (change)="onSubcontractorToggle(sub)"
+                  style="cursor: pointer"
+                />
               </div>
 
               <div style="flex: 1; padding-left: 10px; font-size: 14px; color: #333">
@@ -396,7 +401,12 @@
               [style.background-color]="i % 2 === 0 ? '#fcfcfc' : '#f0f2f5'"
             >
               <div style="width: 30px; display: flex; justify-content: center">
-                <input type="checkbox" [(ngModel)]="sub.selected" style="cursor: pointer" />
+                <input
+                  type="checkbox"
+                  [(ngModel)]="sub.selected"
+                  (change)="onSubcontractorToggle(sub)"
+                  style="cursor: pointer"
+                />
               </div>
 
               <div style="flex: 1; padding-left: 10px; font-size: 14px; color: #333">
