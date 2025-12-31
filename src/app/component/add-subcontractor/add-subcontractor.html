@@ -48,11 +48,17 @@
                 This field is required.
               </span>
               <span
+                *ngIf="subcontractorForm.get('name')?.errors?.['nameExists']"
+                class="text-danger text-sm"
+              >
+                {{ subcontractorForm.get('name')?.errors?.['nameExists'] }}
+              </span>
+              <span
                 *ngIf="subcontractorForm.get('name')?.touched && subcontractorForm.get('name')?.errors?.['pattern']
     "
                 class="text-danger text-sm"
               >
-                Special characters are not allowed.
+                Only letters, spaces, dot (.), hyphen (-), and ampersand (&) are allowed.
               </span>
               <span
                 *ngIf="subcontractorForm.get('name')?.errors?.['minlength']"
@@ -126,13 +132,22 @@
             />
             <div class="form-error-space">
               <span
-                *ngIf="
-                  subcontractorForm.get('location')?.touched &&
-                  subcontractorForm.get('location')?.errors
-                "
+                *ngIf="subcontractorForm.get('location')?.touched && subcontractorForm.get('location')?.errors?.['required']"
                 class="text-danger text-sm"
               >
                 This field is required.
+              </span>
+              <span
+                *ngIf="subcontractorForm.get('location')?.errors?.['pattern']"
+                class="text-danger text-sm"
+              >
+                Only letters, numbers, spaces, comma (,) and hyphen (-) are allowed.
+              </span>
+              <span
+                *ngIf="subcontractorForm.get('location')?.errors?.['maxlength']"
+                class="text-danger text-sm"
+              >
+                Location must not exceed 100 characters.
               </span>
             </div>
           </div>
@@ -154,10 +169,7 @@
             </select>
             <div class="form-error-space">
               <span
-                *ngIf="
-      subcontractorForm.get('country')?.touched &&
-      subcontractorForm.get('country')?.errors?.['required']
-    "
+                *ngIf="subcontractorForm.get('country')?.touched && subcontractorForm.get('country')?.errors?.['required']"
                 class="text-danger small"
               >
                 This field is required.
@@ -182,13 +194,29 @@
             />
             <div class="form-error-space">
               <span
-                *ngIf="
-      subcontractorForm.get('contactPerson')?.touched &&
-      subcontractorForm.get('contactPerson')?.errors?.['required']
-    "
+                *ngIf="subcontractorForm.get('contactPerson')?.touched && subcontractorForm.get('contactPerson')?.errors?.['required']"
                 class="text-danger text-sm"
               >
                 This field is required.
+              </span>
+              <span
+                *ngIf="subcontractorForm.get('contactPerson')?.touched && subcontractorForm.get('contactPerson')?.errors?.['pattern']
+    "
+                class="text-danger text-sm"
+              >
+                Only letters, spaces, dot (.) and hyphen (-) are allowed.
+              </span>
+              <span
+                *ngIf="subcontractorForm.get('contactPerson')?.errors?.['minlength']"
+                class="text-danger text-sm"
+              >
+                contact name must be at least 3 characters.
+              </span>
+              <span
+                *ngIf="subcontractorForm.get('contactPerson')?.errors?.['maxlength']"
+                class="text-danger text-sm"
+              >
+                contact name must not exceed 150 characters.
               </span>
             </div>
           </div>
@@ -246,7 +274,7 @@
     "
                 class="text-danger text-sm"
               >
-                Enter a valid phone number (10–15 digits).
+                Enter a valid phone number (8–15 digits).
               </span>
             </div>
           </div>
@@ -280,6 +308,12 @@
               >
                 Enter a valid email address.
               </span>
+              <span
+                *ngIf="subcontractorForm.get('contactEmail')?.errors?.['maxlength']"
+                class="text-danger text-sm"
+              >
+                Email must not exceed 100 characters.
+              </span>
             </div>
           </div>
 
@@ -312,7 +346,7 @@
               }"
               placeholder="Address 1"
             ></textarea>
-            <div class="form-error-space">
+            <div class="form-error-space" style="margin-bottom: 20px">
               <span
                 *ngIf="
       subcontractorForm.get('officeAddress')?.touched &&
@@ -321,6 +355,26 @@
                 class="text-danger text-sm"
               >
                 This field is required.
+              </span>
+              <span
+                *ngIf="subcontractorForm.get('officeAddress')?.touched && subcontractorForm.get('officeAddress')?.errors?.['pattern']
+    "
+                class="text-danger text-sm"
+              >
+                Only letters, numbers, comma (,), dot(.), hyphen(-), slash(/), and line breaks are
+                allowed.
+              </span>
+              <span
+                *ngIf="subcontractorForm.get('officeAddress')?.errors?.['minlength']"
+                class="text-danger text-sm"
+              >
+                contact name must be at least 10 characters.
+              </span>
+              <span
+                *ngIf="subcontractorForm.get('officeAddress')?.errors?.['maxlength']"
+                class="text-danger text-sm"
+              >
+                contact name must not exceed 300 characters.
               </span>
             </div>
           </div>
@@ -343,8 +397,27 @@
               class="form-control-textarea"
               placeholder="Address 2"
             ></textarea>
-            <div class="form-error-space">
-              <!-- Empty placeholder for alignment -->
+            <div class="form-error-space" style="margin-bottom: 20px">
+              <span
+                *ngIf="subcontractorForm.get('billingAddress')?.touched && subcontractorForm.get('billingAddress')?.errors?.['pattern']
+    "
+                class="text-danger text-sm"
+              >
+                Only letters, numbers, comma (,), dot(.), hyphen(-), slash(/), and line breaks are
+                allowed.
+              </span>
+              <span
+                *ngIf="subcontractorForm.get('billingAddress')?.errors?.['minlength']"
+                class="text-danger text-sm"
+              >
+                contact name must be at least 10 characters.
+              </span>
+              <span
+                *ngIf="subcontractorForm.get('billingAddress')?.errors?.['maxlength']"
+                class="text-danger text-sm"
+              >
+                contact name must not exceed 300 characters.
+              </span>
             </div>
           </div>
         </div>
