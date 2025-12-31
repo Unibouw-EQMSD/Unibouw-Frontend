@@ -42,7 +42,7 @@
 
             <div class="form-error-space">
               <span
-                *ngIf="subcontractorForm.get('name')?.touched && get('name')?.errors?.['required']"
+                *ngIf="subcontractorForm.get('name')?.touched && subcontractorForm.get('name')?.errors?.['required']"
                 class="text-danger text-sm"
               >
                 This field is required.
