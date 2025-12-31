@@ -351,7 +351,7 @@ export class ViewProjects implements AfterViewChecked {
               quote: s.quote || '—',
               quoteAmount: '-',
               dueDate: s.dueDate,
-              actions: ['pdf', 'chat'],
+  actions: s.documentId ? ['pdf', 'chat'] : ['chat'], // ✅ FIX
             });
           });
 
@@ -418,7 +418,7 @@ export class ViewProjects implements AfterViewChecked {
             subcontractorId: item.subcontractorId,
             rating: 0,
             quoteAmount: '-',
-            actions: ['pdf'],
+actions: item.documentId ? ['pdf'] : [],
           });
 
           group.requestsSent = group.workItems.length;
