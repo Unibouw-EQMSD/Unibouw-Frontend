@@ -1,14 +1,36 @@
+/* =========================
+   COMPLETE CSS (Screenshot-matching)
+   Paste as a single file
+   ========================= */
+
 body,
 .container {
   font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
   background: #f7f8fc;
+  color: #22223b;
 }
 
+/* Layout wrapper */
 .container {
-  padding: 32px 0;
+  padding: 24px 12px;
 }
+
+/* Page title */
+.page-header {
+  margin-bottom: 14px;
+}
+
+.page-header h1 {
+  font-size: 34px;
+  font-weight: 600;
+  color: #0f172a;
+  margin: 0 0 14px 0;
+  letter-spacing: 0.2px;
+}
+
+/* Expired banner */
 .expired-banner {
-  margin-top: 10px;
+  margin: 10px 0 14px 0;
   padding: 12px;
   background: #ffe6e6;
   color: #b30000;
@@ -16,26 +38,480 @@ body,
   border-radius: 6px;
   text-align: center;
 }
-.page-header h1 {
-  font-size: 2rem;
-  font-weight: 700;
-  color: #22223b;
-  margin: 0 0 24px 0;
-  letter-spacing: 0.2px;
+
+/* Main 2-column layout */
+.rfq-layout {
+  display: flex;
+  gap: 18px;
+  align-items: flex-start;
 }
 
-/* Background Overlay */
+.left-card {
+  width: 200px;
+  /* flex: 0 0 300px; */
+}
+
+.right-card {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+/* Left + right cards */
+.left-card .details-card,
+.right-card .panel {
+  background: #fff;
+  border-radius: 6px;
+  border: 1px solid #dbe3f3;
+  box-shadow: 0 2px 10px rgba(54, 63, 98, 0.08);
+}
+
+/* Left card content */
+.left-card .details-card {
+  padding: 0;
+  overflow: hidden;
+}
+
+.left-card .details-card h3 {
+  margin: 0;
+  padding: 14px 16px;
+  font-size: 18px;
+  font-weight: 500;
+  color: #111827;
+  border-bottom: 1px solid #e5e7eb;
+  background: #fff;
+}
+
+.detail-row {
+  padding: 12px 16px;
+}
+
+.detail-row + .detail-row {
+  border-top: 1px solid #eef2f7;
+}
+
+.detail-row .label {
+  display: block;
+  font-weight: 500;
+  color: #6a5acd;
+  font-size: 16px;
+  margin-bottom: 8px;
+}
+
+.detail-row .value {
+  color: #111827;
+  font-size: 17px;
+  font-weight: 500;
+}
+
+.detail-row .value.status {
+  font-weight: 600;
+}
+
+.value.status.in-progress {
+  color: #1a7f37;
+}
+.value.status.delayed {
+  color: #b54708;
+}
+.value.status.cancelled {
+  color: #b42318;
+}
+
+.detail-row .value a {
+  color: #f97316;
+  font-weight: 500;
+  text-decoration: underline dotted;
+}
+
+.detail-row .value a:hover {
+  color: #d97706;
+}
+
+/* Right panel */
+.right-card .panel {
+  padding: 0;
+  overflow: hidden;
+}
+
+/* RFQ header INSIDE white box */
+.panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  border-bottom: 1px solid #e5e7eb;
+  background: #fff;
+}
+
+.panel-title {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 500;
+  color: #111827;
+}
+
+.panel-due {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #2563eb;
+  font-weight: 600;
+}
+
+.panel-due i {
+  color: #2563eb;
+}
+
+.panel-due-label {
+  color: #2563eb;
+  font-weight: 500;
+  font-size: 16px;
+}
+
+.panel-due-date {
+  color: #111827;
+  font-weight: 700;
+  font-size: 18px;
+}
+
+/* RFQ list spacing */
+.rfq-list {
+  padding: 12px 14px 14px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* RFQ row card */
+.rfq-row {
+  background: #fff;
+  border: 1px solid #dbe3f3;
+  border-radius: 6px;
+  box-shadow: none;
+  overflow: hidden;
+}
+
+/* RFQ row head (3 zones like screenshot) */
+.rfq-row-head--match {
+  display: grid;
+  grid-template-columns: 520px 1fr 260px;
+  gap: 28px;
+  align-items: center;
+  padding: 18px 18px;
+  border-bottom: 1px solid #e5e7eb;
+  background: #fff;
+}
+
+/* LEFT: Work item mini columns */
+.rfq-mini {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 54px;
+}
+
+.mini-label {
+  color: #6a5acd;
+  font-size: 16px;
+  font-weight: 500;
+  margin-bottom: 8px;
+}
+
+.mini-value {
+  color: #111827;
+  font-size: 18px;
+  font-weight: 500;
+}
+
+.mini-value--bold {
+  font-weight: 700;
+}
+
+/* CENTER: Interest label + buttons */
+.rfq-center .interest-label {
+  color: #6a5acd;
+  font-weight: 500;
+  font-size: 16px;
+  margin-bottom: 12px;
+}
+
+
+
+.interest-btns {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: nowrap;
+}
+
+/* Buttons (match screenshot size) */
+.btn-pill {
+  height: 38px;
+  padding: 0 18px;
+  border-radius: 4px;
+  font-size: 17px;
+  font-weight: 500;
+  line-height: 38px;
+  min-width: 150px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  border: 1px solid #0f172a;
+  background: #fff;
+  color: #0f172a;
+}
+
+.btn-pill i {
+  margin-left: 10px;
+  font-size: 14px;
+}
+
+.btn-pill--primary {
+   background: #fff;
+  border-color: #0f172a;
+  color: #0f172a;
+}
+
+.btn-pill--outline {
+  background: #fff;
+  border-color: #0f172a;
+  color: #0f172a;
+}
+
+.btn-pill--dark {
+  background: #0b3a4a;
+  border-color: #0b3a4a;
+  color: #fff;
+  min-width: 190px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.12);
+}
+
+/* RIGHT: Resubmit + caret on far right */
+.rfq-right {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 14px;
+  margin-top: 34px;
+}
+
+.caret-only {
+  width: 40px;
+  height: 40px;
+  border: none;
+  background: transparent;
+  color: #111827;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.caret-only i {
+  font-size: 20px;
+}
+
+/* Disabled */
+.btn-pill:disabled,
+.caret-only:disabled,
+.btn-primary:disabled,
+.btn-ghost:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* Dropdown */
+.dropdown {
+  position: relative;
+  display: inline-block;
+}
+
+.dropdown-panel {
+  position: absolute;
+  top: calc(100% + 10px);
+  left: 0;
+  width: 340px;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  padding: 12px 14px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.12);
+  z-index: 50;
+}
+
+/* Form fields */
+.rfq-field {
+  margin-bottom: 14px;
+}
+
+.rfq-field label {
+  display: block;
+  font-weight: 500;
+  color: #6a5acd;
+  font-size: 15px;
+  margin-bottom: 8px;
+}
+
+.text-input,
+.rfq-field input[type="text"],
+.rfq-field select,
+.rfq-field textarea {
+  width: 100%;
+  border: 1px solid #e6e6ef;
+  border-radius: 6px;
+  padding: 9px 10px;
+  background: #fff;
+  font-size: 15px;
+  color: #111827;
+  box-sizing: border-box;
+}
+
+.rfq-field textarea {
+  resize: vertical;
+  min-height: 120px;
+}
+
+.hint {
+  color: #64748b;
+  font-size: 13px;
+}
+
+/* Orange primary (used inside dropdown + submit quote panel) */
+.btn-primary {
+  background: #f58220;
+  border: 1px solid #f58220;
+  color: #fff;
+  height: 38px;
+  padding: 0 18px;
+  border-radius: 6px;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.btn-pill:hover {
+  background: #e37517;
+  border-color: #e37517;
+  color: #fff;
+}
+
+/* Ghost (fallback if still used somewhere) */
+.btn-ghost {
+  background: #fff;
+  border: 1px solid #0f172a;
+  color: #0f172a;
+  height: 38px;
+  padding: 0 18px;
+  border-radius: 6px;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+/* Quote details expand area */
+.quote-details-panel {
+  background: #fff;
+  padding: 16px 18px 18px 18px;
+}
+
+/* "Quote Details" heading strip like screenshot */
+.quote-details-panel::before {
+  content: "Quote Details";
+  display: block;
+  font-size: 16px;
+  font-weight: 500;
+  color: #111827;
+  padding: 10px 12px;
+  margin: 0 0 14px 0;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  background: #fff;
+}
+
+/* Grid: previous submissions vs submit quote */
+.quote-grid {
+  display: grid;
+  grid-template-columns: 1.6fr 1fr;
+  gap: 26px;
+}
+
+.section-title {
+  display: block;
+  font-size: 18px;
+  font-weight: 600;
+  color: #111827;
+  margin-bottom: 12px;
+}
+
+.previous-submission-row {
+  display: flex;
+  align-items: center;
+  gap: 46px;
+  background: #fff;
+  border-radius: 6px;
+  padding: 16px 16px;
+  margin-bottom: 12px;
+  border: 1px solid #dbe3f3;
+  box-shadow: none;
+}
+
+.submission-label {
+  color: #6a5acd;
+  font-weight: 500;
+  font-size: 15px;
+  margin-bottom: 6px;
+}
+
+.submission-value {
+  color: #111827;
+  font-weight: 500;
+  font-size: 16px;
+}
+
+.attachment-icon,
+.comment-icon {
+  color: #f58220;
+  font-size: 18px;
+  vertical-align: middle;
+}
+
+.attachments-container {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: nowrap;
+}
+
+.delete-btn {
+  border: 1px solid #dbe3f3;
+  background: #fff;
+  color: #0f172a;
+  width: 38px;
+  height: 38px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.delete-btn:hover {
+  border-color: #0f172a;
+}
+
+/* Error text */
+.error {
+  color: #b42318;
+  font-size: 14px;
+  margin-top: 6px;
+}
+
+/* Comment modal */
 .comment-modal-backdrop {
   position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
+  inset: 0;
   background: rgba(0, 0, 0, 0.5);
   z-index: 999;
 }
 
-/* Modal Container */
 .comment-modal-content {
   position: fixed;
   top: 50%;
@@ -50,10 +526,10 @@ body,
 }
 
 .comment-modal-content h3 {
-  margin-top: 0;
-  margin-bottom: 15px;
+  margin: 0 0 12px 0;
   font-size: 20px;
-  font-weight: bold;
+  font-weight: 700;
+  color: #111827;
 }
 
 .comment-text {
@@ -61,571 +537,326 @@ body,
   background: #f7f7f7;
   border-radius: 6px;
   min-height: 60px;
-  margin-bottom: 20px;
+  margin-bottom: 16px;
   white-space: pre-wrap;
 }
 
-/* Close Button */
 .close-btn {
   width: 100%;
   padding: 10px;
-  background: #f97316;
+  background: #f58220;
   color: white;
   border: none;
   border-radius: 6px;
   cursor: pointer;
 }
 
-.rfq-status-banner {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 18px;
-  padding: 10px;
-  border-radius: 4px;
-  background: #f0f4ff;
+.close-btn:hover {
+  background: #e37517;
 }
 
-.status-badge.active {
-  background-color: #e0f7e9;
-  color: #2e7d32;
-  padding: 4px 8px;
-  border-radius: 4px;
-  font-weight: 600;
-}
-
-.status-badge.expired {
-  background-color: #ffe0e0;
-  color: #d32f2f;
-  padding: 4px 8px;
-  border-radius: 4px;
-  font-weight: 600;
-}
-
-.banner-text {
-  font-size: 14px;
-  color: #22223b;
-}
-
-.rfq-layout {
-  display: flex;
-  background: transparent;
-  border-radius: 12px;
-  box-shadow: none;
-  padding: 0;
-  margin: 0;
-  gap: 24px;
-}
-
-.left-card .details-card,
-.right-card .panel {
-  background: #fff;
-  border-radius: 10px;
-  box-shadow: 0 2px 10px rgba(54, 63, 98, 0.08);
-  padding: 24px 20px 20px 20px;
-  border: 1px solid #f2f2f2;
-}
-
-.details-card h3,
-.panel h3 {
-  font-size: 1.1rem;
-  font-weight: 600;
-  color: #22223b;
-  margin-bottom: 14px;
-  border-bottom: 1px solid #f1f1f1;
-  padding-bottom: 7px;
-}
-
-.detail-row {
-  margin-bottom: 14px;
-}
-
-.detail-row .label {
-  display: block;
-  font-weight: 500;
-  color: #6a5acd;
-  font-size: 15px;
-  margin-bottom: 1px;
-  letter-spacing: 0.2px;
-}
-
-.detail-row .value {
-  color: #22223b;
-  font-size: 15px;
-  font-weight: 400;
-}
-
-.detail-row .value a {
-  color: #f97316;
-  text-decoration: none;
-  font-weight: 500;
-}
-
-.detail-row .value a:hover {
-  text-decoration: underline;
-}
-
-.value.status.in-progress {
-  color: #1a7f37;
-}
-.value.status.delayed {
-  color: #b54708;
-}
-.value.status.cancelled {
-  color: #b42318;
-}
-
-.two-col {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 18px;
-}
-
-.rfq-field label {
-  font-weight: 500;
-  color: #6a5acd;
-  font-size: 15px;
-}
-
-.rfq-field input[type='text'] {
-  border: 1px solid #e6e6ef;
-  border-radius: 7px;
-  padding: 8px 12px;
-  background: #fbfbfd;
-  font-size: 15px;
-  color: #22223b;
-}
-
-.description-box {
-  border: 1px solid #e6e6ef;
-  border-radius: 7px;
-  background: #fbfbfd;
-  padding: 10px 12px;
-  color: #22223b;
-  font-size: 15px;
-  min-height: 54px;
-  line-height: 1.5;
-}
-
-.rfq-field textarea {
-  border: 1px solid #e6e6ef;
-  border-radius: 7px;
-  padding: 10px 12px;
-  font-size: 15px;
-  resize: vertical;
-  min-height: 100px;
-  background: #fbfbfd;
-  color: #22223b;
-}
-
-.rfq-field textarea.invalid {
-  border-color: #e74c3c;
-}
-
-.actions {
-  display: flex;
-  gap: 10px;
-  margin-top: 18px;
-}
-
-
-
-.btn-primary,
-.btn-ghost {
-  font-size: 11px;
-  font-weight: 500;
-  border-radius: 7px;
-  padding: 8px 22px;
-  border: 1.5px solid #d3d8e6;
-  transition: all 0.18s;
-  display: flex;
-width: auto;
-  min-width: 110px;
-  justify-content: center;
-}
-
-.btn-primary {
-  color: #fff;
-  background: #f97316;
-  border-color: #f97316;
-  box-shadow: 0 2px 10px 0 rgba(249, 115, 22, 0.12);
-}
-
-.btn-primary:hover,
-.btn-primary:focus {
-  background: #003042;
-  border-color: #003042;
-  color: #fff;
-}
-
-.btn-ghost {
-  color: #003042;
-  background: #fff;
-  border-color: #d3d8e6;
-}
-
-.btn-ghost:hover,
-.btn-ghost:focus {
-  background: #f7f8fc;
-  color: #f97316;
-  border-color: #f97316;
-}
-
-.btn-primary:disabled,
-.btn-ghost:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-  background: #f1f5f9 !important;
-  color: #94a3b8 !important;
-  border-color: #cfd8e3 !important;
-  pointer-events: none !important;
-}
-
-.upload-btn {
-  margin-left: auto;
-  background: #003042;
-  color: #fff;
-  border: none;
-  font-weight: 500;
-  border-radius: 6px;
-  padding: 8px 18px;
-  font-size: 14px;
-  box-shadow: 0 2px 6px rgba(54, 63, 98, 0.1);
-  transition: all 0.22s;
-}
-
-.upload-btn:hover,
-.upload-btn:focus {
-  background: #f97316;
-  color: #fff;
-}
-
-.attachments-container {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  flex-wrap: wrap;
-}
-
-.attachment-line {
-  display: flex;
-  align-items: center;
-  gap: 7px;
-  min-width: 200px;
-}
-
-.uploaded-files {
-  margin-top: 10px;
-}
-
-.uploaded-title {
-  font-size: 14px;
-  color: #6a5acd;
-  margin: 0 0 10px 0;
-}
-
-.uploaded-file {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 14px;
-  background: #f7f8fc;
-  padding: 7px 12px;
-  border-radius: 7px;
-  margin-bottom: 6px;
-}
-
-.file-name {
-  color: #003042;
-}
-
-.delete-btn {
-  border: none;
-  background: none;
-  color: #b42318;
-  font-size: 18px;
-  cursor: pointer;
-  line-height: 1;
-}
-
-.delete-btn:hover {
-  color: #f97316;
-}
-
-.disabled-wrapper.is-disabled {
-  cursor: not-allowed !important;
-  display: inline-block;
-}
-
-.disabled-wrapper.is-disabled * {
-  pointer-events: none;
-}
-
-@media (max-width: 900px) {
+/* Responsive */
+@media (max-width: 1200px) {
   .rfq-layout {
-    grid-template-columns: 1fr;
-  }
-  .left-card {
-    width: 100%;
-  }
-  .right-card {
-    min-width: 0;
-  }
-}
-
-@media (max-width: 600px) {
-  .details-card,
-  .panel {
-    padding: 18px 8px 14px 8px;
-  }
-  .actions {
     flex-direction: column;
   }
-}
 
-/* --- Custom: Project details left column --- */
-.left-card .details-card {
-  border: 1px solid #ebeafd;
-  padding: 20px 18px 18px 18px;
-}
-
-.detail-row .label {
-  color: #6a5acd;
-  margin-bottom: 0;
-  font-weight: 600;
-  font-size: 15px;
-}
-
-.detail-row .value {
-  color: #003042;
-  font-weight: 400;
-  font-size: 15px;
-  margin-bottom: 1px;
-}
-
-.detail-row .value.status {
-  font-weight: 700;
-  font-size: 15px;
-}
-
-.detail-row .value a {
-  color: #f97316;
-  font-weight: 500;
-  text-decoration: underline dotted;
-  font-size: 15px;
-}
-
-.detail-row .value a:hover {
-  color: #d97706;
-}
-
-/* --- Custom: Table/Quote Details Section Example --- */
-.quote-details-panel {
-  background: #f7f8fc;
-  border-radius: 9px;
-  padding: 18px;
-  margin-top: 18px;
-  border: 1px solid #ebeafd;
-}
-
-.quote-details-panel h4 {
-  color: #22223b;
-  font-size: 16px;
-  font-weight: 600;
-  margin-bottom: 12px;
-  border-bottom: 1px solid #e5e7eb;
-  padding-bottom: 7px;
-}
-
-.previous-submission-row {
-  display: flex;
-  align-items: center;
-  gap: 35px;
-  background: #fff;
-  border-radius: 9px;
-  padding: 13px 14px;
-  margin-bottom: 12px;
-  border: 1px solid #e5e7eb;
-  box-shadow: 0 2px 10px 0 rgba(54, 63, 98, 0.06);
-}
-
-.previous-submission-row .submission-label {
-  color: #22223b;
-  font-weight: 500;
-}
-.previous-submission-row .submission-value {
-  color: #6a5acd;
-  font-weight: 600;
-  font-size: 15px;
-}
-
-.attachment-icon,
-.comment-icon {
-  color: #f97316;
-  font-size: 19px;
-  vertical-align: middle;
-  margin-right: 5px;
-}
-
-.header-with-meta {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-.due-meta {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  color: #475569;
-  font-weight: 500;
-}
-.due-meta strong {
-  color: #0f172a;
-}
-.due-meta .fa-clock {
-  color: #2563eb;
-}
-
-.right-card .panel h3 {
-  margin-bottom: 8px;
-}
-
-.rfq-list {
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-}
-.rfq-row {
-  background: #fff;
-  border: 1px solid #ebeafd;
-  border-radius: 9px;
-  box-shadow: 0 2px 10px rgba(54, 63, 98, 0.06);
-}
-.rfq-row-head {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) 360px 180px;
-  gap: 16px;
-  align-items: center;
-  padding: 14px;
-  width: 100%;
-}
-
-.two-col.compact {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 14px;
-}
-.description-box {
-  min-height: 40px;
-  display: flex;
-  align-items: center;
-}
-
-.interest-actions {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 8px;
-  max-width: 360px;
-}
-
-.interest-label {
-  color: #6a5acd;
-  font-weight: 600;
-  font-size: 15px;
-}
-
-.interest-row {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  flex-wrap: nowrap;
-}
-
-.fa-chevron-down {
-  margin-left: 4px;
-}
-
-.cta {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  gap: 8px;
-  min-width: 180px;
-}
-.chev-btn {
-  border: 1px solid #d3d8e6;
-  background: #fff;
-  color: #334155;
-  border-radius: 7px;
-  padding: 8px 10px;
-  line-height: 1;
-}
-.chev-btn:hover {
-  background: #f7f8fc;
-}
-
-.quote-details-panel {
-  background: #f7f8fc;
-  border-top: 1px solid #ebeafd;
-  border-radius: 0 0 9px 9px;
-  padding: 16px;
-}
-.quote-grid {
-  display: grid;
-  grid-template-columns: 1.6fr 1fr;
-  gap: 18px;
-}
-.prev-col .section-title,
-.submit-col .section-title {
-  display: block;
-  color: #22223b;
-  font-weight: 600;
-  margin-bottom: 10px;
-}
-
-/* responsive */
-@media (max-width: 1100px) {
-  .rfq-row-head {
-    grid-template-columns: 1fr;
-    gap: 12px;
+  .left-card {
+    width: 100%;
+    flex: 0 0 auto;
   }
+
+  .rfq-row-head--match {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+
+  .rfq-right {
+    justify-content: flex-start;
+  }
+
+  .interest-btns {
+    flex-wrap: wrap;
+  }
+
   .quote-grid {
     grid-template-columns: 1fr;
   }
 }
 
-.dropdown {
-  position: relative;
-  display: inline-block;
-}
-.dropdown .btn-ghost.dropdown-open {
-  background: #0f172a;
-  color: #fff;
-  border-color: #0f172a;
-}
-.dropdown-panel {
-  position: absolute;
-  top: calc(100% + 8px);
-  left: 0;
-    right: auto;
+@media (max-width: 600px) {
+  .panel-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
 
-  width: 320px;
-  background: #fff;
-  border: 1px solid #e5e7eb;
-  border-radius: 8px;
-  padding: 12px 14px;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.12);
-  z-index: 20;
+  .rfq-mini {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+
+  .btn-pill,
+  .btn-pill--dark {
+    min-width: 170px;
+  }
+
+  .dropdown-panel {
+    width: 320px;
+  }
 }
-.dropdown-panel .rfq-field label {
-  color: #6a5acd;
-  font-weight: 600;
+
+/* =========================
+   ONE-LINE PERFECT RFQ HEADER (match screenshot)
+   Paste at END of your CSS
+   ========================= */
+
+/* 1) Force the 3 zones to fit in one line */
+.rfq-row-head--match {
+  display: grid !important;
+  grid-template-columns: 420px 420px 240px !important; /* LEFT | CENTER | RIGHT */
+  gap: 18px !important;
+  align-items: center !important;
 }
-.text-input {
-  width: 100%;
-  padding: 8px 10px;
-  border: 1px solid #e6e6ef;
-  border-radius: 7px;
+
+/* Ensure middle can shrink without pushing right side out */
+.rfq-row-head--match > .rfq-center,
+.rfq-row-head--match > .rfq-left {
+  min-width: 0 !important;
+}
+
+/* 2) Left side: Workitem code + Work item. Keep compact and truncate long text */
+.rfq-mini {
+  grid-template-columns: 150px 1fr !important; /* code fixed, workitem flexible */
+  gap: 28px !important;
+}
+
+.rfq-mini-col {
+  min-width: 0 !important; /* allows ellipsis */
+}
+
+.mini-label {
+  font-size: 15px !important;
+  margin-bottom: 6px !important;
+}
+
+.mini-value {
+  font-size: 17px !important;
+}
+
+/* Truncate the Work Item name so it doesn't eat space */
+.rfq-mini-col:nth-child(2) .mini-value {
+  display: block !important;
+  max-width: 100% !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
+/* 3) Center: buttons in one line, no wrapping */
+.interest-btns {
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+  flex-wrap: nowrap !important; /* IMPORTANT */
+  white-space: nowrap !important;
+}
+
+/* Fixed button sizes to match screenshot and fit */
+.interest-btns .btn-pill {
+  height: 34px !important;
+  line-height: 34px !important;
+  padding: 0 14px !important;
+  font-size: 16px !important;
+  border-radius: 4px !important;
+  min-width: 0 !important;
+}
+
+/* Exact widths (fits like screenshot) */
+.interest-btns .btn-pill--primary {
+  width: 120px !important; /* Interested */
+}
+
+.interest-btns .btn-pill--outline {
+  width: 150px !important; /* Maybe Later + Not Interested */
+}
+
+/* Caret sizing like screenshot */
+.interest-btns .btn-pill i {
+  margin-left: 10px !important;
+  font-size: 12px !important;
+}
+
+/* Right: keep resubmit + caret aligned */
+.rfq-right {
+  justify-content: flex-end !important;
+  gap: 12px !important;
+}
+
+.btn-pill--dark {
+  height: 34px !important;
+  line-height: 34px !important;
+  width: 180px !important; /* Resubmit Quote */
+  padding: 0 16px !important;
+  border-radius: 4px !important;
+}
+
+.caret-only {
+  width: 34px !important;
+  height: 34px !important;
+}
+
+.rfq-row-head--match {
+  grid-template-columns: 380px 400px 220px !important; /* was 420/420/240 */
+  gap: 14px !important;
+  padding: 16px 14px !important; /* slightly less padding = more room */
+}
+
+/* Make left part tighter */
+.rfq-mini {
+  grid-template-columns: 140px 1fr !important;
+  gap: 22px !important;
+}
+
+/* Slightly reduce center button widths */
+.interest-btns .btn-pill--primary {
+  width: 112px !important; /* Interested */
+}
+
+.interest-btns .btn-pill--outline {
+  width: 140px !important; /* Maybe Later / Not Interested */
+}
+
+/* Reduce the CTA button width slightly */
+.btn-pill--dark {
+  width: 165px !important; /* Submit/Resubmit Quote */
+}
+
+/* Keep caret compact */
+.caret-only {
+  width: 32px !important;
+  height: 32px !important;
+}
+/* =========================
+   FIX: CTA hidden (clipping) + keep one line
+   Paste at END of CSS
+   ========================= */
+
+/* 1) Do NOT clip the RFQ row horizontally */
+.right-card .panel {
+  overflow: visible !important;
+}
+
+.rfq-row {
+  overflow: visible !important;
+}
+
+/* If you still want rounded corners, keep them but don't hide overflow */
+.rfq-row {
+  border-radius: 6px;
+}
+
+/* 2) One-line flex header that fits */
+.rfq-row-head--flex {
+  display: flex !important;
+  align-items: center !important;
+  gap: 14px !important;
+  padding: 16px 12px !important;
+  overflow: visible !important;
+}
+
+/* Left: allow shrink, but truncate work item */
+.rfq-row-head--flex .rfq-left {
+  flex: 1 1 380px !important; /* can shrink */
+  min-width: 240px !important;
+}
+
+.rfq-row-head--flex .rfq-mini-col {
+  min-width: 0 !important;
+}
+
+.rfq-row-head--flex .rfq-mini-col:last-child .mini-value {
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
+/* Center: keep buttons on one line but allow the whole center block to shrink */
+.rfq-row-head--flex .rfq-center {
+  flex: 0 1 520px !important; /* can shrink */
+  min-width: 420px !important; /* ensures buttons don't collapse */
+}
+
+.rfq-row-head--flex .interest-btns {
+  display: flex !important;
+  gap: 10px !important;
+  flex-wrap: nowrap !important;
+  white-space: nowrap !important;
+}
+
+/* Button sizes: slightly smaller font so all fit */
+.rfq-row-head--flex .interest-btns .btn-pill {
+  height: 34px !important;
+  line-height: 34px !important;
+  padding: 0 12px !important;
+  font-size: 14px !important;
+  border-radius: 4px !important;
+  flex: 0 0 auto !important; /* don't shrink */
+}
+
+.rfq-row-head--flex .interest-btns .btn-pill--primary {
+  width: 112px !important;
+}
+
+.rfq-row-head--flex .interest-btns .btn-pill--outline {
+  width: 142px !important;
+}
+
+.rfq-row-head--flex .interest-btns .btn-pill i {
+  font-size: 11px !important;
+  margin-left: 8px !important;
+}
+
+/* Right: CTA must ALWAYS show */
+.rfq-row-head--flex .rfq-right {
+  flex: 0 0 auto !important;
+  margin-left: auto !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+}
+
+.rfq-row-head--flex .btn-pill--dark {
+  height: 34px !important;
+  line-height: 34px !important;
+  width: 150px !important;   /* was 170/180 */
+  min-width: 150px !important;
+  padding: 0 10px !important;  font-size: 14px !important;
+  flex: 0 0 auto !important;
+}
+
+.rfq-row-head--flex .caret-only {
+  width: 34px !important;
+  height: 34px !important;
+  flex: 0 0 auto !important;
+}
+
+.truncate-text {
+  display: inline-block;
+  max-width: 220px; /* adjust based on your RFQ header space */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  vertical-align: middle;
+}
+.mat-mdc-tooltip {
+  background: #0f172a !important;
+  color: #fff !important;
+  font-size: 13px !important;
+  font-weight: 500 !important;
+  border-radius: 8px !important;
+  padding: 8px 10px !important;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.18) !important;
 }
 
 .badge {

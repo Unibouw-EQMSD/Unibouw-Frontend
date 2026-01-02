@@ -16,8 +16,9 @@ import { HttpClient } from '@angular/common/http';
 import { registerLocaleData } from '@angular/common';
 import localeNl from '@angular/common/locales/nl';
 import { FormsModule } from '@angular/forms';
-import { HostListener } from '@angular/core';
+import { Directive, HostListener, Renderer2 } from '@angular/core';
 import { finalize, switchMap, tap } from 'rxjs';
+import { MatTooltipModule } from '@angular/material/tooltip';
 
 interface NotInterestedData {
   reason: string;
@@ -39,10 +40,12 @@ interface LogConversation {
 @Component({
   selector: 'app-project-summary',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, FormsModule],
+  imports: [CommonModule, ReactiveFormsModule, FormsModule,MatTooltipModule],
   templateUrl: './project-summary.html',
   styleUrls: ['./project-summary.css'],
 })
+
+
 export class ProjectSummary implements OnInit {
   project: any = null;
   subcontractor: any = null;
@@ -98,6 +101,8 @@ export class ProjectSummary implements OnInit {
   showCommentModal: boolean = false;
   formSubmitted: boolean = false;
   openDropdown: { id: string | number | null; type: '' | 'maybe' | 'not' } = { id: null, type: '' };
+  r: any;
+  el: any;
 
   constructor(
     private route: ActivatedRoute,
@@ -111,6 +116,13 @@ export class ProjectSummary implements OnInit {
     this.attachments = this.fb.array<FormControl<File | null>>([
       this.fb.control<File | null>(null),
     ]);
+  }
+
+   @HostListener('mousemove', ['$event'])
+  onMove(e: MouseEvent) {
+    // store cursor position as CSS variables on the hovered element
+    this.r.setStyle(this.el.nativeElement, '--tt-x', `${e.clientX}px`);
+    this.r.setStyle(this.el.nativeElement, '--tt-y', `${e.clientY}px`);
   }
   ngOnInit(): void {
     this.quoteForm = this.fb.group({
