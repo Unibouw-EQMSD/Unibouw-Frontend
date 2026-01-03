@@ -39,19 +39,17 @@ export class AddSubcontractor implements OnInit {
   popupError: boolean = false;
   showPopup: boolean = false;
 
-  private buildTeamsMessage(payload: any): string {
+  private buildTeamsMessage(payload: any, allSelectedWorkitems: Workitem[]): string {
     const CATEGORY_MAP: Record<string, string> = {
       '213cf69b-627e-4962-83ec-53463c8664d2': 'Unibouw',
       '60a1a614-05fd-402d-81b3-3ba05fdd2d8a': 'Standard',
     };
 
-    const allWorkItems = Array.from(this.selectionsByCategory.values()).flat();
-
-    const grouped = allWorkItems.reduce((acc: any, item: any) => {
+    const grouped = allSelectedWorkitems.reduce((acc: any, item: any) => {
       const category = CATEGORY_MAP[item.categoryID] ?? 'Others';
 
       if (!acc[category]) acc[category] = [];
-      acc[category].push(item.name);
+      acc[category].push(item.name.replace(/`/g, '')); // safety
 
       return acc;
     }, {});
@@ -64,23 +62,20 @@ export class AddSubcontractor implements OnInit {
       })
       .join('\n\n');
 
-    return `
-📩 **New Subcontractor Created**
+    return `📩 **New Subcontractor Created**
+\`\`\`
+Subcontractor Name : ${payload.name}
+Email              : ${payload.emailID}
+Location           : ${payload.location}
+Country            : ${payload.country}
+Contact Name       : ${payload.contactName}
+Contact Email      : ${payload.contactEmailID}
+Contact Phone      : ${payload.phoneNumber1}
+Office Address     : ${payload.officeAddress}
 
-      \`\`\`
-      Subcontractor Name : ${payload.name}
-      Email              : ${payload.emailID}
-      Location           : ${payload.location}
-      Country            : ${payload.country}
-      Contact Name       : ${payload.contactName}
-      Contact Email      : ${payload.contactEmailID}
-      Contact Phone      : ${payload.phoneNumber1}
-      Office Address     : ${payload.officeAddress}
-
-      Work Items:
-      ${workItemsText}
-      \`\`\`
-      `.trim();
+Work Items:
+${workItemsText}
+\`\`\``; // 👈 DO NOT add anything after this
   }
 
   constructor(
@@ -341,7 +336,7 @@ export class AddSubcontractor implements OnInit {
         this.handleSuccess(res, formValue.attachments || []);
 
         // 🔔 Send MS Teams notification
-        const teamsMessage = this.buildTeamsMessage(payload);
+        const teamsMessage = this.buildTeamsMessage(payload, allSelectedWorkitems);
 
         this.userService.sendMsTeamsNotification(teamsMessage).subscribe({
           next: () => console.log('Teams notification sent'),
