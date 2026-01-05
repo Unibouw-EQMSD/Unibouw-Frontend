@@ -1,29 +1,54 @@
-form {
+/* form {
   grid-column: 1 / 2;
   display: flex;
   flex-direction: column;
+} */
+
+.form-layout {
+  display: grid;
+  grid-template-columns: 2fr 1.2fr;
+  gap: 24px;
+  align-items: flex-start;
+}
+
+.left-panel {
+  background: #fff;
+}
+
+.right-panel {
+  position: sticky;
+  margin: 0;
+  padding: 0;
+}
+
+@media (max-width: 992px) {
+  .form-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .right-panel {
+    position: static;
+  }
 }
 
 .form-card {
   display: grid;
-  grid-template-columns: 2fr 1fr;
+  /* grid-template-columns: 2fr 1fr; */
   gap: 20px;
 }
 
 .form-row {
-  margin-bottom: 10px;
   display: flex;
   gap: 24px;
   align-items: flex-end;
+  margin-bottom: 10px;
 }
 
 .form-group {
   flex: 1;
   min-width: 250px;
-  margin-bottom: 0;
   display: flex;
   flex-direction: column;
-  position: relative;
 }
 
 .form-error-space {
@@ -35,15 +60,11 @@ form {
   border-bottom: 1px solid #ddd;
   padding: 6px 8px;
   font-size: 14px;
-  outline: none;
 }
 
 .form-control-textarea {
-  border: none;
   border: 1px solid #ddd;
   padding: 6px 8px;
-  font-size: 14px;
-  outline: none;
 }
 
 .form-checkbox-label {
@@ -57,12 +78,21 @@ form {
 }
 
 .workitems-card {
-  grid-column: 2 / 3;
   background: #fafafa;
   border-radius: 10px;
   padding: 10px 15px 15px;
   box-shadow: inset 0 0 4px rgba(0, 0, 0, 0.05);
-  height: fit-content;
+}
+
+/* REMOVE extra space above title */
+.workitems-card > div:first-child {
+  margin-top: 0;
+  padding-top: 0;
+}
+
+/* Remove label margin */
+.workitems-card label {
+  margin-top: 0;
 }
 
 .checkbox-inline {
@@ -78,6 +108,15 @@ form {
 .is-invalid-textarea {
   border: none;
   border: 1px solid rgb(255, 0, 0) !important;
+}
+
+.form-control:focus,
+.form-control:active,
+.form-control:focus-visible {
+  outline: none !important;
+  box-shadow: none !important;
+  border: none;
+  border-bottom: 1px solid #063d4c; /* optional focus color */
 }
 
 .full-width {
@@ -159,7 +198,6 @@ textarea {
   display: flex;
   flex-direction: column;
   gap: 5px;
-  /* max-height: calc(100vh - 320px); */
   max-height: calc(100vh - 350px);
   overflow-y: auto;
 }

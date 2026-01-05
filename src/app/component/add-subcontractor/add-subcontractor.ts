@@ -145,10 +145,12 @@ ${workItemsText}
       contactNumber: ['', [Validators.required, Validators.pattern(/^[0-9]{8,15}$/)]],
       contactPerson: [
         '',
-        Validators.required,
-        Validators.minLength(3),
-        Validators.maxLength(150),
-        Validators.pattern(/^(?=.*\S)[A-Za-z.\-\s]+$/),
+        [
+          Validators.required,
+          Validators.minLength(3),
+          Validators.maxLength(150),
+          Validators.pattern(/^(?=.*\S)[A-Za-z.\-\s]+$/),
+        ],
       ],
       attachments: [null],
     });
@@ -291,14 +293,44 @@ ${workItemsText}
 
   submitAttempted = false;
 
+  private logFormValidationErrors(form: FormGroup) {
+    Object.keys(form.controls).forEach((key) => {
+      const control = form.get(key);
+
+      if (control && control.invalid) {
+        console.warn(`❌ Validation failed for: ${key}`);
+        console.table(control.errors);
+      }
+    });
+  }
+
   /** Form submission */
   onSubmit() {
+    // this.submitAttempted = true;
+
+    // // Mark the form fields as touched so validation errors appear
+    // this.subcontractorForm.markAllAsTouched();
+
+    // const allSelectedWorkitems = Array.from(this.selectionsByCategory.values()).flat();
+    // if (allSelectedWorkitems.length === 0 || this.subcontractorForm.invalid) {
+    //   return;
+    // }
+
     this.submitAttempted = true;
 
-    // Mark the form fields as touched so validation errors appear
     this.subcontractorForm.markAllAsTouched();
 
     const allSelectedWorkitems = Array.from(this.selectionsByCategory.values()).flat();
+
+    if (this.subcontractorForm.invalid) {
+      console.warn('🚫 Form is INVALID');
+      this.logFormValidationErrors(this.subcontractorForm);
+    }
+
+    if (allSelectedWorkitems.length === 0) {
+      console.warn('🚫 No work items selected');
+    }
+
     if (allSelectedWorkitems.length === 0 || this.subcontractorForm.invalid) {
       return;
     }
