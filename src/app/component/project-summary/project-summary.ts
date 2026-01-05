@@ -40,12 +40,10 @@ interface LogConversation {
 @Component({
   selector: 'app-project-summary',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, FormsModule,MatTooltipModule],
+  imports: [CommonModule, ReactiveFormsModule, FormsModule, MatTooltipModule],
   templateUrl: './project-summary.html',
   styleUrls: ['./project-summary.css'],
 })
-
-
 export class ProjectSummary implements OnInit {
   project: any = null;
   subcontractor: any = null;
@@ -118,7 +116,7 @@ export class ProjectSummary implements OnInit {
     ]);
   }
 
-   @HostListener('mousemove', ['$event'])
+  @HostListener('mousemove', ['$event'])
   onMove(e: MouseEvent) {
     // store cursor position as CSS variables on the hovered element
     this.r.setStyle(this.el.nativeElement, '--tt-x', `${e.clientX}px`);
@@ -495,7 +493,13 @@ export class ProjectSummary implements OnInit {
       .submitRfqResponse(this.rfqId, this.subId, target.workItemID, status, reasonPayload, null)
       .subscribe({
         next: () => {
-          alert(`Your response "${status}" was recorded successfully!`);
+          if (status === 'Maybe Later') {
+            alert(
+              'Your preference has been recorded. You may respond any time before the due date.'
+            );
+          } else {
+            alert(`Your response "${status}" was recorded successfully!`);
+          }
           const key = `rfq_state_${this.rfqId}_${this.subId}_${target.workItemID}`;
           localStorage.setItem(
             key,
@@ -556,7 +560,7 @@ export class ProjectSummary implements OnInit {
           const newSubmission = {
             date: new Date().toISOString(),
             amount: totalAmount,
-                    documentId: res.documentId,   // ✅ STORE THIS
+            documentId: res.documentId, // ✅ STORE THIS
 
             attachmentUrl: URL.createObjectURL(file),
             fileName: file.name,
