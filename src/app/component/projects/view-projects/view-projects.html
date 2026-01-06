@@ -753,10 +753,16 @@
             rows="4"
             [(ngModel)]="reminderEmailBody"
             [readonly]="reminderType === 'default'"
-            [ngClass]="{ 'readonly-bg': reminderType === 'default' }"
+            [ngClass]="{
+              'readonly-bg': reminderType === 'default',
+              'error-border': emailBodyError
+            }"
+            (input)="emailBodyError = false"
             >{{ reminderEmailBody }}
          </textarea
           >
+          <!-- Error text -->
+          <p *ngIf="emailBodyError" class="error-text">This field is required</p>
         </div>
       </div>
 

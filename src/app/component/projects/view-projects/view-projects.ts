@@ -897,6 +897,13 @@ export class ViewProjects implements AfterViewChecked {
 
     // this.reminderType = "default";
     this.applyReminderConfig(this.dueDate, this.GlobalReminderConfig);
+
+    // If email body is empty, restore default email body (optional but recommended)
+    if (!this.reminderEmailBody || !this.reminderEmailBody.trim()) {
+      this.emailBodyError = true;
+    } else {
+      this.emailBodyError = false;
+    }
   }
 
   closeReminderPopup() {
@@ -919,7 +926,17 @@ export class ViewProjects implements AfterViewChecked {
     }
   }
 
+  emailBodyError = false;
+
   sendReminder() {
+    // Email body validation
+    if (!this.reminderEmailBody || !this.reminderEmailBody.trim()) {
+      this.emailBodyError = true;
+      return;
+    }
+
+    this.emailBodyError = false;
+
     if (!this.selectedRfqId || !this.subId) {
       alert('Missing RFQ or Subcontractor information.');
       return;
