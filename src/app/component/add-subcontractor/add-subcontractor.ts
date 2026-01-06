@@ -3,7 +3,7 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { WorkitemService, Workitem, WorkitemCategory } from '../../services/workitem.service';
 import { SubcontractorService } from '../../services/subcontractor.service';
 import { UserService } from '../../services/User.service.';
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
 import { countryList } from '../../shared/countries';
 import { Subscription } from 'rxjs';
 import { Location } from '@angular/common';
@@ -39,6 +39,9 @@ export class AddSubcontractor implements OnInit {
   popupError: boolean = false;
   showPopup: boolean = false;
 
+  projectId: string | null = null;
+  projectName: string | null = null;
+
   private buildTeamsMessage(payload: any, allSelectedWorkitems: Workitem[]): string {
     const CATEGORY_MAP: Record<string, string> = {
       '213cf69b-627e-4962-83ec-53463c8664d2': 'Unibouw',
@@ -72,6 +75,7 @@ Contact Name       : ${payload.contactName}
 Contact Email      : ${payload.contactEmailID}
 Contact Phone      : ${payload.phoneNumber1}
 Office Address     : ${payload.officeAddress}
+${this.projectName && this.projectName !== 'null' ? `Project Name       : ${this.projectName}` : ''}
 
 Work Items:
 ${workItemsText}
@@ -81,6 +85,7 @@ ${workItemsText}
   constructor(
     private fb: FormBuilder,
     private router: Router,
+    private route: ActivatedRoute,
     private workItemService: WorkitemService,
     private subcontractorService: SubcontractorService,
     private userService: UserService,
@@ -157,6 +162,11 @@ ${workItemsText}
   }
 
   ngOnInit() {
+    this.route.paramMap.subscribe((params) => {
+      this.projectName = params.get('projectName');
+      this.projectId = params.get('projectID');
+    });
+
     this.loadPersons();
 
     if (this.categories.length > 0) {
@@ -306,16 +316,6 @@ ${workItemsText}
 
   /** Form submission */
   onSubmit() {
-    // this.submitAttempted = true;
-
-    // // Mark the form fields as touched so validation errors appear
-    // this.subcontractorForm.markAllAsTouched();
-
-    // const allSelectedWorkitems = Array.from(this.selectionsByCategory.values()).flat();
-    // if (allSelectedWorkitems.length === 0 || this.subcontractorForm.invalid) {
-    //   return;
-    // }
-
     this.submitAttempted = true;
 
     this.subcontractorForm.markAllAsTouched();
@@ -365,8 +365,6 @@ ${workItemsText}
 
     this.subcontractorService.createSubcontractor(payload).subscribe({
       next: (res) => {
-        this.handleSuccess(res, formValue.attachments || []);
-
         // 🔔 Send MS Teams notification
         const teamsMessage = this.buildTeamsMessage(payload, allSelectedWorkitems);
 
@@ -374,6 +372,8 @@ ${workItemsText}
           next: () => console.log('Teams notification sent'),
           error: (err: any) => console.error('Teams notification failed', err),
         });
+
+        this.handleSuccess(res, formValue.attachments || []);
       },
       error: (err) => {
         console.error('API ERROR:', err);
@@ -431,7 +431,12 @@ ${workItemsText}
 
   private handleFormResetAndRedirect(): void {
     this.onReset();
-    setTimeout(() => this.router.navigate(['/subcontractor']), 1000);
+    // ✅ Navigate to add RFQ if projectId exists and is not 'null'
+    if (this.projectId && this.projectId !== 'null') {
+      setTimeout(() => this.router.navigate(['/add-rfq', this.projectId]), 1000);
+    } else {
+      setTimeout(() => this.router.navigate(['/subcontractor']), 1000);
+    }
   }
 
   onReset() {

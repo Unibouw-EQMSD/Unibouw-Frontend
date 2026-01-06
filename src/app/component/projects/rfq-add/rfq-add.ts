@@ -793,6 +793,15 @@ Due Date: ${this.globalDueDate}
   }
 
   addSub() {
-    this.router.navigate(['/add-subcontractor']);
+    const projectName = this.projectDetails?.name;
+    const projectID = this.projectDetails?.projectID;
+
+    if (!projectName || !projectID) {
+      console.error('Project name or ID missing');
+      return;
+    }
+
+    // Navigate to add-subcontractor with projectID and projectName
+    this.router.navigate(['/add-subcontractor', projectID, projectName]);
   }
 }

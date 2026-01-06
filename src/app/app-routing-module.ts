@@ -13,27 +13,36 @@ import { SSOLogin } from './component/sso-login/sso-login';
 import { AuthGuard } from './auth.guard';
 import { AlreadyAuthGuard } from './already-auth.guard';
 
-
 const routes: Routes = [
   { path: 'login', component: SSOLogin, canActivate: [AlreadyAuthGuard] },
 
-{ path: '', redirectTo: 'workitems', pathMatch: 'full' }, // no guard here
+  { path: '', redirectTo: 'workitems', pathMatch: 'full' }, // no guard here
 
-{ path: 'workitems', component: Workitems, canActivate: [AuthGuard] },
+  { path: 'workitems', component: Workitems, canActivate: [AuthGuard] },
   { path: 'subcontractor', component: Subcontractor, canActivate: [AuthGuard] },
   { path: 'projectdetails', component: ProjectDetails, canActivate: [AuthGuard] },
   { path: 'projectlist', component: ProjectList, canActivate: [AuthGuard] },
   { path: 'rfq', component: Rfq, canActivate: [AuthGuard] },
   { path: 'add-workitem', component: AddWorkitem, canActivate: [AuthGuard] },
-  { path: 'add-subcontractor', component: AddSubcontractor, canActivate: [AuthGuard] },
-{ path: 'add-rfq/:projectId', component: RfqAdd, canActivate: [AuthGuard] },
-{ path: 'view-projects/:id', component: ViewProjects, canActivate: [AuthGuard] },
-{ path: 'project-summary', loadComponent: () => import('./component/project-summary/project-summary').then(m => m.ProjectSummary) },
-{ path: '**', redirectTo: 'login' }
+  // { path: 'add-subcontractor', component: AddSubcontractor, canActivate: [AuthGuard] },
+  {
+    path: 'add-subcontractor/:projectID/:projectName',
+    component: AddSubcontractor,
+    canActivate: [AuthGuard],
+  },
+
+  { path: 'add-rfq/:projectId', component: RfqAdd, canActivate: [AuthGuard] },
+  { path: 'view-projects/:id', component: ViewProjects, canActivate: [AuthGuard] },
+  {
+    path: 'project-summary',
+    loadComponent: () =>
+      import('./component/project-summary/project-summary').then((m) => m.ProjectSummary),
+  },
+  { path: '**', redirectTo: 'login' },
 ];
 
 @NgModule({
   imports: [RouterModule.forRoot(routes)],
-  exports: [RouterModule]
+  exports: [RouterModule],
 })
-export class AppRoutingModule { }
+export class AppRoutingModule {}

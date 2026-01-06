@@ -13,6 +13,9 @@ import { forkJoin } from 'rxjs/internal/observable/forkJoin';
   styleUrl: './subcontractor.css',
 })
 export class Subcontractor implements OnInit, AfterViewInit {
+  projectID: string | null = null;
+  projectName: string | null = null;
+
   displayedColumns: string[] = ['name', 'category', 'contactNumber', 'contactPerson', 'emailId'];
   dataSource = new MatTableDataSource<Subcontractors>([]);
 
