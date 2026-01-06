@@ -26,7 +26,7 @@ const routes: Routes = [
   { path: 'add-workitem', component: AddWorkitem, canActivate: [AuthGuard] },
   // { path: 'add-subcontractor', component: AddSubcontractor, canActivate: [AuthGuard] },
   {
-    path: 'add-subcontractor/:projectID/:projectName',
+    path: 'add-subcontractor/:projectID/:projectName/:projectCode',
     component: AddSubcontractor,
     canActivate: [AuthGuard],
   },

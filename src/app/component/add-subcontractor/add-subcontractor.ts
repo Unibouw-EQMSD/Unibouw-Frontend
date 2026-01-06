@@ -41,6 +41,7 @@ export class AddSubcontractor implements OnInit {
 
   projectId: string | null = null;
   projectName: string | null = null;
+  projectCode: string | null = null;
 
   private buildTeamsMessage(payload: any, allSelectedWorkitems: Workitem[]): string {
     const CATEGORY_MAP: Record<string, string> = {
@@ -50,20 +51,36 @@ export class AddSubcontractor implements OnInit {
 
     const grouped = allSelectedWorkitems.reduce((acc: any, item: any) => {
       const category = CATEGORY_MAP[item.categoryID] ?? 'Others';
-
       if (!acc[category]) acc[category] = [];
-      acc[category].push(item.name.replace(/`/g, '')); // safety
+
+      acc[category].push({
+        name: item.name.replace(/`/g, ''),
+        code: item.code ?? item.number ?? '',
+      });
 
       return acc;
     }, {});
 
     const workItemsText = Object.entries(grouped)
       .map(([category, items]: any) => {
-        const list = items.map((name: string, i: number) => `  ${i + 1}. ${name}`).join('\n');
+        const list = items
+          .map(
+            (item: any, i: number) =>
+              `  ${i + 1}. ${item.name}${item.code ? ` (Code: ${item.code})` : ''}`
+          )
+          .join('\n');
 
         return `${category}\n${list}`;
       })
       .join('\n\n');
+
+    //TEAMS-SAFE Office Address formatting
+    const OFFICE_LABEL = 'Office Address     : ';
+    const OFFICE_PADDING = ' '.repeat(OFFICE_LABEL.length);
+
+    const officeAddressText = payload.officeAddress
+      ? payload.officeAddress.trim().replace(/\r?\n\s*/g, `\n${OFFICE_PADDING}`)
+      : '';
 
     return `📩 **New Subcontractor Created**
 \`\`\`
@@ -74,12 +91,16 @@ Country            : ${payload.country}
 Contact Name       : ${payload.contactName}
 Contact Email      : ${payload.contactEmailID}
 Contact Phone      : ${payload.phoneNumber1}
-Office Address     : ${payload.officeAddress}
-${this.projectName && this.projectName !== 'null' ? `Project Name       : ${this.projectName}` : ''}
+Office Address     : ${officeAddressText}
+${
+  this.projectName && this.projectName !== 'null'
+    ? `Project Name       : ${this.projectName} (Code: ${this.projectCode})`
+    : ''
+}
 
 Work Items:
 ${workItemsText}
-\`\`\``; // 👈 DO NOT add anything after this
+\`\`\``;
   }
 
   constructor(
@@ -165,6 +186,7 @@ ${workItemsText}
     this.route.paramMap.subscribe((params) => {
       this.projectName = params.get('projectName');
       this.projectId = params.get('projectID');
+      this.projectCode = params.get('projectCode');
     });
 
     this.loadPersons();
@@ -316,6 +338,9 @@ ${workItemsText}
 
   /** Form submission */
   onSubmit() {
+    const allSelectedWorkitems1 = Array.from(this.selectionsByCategory.values()).flat();
+    console.log('Selected Workitems:', allSelectedWorkitems1);
+    if (this.submitAttempted) return;
     this.submitAttempted = true;
 
     this.subcontractorForm.markAllAsTouched();
@@ -323,15 +348,13 @@ ${workItemsText}
     const allSelectedWorkitems = Array.from(this.selectionsByCategory.values()).flat();
 
     if (this.subcontractorForm.invalid) {
-      console.warn('🚫 Form is INVALID');
+      this.submitAttempted = false;
       this.logFormValidationErrors(this.subcontractorForm);
+      return;
     }
 
     if (allSelectedWorkitems.length === 0) {
-      console.warn('🚫 No work items selected');
-    }
-
-    if (allSelectedWorkitems.length === 0 || this.subcontractorForm.invalid) {
+      this.submitAttempted = false;
       return;
     }
 
@@ -365,6 +388,7 @@ ${workItemsText}
 
     this.subcontractorService.createSubcontractor(payload).subscribe({
       next: (res) => {
+        this.submitAttempted = false;
         // 🔔 Send MS Teams notification
         const teamsMessage = this.buildTeamsMessage(payload, allSelectedWorkitems);
 
@@ -376,6 +400,7 @@ ${workItemsText}
         this.handleSuccess(res, formValue.attachments || []);
       },
       error: (err) => {
+        this.submitAttempted = false;
         console.error('API ERROR:', err);
 
         if (err.status === 409 && err.error?.field) {
@@ -413,20 +438,14 @@ ${workItemsText}
         },
       });
     } else {
-      this.showPopupMessage('Subcontractor created successfully!');
+      if (this.projectId && this.projectId !== 'null') {
+        this.showPopupMessage('Subcontractors added to the RFQ successfully.');
+      } else {
+        this.showPopupMessage('Subcontractor created successfully.');
+      }
+
       this.handleFormResetAndRedirect();
     }
-  }
-
-  private handleError(err: any) {
-    console.error('Backend error:', err);
-    const errorMessage =
-      err?.error?.message ||
-      err?.error?.error ||
-      JSON.stringify(err?.error?.errors) || // show validation errors
-      err?.message ||
-      'Failed to create Subcontractor. Please try again.';
-    this.showPopupMessage(errorMessage, true);
   }
 
   private handleFormResetAndRedirect(): void {

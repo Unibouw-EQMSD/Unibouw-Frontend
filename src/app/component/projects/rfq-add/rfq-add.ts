@@ -795,6 +795,7 @@ Due Date: ${this.globalDueDate}
   addSub() {
     const projectName = this.projectDetails?.name;
     const projectID = this.projectDetails?.projectID;
+    const projectCode = this.projectDetails?.projectCode;
 
     if (!projectName || !projectID) {
       console.error('Project name or ID missing');
@@ -802,6 +803,6 @@ Due Date: ${this.globalDueDate}
     }
 
     // Navigate to add-subcontractor with projectID and projectName
-    this.router.navigate(['/add-subcontractor', projectID, projectName]);
+    this.router.navigate(['/add-subcontractor', projectID, projectName, projectCode]);
   }
 }
