@@ -1,9 +1,23 @@
-import { Component, ElementRef, HostListener, ViewChild } from '@angular/core';
+import { Component, ElementRef, HostListener, ViewChild, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { AccountInfo, PublicClientApplication } from '@azure/msal-browser';
 import { UserService } from '../../services/User.service.';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { ReminderService } from '../../services/reminder.service';
+import {
+  FormBuilder,
+  FormGroup,
+  Validators,
+  AbstractControl,
+  ValidationErrors,
+} from '@angular/forms';
+
+export function midnightNotAllowedValidator(control: AbstractControl): ValidationErrors | null {
+  if (control.value === '00:00') {
+    return { midnightNotAllowed: true };
+  }
+  return null;
+}
 
 @Component({
   selector: 'app-header',
@@ -11,16 +25,26 @@ import { ReminderService } from '../../services/reminder.service';
   templateUrl: './header.html',
   styleUrl: './header.css',
 })
-export class Header {
+export class Header implements OnInit {
   private msalInstance: PublicClientApplication;
+  reminderForm: FormGroup;
 
   constructor(
     public router: Router,
     private userService: UserService,
     private snackBar: MatSnackBar,
-    private reminderService: ReminderService
+    private reminderService: ReminderService,
+    private fb: FormBuilder
   ) {
     this.msalInstance = (window as any).msalInstance;
+
+    this.reminderForm = this.fb.group({
+      maxReminderSequence: [1, [Validators.required, Validators.min(1)]], // must be > 0
+      reminderSequence: [[], Validators.required],
+      reminderTime: [null, [Validators.required, midnightNotAllowedValidator]],
+      reminderEmailBody: ['', [Validators.required, this.noWhitespaceValidator]],
+      isEnable: [true],
+    });
   }
 
   @HostListener('document:click', ['$event'])
@@ -44,11 +68,11 @@ export class Header {
   }
 
   isAdmin = false;
-  reminderTimeValue: string = '08:00';
-  reminderEmailBody: string = '';
-  enableGlobalReminders: boolean = false;
+  // reminderTimeValue: string = '08:00';
+  // reminderEmailBody: string = '';
+  // enableGlobalReminders: boolean = false;
   dropdownOpen = false;
-  values = Array.from({ length: 30 }, (_, i) => -1 - i); // [-1, -2, -3...]
+  values = Array.from({ length: 60 }, (_, i) => -1 - i); // [-1, -2, -3...]
   selectedReminderSequence: number[] = [];
   // Add a property to your component
   InitialLoadedReminderConfig: any = null;
@@ -56,6 +80,19 @@ export class Header {
 
   ngOnInit() {
     this.isAdmin = this.userService.isAdmin(); // Check role
+
+    this.reminderForm.get('isEnable')?.valueChanges.subscribe((enabled) => {
+      const action = enabled ? 'enable' : 'disable';
+
+      ['reminderTime', 'reminderEmailBody', 'maxReminderSequence', 'reminderSequence'].forEach(
+        (control) => this.reminderForm.get(control)?.[action]({ emitEvent: false })
+      );
+    });
+  }
+
+  noWhitespaceValidator(control: AbstractControl): ValidationErrors | null {
+    const isWhitespace = (control.value || '').trim().length === 0;
+    return isWhitespace ? { whitespace: true } : null;
   }
 
   toggleUserDropdown(event: MouseEvent) {
@@ -133,30 +170,29 @@ export class Header {
           return;
         }
 
-        // Store deep copy for reset
         this.InitialLoadedReminderConfig = JSON.parse(JSON.stringify(config));
 
-        // Fix: Convert to number[]
-        this.selectedReminderSequence = config.reminderSequence
+        const sequenceArray = config.reminderSequence
           ? config.reminderSequence.split(',').map(Number)
           : [];
 
-        this.reminderTimeValue = config.reminderTime || '08:00';
-        this.reminderEmailBody = config.reminderEmailBody || '';
-        this.enableGlobalReminders = config.isEnable || false;
-
-        this.snackBar.open('Reminder configuration loaded successfully', 'Close', {
-          duration: 3000,
+        // ✅ PATCH FORM VALUES
+        this.reminderForm.patchValue({
+          maxReminderSequence: sequenceArray.length || 1,
+          reminderSequence: sequenceArray,
+          reminderTime: config.reminderTime || '08:00',
+          reminderEmailBody: config.reminderEmailBody || '',
+          isEnable: config.isEnable ?? false,
         });
+
+        // UI helpers
+        this.selectedReminderSequence = sequenceArray;
+        // this.maxSequenceLimit = sequenceArray.length || 5;
 
         this.showSetReminderPopup = true;
       },
-      error: (err) => {
-        console.error('Error loading reminder config:', err);
-
-        this.snackBar.open('Failed to load reminder configuration', 'Close', {
-          duration: 4000,
-        });
+      error: () => {
+        this.snackBar.open('Failed to load reminder configuration', 'Close', { duration: 4000 });
       },
     });
   }
@@ -167,39 +203,53 @@ export class Header {
 
   resetReminderConfig() {
     const config = this.InitialLoadedReminderConfig;
-    if (!config) return; // Nothing to reset
+    if (!config) return;
 
-    this.selectedReminderSequence = config.reminderSequence
+    const sequenceArray = config.reminderSequence
       ? config.reminderSequence.split(',').map(Number)
       : [];
-    this.reminderTimeValue = config.reminderTime || '08:00';
-    this.reminderEmailBody = config.reminderEmailBody || '';
-    this.enableGlobalReminders = config.isEnable || false;
+
+    this.reminderForm.reset({
+      maxReminderSequence: sequenceArray.length || 1,
+      reminderSequence: sequenceArray,
+      reminderTime: config.reminderTime || '08:00',
+      reminderEmailBody: config.reminderEmailBody || '',
+      isEnable: config.isEnable ?? false,
+    });
+
+    this.selectedReminderSequence = sequenceArray;
   }
 
   // ------------------ Global Reminder Fields ------------------
   setReminderConfig() {
+    this.reminderForm.markAllAsTouched();
+
+    const formValue = this.reminderForm.value;
+
+    if (this.reminderForm.invalid || !formValue.reminderEmailBody?.trim()) {
+      console.warn('🚫 Reminder form is invalid');
+      return;
+    }
+
     const body = {
-      id: '00000000-0000-0000-0000-000000000001', // use actual ID from DB
-      reminderSequence: this.selectedReminderSequence.join(','),
-      reminderTime: this.reminderTimeValue,
-      reminderEmailBody: this.reminderEmailBody,
-      updatedBy: null,
-      updatedAt: null,
-      isEnable: this.enableGlobalReminders,
+      id: '00000000-0000-0000-0000-000000000001',
+      reminderSequence: formValue.reminderSequence.join(','),
+      reminderTime: formValue.reminderTime,
+      reminderEmailBody: formValue.reminderEmailBody.trim(),
+      isEnable: formValue.isEnable,
     };
 
     this.reminderService.updateGolbalReminderConfigSet(body).subscribe({
-      next: (res) => {
+      next: () => {
         this.closeReminderConfig();
-        alert('Reminder configuration updated successfully');
         this.snackBar.open('Reminder configuration updated successfully', 'Close', {
-          duration: 9000,
+          duration: 5000,
         });
       },
-      error: (err) => {
-        alert('Failed to update reminder configuration');
-        this.snackBar.open('Failed to update reminder configuration', 'Close', { duration: 9000 });
+      error: () => {
+        this.snackBar.open('Failed to update reminder configuration', 'Close', {
+          duration: 5000,
+        });
       },
     });
   }
@@ -208,19 +258,33 @@ export class Header {
 
   numberList: number[] = Array.from({ length: 31 }, (_, i) => i);
 
-  maxSequenceLimit: number = 5;
+  //maxSequenceLimit: number = 5;
 
   open = false;
 
-  selectLimit(limit: number) {
-    this.maxSequenceLimit = limit;
+  // selectLimit(limit: number) {
+  //   this.maxSequenceLimit = limit;
 
-    // 🔥 Reset selected values if they exceed the new limit
+  //   // 🔥 Reset selected values if they exceed the new limit
+  //   if (this.selectedReminderSequence.length > limit) {
+  //     this.selectedReminderSequence = [];
+  //   }
+
+  //   // Close this dropdown
+  //   this.open = false;
+  // }
+
+  selectLimit(limit: number) {
+    // this.maxSequenceLimit = limit;
+
+    this.reminderForm.get('maxReminderSequence')?.setValue(limit);
+    this.reminderForm.get('maxReminderSequence')?.markAsTouched();
+
     if (this.selectedReminderSequence.length > limit) {
       this.selectedReminderSequence = [];
+      this.reminderForm.get('reminderSequence')?.setValue([]);
     }
 
-    // Close this dropdown
     this.open = false;
   }
 
@@ -250,18 +314,47 @@ export class Header {
     return this.selectedReminderSequence.includes(value);
   }
 
+  // onCheck(value: number, checked: boolean) {
+  //   const max = this.reminderForm.get('maxReminderSequence')?.value || 1;
+  //   if (checked) {
+  //     if (this.selectedReminderSequence.length < max) {
+  //       this.selectedReminderSequence.push(value);
+  //     }
+  //   } else {
+  //     this.selectedReminderSequence = this.selectedReminderSequence.filter((v) => v !== value);
+  //   }
+
+  //   //SYNC WITH FORM
+  //   this.reminderForm.get('reminderSequence')?.setValue(this.selectedReminderSequence);
+  //   this.reminderForm.get('reminderSequence')?.markAsTouched();
+  // }
+
   onCheck(value: number, checked: boolean) {
+    const max = this.reminderForm.get('maxReminderSequence')?.value || 1;
+
     if (checked) {
-      if (this.selectedReminderSequence.length < this.maxSequenceLimit) {
+      if (
+        this.selectedReminderSequence.length < max &&
+        !this.selectedReminderSequence.includes(value)
+      ) {
         this.selectedReminderSequence.push(value);
       }
     } else {
       this.selectedReminderSequence = this.selectedReminderSequence.filter((v) => v !== value);
     }
+
+    // 🔽 Sort in descending order
+    this.selectedReminderSequence.sort((a, b) => b - a);
+
+    // Sync with form
+    this.reminderForm.get('reminderSequence')?.setValue(this.selectedReminderSequence);
+
+    this.reminderForm.get('reminderSequence')?.markAsTouched();
   }
 
   isDisabled(value: number): boolean {
-    return !this.isChecked(value) && this.selectedReminderSequence.length >= this.maxSequenceLimit;
+    const max = this.reminderForm.get('maxReminderSequence')?.value || 1;
+    return !this.isChecked(value) && this.selectedReminderSequence.length >= max;
   }
 
   onRowClick(value: number) {
@@ -273,5 +366,6 @@ export class Header {
   clearSelected(event: MouseEvent) {
     event.stopPropagation();
     this.selectedReminderSequence = [];
+    this.reminderForm.get('reminderSequence')?.setValue([]);
   }
 }

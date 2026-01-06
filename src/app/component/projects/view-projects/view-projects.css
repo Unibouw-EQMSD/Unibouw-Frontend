@@ -485,8 +485,8 @@
   left: 50%;
   transform: translate(-50%, -50%);
   z-index: 1000;
-  max-height: 80vh; /* Adjust based on your need */
-  overflow-y: auto; /* Enables vertical scrolling */
+  max-height: 80vh;
+  overflow-y: auto;
   overflow-x: hidden;
 }
 
@@ -565,7 +565,7 @@
 .default-reminder-container {
   display: grid;
   grid-template-columns: repeat(3, 180px);
-  gap: 25px 10px;
+  gap: 25px 0px;
   margin-top: 20px;
 }
 
@@ -632,7 +632,7 @@
 .date-row {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 4px;
   margin-bottom: 14px;
 }
 
@@ -1075,13 +1075,13 @@
   z-index: 999;
 }
 
-.custom-modal {
+/* .custom-modal {
   position: fixed;
-  top: 50%;
+  top: 54%;
   left: 50%;
   transform: translate(-50%, -50%);
   z-index: 1100;
-}
+} */
 
 /* Modal box */
 .modal-content-box {
@@ -1187,6 +1187,12 @@
   font-size: 14px;
   font-weight: 400;
   width: 100%;
+}
+
+.calendar-add.disabled {
+  pointer-events: none;
+  opacity: 0.4;
+  cursor: not-allowed;
 }
 
 /* ----------------- End Modal -------------------- */

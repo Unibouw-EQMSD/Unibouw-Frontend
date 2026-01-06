@@ -82,42 +82,71 @@
     </div>
 
     <!-- Modal Body -->
-    <div class="modal-body">
-      <!-- Reminder Sequence -->
+    <form class="modal-body" [formGroup]="reminderForm">
+      <!-- Reminder Section -->
       <div class="modal-section">
+        <!-- Max Reminder Sequence -->
         <div class="row">
           <label class="label">Max Reminder Sequence</label>
 
-          <!-- Max Reminder Sequence -->
-          <div class="custom-dropdown" (clickOutside)="open = false">
+          <div
+            class="custom-dropdown"
+            [class.disabled]="!reminderForm.get('isEnable')?.value"
+            (clickOutside)="open = false"
+          >
             <div
               class="dropdown-btn"
-              (click)="toggleMaxSequenceDropdown(); $event.stopPropagation()"
+              (click)="reminderForm.get('isEnable')?.value && toggleMaxSequenceDropdown()"
+              [class.is-invalid]="
+                reminderForm.get('maxReminderSequence')?.touched &&
+                reminderForm.get('maxReminderSequence')?.invalid
+              "
             >
-              {{ maxSequenceLimit || '0' }}
+              {{ reminderForm.get('maxReminderSequence')?.value || '0' }}
               <svg class="dropdown-icon" viewBox="0 0 24 24">
                 <path d="M6 9l6 6 6-6" />
               </svg>
             </div>
-            <ul class="dropdown-list" *ngIf="open">
+
+            <ul class="dropdown-list" *ngIf="open && reminderForm.get('isEnable')?.value">
               <li
                 *ngFor="let limit of numberList"
                 (click)="selectLimit(limit)"
-                [class.selected]="limit === maxSequenceLimit"
+                [class.selected]="limit === reminderForm.get('maxReminderSequence')?.value"
               >
                 {{ limit }}
               </li>
             </ul>
           </div>
+
+          <div
+            class="error-text"
+            *ngIf="
+              reminderForm.get('maxReminderSequence')?.touched &&
+              reminderForm.get('maxReminderSequence')?.invalid
+            "
+          >
+            Value must be greater than 0
+          </div>
         </div>
 
-        <!-- Reminder Sequence Multi Select -->
+        <!-- Reminder Sequence -->
         <div class="row">
           <label class="label">Reminder Sequence</label>
 
-          <!-- Reminder Sequence Multi Select -->
-          <div class="dropdown" (clickOutside)="dropdownOpen = false">
-            <div class="dropdown-btn" (click)="toggleReminderDropdown(); $event.stopPropagation()">
+          <div
+            class="dropdown"
+            [class.disabled]="!reminderForm.get('isEnable')?.value"
+            (clickOutside)="dropdownOpen = false"
+            [class.is-invalid]="
+              reminderForm.get('reminderSequence')?.touched &&
+              reminderForm.get('reminderSequence')?.invalid
+            "
+          >
+            <div
+              class="dropdown-btn"
+              (click)="reminderForm.get('isEnable')?.value && toggleReminderDropdown()"
+            >
               <span class="dropdown-text" [class.placeholder]="!selectedReminderSequence.length">
                 {{
                   selectedReminderSequence.length
@@ -129,8 +158,8 @@
               <div class="arrow">
                 <span
                   class="clear"
+                  *ngIf="selectedReminderSequence.length"
                   (click)="clearSelected($event)"
-                  [class.active]="selectedReminderSequence.length"
                 >
                   ×
                 </span>
@@ -138,7 +167,11 @@
               </div>
             </div>
 
-            <div class="dropdown-content" *ngIf="dropdownOpen" (click)="$event.stopPropagation()">
+            <div
+              class="dropdown-content"
+              *ngIf="dropdownOpen && reminderForm.get('isEnable')?.value"
+              (click)="$event.stopPropagation()"
+            >
               <div
                 class="dropdown-item"
                 *ngFor="let value of values"
@@ -149,12 +182,21 @@
                   type="checkbox"
                   [checked]="isChecked(value)"
                   [disabled]="isDisabled(value)"
-                  (click)="$event.stopPropagation()"
                   (change)="onCheck(value, $event.target.checked)"
                 />
                 <span>{{ value }}</span>
               </div>
             </div>
+          </div>
+
+          <div
+            class="error-text"
+            *ngIf="
+              reminderForm.get('reminderSequence')?.touched &&
+              reminderForm.get('reminderSequence')?.invalid
+            "
+          >
+            This field is required
           </div>
         </div>
       </div>
@@ -163,29 +205,72 @@
       <div class="row">
         <label class="label">Set Time</label>
         <div class="time-wrapper">
-          <input type="time" class="time-input" [(ngModel)]="reminderTimeValue" />
+          <input
+            type="time"
+            class="time-input"
+            formControlName="reminderTime"
+            [class.disabled]="!reminderForm.get('isEnable')?.value"
+            [class.is-invalid]="
+              reminderForm.get('reminderTime')?.touched && reminderForm.get('reminderTime')?.invalid
+            "
+          />
           <i class="fa fa-clock-o time-icon"></i>
+        </div>
+
+        <div
+          class="error-text"
+          *ngIf="
+    reminderForm.get('reminderTime')?.touched &&
+    reminderForm.get('reminderTime')?.errors?.['midnightNotAllowed']
+  "
+        >
+          Reminder time cannot be 00:00
         </div>
       </div>
 
       <!-- Email Body -->
       <div class="modal-section">
         <label class="label block">Email Body</label>
-        <textarea class="email-body" rows="4" [(ngModel)]="reminderEmailBody"></textarea>
+        <textarea
+          class="email-body"
+          rows="4"
+          formControlName="reminderEmailBody"
+          [disabled]="!reminderForm.get('isEnable')?.value"
+          [class.is-invalid]="
+            reminderForm.get('reminderEmailBody')?.touched &&
+            reminderForm.get('reminderEmailBody')?.invalid
+          "
+        ></textarea>
+
+        <div
+          class="error-text"
+          *ngIf="
+            reminderForm.get('reminderEmailBody')?.touched &&
+            reminderForm.get('reminderEmailBody')?.invalid
+          "
+        >
+          This field is required
+        </div>
       </div>
 
       <!-- Enable Reminder -->
       <div class="checkbox-row">
-        <input type="checkbox" id="enableGlobalReminders" [(ngModel)]="enableGlobalReminders" />
+        <input type="checkbox" id="enableGlobalReminders" formControlName="isEnable" />
         <label for="enableGlobalReminders"> Enable automated reminders globally </label>
       </div>
-    </div>
 
-    <!-- Footer -->
-    <div class="modal-footer">
-      <button class="btn cancel-btn" (click)="closeReminderConfig()">Cancel</button>
-      <button class="btn reset-btn" (click)="resetReminderConfig()">Reset</button>
-      <button class="btn submit-btn" (click)="setReminderConfig()">Set Reminder</button>
-    </div>
+      <!-- Footer -->
+      <div class="modal-footer">
+        <button type="button" class="btn cancel-btn" (click)="closeReminderConfig()">Cancel</button>
+        <button type="button" class="btn reset-btn" (click)="resetReminderConfig()">Reset</button>
+        <button
+          type="button"
+          class="btn submit-btn"
+          (click)="reminderForm.markAllAsTouched(); setReminderConfig()"
+        >
+          Save Configuration
+        </button>
+      </div>
+    </form>
   </div>
 </div>

@@ -165,6 +165,17 @@ export class ViewProjects implements AfterViewChecked {
     }
   }
 
+  isAddDisabled(): boolean {
+    if (!this.customReminderDates.length) return false;
+
+    const lastDateValue = this.customReminderDates[this.customReminderDates.length - 1];
+    if (!lastDateValue) return true; // prevent adding empty rows
+
+    const lastDate = new Date(lastDateValue);
+
+    return lastDate >= this.maxDate;
+  }
+
   @ViewChild('chatMessages') private chatMessages!: ElementRef;
   ngAfterViewChecked(): void {
     this.scrollToBottom();
@@ -352,7 +363,7 @@ export class ViewProjects implements AfterViewChecked {
               quote: s.quote || '—',
               quoteAmount: '-',
               dueDate: s.dueDate,
-  actions: s.documentId ? ['pdf', 'chat'] : ['chat'], // ✅ FIX
+              actions: s.documentId ? ['pdf', 'chat'] : ['chat'], // ✅ FIX
             });
           });
 
@@ -419,7 +430,7 @@ export class ViewProjects implements AfterViewChecked {
             subcontractorId: item.subcontractorId,
             rating: 0,
             quoteAmount: '-',
-actions: item.documentId ? ['pdf'] : [],
+            actions: item.documentId ? ['pdf'] : [],
           });
 
           group.requestsSent = group.workItems.length;
@@ -564,7 +575,7 @@ actions: item.documentId ? ['pdf'] : [],
 
             return {
               id: item.rfqID,
-              number:item.rfqNumber,
+              number: item.rfqNumber,
               customer: item.customerName || '—',
               rfqSentDate: this.formatDate(item.sentDate),
               dueDate: this.formatDate(item.dueDate),
