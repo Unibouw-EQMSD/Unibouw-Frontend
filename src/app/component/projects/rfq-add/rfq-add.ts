@@ -795,7 +795,7 @@ Due Date: ${this.globalDueDate}
   addSub() {
     const projectName = this.projectDetails?.name;
     const projectID = this.projectDetails?.projectID;
-    const projectCode = this.projectDetails?.projectCode;
+    const projectCode = this.projectDetails?.number;
 
     if (!projectName || !projectID) {
       console.error('Project name or ID missing');
