@@ -66,6 +66,12 @@ export interface ConversationMessageDto {
   messageText: string;
   messageDateTime: string;
   subject?: string;
+
+  conversationMessageID?: string;
+  projectManagerID?: string | null;
+  parentMessageID?: string;
+  parentID: any;
+  rfqID?: string | null;
 }
 
 @Injectable({ providedIn: 'root' })

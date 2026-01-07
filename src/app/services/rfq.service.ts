@@ -267,4 +267,15 @@ export class RfqService {
       switchMap((headers) => this.http.post(`${this.apiURL}/Rfq/delete/${rfqId}`, {}, { headers }))
     );
   }
+
+  replyToConversation(payload: any): Observable<any> {
+    return from(this.getHeaders()).pipe(
+      switchMap((headers) =>
+        this.http.post<{ data: any }>(`${this.apiURL}/RFQConversationMessage/reply`, payload, {
+          headers,
+        })
+      ),
+      map((res) => res.data)
+    );
+  }
 }
