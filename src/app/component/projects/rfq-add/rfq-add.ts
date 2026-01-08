@@ -147,78 +147,120 @@ export class RfqAdd {
     return (id || '').toUpperCase();
   }
 
-  loadRfqForEdit(rfqId: string) {
-    this.rfqIdForEdit = rfqId;
-    this.isLoader = true;
+loadRfqForEdit(rfqId: string) {
+  console.log('🟦 loadRfqForEdit START → RFQ ID:', rfqId);
 
-    this.rfqService.getRfqById(rfqId).subscribe({
-      next: (res: any) => {
-        this.originalRfq = res;
-        if (!this.originalRfq) {
-          this.isLoader = false;
-          return;
-        }
+  this.rfqIdForEdit = rfqId;
+  this.isLoader = true;
 
-        this.rfqNumber = this.originalRfq.rfqNumber || 'N/A';
-        this.createdDateDisplay = this.formatDateDisplay(this.originalRfq.createdOn);
-        this.customerNote = this.originalRfq.customerNote;
-        this.selectedProject = this.originalRfq.projectID;
+  this.rfqService.getRfqById(rfqId).subscribe({
+    next: (res: any) => {
+      console.log('🟦 RFQ HEADER RESPONSE:', res);
 
-        forkJoin([
-          this.rfqService.getWorkItemInfo(rfqId),
-          this.rfqService.getRfqSubcontractorDueDates(rfqId),
-        ]).subscribe({
-          next: ([info, subDates]: [any, any[]]) => {
-            // Normalize SubcontractorIDs in API response
-            const fixedSubDates = subDates.map((s) => ({
-              ...s,
-              subcontractorID: s.subcontractorID || s.subcontractorId,
-              workItemID: s.WorkItemID || s.workItemID,
-              dueDate: s.DueDate || s.dueDate,
-            }));
-
-            // Find the work item to select
-            const allWorkItems = [...this.unibouwWorkitems, ...this.standardWorkitems];
-            const workItemToSelect = allWorkItems.find((w) => w.name === info.workItem);
-
-            if (workItemToSelect) {
-              this.selectedWorkItems = [workItemToSelect];
-              this.workItemName = workItemToSelect.name;
-              this.selectedTab = this.standardWorkitems.some(
-                (w) => w.workItemID === workItemToSelect.workItemID
-              )
-                ? 'standard'
-                : 'unibouw';
-
-              this.globalDueDate = ''; // Do NOT force globalDueDate in edit mode
-
-              // 🔑 Normalize WorkItemID for filtering
-              const existingSubs = fixedSubDates.filter(
-                (s) =>
-                  this.normalizeId(s.workItemID) === this.normalizeId(workItemToSelect.workItemID)
-              );
-
-              this.loadSubcontractors(workItemToSelect.workItemID, existingSubs);
-            } else {
-              this.selectedWorkItems = [];
-              this.workItemName = info.workItem || 'N/A';
-              this.subcontractors = [];
-            }
-
-            this.isLoader = false;
-          },
-          error: (err) => {
-            console.error('❌ Error loading linked info for RFQ edit:', err);
-            this.isLoader = false;
-          },
-        });
-      },
-      error: (err: any) => {
-        console.error('❌ Error loading RFQ for edit:', err);
+      this.originalRfq = res;
+      if (!this.originalRfq) {
         this.isLoader = false;
-      },
-    });
-  }
+        return;
+      }
+
+      this.rfqNumber = this.originalRfq.rfqNumber || 'N/A';
+      this.createdDateDisplay = this.formatDateDisplay(this.originalRfq.createdOn);
+      this.customerNote = this.originalRfq.customerNote;
+      this.selectedProject = this.originalRfq.projectID;
+
+      forkJoin([
+        this.rfqService.getWorkItemInfo(rfqId),
+        this.rfqService.getRfqSubcontractorDueDates(rfqId),
+      ]).subscribe({
+        next: ([info, subDates]: [any, any[]]) => {
+          console.log('🟦 WorkItemInfo:', info);
+          console.log('🟦 Raw Sub Dates:', subDates);
+
+          /** Normalize subcontractor payload */
+          const fixedSubDates = subDates.map(s => ({
+            ...s,
+            subcontractorID: s.subcontractorID || s.subcontractorId,
+            workItemID: s.WorkItemID || s.workItemID,
+            dueDate: s.DueDate || s.dueDate
+          }));
+
+          /** All available work items */
+          const allWorkItems = [
+            ...this.unibouwWorkitems,
+            ...this.standardWorkitems
+          ];
+
+          /** 🔑 Collect UNIQUE workItemIDs from subcontractor table */
+          const uniqueWorkItemIds = [
+            ...new Set(fixedSubDates.map(s => this.normalizeId(s.workItemID)))
+          ];
+
+          console.log('🟦 Unique WorkItem IDs:', uniqueWorkItemIds);
+
+          /** Match work items */
+          this.selectedWorkItems = allWorkItems.filter(w =>
+            uniqueWorkItemIds.includes(this.normalizeId(w.workItemID))
+          );
+
+          console.log('🟦 Selected WorkItems:', this.selectedWorkItems);
+
+          /** Set tab (first item decides UI tab) */
+          if (this.selectedWorkItems.length) {
+            const first = this.selectedWorkItems[0];
+
+            this.selectedTab = this.standardWorkitems.some(
+              w => w.workItemID === first.workItemID
+            ) ? 'standard' : 'unibouw';
+
+            this.workItemName = this.selectedWorkItems
+              .map(w => w.name)
+              .join(', ');
+          }
+
+          /** 🔑 PRESERVE DUE DATE */
+          const dueDates = fixedSubDates
+            .map(s => s.dueDate)
+            .filter(Boolean)
+            .sort();
+
+          this.globalDueDate = dueDates.length ? dueDates[0] : '';
+
+          console.log('🟦 Global Due Date:', this.globalDueDate);
+
+          /** 🔑 Load subcontractors PER work item */
+          this.subcontractors = [];
+
+          this.selectedWorkItems.forEach(wi => {
+            const subsForWorkItem = fixedSubDates.filter(
+              s =>
+                this.normalizeId(s.workItemID) ===
+                this.normalizeId(wi.workItemID)
+            );
+
+            console.log(
+              '🟦 Loading subcontractors for:',
+              wi.workItemID,
+              subsForWorkItem
+            );
+
+            this.loadSubcontractors(wi.workItemID, subsForWorkItem);
+          });
+
+          this.isLoader = false;
+          console.log('🟦 loadRfqForEdit COMPLETED');
+        },
+        error: err => {
+          console.error('❌ Linked API error:', err);
+          this.isLoader = false;
+        }
+      });
+    },
+    error: err => {
+      console.error('❌ RFQ load error:', err);
+      this.isLoader = false;
+    }
+  });
+}
 
   formatDateForHtml(dateStr: string): string {
     if (!dateStr) return '';
@@ -253,96 +295,129 @@ export class RfqAdd {
   }
 
   // End Helpers
-  loadSubcontractors(workItemID: string, existingSubs: any[] = []): Promise<void> {
-    this.isLoader = true;
+loadSubcontractors(workItemID: string, existingSubs: any[] = []): Promise<void> {
+  this.isLoader = true;
 
-    // Normalize existingSubs from API
-    const normalizedExistingSubs = existingSubs.map((s) => ({
-      workItemID: s.WorkItemID, // match API field casing
-      subcontractorID: s.SubcontractorID,
-      dueDate: s.DueDate, // keep original API field
-    }));
+  // 🔒 DO NOT CHANGE — this is the working RFQ structure
+  const normalizedExistingSubs = existingSubs.map(s => ({
+    workItemID: s.WorkItemID ?? s.workItemID,
+    subcontractorID: s.SubcontractorID ?? s.subcontractorID,
+    dueDate: s.DueDate ?? s.dueDate
+  }));
 
-    return new Promise((resolve, reject) => {
-      forkJoin({
-        mappings: this.subcontractorService.getSubcontractorWorkItemMappings(),
-        subs: this.subcontractorService.getSubcontractors(),
-      }).subscribe({
-        next: ({ mappings, subs }) => {
-          const normalizedWorkItemID = this.normalizeId(workItemID);
+  return new Promise((resolve, reject) => {
+    forkJoin({
+      mappings: this.subcontractorService.getSubcontractorWorkItemMappings(),
+      subs: this.subcontractorService.getSubcontractors(),
+    }).subscribe({
+      next: ({ mappings, subs }) => {
+        const normalizedWorkItemID = this.normalizeId(workItemID);
 
-          // Map existing subcontractor DueDates
-          const rfqDueDateMap = new Map<string, string>();
-          normalizedExistingSubs.forEach((s) => {
-            const subId = this.normalizeId(s.subcontractorID);
-            rfqDueDateMap.set(subId, this.formatDateForHtml(s.dueDate));
-          });
+        /* =====================================================
+           1️⃣ RFQ DUE DATE MAP (SOURCE OF TRUTH)
+        ====================================================== */
+        const rfqDueDateMap = new Map<string, string>();
+        normalizedExistingSubs.forEach(s => {
+          const subId = this.normalizeId(s.subcontractorID);
+          if (!subId) return;
+          rfqDueDateMap.set(subId, this.formatDateForHtml(s.dueDate));
+        });
 
-          // Linked subcontractor IDs for this work item
-          const linkedIds = mappings
-            .filter((m) => this.normalizeId(m.workItemID) === normalizedWorkItemID)
-            .map((m) => this.normalizeId(m.subcontractorID));
+        /* =====================================================
+           2️⃣ LINKED SUBCONTRACTORS FOR WORK ITEM
+        ====================================================== */
+        const linkedIds = mappings
+          .filter(m => this.normalizeId(m.workItemID) === normalizedWorkItemID)
+          .map(m => this.normalizeId(m.subcontractorID));
 
-          // Build final subcontractor list
-          let mappedSubcontractors = subs.map((s) => {
-            const subId = this.normalizeId(s.subcontractorID);
-            const rfqDueDate = rfqDueDateMap.get(subId);
+        /* =====================================================
+           3️⃣ BUILD SUBCONTRACTORS (DO NOT TOUCH DUE DATE LOGIC)
+        ====================================================== */
+        let mappedSubcontractors = subs.map(s => {
+          const subId = this.normalizeId(s.subcontractorID);
+          const rfqDueDate = rfqDueDateMap.get(subId);
 
-            // Check if user already has selection (existing UI) for this sub
-            const existingUI = existingSubs.find(
-              (e) => this.normalizeId(e.subcontractorID) === subId
-            );
+          const existingUI = existingSubs.find(
+            e => this.normalizeId(e.subcontractorID) === subId
+          );
 
-            const subcontractorItem = {
-              subcontractorID: s.subcontractorID,
-              name: s.name,
-              // ✅ Fix TS5076: wrap `??` and `||` in parentheses
-              selected:
-                (existingUI?.selected ?? rfqDueDateMap.has(subId)) || linkedIds.includes(subId),
-              dueDate: existingUI?.dueDate ?? rfqDueDate ?? '',
-            };
+          return {
+            subcontractorID: s.subcontractorID,
+            name: s.name,
+            emailID: s.emailID || '',
+            selected:
+              (existingUI?.selected ?? rfqDueDateMap.has(subId)) ||
+              linkedIds.includes(subId),
+            dueDate: existingUI?.dueDate ?? rfqDueDate ?? '',
+          };
+        });
 
-            console.log(
-              '🔹 Subcontractor:',
-              subcontractorItem.name,
-              'dueDate:',
-              subcontractorItem.dueDate
-            );
+        /* =====================================================
+           4️⃣ SHOW ALL TOGGLE
+        ====================================================== */
+        if (!this.showAll) {
+          mappedSubcontractors = mappedSubcontractors.filter(
+            s => s.selected || linkedIds.includes(this.normalizeId(s.subcontractorID))
+          );
+        }
 
-            return subcontractorItem;
-          });
+        /* =====================================================
+           5️⃣ SORT
+        ====================================================== */
+        mappedSubcontractors.sort((a, b) => {
+          if (a.selected && !b.selected) return -1;
+          if (!a.selected && b.selected) return 1;
+          return a.name.localeCompare(b.name);
+        });
 
-          // Apply "Show All" toggle
-          if (!this.showAll) {
-            mappedSubcontractors = mappedSubcontractors.filter(
-              (s) => s.selected || linkedIds.includes(this.normalizeId(s.subcontractorID))
-            );
+        /* =====================================================
+           6️⃣ EMAIL DE-DUPLICATION (SAFE — NO DATE LOSS)
+        ====================================================== */
+        const emailMap = new Map<string, any>();
+
+        // ✅ Merge with previously loaded subcontractors
+        this.subcontractors.forEach(sub => {
+          const emailKey = (sub.emailID || '').toLowerCase().trim();
+          if (!emailKey) return;
+          emailMap.set(emailKey, { ...sub });
+        });
+
+        mappedSubcontractors.forEach(sub => {
+          const emailKey = (sub.emailID || '').toLowerCase().trim();
+          if (!emailKey) return;
+
+          if (!emailMap.has(emailKey)) {
+            emailMap.set(emailKey, { ...sub });
+          } else {
+            const existing = emailMap.get(emailKey);
+            existing.selected = existing.selected || sub.selected;
+
+            if (!existing.dueDate && sub.dueDate) {
+              existing.dueDate = sub.dueDate;
+            }
           }
+        });
 
-          // Sort selected first
-          mappedSubcontractors.sort((a, b) => {
-            if (a.selected && !b.selected) return -1;
-            if (!a.selected && b.selected) return 1;
-            return a.name.localeCompare(b.name);
-          });
+        /* =====================================================
+           7️⃣ FINAL UI ASSIGNMENT
+        ====================================================== */
+        this.subcontractors = Array.from(emailMap.values());
 
-          this.subcontractors = mappedSubcontractors;
-          this.noSubMessage = this.subcontractors.length
-            ? ''
-            : 'No subcontractors linked to this work item.';
-          this.isLoader = false;
+        this.noSubMessage = this.subcontractors.length
+          ? ''
+          : 'No subcontractors linked to this work item.';
 
-          resolve();
-        },
-        error: (err) => {
-          console.error('❌ Error loading subcontractors:', err);
-          this.noSubMessage = 'Failed to load subcontractors.';
-          this.isLoader = false;
-          reject(err);
-        },
-      });
+        this.isLoader = false;
+        resolve();
+      },
+      error: err => {
+        console.error('❌ Error loading subcontractors:', err);
+        this.isLoader = false;
+        reject(err);
+      }
     });
-  }
+  });
+}
 
   getNewOrModifiedSubcontractors(): any[] {
     return this.subcontractors.filter((sub) => {
@@ -403,129 +478,137 @@ export class RfqAdd {
   }
   // MODIFIED: onSubmit to handle both Create and Update (WITHOUT client-side mapping API call)
   async onSubmit(sendEmail: boolean = false, editedEmailBody: string = '') {
-    if (!this.selectedProject) return alert('Select a project first');
+  if (!this.selectedProject) return alert('Select a project first');
 
-    const selectedProject = this.projects.find((p) => p.projectID === this.selectedProject);
-    if (!selectedProject) return alert('Project not found');
+  const selectedProject = this.projects.find((p) => p.projectID === this.selectedProject);
+  if (!selectedProject) return alert('Project not found');
 
-    const selectedSubs = this.subcontractors.filter((s) => s.selected);
-    if (!selectedSubs.length) return alert('Select at least one subcontractor');
-    if (!this.selectedWorkItems.length) return alert('Select at least one work item');
-    if (selectedSubs.some((s) => !s.dueDate))
-      return alert('Please select a Due Date for all selected subcontractors.');
+  const selectedSubs = this.subcontractors.filter((s) => s.selected);
+  if (!selectedSubs.length) return alert('Select at least one subcontractor');
+  if (!this.selectedWorkItems.length) return alert('Select at least one work item');
+  if (selectedSubs.some((s) => !s.dueDate))
+    return alert('Please select a Due Date for all selected subcontractors.');
 
-    this.isLoader = true;
-    const now = new Date().toISOString();
-    const isUpdate = !!this.rfqIdForEdit;
-    const rfqID = this.rfqIdForEdit || '00000000-0000-0000-0000-000000000000';
-    const createdBy = this.originalRfq?.createdBy || 'System';
-    const emailBodyToUse = editedEmailBody || this.customerNote || '';
+  this.isLoader = true;
+  const now = new Date().toISOString();
+  const isUpdate = !!this.rfqIdForEdit;
+  const rfqID = this.rfqIdForEdit || '00000000-0000-0000-0000-000000000000';
+  const createdBy = this.originalRfq?.createdBy || 'System';
+  const emailBodyToUse = editedEmailBody || this.customerNote || '';
 
-    // RFQ main due date = earliest due date among selected subcontractors
-    const primaryDueDate = new Date(
-      Math.min(...selectedSubs.map((s) => new Date(s.dueDate!).getTime()))
-    ).toISOString();
+  // RFQ main due date = earliest due date among selected subcontractors
+  const primaryDueDate = new Date(
+    Math.min(...selectedSubs.map((s) => new Date(s.dueDate!).getTime()))
+  ).toISOString();
 
-    // Build subcontractor → dueDate map
-    const subcontractorDueDates = selectedSubs.map((s) => ({
-      subcontractorID: s.subcontractorID,
-      dueDate: new Date(s.dueDate!).toISOString().split('T')[0],
-    }));
+  // Build subcontractor → dueDate map
+  const subcontractorDueDates = selectedSubs.map((s) => ({
+    subcontractorID: s.subcontractorID,
+    dueDate: new Date(s.dueDate!).toISOString().split('T')[0],
+  }));
 
-    let subsToEmail: any[] = [];
-    if (sendEmail) subsToEmail = this.getNewOrModifiedSubcontractors();
+  let subsToEmail: any[] = [];
+  if (sendEmail) subsToEmail = this.getNewOrModifiedSubcontractors();
 
-    /* ---------------- STEP 1: SAVE SUBCONTRACTOR–WORKITEM MAPPINGS ---------------- */
-    try {
-      if (isUpdate) {
-        // Update → save each mapping individually
-        for (const sub of selectedSubs) {
-          for (const work of this.selectedWorkItems) {
-            const mapping = subcontractorDueDates.find(
-              (d) => d.subcontractorID === sub.subcontractorID
-            );
+  /* ---------------- STEP 1: SAVE SUBCONTRACTOR–WORKITEM MAPPINGS ---------------- */
+  try {
+    if (isUpdate) {
+      // Update → save each mapping individually
+      for (const sub of selectedSubs) {
+        for (const work of this.selectedWorkItems) {
+          const mapping = subcontractorDueDates.find(
+            (d) => d.subcontractorID === sub.subcontractorID
+          );
 
-            const dueDateStr = mapping?.dueDate;
+          const dueDateStr = mapping?.dueDate;
 
-            if (!dueDateStr) {
-              alert('Due date missing for subcontractor');
-              return;
-            }
-            await this.rfqService
-              .saveOrUpdateRfqSubcontractorMapping(
-                rfqID,
-                sub.subcontractorID,
-                work.workItemID,
-                dueDateStr
-              )
-              .toPromise();
+          if (!dueDateStr) {
+            alert('Due date missing for subcontractor');
+            return;
           }
+          await this.rfqService
+            .saveOrUpdateRfqSubcontractorMapping(
+              rfqID,
+              sub.subcontractorID,
+              work.workItemID,
+              dueDateStr
+            )
+            .toPromise();
         }
-      } else {
-        // Create → batch save method
-        await this.saveSubcontractorWorkItemMappings(selectedSubs, this.selectedWorkItems, rfqID);
       }
-    } catch (err) {
-      console.error('Mapping save failed', err);
-      alert('Failed to save subcontractor–work item mappings.');
-      this.isLoader = false;
-      return;
+    } else {
+      // Create → batch save method
+      await this.saveSubcontractorWorkItemMappings(selectedSubs, this.selectedWorkItems, rfqID);
     }
-
-    /* ---------------- STEP 2: BUILD RFQ PAYLOAD ---------------- */
-    const rfqPayload = {
-      rfqID,
-      sentDate: sendEmail ? now : this.originalRfq?.sentDate || null,
-      dueDate: primaryDueDate,
-      deadLine: primaryDueDate,
-      rfqSent: sendEmail ? 1 : this.originalRfq?.rfqSent || 0,
-      quoteReceived: this.originalRfq?.quoteReceived || 0,
-      customerID: selectedProject.customerID,
-      projectID: this.projectId,
-      customerNote: emailBodyToUse,
-      createdBy,
-      modifiedBy: isUpdate ? 'System' : null,
-      status: sendEmail ? 'Sent' : 'Draft',
-      createdOn: this.originalRfq?.createdOn || now,
-      modifiedOn: isUpdate ? now : null,
-      GlobalDueDate: this.globalDueDate || primaryDueDate,
-      subcontractorsToEmail: subsToEmail.map((s) => s.subcontractorID),
-    };
-
-    const subcontractorIds = selectedSubs.map((s) => s.subcontractorID);
-    const workItems = this.selectedWorkItems.map((w) => w.workItemID);
-
-    /* ---------------- STEP 3: CALL CREATE / UPDATE ---------------- */
-    const request = isUpdate
-      ? this.rfqService.updateRfq(
-          rfqPayload.rfqID!,
-          rfqPayload,
-          subcontractorIds,
-          workItems,
-          sendEmail
-        )
-      : this.rfqService.createRfqSimple(
-          rfqPayload,
-          subcontractorIds,
-          workItems,
-          emailBodyToUse,
-          sendEmail,
-          subcontractorDueDates
-        );
-
-    request.subscribe({
-      next: () => {
-        alert(sendEmail ? 'RFQ sent successfully!' : 'RFQ saved successfully!');
-        this.isLoader = false;
-        this.router.navigate(['/view-projects', this.projectId], { queryParams: { tab: 'rfq' } });
-      },
-      error: (err) => {
-        console.error('RFQ failed', err);
-        alert('RFQ failed!');
-        this.isLoader = false;
-      },
-    });
+  } catch (err) {
+    console.error('Mapping save failed', err);
+    alert('Failed to save subcontractor–work item mappings.');
+    this.isLoader = false;
+    return;
   }
+
+  /* ---------------- STEP 2: BUILD RFQ PAYLOAD ---------------- */
+  // Determine the correct sent date
+  let sentDateToUse = this.originalRfq?.sentDate || null;
+  if (sendEmail) {
+    sentDateToUse = now; // If sending now, overwrite with current time
+  }
+
+  const rfqPayload = {
+    rfqID,
+    sentDate: sentDateToUse,
+    dueDate: primaryDueDate,
+    deadLine: primaryDueDate,
+    rfqSent: sendEmail ? 1 : this.originalRfq?.rfqSent || 0,
+    quoteReceived: this.originalRfq?.quoteReceived || 0,
+    customerID: selectedProject.customerID,
+    projectID: this.projectId,
+    customerNote: emailBodyToUse,
+    createdBy,
+    modifiedBy: isUpdate ? 'System' : null,
+    status: sendEmail ? 'Sent' : 'Draft',
+    createdOn: this.originalRfq?.createdOn || now,
+    modifiedOn: isUpdate ? now : null,
+    GlobalDueDate: this.globalDueDate || primaryDueDate,
+    subcontractorsToEmail: subsToEmail.map((s) => s.subcontractorID),
+  };
+
+  console.log('🟦 RFQ PAYLOAD BEFORE SUBMIT:', rfqPayload);
+
+  const subcontractorIds = selectedSubs.map((s) => s.subcontractorID);
+  const workItems = this.selectedWorkItems.map((w) => w.workItemID);
+
+  /* ---------------- STEP 3: CALL CREATE / UPDATE ---------------- */
+  const request = isUpdate
+    ? this.rfqService.updateRfq(
+        rfqPayload.rfqID!,
+        rfqPayload,
+        subcontractorIds,
+        workItems,
+        sendEmail
+      )
+    : this.rfqService.createRfqSimple(
+        rfqPayload,
+        subcontractorIds,
+        workItems,
+        emailBodyToUse,
+        sendEmail,
+        subcontractorDueDates
+      );
+
+  request.subscribe({
+    next: () => {
+      alert(sendEmail ? 'RFQ sent successfully!' : 'RFQ saved successfully!');
+      this.isLoader = false;
+      this.router.navigate(['/view-projects', this.projectId], { queryParams: { tab: 'rfq' } });
+    },
+    error: (err) => {
+      console.error('RFQ failed', err);
+      alert('RFQ failed!');
+      this.isLoader = false;
+    },
+  });
+}
 
   loadProjectDetails(id: string) {
     this.projectService.getProjectById(id).subscribe({
@@ -596,20 +679,50 @@ export class RfqAdd {
     return this.selectedWorkItems.some((w) => w.workItemID === item.workItemID);
   }
 
-  onWorkitemToggle(item: Workitem, checked: boolean) {
-    if (checked) {
-      if (!this.selectedWorkItems.some((w) => w.workItemID === item.workItemID)) {
-        this.selectedWorkItems.push(item);
-      }
-    } else {
-      this.selectedWorkItems = this.selectedWorkItems.filter(
-        (w) => w.workItemID !== item.workItemID
-      );
+private subcontractorsByWorkItem = new Map<string, SubcontractorItem[]>();
+
+onWorkitemToggle(item: Workitem, checked: boolean) {
+  const normalizedWorkItemID = this.normalizeId(item.workItemID);
+
+  if (checked) {
+    // Add to selected work items if not already present
+    if (!this.selectedWorkItems.some((w) => w.workItemID === item.workItemID)) {
+      this.selectedWorkItems.push(item);
     }
 
-    // ✅ Load only the toggled work item
-    this.loadSubcontractors(item.workItemID);
+    // Load subcontractors for the newly checked work item
+    this.loadSubcontractors(item.workItemID).then(() => {
+      // Store a **snapshot** of the current subcontractors for this work item
+      const currentSubs = this.subcontractors.filter(sub =>
+        // Keep only subs relevant to this work item
+        !Array.from(this.subcontractorsByWorkItem.values())
+          .flat()
+          .some(s => this.normalizeId(s.subcontractorID) === this.normalizeId(sub.subcontractorID))
+      );
+
+      this.subcontractorsByWorkItem.set(normalizedWorkItemID, currentSubs);
+
+      // Merge all subcontractors from selected work items
+      this.subcontractors = Array.from(this.subcontractorsByWorkItem.values()).flat();
+    });
+  } else {
+    // Remove from selected work items
+    this.selectedWorkItems = this.selectedWorkItems.filter(
+      (w) => w.workItemID !== item.workItemID
+    );
+
+    // Remove subcontractors that belong to this unchecked work item only
+    const subsToRemove = this.subcontractorsByWorkItem.get(normalizedWorkItemID) || [];
+    const subsToRemoveIds = subsToRemove.map(sub => this.normalizeId(sub.subcontractorID));
+
+    this.subcontractors = this.subcontractors.filter(
+      sub => !subsToRemoveIds.includes(this.normalizeId(sub.subcontractorID))
+    );
+
+    // Remove from the map
+    this.subcontractorsByWorkItem.delete(normalizedWorkItemID);
   }
+}
 
   loadSubcontractorsForSelectedWorkitems() {
     if (!this.selectedWorkItems.length) {
