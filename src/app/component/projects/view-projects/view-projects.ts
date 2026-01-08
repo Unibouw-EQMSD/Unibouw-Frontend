@@ -62,6 +62,7 @@ interface WorkItem {
 
 interface RFQConversationMessage {
   conversationMessageID?: string;
+  parentMessageID?: string;
   projectID: string;
   rfqID: string;
   workItemID?: string | null;
@@ -154,6 +155,13 @@ export class ViewProjects implements AfterViewChecked {
   minDate: Date = new Date();
   maxDate!: Date;
   convoSubcontractors: { id: string; name: string }[] = [];
+  replyingToMessageId: string | null = null;
+  replyText = '';
+  replySubject = '';
+  replyTexts: { [key: string]: string } = {}; // store reply text per message
+  replyAttachments: File[] = [];
+  isSendingReply = false;
+  replyError = '';
 
   setMaxDueDate(due: Date | string) {
     if (typeof due === 'string') {
@@ -1069,41 +1077,132 @@ export class ViewProjects implements AfterViewChecked {
     });
   }
 
+  // loadConversationBySub(subId: string): void {
+  //   if (!subId) {
+  //     this.isSpinLoading = false;
+  //     return;
+  //   }
+
+  //   this.projectService
+  //     .getConversationByProjectAndSubcontractor(this.projectId, subId)
+  //     .pipe(
+  //       switchMap((res: any[]) => {
+  //         this.conversationsData = res;
+
+  //         if (!res || res.length === 0) {
+  //           this.pmSubConversationData = [];
+  //           return of([]);
+  //         }
+
+  //         const draft = res[0];
+  //         return this.projectService.getConversation(
+  //           draft.projectID,
+  //           draft.rfqID,
+  //           draft.subcontractorID
+  //         );
+  //       }),
+  //       finalize(() => (this.isSpinLoading = false))
+  //     )
+  //     .subscribe({
+  //       next: (res) => {
+  //         this.pmSubConversationData = res;
+  //         setTimeout(() => this.scrollToBottom(), 0);
+  //       },
+  //       error: (err) => {
+  //         console.error('■ Error loading conversation:', err);
+  //         this.isSpinLoading = false;
+  //       },
+  //     });
+  // }
+
   loadConversationBySub(subId: string): void {
-    if (!subId) {
-      this.isSpinLoading = false;
-      return;
-    }
+    if (!subId) return;
+
+    this.isSpinLoading = true;
 
     this.projectService
       .getConversationByProjectAndSubcontractor(this.projectId, subId)
       .pipe(
         switchMap((res: any[]) => {
-          this.conversationsData = res;
+          const initialConvos = res || [];
 
-          if (!res || res.length === 0) {
+          if (initialConvos.length === 0) {
             this.pmSubConversationData = [];
             return of([]);
           }
 
-          const draft = res[0];
-          return this.projectService.getConversation(
-            draft.projectID,
-            draft.rfqID,
-            draft.subcontractorID
-          );
+          // Always fetch full conversation from backend
+          const draft = initialConvos[0];
+          return this.projectService
+            .getConversation(
+              draft.projectID,
+              draft.rfqID ?? '00000000-0000-0000-0000-000000000000',
+              draft.subcontractorID
+            )
+            .pipe(
+              map((fullConvos) => {
+                // Merge PM IDs from initialConvos into fullConvos
+                const merged = fullConvos.map((fc) => {
+                  const match = initialConvos.find(
+                    (ic) =>
+                      (ic.conversationMessageID ?? ic.messageID) ===
+                      (fc.conversationMessageID ?? fc.messageID)
+                  );
+
+                  const pmID =
+                    match?.projectManagerID ?? match?.ProjectManagerID ?? fc?.projectManagerID;
+
+                  const validPMID =
+                    pmID && pmID !== '00000000-0000-0000-0000-000000000000' ? pmID : undefined;
+
+                  return {
+                    conversationMessageID:
+                      fc.conversationMessageID ?? fc.messageID ?? fc.messageID
+                        ? String(fc.conversationMessageID ?? fc.messageID ?? fc.messageID)
+                        : undefined,
+
+                    parentMessageID:
+                      fc.parentMessageID ?? fc.parentID
+                        ? String(fc.parentMessageID ?? fc.parentID)
+                        : undefined,
+
+                    projectID: this.projectId,
+                    rfqID: fc.rfqID ?? null,
+                    workItemID: null,
+                    subcontractorID: subId,
+
+                    projectManagerID: validPMID,
+                    senderType: fc.senderType,
+                    messageText: fc.messageText,
+                    subject: fc.subject ?? null,
+                    messageDateTime: fc.messageDateTime
+                      ? new Date(fc.messageDateTime + 'Z')
+                      : undefined,
+                    status: 'Active',
+                    createdBy: null,
+                    createdOn: null,
+                  };
+                });
+
+                return merged;
+              })
+            );
         }),
         finalize(() => (this.isSpinLoading = false))
       )
       .subscribe({
-        next: (res) => {
-          this.pmSubConversationData = res;
+        next: (res: any[]) => {
+          this.pmSubConversationData = res || [];
+
+          // 🔹 Debug PM IDs
+          console.log(
+            'Loaded projectManagerIDs:',
+            this.pmSubConversationData.map((c) => c.projectManagerID)
+          );
+
           setTimeout(() => this.scrollToBottom(), 0);
         },
-        error: (err) => {
-          console.error('■ Error loading conversation:', err);
-          this.isSpinLoading = false;
-        },
+        error: (err) => console.error('Error loading conversation:', err),
       });
   }
 
@@ -1273,11 +1372,139 @@ export class ViewProjects implements AfterViewChecked {
       });
   }
 
+  startReply(convo: RFQConversationMessage) {
+    console.log('▶ startReply clicked');
+    console.log('Convo object received:', convo);
+
+    if (!convo.conversationMessageID) {
+      console.error('❌ conversationMessageID is undefined or null', 'Full convo:', convo);
+      return;
+    }
+
+    console.log('✅ conversationMessageID:', convo.conversationMessageID);
+
+    this.replyingToMessageId = convo.conversationMessageID;
+    console.log('replyingToMessageId set to:', this.replyingToMessageId);
+
+    this.replyTexts[convo.conversationMessageID] = '';
+    console.log('replyTexts initialized:', this.replyTexts);
+
+    this.replyAttachments = [];
+    console.log('replyAttachments reset');
+
+    this.replySubject = 'Re: ' + (convo.subject || '');
+    console.log('replySubject set to:', this.replySubject);
+
+    this.replyError = '';
+  }
+
   // Helper method for reset, close, reload
   private afterMessageSent(): void {
     // Reload list and keep active subcontractor
     this.loadConversationSubcontractors(true);
     this.closeLogConvo();
     this.resetLogConvo();
+  }
+
+  cancelReply() {
+    if (this.replyingToMessageId) {
+      delete this.replyTexts[this.replyingToMessageId];
+      this.replyingToMessageId = null;
+      this.replyAttachments = [];
+      this.replyError = '';
+    }
+  }
+
+  getReplyText(id: string): string {
+    return this.replyTexts[id] ?? '';
+  }
+
+  setReplyText(id: string, text: string) {
+    this.replyTexts[id] = text;
+  }
+
+  onReplyFileSelected(event: any) {
+    const files: File[] = Array.from(event.target.files);
+    this.replyAttachments.push(...files);
+  }
+
+  removeReplyFile(index: number) {
+    this.replyAttachments.splice(index, 1);
+  }
+
+  sendReply(convo: RFQConversationMessage) {
+    const parentId = convo.conversationMessageID;
+    const replyText = this.replyTexts[parentId!] ?? '';
+
+    if (!replyText.trim()) {
+      this.replyError = 'Reply cannot be empty';
+      return;
+    }
+
+    this.isSendingReply = true;
+    this.replyError = '';
+
+    const formData = new FormData();
+    formData.append('parentMessageId', String(parentId)); // ✅ ensure string
+    formData.append('message', replyText);
+    formData.append('subject', this.replySubject);
+
+    this.replyAttachments.forEach((file) => formData.append('attachments', file));
+
+    this.rfqService.replyToConversation(formData).subscribe({
+      next: (reply: any) => {
+        const normalizedReply: RFQConversationMessage = {
+          conversationMessageID: String(reply.conversationMessageID ?? reply.messageID),
+
+          // ✅ CRITICAL: set parentMessageID so Teams reply shows immediately
+          parentMessageID: String(parentId),
+
+          projectID: reply.projectID,
+          rfqID: reply.rfqID,
+          workItemID: reply.workItemID,
+          subcontractorID: reply.subcontractorID,
+          projectManagerID: reply.projectManagerID,
+
+          senderType: reply.senderType,
+          messageText: reply.messageText,
+          subject: reply.subject,
+
+          messageDateTime: new Date(),
+          status: reply.status,
+          createdBy: reply.createdBy,
+          createdOn: reply.createdOn,
+        };
+
+        const index = this.pmSubConversationData.findIndex(
+          (m) => String(m.conversationMessageID) === String(parentId)
+        );
+
+        if (index === -1) {
+          this.pmSubConversationData.push(normalizedReply);
+        } else {
+          this.pmSubConversationData.splice(index + 1, 0, normalizedReply);
+        }
+
+        this.cancelReply();
+        this.isSendingReply = false;
+      },
+      error: (err) => {
+        console.error('❌ Error sending reply:', err);
+        this.replyError = 'Email failed. Reply saved as draft.';
+        this.isSendingReply = false;
+      },
+    });
+  }
+
+  getParentMessage(parentId: any) {
+    if (parentId === null || parentId === undefined || parentId === '') {
+      return undefined;
+    }
+
+    const pid = String(parentId);
+
+    return (this.pmSubConversationData || []).find(
+      (m: any) => String(m.conversationMessageID) === pid
+    );
   }
 }

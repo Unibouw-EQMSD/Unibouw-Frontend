@@ -1210,3 +1210,200 @@
 }
 
 /* ----------------- End Modal -------------------- */
+
+.reply-highlight {
+  border-left: 4px solid #f97316;
+  background: #fff7ed;
+}
+.message-row.reply {
+  margin-left: 40px;
+  border-left: 3px solid #e5e7eb;
+  padding-left: 12px;
+}
+
+.draft {
+  background: #fde68a;
+  color: #92400e;
+  font-size: 11px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  margin-left: 8px;
+}
+
+/* Quoted (parent) message */
+.message {
+  padding: 10px 12px;
+  border-radius: 8px;
+  margin-top: 5px;
+  white-space: pre-line;
+}
+
+/* quoted (parent) block inside bubble */
+.message .teams-reply {
+  border-left: 3px solid #8b8cc7; /* Teams-like purple */
+  background: rgba(0, 0, 0, 0.04) !important;
+  border-radius: 4px;
+  padding: 6px 8px;
+  margin-bottom: 6px;
+}
+
+/* header line: "Ashwini P · 02-01-2026 19:31" */
+.message .teams-reply-header {
+  font-size: 12px;
+  font-weight: 600;
+  color: #2f2f2f;
+  margin-bottom: 2px;
+}
+
+/* quoted text: show 1 line with ellipsis like Teams */
+.message .teams-reply-text {
+  font-size: 13px;
+  color: #444;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* reply text */
+.message .message-text {
+  font-size: 14px;
+  color: #111;
+}
+
+/* Optional: slight highlight for the message you are replying to */
+.reply-highlight {
+  border-left: 4px solid #f97316;
+  background: #fff7ed;
+}
+
+.message-row.reply .teams-reply {
+  display: flex;
+  gap: 10px;
+  max-width: 100%;
+  background: rgba(0, 0, 0, 0.06);
+  border-radius: 6px;
+  padding: 8px 10px;
+  margin: 6px 0 8px 0;
+}
+
+/* The vertical bar (this was missing, so you won't see the Teams bar) */
+.message-row.reply .teams-reply-bar {
+  width: 3px;
+  background: #8b8cc7; /* Teams-ish purple */
+  border-radius: 4px;
+  flex: 0 0 3px;
+}
+
+/* Content wrapper */
+.message-row.reply .teams-reply-content {
+  min-width: 0; /* required for ellipsis */
+  flex: 1;
+}
+
+/* Header: "Name · time" */
+.message-row.reply .teams-reply-header {
+  font-size: 12px;
+  font-weight: 600;
+  color: #2f2f2f;
+  line-height: 1.2;
+  margin-bottom: 2px;
+}
+
+/* Quoted text (ellipsis like Teams) */
+.message-row.reply .teams-reply-text {
+  font-size: 13px;
+  color: #444;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.reply-box {
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 12px;
+  margin-top: 8px;
+}
+
+/* Textarea */
+.reply-textarea {
+  width: 100%;
+  resize: none;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  padding: 10px;
+  font-size: 14px;
+  outline: none;
+}
+
+.reply-textarea:focus {
+  border-color: #2563eb;
+}
+
+/* Attachments */
+.attachment-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.file-chip {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: #eef2ff;
+  border: 1px solid #c7d2fe;
+  border-radius: 16px;
+  padding: 4px 10px;
+  font-size: 12px;
+}
+
+.file-chip .remove {
+  cursor: pointer;
+  font-weight: bold;
+  color: #4f46e5;
+}
+
+/* Actions */
+.reply-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 10px;
+}
+
+.attach-btn {
+  background: none;
+  border: none;
+  color: #2563eb;
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.action-right {
+  display: flex;
+  gap: 8px;
+}
+
+.cancel-btn {
+  background: transparent;
+  border: 1px solid #d1d5db;
+  padding: 6px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.send-btn {
+  background: #2563eb;
+  color: white;
+  border: none;
+  padding: 6px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.send-btn:hover {
+  background: #1d4ed8;
+}

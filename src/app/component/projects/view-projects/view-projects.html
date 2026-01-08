@@ -552,11 +552,24 @@
                     </div>
 
                     <!-- Chat Messages -->
-                    <div
+                    <!-- <div
                       class="message-row"
                       *ngFor="let convo of pmSubConversationData"
                       [ngClass]="convo.senderType === 'PM' ? 'right' : 'left'"
+                    > -->
+                    <div
+                      class="message-row"
+                      *ngFor="let convo of pmSubConversationData"
+                      [class.reply-highlight]="replyingToMessageId === convo.conversationMessageID"
+                      [ngClass]="{
+                        right: convo.senderType === 'PM',
+                        left: convo.senderType !== 'PM',
+                        reply: convo.parentMessageID
+                      }"
                     >
+                      <div class="message-header">
+                        <span class="draft" *ngIf="convo.status === 'Draft'"> Draft </span>
+                      </div>
                       <!-- Subcontractor Meta -->
                       <ng-container *ngIf="convo.senderType !== 'PM'">
                         <div class="message-meta">
@@ -586,7 +599,16 @@
                           </ng-container>
 
                           <!-- Reply Button -->
-                          <button class="reply-btn">Reply</button>
+                          <!-- <button class="reply-btn">Reply</button> -->
+
+                          <!-- Reply Button -->
+                          <button
+                            class="reply-btn"
+                            *ngIf="convo.conversationMessageID"
+                            (click)="startReply(convo)"
+                          >
+                            Reply
+                          </button>
                         </div>
                       </ng-container>
 
@@ -598,9 +620,82 @@
                       </ng-container>
 
                       <!-- Message Bubble -->
-                      <div class="message" [ngClass]="convo.senderType === 'PM' ? 'user' : 'bot'">
-                        <!-- {{ convo.messageText }} -->
+                      <!-- <div class="message" [ngClass]="convo.senderType === 'PM' ? 'user' : 'bot'">
                         {{ convo.messageText || convo.message || convo.Message }}
+                      </div> -->
+
+                      <!-- 💬 ACTUAL MESSAGE BUBBLE -->
+                      <div class="message" [ngClass]="convo.senderType === 'PM' ? 'user' : 'bot'">
+                        <!-- ✅ Teams-style quoted parent message INSIDE bubble -->
+                        <div class="teams-reply" *ngIf="convo.parentMessageID">
+                          <div class="teams-reply-bar"></div>
+
+                          <div class="teams-reply-content">
+                            <div class="teams-reply-header">
+                              {{ getParentMessage(convo.parentMessageID)?.senderType }}
+                              ·
+                              {{
+                                getParentMessage(convo.parentMessageID)?.messageDateTime
+                                  | date : 'dd-MM-yyyy HH:mm'
+                              }}
+                            </div>
+
+                            <div class="teams-reply-text">
+                              {{ getParentMessage(convo.parentMessageID)?.messageText }}
+                            </div>
+                          </div>
+                        </div>
+
+                        <!-- Actual message text -->
+                        {{ convo.messageText || convo.message || convo.Message }}
+                      </div>
+
+                      <div
+                        class="reply-box"
+                        *ngIf="replyingToMessageId === convo.conversationMessageID"
+                      >
+                        <!-- Text Input -->
+                        <textarea
+                          class="reply-textarea"
+                          rows="3"
+                          placeholder="Write a reply…"
+                          [(ngModel)]="replyTexts[convo.conversationMessageID]"
+                        ></textarea>
+
+                        <!-- Attachments -->
+                        <div class="attachment-row" *ngIf="replyAttachments.length">
+                          <div
+                            class="file-chip"
+                            *ngFor="let file of replyAttachments; let i = index"
+                          >
+                            <span class="file-name">{{ file.name }}</span>
+                            <span class="remove" (click)="removeReplyFile(i)">×</span>
+                          </div>
+                        </div>
+
+                        <input
+                          type="file"
+                          #replyFileInput
+                          hidden
+                          multiple
+                          (change)="onReplyFileSelected($event)"
+                        />
+
+                        <!-- Actions -->
+                        <div class="reply-actions">
+                          <button class="attach-btn" (click)="replyFileInput.click()">
+                            📎 Attach
+                          </button>
+
+                          <div class="action-right">
+                            <button class="cancel-btn" (click)="cancelReply()">Cancel</button>
+                            <button class="send-btn" (click)="sendReply(convo)">Send</button>
+                          </div>
+                        </div>
+
+                        <div class="error" *ngIf="replyError">
+                          {{ replyError }}
+                        </div>
                       </div>
                     </div>
                   </div>
