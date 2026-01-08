@@ -1488,7 +1488,8 @@ export class ViewProjects implements AfterViewChecked {
         this.cancelReply();
         this.isSendingReply = false;
       },
-      error: () => {
+      error: (err) => {
+        console.error('❌ Error sending reply:', err);
         this.replyError = 'Email failed. Reply saved as draft.';
         this.isSendingReply = false;
       },
