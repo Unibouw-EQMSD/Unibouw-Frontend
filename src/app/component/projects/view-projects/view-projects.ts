@@ -585,7 +585,7 @@ export class ViewProjects implements AfterViewChecked {
               id: item.rfqID,
               number: item.rfqNumber,
               customer: item.customerName || '—',
-              rfqSentDate: this.formatDate(item.sentDate),
+    rfqSentDate: item.sentDate ? this.formatDate(item.sentDate) : '-', // ensures display
               dueDate: this.formatDate(item.dueDate),
               rfqSent: item.rfqSent || 0,
               quoteReceived: item.quoteReceived || 0,
