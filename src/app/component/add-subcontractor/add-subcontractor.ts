@@ -82,7 +82,15 @@ export class AddSubcontractor implements OnInit {
       ? payload.officeAddress.trim().replace(/\r?\n\s*/g, `\n${OFFICE_PADDING}`)
       : '';
 
-    return `📩 **New Subcontractor Created**
+      const billingAddressText = payload.billingAddress
+      ? payload.billingAddress.trim().replace(/\r?\n\s*/g, `\n${OFFICE_PADDING}`)
+      : '';
+
+   return `📩 **${
+  this.projectName && this.projectName !== 'null'
+    ? 'New Subcontractor Added to an RFQ'
+    : 'New Subcontractor Created'
+}**
 \`\`\`
 Subcontractor Name : ${payload.name}
 Email              : ${payload.emailID}
@@ -92,6 +100,7 @@ Contact Name       : ${payload.contactName}
 Contact Email      : ${payload.contactEmailID}
 Contact Phone      : ${payload.phoneNumber1}
 Office Address     : ${officeAddressText}
+Billing Address    : ${billingAddressText}
 ${
   this.projectName && this.projectName !== 'null'
     ? `Project Name       : ${this.projectName} (Code: ${this.projectCode})`
