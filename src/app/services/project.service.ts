@@ -88,20 +88,26 @@ export class projectService {
     this.getprojectsurl = this.apiURL + '/Projects';
   }
 
-  private async getHeaders(): Promise<HttpHeaders> {
-    const accounts = this.msalService.instance.getAllAccounts();
-    if (!accounts.length) throw new Error('No MSAL account found');
+ private async getHeaders(): Promise<HttpHeaders> {
+  const accounts = this.msalService.instance.getAllAccounts();
 
-    const result = await this.msalService.instance.acquireTokenSilent({
-      account: accounts[0],
-      scopes: ['api://96b6d570-73e9-4669-98d6-745f22f4acc0/Api.Read'],
-    });
-
+  // 🔐 If not logged in yet, send request without auth
+  if (!accounts.length) {
     return new HttpHeaders({
-      Accept: '*/*',
-      Authorization: `Bearer ${result.accessToken}`,
+      Accept: '*/*'
     });
   }
+
+  const result = await this.msalService.instance.acquireTokenSilent({
+    account: accounts[0],
+    scopes: ['api://96b6d570-73e9-4669-98d6-745f22f4acc0/Api.Read'],
+  });
+
+  return new HttpHeaders({
+    Accept: '*/*',
+    Authorization: `Bearer ${result.accessToken}`,
+  });
+}
 
   getProjectById(id: string): Observable<projectdetails> {
     return from(this.getHeaders()).pipe(

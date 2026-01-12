@@ -1115,96 +1115,100 @@ export class ViewProjects implements AfterViewChecked {
   //     });
   // }
 
-  loadConversationBySub(subId: string): void {
-    if (!subId) return;
+ loadConversationBySub(subId: string): void {
+  if (!subId) return;
 
-    this.isSpinLoading = true;
+  this.isSpinLoading = true;
 
-    this.projectService
-      .getConversationByProjectAndSubcontractor(this.projectId, subId)
-      .pipe(
-        switchMap((res: any[]) => {
-          const initialConvos = res || [];
+  this.projectService
+    .getConversationByProjectAndSubcontractor(this.projectId, subId)
+    .pipe(
+      switchMap((res: any[]) => {
+        const initialConvos = res || [];
 
-          if (initialConvos.length === 0) {
-            this.pmSubConversationData = [];
-            return of([]);
-          }
+        if (initialConvos.length === 0) {
+          this.pmSubConversationData = [];
+          return of([]);
+        }
 
-          // Always fetch full conversation from backend
-          const draft = initialConvos[0];
-          return this.projectService
-            .getConversation(
-              draft.projectID,
-              draft.rfqID ?? '00000000-0000-0000-0000-000000000000',
-              draft.subcontractorID
-            )
-            .pipe(
-              map((fullConvos) => {
-                // Merge PM IDs from initialConvos into fullConvos
-                const merged = fullConvos.map((fc) => {
-                  const match = initialConvos.find(
-                    (ic) =>
-                      (ic.conversationMessageID ?? ic.messageID) ===
-                      (fc.conversationMessageID ?? fc.messageID)
-                  );
+        // Always fetch full conversation from backend
+        const draft = initialConvos[0];
+        return this.projectService
+          .getConversation(
+            draft.projectID,
+            draft.rfqID ?? '00000000-0000-0000-0000-000000000000',
+            draft.subcontractorID
+          )
+          .pipe(
+            map((fullConvos) => {
+              // Merge PM IDs from initialConvos into fullConvos
+              const merged = fullConvos.map((fc) => {
+                const match = initialConvos.find(
+                  (ic) =>
+                    (ic.conversationMessageID ?? ic.messageID) ===
+                    (fc.conversationMessageID ?? fc.messageID)
+                );
 
-                  const pmID =
-                    match?.projectManagerID ?? match?.ProjectManagerID ?? fc?.projectManagerID;
+                const pmID =
+                  match?.projectManagerID ?? match?.ProjectManagerID ?? fc?.projectManagerID;
 
-                  const validPMID =
-                    pmID && pmID !== '00000000-0000-0000-0000-000000000000' ? pmID : undefined;
+                const validPMID =
+                  pmID && pmID !== '00000000-0000-0000-0000-000000000000' ? pmID : undefined;
 
-                  return {
-                    conversationMessageID:
-                      fc.conversationMessageID ?? fc.messageID ?? fc.messageID
-                        ? String(fc.conversationMessageID ?? fc.messageID ?? fc.messageID)
-                        : undefined,
-
-                    parentMessageID:
-                      fc.parentMessageID ?? fc.parentID
-                        ? String(fc.parentMessageID ?? fc.parentID)
-                        : undefined,
-
-                    projectID: this.projectId,
-                    rfqID: fc.rfqID ?? null,
-                    workItemID: null,
-                    subcontractorID: subId,
-
-                    projectManagerID: validPMID,
-                    senderType: fc.senderType,
-                    messageText: fc.messageText,
-                    subject: fc.subject ?? null,
-                    messageDateTime: fc.messageDateTime
-                      ? new Date(fc.messageDateTime + 'Z')
+                return {
+                  conversationMessageID:
+                    fc.conversationMessageID ?? fc.messageID ?? fc.messageID
+                      ? String(fc.conversationMessageID ?? fc.messageID ?? fc.messageID)
                       : undefined,
-                    status: 'Active',
-                    createdBy: null,
-                    createdOn: null,
-                  };
-                });
 
-                return merged;
-              })
-            );
-        }),
-        finalize(() => (this.isSpinLoading = false))
-      )
-      .subscribe({
-        next: (res: any[]) => {
-          this.pmSubConversationData = res || [];
+                  parentMessageID:
+                    fc.parentMessageID ?? fc.parentID
+                      ? String(fc.parentMessageID ?? fc.parentID)
+                      : undefined,
 
-          // 🔹 Debug PM IDs
-          console.log(
-            'Loaded projectManagerIDs:',
-            this.pmSubConversationData.map((c) => c.projectManagerID)
+                  projectID: this.projectId,
+                  rfqID: fc.rfqID ?? null,
+                  workItemID: null,
+                  subcontractorID: subId,
+
+                  projectManagerID: validPMID,
+                  senderType: fc.senderType,
+                  messageText: fc.messageText,
+                  subject: fc.subject ?? null,
+
+                  // ✅ Fixed datetime handling
+                  messageDateTime: fc.messageDateTime
+                    ? new Date(fc.messageDateTime) // JS automatically converts UTC → local
+                    : undefined,
+
+                  status: 'Active',
+                  createdBy: null,
+                  createdOn: null,
+                };
+              });
+
+              return merged;
+            })
           );
+      }),
+      finalize(() => (this.isSpinLoading = false))
+    )
+    .subscribe({
+      next: (res: any[]) => {
+        this.pmSubConversationData = res || [];
 
-          setTimeout(() => this.scrollToBottom(), 0);
-        },
-        error: (err) => console.error('Error loading conversation:', err),
-      });
-  }
+        // 🔹 Debug PM IDs
+        console.log(
+          'Loaded projectManagerIDs:',
+          this.pmSubConversationData.map((c) => c.projectManagerID)
+        );
+
+        setTimeout(() => this.scrollToBottom(), 0);
+      },
+      error: (err) => console.error('Error loading conversation:', err),
+    });
+}
+
 
   setDefaultValues() {
     const now = new Date();
@@ -1213,10 +1217,15 @@ export class ViewProjects implements AfterViewChecked {
     this.conversationType = 'Email';
   }
 
-  openLogConvo() {
-    this.setDefaultValues();
-    this.showLogConvoPopup = true;
+openLogConvo() {
+  this.setDefaultValues();
+
+  if (!this.conversationsData?.length && this.pmSubConversationData?.length) {
+    this.conversationsData = [...this.pmSubConversationData];
   }
+
+  this.showLogConvoPopup = true;
+}
 
   closeLogConvo() {
     this.showLogConvoPopup = false;
@@ -1233,61 +1242,85 @@ export class ViewProjects implements AfterViewChecked {
     this.conversationText = '';
   }
 
-  saveLogConvo() {
-    if (!this.conversationText?.trim() || this.isLoading) return;
+getLocalTime(dateUtc: string | Date) {
+  return new Date(dateUtc).toLocaleString('en-IN', {
+    timeZone: 'Asia/Kolkata',
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+}
 
-    if (!this.conversationsData?.length) {
-      alert('No conversation data available.');
-      return;
-    }
-
-    this.isLoading = true;
-
-    const draftConvo = this.conversationsData[0];
-
-    const payload: LogConversation = {
-      projectID: draftConvo.projectID,
-      //rfqID: draftConvo.rfqID,
-      rfqID: null,
-      subcontractorID: draftConvo.subcontractorID,
-      projectManagerID: draftConvo.projectManagerID,
-      conversationType: this.conversationType || 'Email',
-      subject: this.conversationSubject || '',
-      message: this.conversationText,
-      messageDateTime: this.conversationDateTime ?? new Date(),
-    };
-
-    this.projectService
-      .createLogConversation(payload)
-      .pipe(
-        switchMap((res) => {
-          this.pmSubConversationData.push({
-            ...res,
-            messageText: res.message,
-            senderType: 'Subcontractor',
-            messageDateTime: res.messageDateTime,
-          });
-
-          setTimeout(() => this.scrollToBottom(), 0);
-
-          return of(true);
-        }),
-        finalize(() => {
-          this.isLoading = false;
-        })
-      )
-      .subscribe({
-        next: () => {
-          this.afterMessageSent();
-          alert('Conversation logged successfully!');
-        },
-        error: (err) => {
-          console.error('Error saving conversation:', err);
-          alert('Failed to save conversation. Please try again.');
-        },
-      });
+saveLogConvo() {
+  if (!this.conversationText?.trim() || this.isLoading) return;
+  if (!this.conversationsData?.length) {
+    alert('No conversation data available.');
+    return;
   }
 
+  this.isLoading = true;
+
+  const draftConvo = this.conversationsData[0];
+
+  // Use local time or selected time
+  const messageDate = this.conversationDateTime
+    ? new Date(this.conversationDateTime)
+    : new Date();
+
+  // Convert local time → UTC before sending to backend
+  const messageDateUtc = new Date(Date.UTC(
+    messageDate.getFullYear(),
+    messageDate.getMonth(),
+    messageDate.getDate(),
+    messageDate.getHours(),
+    messageDate.getMinutes(),
+    messageDate.getSeconds(),
+    messageDate.getMilliseconds()
+  ));
+
+  const payload: LogConversation = {
+    projectID: draftConvo.projectID,
+    rfqID: null,
+    subcontractorID: draftConvo.subcontractorID,
+    projectManagerID: draftConvo.projectManagerID,
+    conversationType: this.conversationType || 'Email',
+    subject: this.conversationSubject || '',
+    message: this.conversationText,
+    messageDateTime: messageDateUtc, // UTC Date object
+  };
+
+  this.projectService.createLogConversation(payload)
+    .pipe(
+      switchMap((res) => {
+        // Convert UTC → IST for display in UI
+        const localDate = new Date(res.messageDateTime);
+        this.pmSubConversationData.push({
+          ...res,
+          messageText: res.message,
+          senderType: 'Subcontractor',
+          messageDateTime: localDate, // JS Date automatically converts for UI
+        });
+
+        setTimeout(() => this.scrollToBottom(), 0);
+        return of(true);
+      }),
+      finalize(() => {
+        this.isLoading = false;
+      })
+    )
+    .subscribe({
+      next: () => {
+        this.afterMessageSent();
+        alert('Conversation logged successfully!');
+      },
+      error: (err) => {
+        console.error('Error saving conversation:', err);
+        alert('Failed to save conversation. Please try again.');
+      },
+    });
+}
   sendMessage() {
     if (!this.messageText?.trim() && !this.subject?.trim()) return;
 
@@ -1432,31 +1465,50 @@ export class ViewProjects implements AfterViewChecked {
     this.replyAttachments.splice(index, 1);
   }
 
-  sendReply(convo: RFQConversationMessage) {
-    const parentId = convo.conversationMessageID;
-    const replyText = this.replyTexts[parentId!] ?? '';
+sendReply(convo: RFQConversationMessage) {
+  const parentId = convo.conversationMessageID;
+  const replyText = this.replyTexts[parentId!] ?? '';
 
-    if (!replyText.trim()) {
-      this.replyError = 'Reply cannot be empty';
-      return;
-    }
+  if (!replyText.trim()) {
+    this.replyError = 'Reply cannot be empty';
+    return;
+  }
 
-    this.isSendingReply = true;
-    this.replyError = '';
+  this.isSendingReply = true;
+  this.replyError = '';
 
-    const formData = new FormData();
-    formData.append('parentMessageId', String(parentId)); // ✅ ensure string
-    formData.append('message', replyText);
-    formData.append('subject', this.replySubject);
+  const formData = new FormData();
+  formData.append('parentMessageId', String(parentId));
+  formData.append('message', replyText);
+  formData.append('subject', this.replySubject);
 
-    this.replyAttachments.forEach((file) => formData.append('attachments', file));
+  this.replyAttachments.forEach((file) =>
+    formData.append('attachments', file)
+  );
 
-    this.rfqService.replyToConversation(formData).subscribe({
+  this.rfqService
+    .replyToConversation(formData)
+    .pipe(
+      finalize(() => {
+        // ONLY stop loader here
+        this.isSendingReply = false;
+      })
+    )
+    .subscribe({
       next: (reply: any) => {
-        const normalizedReply: RFQConversationMessage = {
-          conversationMessageID: String(reply.conversationMessageID ?? reply.messageID),
+        // ✅ SUCCESS → API returned 200
+        // alert('Reply sent successfully!');
 
-          // ✅ CRITICAL: set parentMessageID so Teams reply shows immediately
+        if (!reply) {
+          // Handles rare 204 safely (no UI update)
+          window.location.reload();
+          return;
+        }
+
+        const normalizedReply: RFQConversationMessage = {
+          conversationMessageID: String(
+            reply.conversationMessageID ?? reply.messageID
+          ),
           parentMessageID: String(parentId),
 
           projectID: reply.projectID,
@@ -1469,7 +1521,9 @@ export class ViewProjects implements AfterViewChecked {
           messageText: reply.messageText,
           subject: reply.subject,
 
-          messageDateTime: new Date(),
+    messageDateTime: reply.messageDateTime
+            ? new Date(reply.messageDateTime)
+            : new Date(),
           status: reply.status,
           createdBy: reply.createdBy,
           createdOn: reply.createdOn,
@@ -1486,15 +1540,15 @@ export class ViewProjects implements AfterViewChecked {
         }
 
         this.cancelReply();
-        this.isSendingReply = false;
+        window.location.reload();
       },
       error: (err) => {
         console.error('❌ Error sending reply:', err);
         this.replyError = 'Email failed. Reply saved as draft.';
-        this.isSendingReply = false;
       },
     });
-  }
+}
+
 
   getParentMessage(parentId: any) {
     if (parentId === null || parentId === undefined || parentId === '') {
