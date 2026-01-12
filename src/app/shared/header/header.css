@@ -504,7 +504,7 @@ select option {
 
 .error-text {
   color: #dc3545;
-  font-size: 12px;
+  font-size: 0.875rem;
   margin-top: 4px;
 }
 

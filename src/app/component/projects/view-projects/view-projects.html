@@ -575,7 +575,8 @@
                         <div class="message-meta">
                           <!-- Date/Time -->
                           <span class="message-time">
-{{ getLocalTime(convo.messageDateTime) }}                          </span>
+                            {{ getLocalTime(convo.messageDateTime) }}
+                          </span>
 
                           <!-- Conversation Type Icon -->
                           <ng-container [ngSwitch]="convo.conversationType?.toLowerCase()">
@@ -614,7 +615,8 @@
                       <!-- PM Meta -->
                       <ng-container *ngIf="convo.senderType === 'PM'">
                         <span class="message-time">
-{{ getLocalTime(convo.messageDateTime) }}                        </span>
+                          {{ getLocalTime(convo.messageDateTime) }}
+                        </span>
                       </ng-container>
 
                       <!-- Message Bubble -->
@@ -625,25 +627,26 @@
                       <!-- 💬 ACTUAL MESSAGE BUBBLE -->
                       <div class="message" [ngClass]="convo.senderType === 'PM' ? 'user' : 'bot'">
                         <!-- ✅ Teams-style quoted parent message INSIDE bubble -->
-                       <div class="teams-reply" *ngIf="convo.parentMessageID">
-  <div class="teams-reply-bar"></div>
+                        <div class="teams-reply" *ngIf="convo.parentMessageID">
+                          <div class="teams-reply-bar"></div>
 
-  <div class="teams-reply-content">
-    <div class="teams-reply-header">
-      {{ getParentMessage(convo.parentMessageID)?.senderType || '—' }}
-      ·
-      {{
-        getParentMessage(convo.parentMessageID)?.messageDateTime
-          ? (getParentMessage(convo.parentMessageID)?.messageDateTime | date:'dd-MM-yyyy HH:mm')
-          : '--'
-      }}
-    </div>
+                          <div class="teams-reply-content">
+                            <div class="teams-reply-header">
+                              {{ getParentMessage(convo.parentMessageID)?.senderType || '—' }}
+                              ·
+                              {{
+                                getParentMessage(convo.parentMessageID)?.messageDateTime
+                                  ? (getParentMessage(convo.parentMessageID)?.messageDateTime
+                                    | date : 'dd-MM-yyyy HH:mm')
+                                  : '--'
+                              }}
+                            </div>
 
-    <div class="teams-reply-text">
-      {{ getParentMessage(convo.parentMessageID)?.messageText || '' }}
-    </div>
-  </div>
-</div>
+                            <div class="teams-reply-text">
+                              {{ getParentMessage(convo.parentMessageID)?.messageText || '' }}
+                            </div>
+                          </div>
+                        </div>
                         <!-- Actual message text -->
                         {{ convo.messageText || convo.message || convo.Message }}
                       </div>
@@ -699,7 +702,7 @@
                   </div>
                 </ng-container>
                 <!-- INPUT AREA -->
-                <div class="chat-input">
+                <div class="chat-input" [ngClass]="{ invalid: showInvalid }">
                   <!-- Row 1: Attachments -->
                   <div class="attachment-row" *ngIf="attachments.length">
                     <div class="file-chip" *ngFor="let file of attachments; let i = index">
@@ -715,6 +718,7 @@
                       class="subject-input"
                       placeholder="Enter Subject"
                       [(ngModel)]="subject"
+                      [class.invalid]="subject"
                     />
 
                     <input
@@ -722,6 +726,7 @@
                       class="message-input"
                       placeholder="Enter your message..."
                       [(ngModel)]="messageText"
+                      [class.invalid]="messageText"
                     />
 
                     <!-- Hidden file input -->

@@ -220,11 +220,16 @@
         <div
           class="error-text"
           *ngIf="
-    reminderForm.get('reminderTime')?.touched &&
-    reminderForm.get('reminderTime')?.errors?.['midnightNotAllowed']
-  "
+            reminderForm.get('reminderTime')?.touched && reminderForm.get('reminderTime')?.invalid
+          "
         >
-          Reminder time cannot be 00:00
+          <span *ngIf="reminderForm.get('reminderTime')?.errors?.['required']">
+            Please select a valid time.
+          </span>
+
+          <span *ngIf="reminderForm.get('reminderTime')?.errors?.['midnightNotAllowed']">
+            Reminder time cannot be 00:00
+          </span>
         </div>
       </div>
 

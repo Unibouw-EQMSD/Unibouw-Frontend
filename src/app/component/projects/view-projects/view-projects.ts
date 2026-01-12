@@ -162,6 +162,8 @@ export class ViewProjects implements AfterViewChecked {
   replyAttachments: File[] = [];
   isSendingReply = false;
   replyError = '';
+  readonly MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB
+  readonly MAX_FILES = 3;
 
   setMaxDueDate(due: Date | string) {
     if (typeof due === 'string') {
@@ -585,7 +587,7 @@ export class ViewProjects implements AfterViewChecked {
               id: item.rfqID,
               number: item.rfqNumber,
               customer: item.customerName || '—',
-    rfqSentDate: item.sentDate ? this.formatDate(item.sentDate) : '-', // ensures display
+              rfqSentDate: item.sentDate ? this.formatDate(item.sentDate) : '-', // ensures display
               dueDate: this.formatDate(item.dueDate),
               rfqSent: item.rfqSent || 0,
               quoteReceived: item.quoteReceived || 0,
@@ -1004,16 +1006,39 @@ export class ViewProjects implements AfterViewChecked {
   messageText: string = '';
   attachments: File[] = [];
 
+  // onFileSelected(event: Event) {
+  //   const input = event.target as HTMLInputElement;
+
+  //   if (!input.files || input.files.length === 0) return;
+
+  //   for (let i = 0; i < input.files.length; i++) {
+  //     this.attachments.push(input.files[i]);
+  //   }
+
+  //   // reset input so same file can be selected again
+  //   input.value = '';
+  // }
+
   onFileSelected(event: Event) {
     const input = event.target as HTMLInputElement;
+    if (!input.files || input.files.length === 0) return;
 
-    if (!input.files?.length) return;
-
-    for (let i = 0; i < input.files.length; i++) {
-      this.attachments.push(input.files[i]);
+    // Check total files limit
+    if (this.attachments.length + input.files.length > this.MAX_FILES) {
+      alert(`You can attach a maximum of ${this.MAX_FILES} files per message.`);
+      input.value = '';
+      return;
     }
 
-    // reset input so same file can be selected again
+    for (const file of Array.from(input.files)) {
+      if (file.size > this.MAX_FILE_SIZE) {
+        alert(`"${file.name}" exceeds the 10 MB limit.`);
+        continue;
+      }
+      this.attachments.push(file);
+    }
+
+    // Reset input so same file can be selected again
     input.value = '';
   }
 
@@ -1115,100 +1140,99 @@ export class ViewProjects implements AfterViewChecked {
   //     });
   // }
 
- loadConversationBySub(subId: string): void {
-  if (!subId) return;
+  loadConversationBySub(subId: string): void {
+    if (!subId) return;
 
-  this.isSpinLoading = true;
+    this.isSpinLoading = true;
 
-  this.projectService
-    .getConversationByProjectAndSubcontractor(this.projectId, subId)
-    .pipe(
-      switchMap((res: any[]) => {
-        const initialConvos = res || [];
+    this.projectService
+      .getConversationByProjectAndSubcontractor(this.projectId, subId)
+      .pipe(
+        switchMap((res: any[]) => {
+          const initialConvos = res || [];
 
-        if (initialConvos.length === 0) {
-          this.pmSubConversationData = [];
-          return of([]);
-        }
+          if (initialConvos.length === 0) {
+            this.pmSubConversationData = [];
+            return of([]);
+          }
 
-        // Always fetch full conversation from backend
-        const draft = initialConvos[0];
-        return this.projectService
-          .getConversation(
-            draft.projectID,
-            draft.rfqID ?? '00000000-0000-0000-0000-000000000000',
-            draft.subcontractorID
-          )
-          .pipe(
-            map((fullConvos) => {
-              // Merge PM IDs from initialConvos into fullConvos
-              const merged = fullConvos.map((fc) => {
-                const match = initialConvos.find(
-                  (ic) =>
-                    (ic.conversationMessageID ?? ic.messageID) ===
-                    (fc.conversationMessageID ?? fc.messageID)
-                );
+          // Always fetch full conversation from backend
+          const draft = initialConvos[0];
+          return this.projectService
+            .getConversation(
+              draft.projectID,
+              draft.rfqID ?? '00000000-0000-0000-0000-000000000000',
+              draft.subcontractorID
+            )
+            .pipe(
+              map((fullConvos) => {
+                // Merge PM IDs from initialConvos into fullConvos
+                const merged = fullConvos.map((fc) => {
+                  const match = initialConvos.find(
+                    (ic) =>
+                      (ic.conversationMessageID ?? ic.messageID) ===
+                      (fc.conversationMessageID ?? fc.messageID)
+                  );
 
-                const pmID =
-                  match?.projectManagerID ?? match?.ProjectManagerID ?? fc?.projectManagerID;
+                  const pmID =
+                    match?.projectManagerID ?? match?.ProjectManagerID ?? fc?.projectManagerID;
 
-                const validPMID =
-                  pmID && pmID !== '00000000-0000-0000-0000-000000000000' ? pmID : undefined;
+                  const validPMID =
+                    pmID && pmID !== '00000000-0000-0000-0000-000000000000' ? pmID : undefined;
 
-                return {
-                  conversationMessageID:
-                    fc.conversationMessageID ?? fc.messageID ?? fc.messageID
-                      ? String(fc.conversationMessageID ?? fc.messageID ?? fc.messageID)
+                  return {
+                    conversationMessageID:
+                      fc.conversationMessageID ?? fc.messageID ?? fc.messageID
+                        ? String(fc.conversationMessageID ?? fc.messageID ?? fc.messageID)
+                        : undefined,
+
+                    parentMessageID:
+                      fc.parentMessageID ?? fc.parentID
+                        ? String(fc.parentMessageID ?? fc.parentID)
+                        : undefined,
+
+                    projectID: this.projectId,
+                    rfqID: fc.rfqID ?? null,
+                    workItemID: null,
+                    subcontractorID: subId,
+
+                    projectManagerID: validPMID,
+                    senderType: fc.senderType,
+                    messageText: fc.messageText,
+                    subject: fc.subject ?? null,
+
+                    // ✅ Fixed datetime handling
+                    messageDateTime: fc.messageDateTime
+                      ? new Date(fc.messageDateTime) // JS automatically converts UTC → local
                       : undefined,
 
-                  parentMessageID:
-                    fc.parentMessageID ?? fc.parentID
-                      ? String(fc.parentMessageID ?? fc.parentID)
-                      : undefined,
+                    status: 'Active',
+                    createdBy: null,
+                    createdOn: null,
+                  };
+                });
 
-                  projectID: this.projectId,
-                  rfqID: fc.rfqID ?? null,
-                  workItemID: null,
-                  subcontractorID: subId,
+                return merged;
+              })
+            );
+        }),
+        finalize(() => (this.isSpinLoading = false))
+      )
+      .subscribe({
+        next: (res: any[]) => {
+          this.pmSubConversationData = res || [];
 
-                  projectManagerID: validPMID,
-                  senderType: fc.senderType,
-                  messageText: fc.messageText,
-                  subject: fc.subject ?? null,
-
-                  // ✅ Fixed datetime handling
-                  messageDateTime: fc.messageDateTime
-                    ? new Date(fc.messageDateTime) // JS automatically converts UTC → local
-                    : undefined,
-
-                  status: 'Active',
-                  createdBy: null,
-                  createdOn: null,
-                };
-              });
-
-              return merged;
-            })
+          // 🔹 Debug PM IDs
+          console.log(
+            'Loaded projectManagerIDs:',
+            this.pmSubConversationData.map((c) => c.projectManagerID)
           );
-      }),
-      finalize(() => (this.isSpinLoading = false))
-    )
-    .subscribe({
-      next: (res: any[]) => {
-        this.pmSubConversationData = res || [];
 
-        // 🔹 Debug PM IDs
-        console.log(
-          'Loaded projectManagerIDs:',
-          this.pmSubConversationData.map((c) => c.projectManagerID)
-        );
-
-        setTimeout(() => this.scrollToBottom(), 0);
-      },
-      error: (err) => console.error('Error loading conversation:', err),
-    });
-}
-
+          setTimeout(() => this.scrollToBottom(), 0);
+        },
+        error: (err) => console.error('Error loading conversation:', err),
+      });
+  }
 
   setDefaultValues() {
     const now = new Date();
@@ -1217,15 +1241,15 @@ export class ViewProjects implements AfterViewChecked {
     this.conversationType = 'Email';
   }
 
-openLogConvo() {
-  this.setDefaultValues();
+  openLogConvo() {
+    this.setDefaultValues();
 
-  if (!this.conversationsData?.length && this.pmSubConversationData?.length) {
-    this.conversationsData = [...this.pmSubConversationData];
+    if (!this.conversationsData?.length && this.pmSubConversationData?.length) {
+      this.conversationsData = [...this.pmSubConversationData];
+    }
+
+    this.showLogConvoPopup = true;
   }
-
-  this.showLogConvoPopup = true;
-}
 
   closeLogConvo() {
     this.showLogConvoPopup = false;
@@ -1242,88 +1266,102 @@ openLogConvo() {
     this.conversationText = '';
   }
 
-getLocalTime(dateUtc: string | Date) {
-  return new Date(dateUtc).toLocaleString('en-IN', {
-    timeZone: 'Asia/Kolkata',
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-  });
-}
-
-saveLogConvo() {
-  if (!this.conversationText?.trim() || this.isLoading) return;
-  if (!this.conversationsData?.length) {
-    alert('No conversation data available.');
-    return;
+  getLocalTime(dateUtc: string | Date) {
+    return new Date(dateUtc).toLocaleString('en-IN', {
+      timeZone: 'Asia/Kolkata',
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
   }
 
-  this.isLoading = true;
+  saveLogConvo() {
+    if (!this.conversationText?.trim() || this.isLoading) return;
+    if (!this.conversationsData?.length) {
+      alert('No conversation data available.');
+      return;
+    }
 
-  const draftConvo = this.conversationsData[0];
+    this.isLoading = true;
 
-  // Use local time or selected time
-  const messageDate = this.conversationDateTime
-    ? new Date(this.conversationDateTime)
-    : new Date();
+    const draftConvo = this.conversationsData[0];
 
-  // Convert local time → UTC before sending to backend
-  const messageDateUtc = new Date(Date.UTC(
-    messageDate.getFullYear(),
-    messageDate.getMonth(),
-    messageDate.getDate(),
-    messageDate.getHours(),
-    messageDate.getMinutes(),
-    messageDate.getSeconds(),
-    messageDate.getMilliseconds()
-  ));
+    // Use local time or selected time
+    const messageDate = this.conversationDateTime
+      ? new Date(this.conversationDateTime)
+      : new Date();
 
-  const payload: LogConversation = {
-    projectID: draftConvo.projectID,
-    rfqID: null,
-    subcontractorID: draftConvo.subcontractorID,
-    projectManagerID: draftConvo.projectManagerID,
-    conversationType: this.conversationType || 'Email',
-    subject: this.conversationSubject || '',
-    message: this.conversationText,
-    messageDateTime: messageDateUtc, // UTC Date object
-  };
+    // Convert local time → UTC before sending to backend
+    const messageDateUtc = new Date(
+      Date.UTC(
+        messageDate.getFullYear(),
+        messageDate.getMonth(),
+        messageDate.getDate(),
+        messageDate.getHours(),
+        messageDate.getMinutes(),
+        messageDate.getSeconds(),
+        messageDate.getMilliseconds()
+      )
+    );
 
-  this.projectService.createLogConversation(payload)
-    .pipe(
-      switchMap((res) => {
-        // Convert UTC → IST for display in UI
-        const localDate = new Date(res.messageDateTime);
-        this.pmSubConversationData.push({
-          ...res,
-          messageText: res.message,
-          senderType: 'Subcontractor',
-          messageDateTime: localDate, // JS Date automatically converts for UI
-        });
+    const payload: LogConversation = {
+      projectID: draftConvo.projectID,
+      rfqID: null,
+      subcontractorID: draftConvo.subcontractorID,
+      projectManagerID: draftConvo.projectManagerID,
+      conversationType: this.conversationType || 'Email',
+      subject: this.conversationSubject || '',
+      message: this.conversationText,
+      messageDateTime: messageDateUtc, // UTC Date object
+    };
 
-        setTimeout(() => this.scrollToBottom(), 0);
-        return of(true);
-      }),
-      finalize(() => {
-        this.isLoading = false;
-      })
-    )
-    .subscribe({
-      next: () => {
-        this.afterMessageSent();
-        alert('Conversation logged successfully!');
-      },
-      error: (err) => {
-        console.error('Error saving conversation:', err);
-        alert('Failed to save conversation. Please try again.');
-      },
-    });
-}
+    this.projectService
+      .createLogConversation(payload)
+      .pipe(
+        switchMap((res) => {
+          // Convert UTC → IST for display in UI
+          const localDate = new Date(res.messageDateTime);
+          this.pmSubConversationData.push({
+            ...res,
+            messageText: res.message,
+            senderType: 'Subcontractor',
+            messageDateTime: localDate, // JS Date automatically converts for UI
+          });
+
+          setTimeout(() => this.scrollToBottom(), 0);
+          return of(true);
+        }),
+        finalize(() => {
+          this.isLoading = false;
+        })
+      )
+      .subscribe({
+        next: () => {
+          this.afterMessageSent();
+          alert('Conversation logged successfully!');
+        },
+        error: (err) => {
+          console.error('Error saving conversation:', err);
+          alert('Failed to save conversation. Please try again.');
+        },
+      });
+  }
+
+  showInvalid = false;
   sendMessage() {
-    if (!this.messageText?.trim() && !this.subject?.trim()) return;
+    // Trim inputs and check if empty
+    const subjectTrimmed = this.subject?.trim();
+    const messageTrimmed = this.messageText?.trim();
 
+    if (!subjectTrimmed && !messageTrimmed) {
+      // Optionally: mark the chat-input as invalid (for CSS)
+      this.showInvalid = true; // use this boolean in [ngClass] in HTML
+      return;
+    } else {
+      this.showInvalid = false;
+    }
     if (!this.conversationsData?.length) {
       alert('No conversation data available.');
       return;
@@ -1456,99 +1494,114 @@ saveLogConvo() {
     this.replyTexts[id] = text;
   }
 
-  onReplyFileSelected(event: any) {
-    const files: File[] = Array.from(event.target.files);
-    this.replyAttachments.push(...files);
+  // onReplyFileSelected(event: any) {
+  //   const files: File[] = Array.from(event.target.files);
+  //   this.replyAttachments.push(...files);
+  // }
+
+  onReplyFileSelected(event: Event) {
+    const input = event.target as HTMLInputElement;
+    if (!input.files || input.files.length === 0) return;
+
+    // Check total files limit
+    if (this.replyAttachments.length + input.files.length > this.MAX_FILES) {
+      alert(`You can attach a maximum of ${this.MAX_FILES} files per message.`);
+      input.value = '';
+      return;
+    }
+
+    for (const file of Array.from(input.files)) {
+      if (file.size > this.MAX_FILE_SIZE) {
+        alert(`"${file.name}" exceeds the 10 MB limit.`);
+        continue;
+      }
+      this.replyAttachments.push(file);
+    }
+
+    input.value = '';
   }
 
   removeReplyFile(index: number) {
     this.replyAttachments.splice(index, 1);
   }
 
-sendReply(convo: RFQConversationMessage) {
-  const parentId = convo.conversationMessageID;
-  const replyText = this.replyTexts[parentId!] ?? '';
+  sendReply(convo: RFQConversationMessage) {
+    const parentId = convo.conversationMessageID;
+    const replyText = this.replyTexts[parentId!] ?? '';
 
-  if (!replyText.trim()) {
-    this.replyError = 'Reply cannot be empty';
-    return;
-  }
+    if (!replyText.trim()) {
+      this.replyError = 'Reply cannot be empty';
+      return;
+    }
 
-  this.isSendingReply = true;
-  this.replyError = '';
+    this.isSendingReply = true;
+    this.replyError = '';
 
-  const formData = new FormData();
-  formData.append('parentMessageId', String(parentId));
-  formData.append('message', replyText);
-  formData.append('subject', this.replySubject);
+    const formData = new FormData();
+    formData.append('parentMessageId', String(parentId));
+    formData.append('message', replyText);
+    formData.append('subject', this.replySubject);
 
-  this.replyAttachments.forEach((file) =>
-    formData.append('attachments', file)
-  );
+    this.replyAttachments.forEach((file) => formData.append('attachments', file));
 
-  this.rfqService
-    .replyToConversation(formData)
-    .pipe(
-      finalize(() => {
-        // ONLY stop loader here
-        this.isSendingReply = false;
-      })
-    )
-    .subscribe({
-      next: (reply: any) => {
-        // ✅ SUCCESS → API returned 200
-        // alert('Reply sent successfully!');
+    this.rfqService
+      .replyToConversation(formData)
+      .pipe(
+        finalize(() => {
+          // ONLY stop loader here
+          this.isSendingReply = false;
+        })
+      )
+      .subscribe({
+        next: (reply: any) => {
+          // ✅ SUCCESS → API returned 200
+          // alert('Reply sent successfully!');
 
-        if (!reply) {
-          // Handles rare 204 safely (no UI update)
+          if (!reply) {
+            // Handles rare 204 safely (no UI update)
+            window.location.reload();
+            return;
+          }
+
+          const normalizedReply: RFQConversationMessage = {
+            conversationMessageID: String(reply.conversationMessageID ?? reply.messageID),
+            parentMessageID: String(parentId),
+
+            projectID: reply.projectID,
+            rfqID: reply.rfqID,
+            workItemID: reply.workItemID,
+            subcontractorID: reply.subcontractorID,
+            projectManagerID: reply.projectManagerID,
+
+            senderType: reply.senderType,
+            messageText: reply.messageText,
+            subject: reply.subject,
+
+            messageDateTime: reply.messageDateTime ? new Date(reply.messageDateTime) : new Date(),
+            status: reply.status,
+            createdBy: reply.createdBy,
+            createdOn: reply.createdOn,
+          };
+
+          const index = this.pmSubConversationData.findIndex(
+            (m) => String(m.conversationMessageID) === String(parentId)
+          );
+
+          if (index === -1) {
+            this.pmSubConversationData.push(normalizedReply);
+          } else {
+            this.pmSubConversationData.splice(index + 1, 0, normalizedReply);
+          }
+
+          this.cancelReply();
           window.location.reload();
-          return;
-        }
-
-        const normalizedReply: RFQConversationMessage = {
-          conversationMessageID: String(
-            reply.conversationMessageID ?? reply.messageID
-          ),
-          parentMessageID: String(parentId),
-
-          projectID: reply.projectID,
-          rfqID: reply.rfqID,
-          workItemID: reply.workItemID,
-          subcontractorID: reply.subcontractorID,
-          projectManagerID: reply.projectManagerID,
-
-          senderType: reply.senderType,
-          messageText: reply.messageText,
-          subject: reply.subject,
-
-    messageDateTime: reply.messageDateTime
-            ? new Date(reply.messageDateTime)
-            : new Date(),
-          status: reply.status,
-          createdBy: reply.createdBy,
-          createdOn: reply.createdOn,
-        };
-
-        const index = this.pmSubConversationData.findIndex(
-          (m) => String(m.conversationMessageID) === String(parentId)
-        );
-
-        if (index === -1) {
-          this.pmSubConversationData.push(normalizedReply);
-        } else {
-          this.pmSubConversationData.splice(index + 1, 0, normalizedReply);
-        }
-
-        this.cancelReply();
-        window.location.reload();
-      },
-      error: (err) => {
-        console.error('❌ Error sending reply:', err);
-        this.replyError = 'Email failed. Reply saved as draft.';
-      },
-    });
-}
-
+        },
+        error: (err) => {
+          console.error('❌ Error sending reply:', err);
+          this.replyError = 'Email failed. Reply saved as draft.';
+        },
+      });
+  }
 
   getParentMessage(parentId: any) {
     if (parentId === null || parentId === undefined || parentId === '') {

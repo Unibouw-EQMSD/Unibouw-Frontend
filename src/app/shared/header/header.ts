@@ -41,7 +41,7 @@ export class Header implements OnInit {
     this.reminderForm = this.fb.group({
       maxReminderSequence: [1, [Validators.required, Validators.min(1)]], // must be > 0
       reminderSequence: [[], Validators.required],
-      reminderTime: [null, [Validators.required, midnightNotAllowedValidator]],
+      reminderTime: ['', [Validators.required, midnightNotAllowedValidator]],
       reminderEmailBody: ['', [Validators.required, this.noWhitespaceValidator]],
       isEnable: [true],
     });
