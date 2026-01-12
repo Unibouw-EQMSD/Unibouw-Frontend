@@ -729,6 +729,10 @@
                       [class.invalid]="messageText"
                     />
 
+                     <div class="error-msg" *ngIf="(messageText ?? '').length > 5000">
+      Message is too long. Please shorten your message.
+    </div>
+
                     <!-- Hidden file input -->
                     <input
                       type="file"
@@ -746,7 +750,7 @@
                     ></i>
 
                     <!-- Send icon -->
-                    <i class="fa fa-paper-plane send-icon" title="Send" (click)="sendMessage()"></i>
+                    <i class="fa fa-paper-plane send-icon" title="Send" [class.disabled]="(messageText ?? '').length > 5000" (click)="sendMessage()"></i>
                   </div>
                 </div>
               </div>
@@ -914,7 +918,7 @@
       <div class="row">
         <label class="label">Date & Time</label>
         <div class="time-wrapper">
-          <input type="datetime-local" class="date-time-input" [(ngModel)]="conversationDateTime" />
+          <input type="datetime-local" class="date-time-input" [max]="maxDateTime" [(ngModel)]="conversationDateTime" />
         </div>
       </div>
       <!-- Add Subject -->

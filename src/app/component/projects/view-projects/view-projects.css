@@ -1188,7 +1188,17 @@
   font-weight: 400;
   width: 100%;
 }
+.send-icon.disabled {
+  opacity: 0.5;
+  pointer-events: none;
+  cursor: not-allowed;
+}
 
+.error-text {
+  color: red;
+  font-size: 0.85rem;
+  margin-top: 4px;
+}
 .calendar-add.disabled {
   pointer-events: none;
   opacity: 0.4;

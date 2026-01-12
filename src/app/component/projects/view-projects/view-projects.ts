@@ -154,6 +154,8 @@ export class ViewProjects implements AfterViewChecked {
   reminderEmailBody: string = '';
   minDate: Date = new Date();
   maxDate!: Date;
+    maxDateTime: string = '';
+
   convoSubcontractors: { id: string; name: string }[] = [];
   replyingToMessageId: string | null = null;
   replyText = '';
@@ -246,6 +248,15 @@ export class ViewProjects implements AfterViewChecked {
     private location: Location
   ) {
     registerLocaleData(localeNl);
+        const now = new Date();
+
+const yyyy = now.getFullYear();
+    const mm = String(now.getMonth() + 1).padStart(2, '0'); // Months are 0-based
+    const dd = String(now.getDate()).padStart(2, '0');
+    const hh = String(now.getHours()).padStart(2, '0');
+    const min = String(now.getMinutes()).padStart(2, '0');
+
+    this.maxDateTime = `${yyyy}-${mm}-${dd}T${hh}:${min}`;
   }
 
   ngOnInit(): void {
@@ -1150,7 +1161,7 @@ export class ViewProjects implements AfterViewChecked {
       .pipe(
         switchMap((res: any[]) => {
           const initialConvos = res || [];
-
+ this.conversationsData = res;
           if (initialConvos.length === 0) {
             this.pmSubConversationData = [];
             return of([]);
@@ -1350,99 +1361,102 @@ export class ViewProjects implements AfterViewChecked {
   }
 
   showInvalid = false;
-  sendMessage() {
-    // Trim inputs and check if empty
-    const subjectTrimmed = this.subject?.trim();
-    const messageTrimmed = this.messageText?.trim();
+ sendMessage() {
+  // Trim inputs
+  const subjectTrimmed = this.subject?.trim();
+  const messageTrimmed = this.messageText?.trim();
 
-    if (!subjectTrimmed && !messageTrimmed) {
-      // Optionally: mark the chat-input as invalid (for CSS)
-      this.showInvalid = true; // use this boolean in [ngClass] in HTML
-      return;
-    } else {
-      this.showInvalid = false;
-    }
-    if (!this.conversationsData?.length) {
-      alert('No conversation data available.');
-      return;
-    }
-
-    this.isLoading = true;
-
-    const draftConvo = this.conversationsData[0];
-
-    const payload: RFQConversationMessage = {
-      projectID: draftConvo.projectID,
-      rfqID: draftConvo.rfqID,
-      workItemID: null,
-      subcontractorID: draftConvo.subcontractorID,
-      senderType: 'PM',
-      messageText: this.messageText,
-      subject: this.subject || '',
-      createdBy: draftConvo.createdBy,
-    };
-
-    this.projectService
-      .addRfqConversationMessage(payload)
-      .pipe(
-        // ⭐ FIX: Explicit return type
-        switchMap((res: RFQConversationMessage): Observable<UploadResult> => {
-          if (!res.conversationMessageID) {
-            throw new Error('ConversationMessageID missing');
-          }
-
-          // ✅ IMPORTANT: clone attachments to avoid async clearing
-          const filesToUpload = [...this.attachments];
-
-          this.pmSubConversationData.push({
-            ...res,
-            senderType: 'PM',
-            messageDateTime: new Date(res.messageDateTime || new Date()),
-          });
-
-          this.pmSubConversationData.sort(
-            (a, b) => new Date(a.messageDateTime).getTime() - new Date(b.messageDateTime).getTime()
-          );
-
-          return this.projectService
-            .uploadAttachmentFiles(res.conversationMessageID, filesToUpload)
-            .pipe(
-              map((paths: string[]) => ({
-                res,
-                paths,
-              }))
-            );
-        }),
-
-        switchMap(({ res, paths }) =>
-          this.projectService.sendMail({
-            subcontractorID: draftConvo.subcontractorID,
-            subject: this.subject,
-            body: this.messageText,
-            attachmentFilePaths: paths,
-          })
-        ),
-
-        finalize(() => {
-          this.isLoading = false;
-        })
-      )
-      .subscribe({
-        next: () => {
-          this.messageText = '';
-          this.subject = '';
-          this.attachments = [];
-
-          this.afterMessageSent();
-          alert('Conversation logged successfully!');
-        },
-        error: (err) => {
-          console.error('Error sending message:', err);
-          alert('Failed to save conversation. Please try again.');
-        },
-      });
+  // ✅ Validate empty inputs
+  if (!subjectTrimmed && !messageTrimmed) {
+    this.showInvalid = true; // keeps your current CSS logic
+    return;
+  } else {
+    this.showInvalid = false;
   }
 
+  // ✅ Validate message length
+  if (messageTrimmed.length > 5000) {
+    alert('Message is too long. Please shorten your message.');
+    return;
+  }
+
+  if (!this.conversationsData?.length) {
+    alert('No conversation data available.');
+    return;
+  }
+
+  this.isLoading = true;
+  const draftConvo = this.conversationsData[0];
+
+  const payload: RFQConversationMessage = {
+    projectID: draftConvo.projectID,
+    rfqID: draftConvo.rfqID,
+    workItemID: null,
+    subcontractorID: draftConvo.subcontractorID,
+    senderType: 'PM',
+    messageText: this.messageText,
+    subject: this.subject || '',
+    createdBy: draftConvo.createdBy,
+  };
+
+  this.projectService
+    .addRfqConversationMessage(payload)
+    .pipe(
+      switchMap((res: RFQConversationMessage): Observable<UploadResult> => {
+        if (!res.conversationMessageID) {
+          throw new Error('ConversationMessageID missing');
+        }
+
+        // Clone attachments
+        const filesToUpload = [...this.attachments];
+
+        this.pmSubConversationData.push({
+          ...res,
+          senderType: 'PM',
+          messageDateTime: new Date(res.messageDateTime || new Date()),
+        });
+
+        this.pmSubConversationData.sort(
+          (a, b) =>
+            new Date(a.messageDateTime).getTime() -
+            new Date(b.messageDateTime).getTime()
+        );
+
+        return this.projectService
+          .uploadAttachmentFiles(res.conversationMessageID, filesToUpload)
+          .pipe(
+            map((paths: string[]) => ({
+              res,
+              paths,
+            }))
+          );
+      }),
+      switchMap(({ res, paths }) =>
+        this.projectService.sendMail({
+          subcontractorID: draftConvo.subcontractorID,
+          subject: this.subject,
+          body: this.messageText,
+          attachmentFilePaths: paths,
+        })
+      ),
+      finalize(() => {
+        this.isLoading = false;
+      })
+    )
+    .subscribe({
+      next: () => {
+        this.messageText = '';
+        this.subject = '';
+        this.attachments = [];
+        this.afterMessageSent();
+        alert('Conversation logged successfully!');
+      },
+      error: (err) => {
+        console.error('Error sending message:', err);
+        alert('Failed to save conversation. Please try again.');
+      },
+    });
+}
   startReply(convo: RFQConversationMessage) {
     console.log('▶ startReply clicked');
     console.log('Convo object received:', convo);
