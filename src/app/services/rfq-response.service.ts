@@ -188,13 +188,25 @@ export class RfqResponseService {
     );
   }
 
-  sendReminder(subId: string | null, rfqId: string | null, emailBody: string): Observable<any> {
-    const body = {
-      SubcontractorId: subId ?? null,
-      RfqID: rfqId ?? null,
-      EmailBody: emailBody,
-    };
+  sendReminder(
+  subId: string | null,
+  rfqId: string | null,
+  emailBody: string
+): Observable<any> {
+  const body = {
+    subcontractorId: subId,
+    rfqId: rfqId,
+    emailBody: emailBody,
+  };
 
-    return this.http.post<any>(`${this.apiURL}/Email/send-reminder`, body);
-  }
+  return from(this.getHeaders()).pipe(
+    switchMap((headers) =>
+      this.http.post<any>(
+        `${this.apiURL}/Email/send-reminder`,
+        body,
+        { headers }
+      )
+    )
+  );
+}
 }
