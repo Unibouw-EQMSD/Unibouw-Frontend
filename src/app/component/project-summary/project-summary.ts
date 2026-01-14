@@ -229,7 +229,6 @@ export class ProjectSummary implements OnInit {
             // ✅ Restore chevron only if interested
             if (w.isInterested) {
               this.expandedId = w.workItemID;
-              
             }
           } else {
             // Defaults (important for first load)
@@ -240,9 +239,9 @@ export class ProjectSummary implements OnInit {
           /* ===== Restore previous submissions ===== */
           const subKey = `rfq_prev_submissions_${this.rfqId}_${this.subId}_${w.workItemID}`;
           w.previousSubmissions = JSON.parse(localStorage.getItem(subKey) || '[]');
- if (w.previousSubmissions.length > 0) {
-    w.isQuoteSubmitted = true;  // ← THIS IS THE CRITICAL LINE
-  }
+          if (w.previousSubmissions.length > 0) {
+            w.isQuoteSubmitted = true; // ← THIS IS THE CRITICAL LINE
+          }
           /* ===== Mark as viewed (server-side) ===== */
           this.rfqResponseService.markAsViewed(this.rfqId, this.subId, w.workItemID).subscribe();
         });
@@ -322,66 +321,68 @@ export class ProjectSummary implements OnInit {
     // alert('Your preference has been recorded.');
   }
 
- confirmNotInterested(wi: any): void {
-  const reason = wi?.notInterested?.reason?.trim();
-  const comment = wi?.notInterested?.comment?.trim();
-  const workItemName = wi?.name || '';
+  confirmNotInterested(wi: any): void {
+    const reason = wi?.notInterested?.reason?.trim();
+    const comment = wi?.notInterested?.comment?.trim();
+    const workItemName = wi?.name || '';
+    const rfqNumber = this.rfq?.rfqNumber || '';
 
-  // Validations
-  if (!reason) {
-    alert('Please select a reason.');
-    return;
-  }
+    // Validations
+    if (!reason) {
+      alert('Please select a reason.');
+      return;
+    }
 
-  if (reason === 'Anders' && !comment) {
-    alert('Please enter a reason.');
-    return;
-  }
+    if (reason === 'Anders' && !comment) {
+      alert('Please enter a reason.');
+      return;
+    }
 
-  const message = `
+    const message = `
 Not Interested – Confirmation
 
+RFQ Number     : ${rfqNumber}
 Work Item Name : ${workItemName}
 Reason         : ${reason}
 Comment        : ${comment || 'No additional comments provided.'}
 `.trim();
 
-  const payload: LogConversation = {
-    projectID: this.project?.projectID,          // ✅ dynamic
-    rfqID: this.rfqId ?? null,                    // ✅ dynamic
-    subcontractorID: this.subId,                  // ✅ dynamic
-    projectManagerID: this.project?.projectManagerID, // ✅ dynamic
-    conversationType: 'Email',
-    subject: 'Marked as Not Interested',
-    message,
-    messageDateTime: new Date(),
-  };
+    const payload: LogConversation = {
+      projectID: this.project?.projectID, // ✅ dynamic
+      rfqID: this.rfqId ?? null, // ✅ dynamic
+      subcontractorID: this.subId, // ✅ dynamic
+      projectManagerID: this.project?.projectManagerID, // ✅ dynamic
+      conversationType: 'Email',
+      subject: 'Marked as Not Interested',
+      message,
+      messageDateTime: new Date(),
+    };
 
-  if (!payload.projectID || !payload.projectManagerID) {
-    alert('Project data not loaded yet. Please try again.');
-    return;
+    if (!payload.projectID || !payload.projectManagerID) {
+      alert('Project data not loaded yet. Please try again.');
+      return;
+    }
+
+    this.isLoading = true;
+
+    this.projectService
+      .createLogConversation(payload)
+      .pipe(
+        tap((res) => console.log('Log conversation saved:', res)),
+        finalize(() => (this.isLoading = false))
+      )
+      .subscribe({
+        next: () => {
+          //alert('Conversation logged successfully!');
+          this.submitInterest('Not Interested', wi);
+          this.closeDropdowns();
+        },
+        error: (err) => {
+          console.error('Error saving conversation:', err);
+          alert('Failed to save conversation. Please try again.');
+        },
+      });
   }
-
-  this.isLoading = true;
-
-  this.projectService
-    .createLogConversation(payload)
-    .pipe(
-      tap((res) => console.log('Log conversation saved:', res)),
-      finalize(() => (this.isLoading = false))
-    )
-    .subscribe({
-      next: () => {
-        alert('Conversation logged successfully!');
-        this.submitInterest('Not Interested', wi);
-        this.closeDropdowns();
-      },
-      error: (err) => {
-        console.error('Error saving conversation:', err);
-        alert('Failed to save conversation. Please try again.');
-      },
-    });
-}
 
   addMore() {
     this.attachments.push(this.fb.control(null));
