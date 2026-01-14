@@ -53,6 +53,9 @@ export class RfqAdd {
   workItemName: string = 'N/A';
   globalDateError = false;
   originalRfqSubcontractors: any[] = [];
+  private readonly RFQ_DRAFT_KEY = 'rfq_add_state';
+private skipDraftSave = false;
+
   constructor(
     private workitemService: WorkitemService,
     private subcontractorService: SubcontractorService,
@@ -62,44 +65,150 @@ export class RfqAdd {
     private route: ActivatedRoute,
     private router: Router,
     private dialog: MatDialog,
-    private location: Location
+    private location: Location,
+    
   ) {}
 
   isLoader: boolean = false;
   // minDate: Date = new Date();
   minDate: string = '';
 
-  ngOnInit() {
-    const today = new Date();
-    this.minDate = today.toISOString().split('T')[0]; // yyyy-MM-dd
+ngOnInit() {
+    localStorage.removeItem('rfqDraft');
 
-    //SHOW DEFAULT MESSAGE ON PAGE LOAD (Add + Edit mode)
-    this.noSubMessage = 'Select a work item to view subcontractors.';
+  const today = new Date();
+  this.minDate = today.toISOString().split('T')[0]; // yyyy-MM-dd
 
-    // Load workitems first, as loadRfqForEdit depends on them
-    this.loadCategoriesAndWorkitems().then(() => {
-      this.projectId = this.route.snapshot.paramMap.get('projectId') || '';
-      this.rfqIdForEdit = this.route.snapshot.paramMap.get('rfqId');
+  // Default message
+  this.noSubMessage = 'Select a work item to view subcontractors.';
 
-      if (this.projectId) {
-        this.loadProjectDetails(this.projectId);
-        this.selectedProject = this.projectId;
-      }
+  // 🔹 Load categories & workitems FIRST
+  this.loadCategoriesAndWorkitems();
 
-      if (this.rfqIdForEdit) {
-        this.loadRfqForEdit(this.rfqIdForEdit);
+  // 🔹 Load route params
+  this.projectId = this.route.snapshot.paramMap.get('projectId') || '';
+  this.rfqIdForEdit = this.route.snapshot.paramMap.get('rfqId');
 
-        //IMPORTANT: Reset the message again in edit mode
-        this.noSubMessage = 'Select a work item to view subcontractors.';
-      }
-    });
-
-    this.loadProjects();
+  if (this.projectId) {
+    this.loadProjectDetails(this.projectId);
+    this.selectedProject = this.projectId;
   }
+
+  if (this.rfqIdForEdit) {
+    this.loadRfqForEdit(this.rfqIdForEdit);
+    this.noSubMessage = 'Select a work item to view subcontractors.';
+  }
+
+  // 🔹 Load projects (DO NOT override restored project)
+  this.loadProjects();
+
+  /* =====================================================
+     🔑 DRAFT RESTORE HOOK (WAIT FOR WORKITEMS)
+     ===================================================== */
+  const waitForWorkitems = setInterval(() => {
+    if (
+      this.standardWorkitems.length ||
+      this.unibouwWorkitems.length
+    ) {
+      clearInterval(waitForWorkitems);
+
+      // 🚫 Do NOT restore in edit mode
+      if (this.rfqIdForEdit) return;
+
+      const saved = localStorage.getItem(this.RFQ_DRAFT_KEY);
+      if (!saved) return;
+
+      const state = JSON.parse(saved);
+
+      console.log('🟢 RFQ DRAFT FOUND');
+
+      // Restore simple fields
+      this.selectedTab = state.selectedTab ?? this.selectedTab;
+      this.globalDueDate = state.globalDueDate ?? '';
+
+      // Restore workitems
+      const allWorkItems = [
+        ...this.standardWorkitems,
+        ...this.unibouwWorkitems
+      ];
+
+      this.selectedWorkItems = allWorkItems.filter(w =>
+        state.selectedWorkItems?.includes(w.workItemID)
+      );
+
+      // Restore subcontractors per workitem
+      this.selectedWorkItems.forEach(wi => {
+        this.loadSubcontractors(wi.workItemID).then(() => {
+          this.subcontractors.forEach(sub => {
+            const savedSub = state.subcontractors?.find(
+              (s: any) => s.subcontractorID === sub.subcontractorID
+            );
+            if (savedSub) {
+              sub.selected = savedSub.selected;
+              sub.dueDate = savedSub.dueDate;
+            }
+          });
+        });
+      });
+    }
+  }, 50);
+}
+
+ngOnDestroy(): void {
+  localStorage.removeItem(this.RFQ_DRAFT_KEY);
+}
+
+
+  @HostListener('window:beforeunload')
+onBeforeUnload() {
+  this.saveDraft();
+}
 
   goBack(): void {
     this.location.back();
   }
+
+private restoreDraft() {
+  if (this.rfqIdForEdit) return;
+
+  const saved = localStorage.getItem(this.RFQ_DRAFT_KEY);
+  if (!saved) return;
+
+  const state = JSON.parse(saved);
+
+  this.selectedTab = state.selectedTab ?? this.selectedTab;
+  this.globalDueDate = state.globalDueDate ?? '';
+
+  // restore workitems AFTER they are loaded
+  const allWorkItems = [...this.standardWorkitems, ...this.unibouwWorkitems];
+
+  this.selectedWorkItems = allWorkItems.filter(w =>
+    state.selectedWorkItems?.includes(w.workItemID)
+  );
+
+  // restore subcontractor state later (after loadSubcontractors)
+}
+
+
+private saveDraft() {
+  if (this.rfqIdForEdit || this.skipDraftSave) return;
+
+  localStorage.setItem(
+    this.RFQ_DRAFT_KEY,
+    JSON.stringify({
+      selectedTab: this.selectedTab,
+      globalDueDate: this.globalDueDate,
+      selectedWorkItems: this.selectedWorkItems.map(w => w.workItemID),
+      subcontractors: this.subcontractors.map(s => ({
+        subcontractorID: s.subcontractorID,
+        selected: s.selected,
+        dueDate: s.dueDate
+      }))
+    })
+  );
+}
+
+
 
   confirmCancel() {
     const dialogRef = this.dialog.open(ConfirmDialogComponent, {
@@ -128,20 +237,27 @@ export class RfqAdd {
   hasSelectedSubcontractor(): boolean {
     return this.subcontractors?.some((s) => s.selected);
   }
-  onCancelConfirmed() {
-    // reset state
-    this.selectedTab = 'standard';
-    this.selectedWorkItems = [];
-    this.subcontractors = [];
+onCancelConfirmed() {
+  // 🛑 stop autosave FIRST
+  this.skipDraftSave = true;
 
-    if (!this.projectId) {
-      console.error('❌ Project ID missing on cancel');
-      return;
-    }
+  // 🔴 clear draft
+  localStorage.removeItem(this.RFQ_DRAFT_KEY);
 
-    // ✅ ALWAYS go back to the SAME project RFQ tab
-    this.router.navigate(['view-projects', this.projectId], { queryParams: { tab: 'rfq' } });
+  // reset state
+  this.selectedTab = 'standard';
+  this.selectedWorkItems = [];
+  this.subcontractors = [];
+
+  if (!this.projectId) {
+    console.error('❌ Project ID missing on cancel');
+    return;
   }
+
+  this.router.navigate(['view-projects', this.projectId], {
+    queryParams: { tab: 'rfq' }
+  });
+}
 
   private normalizeId(id: string | null | undefined): string {
     return (id || '').toUpperCase();
@@ -277,9 +393,11 @@ loadRfqForEdit(rfqId: string) {
 
   onSubcontractorToggle(sub: any) {
     if (sub.selected) {
+        this.saveDraft();
+
       // Assign date when selected
       if (!sub.dueDate) {
-        sub.dueDate = this.globalDueDate || this.todayForHtml();
+       sub.dueDate = '';
       }
     } else {
       // Clear date when unselected
@@ -345,9 +463,9 @@ loadSubcontractors(workItemID: string, existingSubs: any[] = []): Promise<void> 
             subcontractorID: s.subcontractorID,
             name: s.name,
             emailID: s.emailID || '',
-            selected:
-              (existingUI?.selected ?? rfqDueDateMap.has(subId)) ||
-              linkedIds.includes(subId),
+            selected: this.rfqIdForEdit
+  ? rfqDueDateMap.has(subId) // ✅ EDIT → only previously emailed
+  : linkedIds.includes(subId),
             dueDate: existingUI?.dueDate ?? rfqDueDate ?? '',
           };
         });
@@ -599,6 +717,8 @@ loadSubcontractors(workItemID: string, existingSubs: any[] = []): Promise<void> 
   request.subscribe({
     next: () => {
       alert(sendEmail ? 'RFQ sent successfully!' : 'RFQ saved successfully!');
+      localStorage.removeItem(this.RFQ_DRAFT_KEY);
+
       this.isLoader = false;
       this.router.navigate(['/view-projects', this.projectId], { queryParams: { tab: 'rfq' } });
     },
@@ -685,6 +805,8 @@ onWorkitemToggle(item: Workitem, checked: boolean) {
   const normalizedWorkItemID = this.normalizeId(item.workItemID);
 
   if (checked) {
+      this.saveDraft();
+
     // Add to selected work items if not already present
     if (!this.selectedWorkItems.some((w) => w.workItemID === item.workItemID)) {
       this.selectedWorkItems.push(item);
@@ -805,6 +927,7 @@ onWorkitemToggle(item: Workitem, checked: boolean) {
     // No subcontractor selected → show error & revert date
     if (!this.hasSelectedSubcontractor()) {
       this.globalDateError = true;
+  this.saveDraft();
 
       // 🔥 IMPORTANT: revert the picked date
       this.globalDueDate = '';

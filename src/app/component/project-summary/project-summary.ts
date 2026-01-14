@@ -90,6 +90,7 @@ export class ProjectSummary implements OnInit {
 
   // Previous submissions
   previousSubmissions: {
+    subcontractorName: string;
     date: string | Date;
     amount: number;
     attachmentUrl: string;
@@ -123,10 +124,16 @@ export class ProjectSummary implements OnInit {
     this.r.setStyle(this.el.nativeElement, '--tt-y', `${e.clientY}px`);
   }
   ngOnInit(): void {
-    this.quoteForm = this.fb.group({
-      quoteAmount: ['', Validators.required],
-      comments: ['', Validators.required],
-    });
+  this.quoteForm = this.fb.group({
+  quoteAmount: [
+    '',
+    [
+      Validators.required,
+      Validators.pattern(/^[0-9.,]+$/) // only numbers, dot, comma
+    ]
+  ],
+  comments: ['', Validators.required],
+});
 
     this.route.queryParams.subscribe((params) => {
       this.rfqId = params['rfqId'];
@@ -216,7 +223,7 @@ export class ProjectSummary implements OnInit {
             w.isInterested = !!state.isInterested;
             w.status = state.status || w.status;
             w.viewed = !!state.viewed;
-            w.buttonsDisabled = !!state.buttonsDisabled;
+            // w.buttonsDisabled = !!state.buttonsDisabled;
 
             if (state.notInterested) {
               w.notInterested = {
@@ -292,37 +299,42 @@ export class ProjectSummary implements OnInit {
     this.closeDropdowns();
   }
 
-  confirmMaybeLater(wi: any) {
-    this.maybeLaterError = '';
+confirmMaybeLater(wi: any) {
+  this.maybeLaterError = '';
 
-    if (this.isRfqExpired) {
-      this.maybeLaterError = 'This RFQ link has expired.';
-      return;
-    }
-
-    if (!wi.maybeLaterDate) {
-      this.maybeLaterError = 'Please select a date.';
-      return;
-    }
-
-    if (wi.maybeLaterDate < this.today) {
-      this.maybeLaterError = 'Date cannot be in the past.';
-      return;
-    }
-
-    if (wi.maybeLaterDate > this.dueDate) {
-      this.maybeLaterError = 'Date must be on or before RFQ due date.';
-      return;
-    }
-
-    wi.status = 'Maybe Later';
-
-    this.submitInterest('Maybe Later', wi);
-
-    // alert('Your preference has been recorded.');
+  if (this.isRfqExpired) {
+    this.maybeLaterError = 'This RFQ link has expired.';
+    return;
   }
 
- confirmNotInterested(wi: any): void {
+  if (!wi.maybeLaterDate) {
+    this.maybeLaterError = 'Please select a date.';
+    return;
+  }
+
+  if (wi.maybeLaterDate < this.today) {
+    this.maybeLaterError = 'Date cannot be in the past.';
+    return;
+  }
+
+  if (wi.maybeLaterDate > this.dueDate) {
+    this.maybeLaterError = 'Date must be on or before RFQ due date.';
+    return;
+  }
+
+  // ✅ Set status BEFORE calling submitInterest
+  wi.status = 'Maybe Later';
+  
+  console.log('🔵 Maybe Later confirmed - Status set to:', wi.status);
+
+  this.submitInterest('Maybe Later', wi);
+  
+  // ✅ Close dropdown after submission
+  this.closeDropdowns();
+}
+
+// Replace your confirmNotInterested method with this:
+confirmNotInterested(wi: any): void {
   const reason = wi?.notInterested?.reason?.trim();
   const comment = wi?.notInterested?.comment?.trim();
   const workItemName = wi?.name || '';
@@ -347,10 +359,10 @@ Comment        : ${comment || 'No additional comments provided.'}
 `.trim();
 
   const payload: LogConversation = {
-    projectID: this.project?.projectID,          // ✅ dynamic
-    rfqID: this.rfqId ?? null,                    // ✅ dynamic
-    subcontractorID: this.subId,                  // ✅ dynamic
-    projectManagerID: this.project?.projectManagerID, // ✅ dynamic
+    projectID: this.project?.projectID,
+    rfqID: this.rfqId ?? null,
+    subcontractorID: this.subId,
+    projectManagerID: this.project?.projectManagerID,
     conversationType: 'Email',
     subject: 'Marked as Not Interested',
     message,
@@ -373,6 +385,12 @@ Comment        : ${comment || 'No additional comments provided.'}
     .subscribe({
       next: () => {
         alert('Conversation logged successfully!');
+        
+        // ✅ Set status BEFORE calling submitInterest
+        wi.status = 'Not Interested';
+        
+        console.log('🔴 Not Interested confirmed - Status set to:', wi.status);
+        
         this.submitInterest('Not Interested', wi);
         this.closeDropdowns();
       },
@@ -420,108 +438,140 @@ Comment        : ${comment || 'No additional comments provided.'}
     this.showCommentModal = false;
     this.selectedComment = '';
   }
+downloadSubmission(submission: any) {
+  const rfqId = this.rfqId || 'RFQ';
 
-  downloadSubmission(submission: any) {
-    if (!submission?.attachmentUrl) {
-      alert('No file available to download.');
-      return;
-    }
+  const subcontractor =
+    (submission.subcontractorName ||
+     this.previousSubmissions.find(s => s.subcontractorName)?.subcontractorName ||
+     'Subcontractor')
+    .replace(/\s+/g, '_');
 
-    // Create a hidden download link
-    const link = document.createElement('a');
-    link.href = submission.attachmentUrl;
-    link.download = submission.fileName || 'Quote.pdf'; // fallback filename
-    link.target = '_blank';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  }
+  const today = new Date();
+  const yyyymmdd =
+    today.getFullYear() +
+    String(today.getMonth() + 1).padStart(2, '0') +
+    String(today.getDate()).padStart(2, '0');
+
+  const ext = submission.fileName?.split('.').pop() || 'pdf';
+
+  const fileName = `${rfqId}_${subcontractor}_${yyyymmdd}.${ext}`;
+
+  const link = document.createElement('a');
+  link.href = submission.attachmentUrl;
+  link.download = fileName;
+  link.click();
+}
+
+
+
 
   loadPreviousSubmissions() {
-    this.rfqResponseService.getPreviousSubmissions(this.rfqId, this.subId).subscribe({
+  this.rfqResponseService
+    .getPreviousSubmissions(this.rfqId, this.subId)
+    .subscribe({
       next: (res: any[]) => {
-        // Load backend rows
         const backendData = res.map((r) => ({
-          date: r.uploadedOn,
-          amount: r.totalQuoteAmount,
-          attachmentUrl: r.attachmentUrl || null,
-          comment: r.comment,
+          date: r.UploadedOn,                  // ✅
+          amount: r.TotalQuoteAmount ?? null,  // optional
+          attachmentUrl: r.AttachmentUrl,      // ✅
+          comment: r.Comment ?? null,
+          fileName: r.FileName,                // ✅ IMPORTANT
+          subcontractorName: r.SubcontractorName // ✅ THIS FIXES DOWNLOAD
         }));
 
-        // Load stored file URLs from localStorage
         const key = `rfq_prev_submissions_${this.rfqId}_${this.subId}`;
         const localData = JSON.parse(localStorage.getItem(key) || '[]');
 
         this.previousSubmissions = [...backendData, ...localData];
       },
-      error: () => console.warn('Failed to load previous submissions.'),
+      error: () => console.warn('Failed to load previous submissions.')
     });
-  }
+}
 
   private pickWorkItem(wi?: any) {
     if (wi) this.selectedWorkItem = wi;
     return this.selectedWorkItem;
   }
 
-  submitInterest(status: string, wi?: any) {
-    const target = this.pickWorkItem(wi);
-    if (!target) return;
-
-    // mark viewed
-    this.rfqResponseService.markAsViewed(this.rfqId, this.subId, target.workItemID).subscribe();
-
-    // per-row state
-    target.status = status;
-    target.viewed = true;
-    target.buttonsDisabled = status === 'Interested';
-
-    // ✅ track interest per work item
-    target.isInterested = status === 'Interested';
-
-    // expand quote panel automatically only if Interested
-    if (status === 'Interested') {
-      this.expandedId = target.workItemID;
-    } else if (this.expandedId === target.workItemID) {
-      this.expandedId = null;
-    }
-
-    const reasonPayload =
-      status === 'Not Interested'
-        ? {
-            reason: target.notInterested?.reason || '',
-            comment: target.notInterested?.comment || '',
-          }
-        : null;
-
-    this.rfqResponseService
-      .submitRfqResponse(this.rfqId, this.subId, target.workItemID, status, reasonPayload, null)
-      .subscribe({
-        next: () => {
-          if (status === 'Maybe Later') {
-            alert(
-              'Your preference has been recorded. You may respond any time before the due date.'
-            );
-          } else {
-            alert(`Your response "${status}" was recorded successfully!`);
-          }
-          const key = `rfq_state_${this.rfqId}_${this.subId}_${target.workItemID}`;
-          localStorage.setItem(
-            key,
-            JSON.stringify({
-              status,
-              viewed: true,
-              buttonsDisabled: target.buttonsDisabled,
-              notInterested: reasonPayload,
-            })
-          );
-        },
-        error: () => {
-          alert('Failed to submit response.');
-          target.buttonsDisabled = false;
-          target.isInterested = false; // rollback on error
-        },
-      });
+  getButtonClass(wi: any, buttonType: 'interested' | 'maybe' | 'not'): string {
+  const baseClass = buttonType === 'interested' ? 'btn-pill--primary' : 'btn-pill--outline';
+  
+  // Check if this button's status matches the work item's current status
+  if (buttonType === 'interested' && wi.status === 'Interested') {
+    return `${baseClass} active-interest`;
   }
+  if (buttonType === 'maybe' && wi.status === 'Maybe Later') {
+    return `${baseClass} active-interest`;
+  }
+  if (buttonType === 'not' && wi.status === 'Not Interested') {
+    return `${baseClass} active-interest`;
+  }
+  
+  return baseClass;
+}
+
+// Update your submitInterest method to ensure status is saved
+submitInterest(status: string, wi?: any) {
+  const target = this.pickWorkItem(wi);
+  if (!target) return;
+
+  // mark viewed
+  this.rfqResponseService.markAsViewed(this.rfqId, this.subId, target.workItemID).subscribe();
+
+  // per-row state
+  target.status = status;
+  target.viewed = true;
+  target.buttonsDisabled = status === 'Interested';
+
+  // ✅ track interest per work item
+  target.isInterested = status === 'Interested';
+
+  // expand quote panel automatically only if Interested
+  if (status === 'Interested') {
+    this.expandedId = target.workItemID;
+  } else if (this.expandedId === target.workItemID) {
+    this.expandedId = null;
+  }
+
+  const reasonPayload =
+    status === 'Not Interested'
+      ? {
+          reason: target.notInterested?.reason || '',
+          comment: target.notInterested?.comment || '',
+        }
+      : null;
+
+  this.rfqResponseService
+    .submitRfqResponse(this.rfqId, this.subId, target.workItemID, status, reasonPayload, null)
+    .subscribe({
+      next: () => {
+        if (status === 'Maybe Later') {
+          alert(
+            'Your preference has been recorded. You may respond any time before the due date.'
+          );
+        } else {
+          alert(`Your response "${status}" was recorded successfully!`);
+        }
+        const key = `rfq_state_${this.rfqId}_${this.subId}_${target.workItemID}`;
+        localStorage.setItem(
+          key,
+          JSON.stringify({
+            status,  // ✅ IMPORTANT: Save the status
+            viewed: true,
+            buttonsDisabled: target.buttonsDisabled,
+            isInterested: target.isInterested,
+            notInterested: reasonPayload,
+          })
+        );
+      },
+      error: () => {
+        alert('Failed to submit response.');
+        target.buttonsDisabled = false;
+        target.isInterested = false; // rollback on error
+      },
+    });
+}
 
   submitQuoteFile(wi?: any) {
     const target = this.pickWorkItem(wi);
