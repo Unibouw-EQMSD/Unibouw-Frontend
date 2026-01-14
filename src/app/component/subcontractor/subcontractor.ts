@@ -44,18 +44,18 @@ export class Subcontractor implements OnInit, AfterViewInit {
   ngOnInit() {
     this.isAdmin = this.userService.isAdmin(); // Check role
     this.updateDisplayedColumns();
-    this.dataSource.sortingDataAccessor = (item, property) => {
-      switch (property) {
-        case 'contactNumber':
-          return item.phoneNumber1 || '';
-        case 'contactPerson':
-          return item.personName || '';
-        case 'emailId':
-          return item.emailID || '';
-        default:
-          return (item as any)[property] || '';
-      }
-    };
+    // this.dataSource.sortingDataAccessor = (item, property) => {
+    //   switch (property) {
+    //     case 'contactNumber':
+    //       return item.phoneNumber1 || '';
+    //     case 'contactPerson':
+    //       return item.personName || '';
+    //     case 'emailId':
+    //       return item.emailID || '';
+    //     default:
+    //       return (item as any)[property] || '';
+    //   }
+    // };
     // Show skeleton first, then load table
     this.isSkeletonLoading = true;
 
@@ -65,6 +65,8 @@ export class Subcontractor implements OnInit, AfterViewInit {
       this.loadSubcontractors();
     }, 1000);
   }
+
+  
 
   updateDisplayedColumns() {
     if (this.isAdmin) {
@@ -76,40 +78,70 @@ export class Subcontractor implements OnInit, AfterViewInit {
     }
   }
 
-  ngAfterViewInit() {
-    this.dataSource.paginator = this.paginator;
-    this.dataSource.sort = this.sort;
+ ngAfterViewInit() {
+  this.dataSource.paginator = this.paginator;
+  this.dataSource.sort = this.sort;
+
+  // ✅ Disable the third "unsorted" state
+  if (this.sort) {
+    this.sort.disableClear = true;
   }
 
-  loadSubcontractors() {
-    this.isLoading = true;
+  // ✅ Define custom sorting AFTER sort is attached
+  this.dataSource.sortingDataAccessor = (item, property) => {
+    switch (property) {
+      case 'name':
+        return item.name?.toLowerCase() || '';
+      case 'category':
+        return item.category?.toLowerCase() || '';
+      case 'contactNumber':
+        return item.phoneNumber1 || '';
+      case 'contactPerson':
+        return item.personName?.toLowerCase() || '';
+      case 'emailId':
+        return item.emailID?.toLowerCase() || '';
+      default:
+        return '';
+    }
+  };
+}
+ loadSubcontractors() {
+  this.isLoading = true;
 
-    forkJoin({
-      subcontractors: this.subcontractorService.getSubcontractors(),
-      mappings: this.subcontractorService.getSubcontractorWorkItemMappings(),
-    }).subscribe({
-      next: ({ subcontractors, mappings }) => {
-        // Merge: attach work items to subcontractors
-        const merged = subcontractors.map((sub) => {
-          const related = mappings
-            .filter((m) => m.subcontractorName?.trim() === sub.name?.trim())
-            .map((m) => m.workItemName)
-            .join(', ');
-          return { ...sub, category: related || '-' };
-        });
+  forkJoin({
+    subcontractors: this.subcontractorService.getSubcontractors(),
+    mappings: this.subcontractorService.getSubcontractorWorkItemMappings(),
+  }).subscribe({
+    next: ({ subcontractors, mappings }) => {
+      // Merge: attach work items to subcontractors
+      const merged = subcontractors.map((sub) => {
+        const related = mappings
+          .filter((m) => m.subcontractorName?.trim() === sub.name?.trim())
+          .map((m) => m.workItemName)
+          .join(', ');
+        return { ...sub, category: related || '-' };
+      });
 
-        this.dataSource.data = merged;
+      this.dataSource.data = merged;
+
+      // ✅ Re-attach paginator and sort after data assignment
+      if (this.paginator) {
         this.dataSource.paginator = this.paginator;
-        this.dataSource.sort = this.sort;
-        this.isLoading = false;
-      },
-      error: (err) => {
-        console.error('❌ API Error:', err);
-        this.isLoading = false;
-      },
-    });
-  }
+        this.paginator.firstPage();
+      }
 
+      if (this.sort) {
+        this.dataSource.sort = this.sort;
+      }
+
+      this.isLoading = false;
+    },
+    error: (err) => {
+      console.error('❌ API Error:', err);
+      this.isLoading = false;
+    },
+  });
+}
   applyFilter() {
     this.dataSource.filter = this.searchText.trim().toLowerCase();
     if (this.dataSource.paginator) this.dataSource.paginator.firstPage();

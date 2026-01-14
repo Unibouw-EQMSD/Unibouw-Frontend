@@ -90,6 +90,7 @@ export class ProjectSummary implements OnInit {
 
   // Previous submissions
   previousSubmissions: {
+    subcontractorName: string;
     date: string | Date;
     amount: number;
     attachmentUrl: string;
@@ -124,7 +125,13 @@ export class ProjectSummary implements OnInit {
   }
   ngOnInit(): void {
     this.quoteForm = this.fb.group({
-      quoteAmount: ['', Validators.required],
+      quoteAmount: [
+        '',
+        [
+          Validators.required,
+          Validators.pattern(/^[0-9.,]+$/), // only numbers, dot, comma
+        ],
+      ],
       comments: ['', Validators.required],
     });
 
@@ -216,7 +223,7 @@ export class ProjectSummary implements OnInit {
             w.isInterested = !!state.isInterested;
             w.status = state.status || w.status;
             w.viewed = !!state.viewed;
-            w.buttonsDisabled = !!state.buttonsDisabled;
+            // w.buttonsDisabled = !!state.buttonsDisabled;
 
             if (state.notInterested) {
               w.notInterested = {
@@ -314,11 +321,15 @@ export class ProjectSummary implements OnInit {
       return;
     }
 
+    // ✅ Set status BEFORE calling submitInterest
     wi.status = 'Maybe Later';
+
+    console.log('🔵 Maybe Later confirmed - Status set to:', wi.status);
 
     this.submitInterest('Maybe Later', wi);
 
-    // alert('Your preference has been recorded.');
+    // ✅ Close dropdown after submission
+    this.closeDropdowns();
   }
 
   confirmNotInterested(wi: any): void {
@@ -348,10 +359,10 @@ Comment        : ${comment || 'No additional comments provided.'}
 `.trim();
 
     const payload: LogConversation = {
-      projectID: this.project?.projectID, // ✅ dynamic
-      rfqID: this.rfqId ?? null, // ✅ dynamic
-      subcontractorID: this.subId, // ✅ dynamic
-      projectManagerID: this.project?.projectManagerID, // ✅ dynamic
+      projectID: this.project?.projectID,
+      rfqID: this.rfqId ?? null,
+      subcontractorID: this.subId,
+      projectManagerID: this.project?.projectManagerID,
       conversationType: 'Email',
       subject: 'Marked as Not Interested',
       message,
@@ -374,6 +385,12 @@ Comment        : ${comment || 'No additional comments provided.'}
       .subscribe({
         next: () => {
           //alert('Conversation logged successfully!');
+
+          // ✅ Set status BEFORE calling submitInterest
+          wi.status = 'Not Interested';
+
+          console.log('🔴 Not Interested confirmed - Status set to:', wi.status);
+
           this.submitInterest('Not Interested', wi);
           this.closeDropdowns();
         },
@@ -421,35 +438,43 @@ Comment        : ${comment || 'No additional comments provided.'}
     this.showCommentModal = false;
     this.selectedComment = '';
   }
-
   downloadSubmission(submission: any) {
-    if (!submission?.attachmentUrl) {
-      alert('No file available to download.');
-      return;
-    }
+    const rfqId = this.rfqId || 'RFQ';
 
-    // Create a hidden download link
+    const subcontractor = (
+      submission.subcontractorName ||
+      this.previousSubmissions.find((s) => s.subcontractorName)?.subcontractorName ||
+      'Subcontractor'
+    ).replace(/\s+/g, '_');
+
+    const today = new Date();
+    const yyyymmdd =
+      today.getFullYear() +
+      String(today.getMonth() + 1).padStart(2, '0') +
+      String(today.getDate()).padStart(2, '0');
+
+    const ext = submission.fileName?.split('.').pop() || 'pdf';
+
+    const fileName = `${rfqId}_${subcontractor}_${yyyymmdd}.${ext}`;
+
     const link = document.createElement('a');
     link.href = submission.attachmentUrl;
-    link.download = submission.fileName || 'Quote.pdf'; // fallback filename
-    link.target = '_blank';
-    document.body.appendChild(link);
+    link.download = fileName;
     link.click();
-    document.body.removeChild(link);
   }
 
   loadPreviousSubmissions() {
     this.rfqResponseService.getPreviousSubmissions(this.rfqId, this.subId).subscribe({
       next: (res: any[]) => {
-        // Load backend rows
         const backendData = res.map((r) => ({
-          date: r.uploadedOn,
-          amount: r.totalQuoteAmount,
-          attachmentUrl: r.attachmentUrl || null,
-          comment: r.comment,
+          date: r.UploadedOn, // ✅
+          amount: r.TotalQuoteAmount ?? null, // optional
+          attachmentUrl: r.AttachmentUrl, // ✅
+          comment: r.Comment ?? null,
+          fileName: r.FileName, // ✅ IMPORTANT
+          subcontractorName: r.SubcontractorName, // ✅ THIS FIXES DOWNLOAD
         }));
 
-        // Load stored file URLs from localStorage
         const key = `rfq_prev_submissions_${this.rfqId}_${this.subId}`;
         const localData = JSON.parse(localStorage.getItem(key) || '[]');
 
@@ -464,6 +489,24 @@ Comment        : ${comment || 'No additional comments provided.'}
     return this.selectedWorkItem;
   }
 
+  getButtonClass(wi: any, buttonType: 'interested' | 'maybe' | 'not'): string {
+    const baseClass = buttonType === 'interested' ? 'btn-pill--primary' : 'btn-pill--outline';
+
+    // Check if this button's status matches the work item's current status
+    if (buttonType === 'interested' && wi.status === 'Interested') {
+      return `${baseClass} active-interest`;
+    }
+    if (buttonType === 'maybe' && wi.status === 'Maybe Later') {
+      return `${baseClass} active-interest`;
+    }
+    if (buttonType === 'not' && wi.status === 'Not Interested') {
+      return `${baseClass} active-interest`;
+    }
+
+    return baseClass;
+  }
+
+  // Update your submitInterest method to ensure status is saved
   submitInterest(status: string, wi?: any) {
     const target = this.pickWorkItem(wi);
     if (!target) return;
@@ -509,9 +552,10 @@ Comment        : ${comment || 'No additional comments provided.'}
           localStorage.setItem(
             key,
             JSON.stringify({
-              status,
+              status, // ✅ IMPORTANT: Save the status
               viewed: true,
               buttonsDisabled: target.buttonsDisabled,
+              isInterested: target.isInterested,
               notInterested: reasonPayload,
             })
           );

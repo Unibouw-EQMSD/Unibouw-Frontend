@@ -155,6 +155,9 @@ export class ViewProjects implements AfterViewChecked {
   minDate: Date = new Date();
   maxDate!: Date;
   maxDateTime: string = '';
+  dateTimeError = '';
+  notesError = '';
+  dateTimeTouched = false;
 
   convoSubcontractors: { id: string; name: string }[] = [];
   replyingToMessageId: string | null = null;
@@ -260,20 +263,29 @@ export class ViewProjects implements AfterViewChecked {
   }
 
   ngOnInit(): void {
-    this.route.queryParams.subscribe((params) => {
-      if (params['tab'] === 'rfq') {
-        this.selectedTab = 'rfq';
-        this.loadRfqData(); // reload table
-      }
-    });
+    // 🔹 Restore tab from localStorage (default: 'response')
+    const savedTab = localStorage.getItem('activeTab');
+    this.selectedTab = savedTab || 'response';
 
-    // Capture the project ID from the route
+    // 🔹 Capture the project ID from the route
     this.projectId = this.route.snapshot.paramMap.get('id') || '';
+
     if (this.projectId) {
-      this.loadRfqData();
       this.loadProjectDetails(this.projectId);
       this.loadRfqResponseSummary(this.projectId);
+
+      // 🔹 Load data based on restored tab
+      if (this.selectedTab === 'rfq') {
+        this.loadRfqData();
+      } else if (this.selectedTab === 'conversation') {
+        this.loadConversationSubcontractors();
+      }
     }
+  }
+
+  setActiveTab(tab: string): void {
+    this.selectedTab = tab;
+    localStorage.setItem('activeTab', tab);
   }
 
   ngAfterViewInit() {
@@ -1289,7 +1301,33 @@ export class ViewProjects implements AfterViewChecked {
   }
 
   saveLogConvo() {
-    if (!this.conversationText?.trim() || this.isLoading) return;
+    // 🔹 reset validation messages
+    this.dateTimeError = '';
+    this.notesError = '';
+
+    // 🔹 Notes validation
+    if (!this.conversationText?.trim()) {
+      this.notesError = 'Please enter the message details.';
+      return;
+    }
+
+    // 🔹 Date & Time validation
+    if (!this.dateTimeTouched) {
+      this.dateTimeError = 'Please enter the date and time.';
+      return;
+    }
+
+    const selectedDate = new Date(this.conversationDateTime!);
+    const now = new Date();
+
+    if (selectedDate > now) {
+      this.dateTimeError = 'Communication date cannot be in the future.';
+      return;
+    }
+
+    // 🔹 Existing guards
+    if (this.isLoading) return;
+
     if (!this.conversationsData?.length) {
       alert('No conversation data available.');
       return;
@@ -1299,21 +1337,16 @@ export class ViewProjects implements AfterViewChecked {
 
     const draftConvo = this.conversationsData[0];
 
-    // Use local time or selected time
-    const messageDate = this.conversationDateTime
-      ? new Date(this.conversationDateTime)
-      : new Date();
-
-    // Convert local time → UTC before sending to backend
+    // 🔹 Convert local → UTC
     const messageDateUtc = new Date(
       Date.UTC(
-        messageDate.getFullYear(),
-        messageDate.getMonth(),
-        messageDate.getDate(),
-        messageDate.getHours(),
-        messageDate.getMinutes(),
-        messageDate.getSeconds(),
-        messageDate.getMilliseconds()
+        selectedDate.getFullYear(),
+        selectedDate.getMonth(),
+        selectedDate.getDate(),
+        selectedDate.getHours(),
+        selectedDate.getMinutes(),
+        selectedDate.getSeconds(),
+        selectedDate.getMilliseconds()
       )
     );
 
@@ -1325,20 +1358,20 @@ export class ViewProjects implements AfterViewChecked {
       conversationType: this.conversationType || 'Email',
       subject: this.conversationSubject || '',
       message: this.conversationText,
-      messageDateTime: messageDateUtc, // UTC Date object
+      messageDateTime: messageDateUtc,
     };
 
     this.projectService
       .createLogConversation(payload)
       .pipe(
         switchMap((res) => {
-          // Convert UTC → IST for display in UI
           const localDate = new Date(res.messageDateTime);
+
           this.pmSubConversationData.push({
             ...res,
             messageText: res.message,
             senderType: 'Subcontractor',
-            messageDateTime: localDate, // JS Date automatically converts for UI
+            messageDateTime: localDate,
           });
 
           setTimeout(() => this.scrollToBottom(), 0);

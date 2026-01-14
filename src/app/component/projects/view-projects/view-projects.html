@@ -101,20 +101,23 @@
         <div class="rfq-card" *ngIf="!isLoading">
           <!-- 🔹 Tabs -->
           <div class="tabs">
-            <button [class.active]="selectedTab === 'response'" (click)="selectedTab = 'response'">
-              RFQ Response
-            </button>
+           <button 
+    [class.active]="selectedTab === 'response'" 
+    (click)="setActiveTab('response')">
+    RFQ Response
+  </button>
 
-            <button [class.active]="selectedTab === 'rfq'" (click)="selectedTab = 'rfq'">
-              RFQ
-            </button>
+         <button 
+    [class.active]="selectedTab === 'rfq'" 
+    (click)="setActiveTab('rfq'); loadRfqData()">
+    RFQ
+  </button>
 
-            <button
-              [class.active]="selectedTab === 'conversation'"
-              (click)="selectedTab = 'conversation'; loadConversationSubcontractors()"
-            >
-              Conversation
-            </button>
+              <button
+    [class.active]="selectedTab === 'conversation'"
+    (click)="setActiveTab('conversation'); loadConversationSubcontractors()">
+    Conversation
+  </button>
           </div>
 
           <!-- TAB 1: RFQ RESPONSE (Accordion Section) -->
@@ -918,7 +921,11 @@
       <div class="row">
         <label class="label">Date & Time</label>
         <div class="time-wrapper">
-          <input type="datetime-local" class="date-time-input" [max]="maxDateTime" [(ngModel)]="conversationDateTime" />
+          <input type="datetime-local" class="date-time-input"   (change)="dateTimeTouched = true"
+ [max]="maxDateTime" [(ngModel)]="conversationDateTime" />
+       <small class="error-text" *ngIf="dateTimeError">
+      {{ dateTimeError }}
+    </small>
         </div>
       </div>
       <!-- Add Subject -->
@@ -930,6 +937,9 @@
       <div class="modal-section">
         <label class="label block">Add Conversation</label>
         <textarea class="add-convo-textarea" rows="4" [(ngModel)]="conversationText"></textarea>
+       <small class="error-text" *ngIf="notesError">
+    {{ notesError }}
+  </small>
       </div>
     </div>
 

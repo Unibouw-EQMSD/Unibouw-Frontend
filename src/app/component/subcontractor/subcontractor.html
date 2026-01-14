@@ -52,11 +52,13 @@
       <!-- 🧾 Table -->
       <div class="table-scroll">
         <table
-          mat-table
-          [dataSource]="dataSource"
-          matSort
-          matSortActive="name"
-          class="mat-elevation-z2 full-width-table"
+         mat-table
+  [dataSource]="dataSource"
+  matSort
+  matSortActive="name"
+  matSortDirection="asc"
+  matSortDisableClear
+  class="mat-elevation-z2 full-width-table"
         >
           <!-- ✅ Actual Data Columns -->
           <ng-container matColumnDef="name">

@@ -74,6 +74,32 @@ export class SubcontractorService {
     );
   }
 
+getSubcontractorById(id: string): Observable<Subcontractors> {
+  return from(this.getHeaders()).pipe(
+    switchMap((headers) =>
+      this.http.get<{ data: Subcontractors }>(
+        `${this.apiURL}/Subcontractor/${id}`,
+        { headers }
+      )
+    ),
+    map((res) => {
+      const it = res.data; // ✅ extract from 'data'
+      return {
+        subcontractorID: it.subcontractorID,
+        name: it.name || '',
+        category: it.category || '',
+        personName: it.personName || '',
+        phoneNumber1: it.phoneNumber1 || '',
+        emailID: it.emailID || '',
+        isActive: it.isActive,
+        editItem: false,
+      };
+    })
+  );
+}
+
+
+
   /* Get Work Items mapped to Subcontractors */
   getSubcontractorWorkItemMappings(): Observable<any[]> {
     return from(this.getHeaders()).pipe(
