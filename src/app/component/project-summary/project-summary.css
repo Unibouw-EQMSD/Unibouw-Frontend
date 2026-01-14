@@ -880,3 +880,62 @@ body,
   background: #f8d7da;
   color: #721c24;
 }
+
+
+
+.btn-pill.active-interest {
+  background: #f58220 !important;
+  border-color: #f58220 !important;
+  color: #fff !important;
+  font-weight: 600 !important;
+}
+
+/* Disabled AND active state (greyed out orange) */
+.btn-pill.active-interest:disabled {
+  background: #f5822080 !important; /* 50% opacity orange */
+  border-color: #f5822080 !important;
+  color: #ffffff99 !important; /* slightly transparent white */
+  opacity: 1 !important; /* Override default disabled opacity */
+  cursor: not-allowed !important;
+}
+
+/* Hover effect for active buttons (when not disabled) */
+.btn-pill.active-interest:not(:disabled):hover {
+  background: #e37517 !important;
+  border-color: #e37517 !important;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(245, 130, 32, 0.3);
+  transition: all 0.2s ease;
+}
+
+/* Keep inactive buttons styled normally */
+/* .btn-pill:not(.active-interest) {
+  background: #fff;
+  border-color: #0f172a;
+  color: #0f172a;
+  transition: all 0.2s ease;
+} */
+
+/* Inactive button hover (when not disabled) */
+/* .btn-pill:not(.active-interest):not(:disabled):hover {
+  background: #f8f9fa;
+  border-color: #0f172a;
+  color: #0f172a;
+} */
+
+/* Ensure disabled inactive buttons look properly disabled */
+/* .btn-pill:not(.active-interest):disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  pointer-events: none;
+} */
+
+/* Icon color inside active button */
+.btn-pill.active-interest i {
+  color: #fff !important;
+}
+
+/* Smooth transition for all button state changes */
+.btn-pill {
+  transition: all 0.2s ease-in-out;
+}
