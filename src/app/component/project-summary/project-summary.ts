@@ -633,22 +633,14 @@ Comment        : ${comment || 'No additional comments provided.'}
     if (!file) return;
 
     const { quoteAmount, comments } = this.quoteForm.getRawValue();
+    const trimmedComment = comments?.trim();
     const totalAmount = Number(quoteAmount || 0);
 
-    // ✅ PER-WORKITEM KEY
     const key = `rfq_prev_submissions_${this.rfqId}_${this.subId}_${target.workItemID}`;
     const previous = JSON.parse(localStorage.getItem(key) || '[]');
 
-    // 🔴 CRITICAL FIX — PASS workItemID
     this.rfqResponseService
-      .uploadQuoteFile(
-        this.rfqId,
-        this.subId,
-        target.workItemID, // ✅ REQUIRED
-        file,
-        totalAmount,
-        comments
-      )
+      .uploadQuoteFile(this.rfqId, this.subId, target.workItemID, file, totalAmount, comments)
       .subscribe({
         next: (res: any) => {
           alert(this.isQuoteSubmitted ? 'Quote re-submitted!' : 'Quote submitted!');
@@ -659,8 +651,7 @@ Comment        : ${comment || 'No additional comments provided.'}
           const newSubmission = {
             date: new Date().toISOString(),
             amount: totalAmount,
-            documentId: res.documentId, // ✅ STORE THIS
-
+            documentId: res.documentId,
             attachmentUrl: URL.createObjectURL(file),
             fileName: file.name,
             comment: comments,
@@ -669,17 +660,47 @@ Comment        : ${comment || 'No additional comments provided.'}
           previous.unshift(newSubmission);
           localStorage.setItem(key, JSON.stringify(previous));
 
-          if (!target.previousSubmissions) {
-            target.previousSubmissions = [];
-          }
+          target.previousSubmissions ??= [];
           target.previousSubmissions.unshift(newSubmission);
+
+          // ✅ CREATE LOG CONVERSATION ONLY IF COMMENT EXISTS
+          if (trimmedComment) {
+            const message = `
+Quote Submitted
+
+RFQ Number     : ${this.rfq?.rfqNumber || ''}
+Work Item Name : ${target?.name || ''}
+Quote Amount   : ${new Intl.NumberFormat('nl-NL', {
+              style: 'currency',
+              currency: 'EUR',
+            }).format(totalAmount)}
+Comment        : ${trimmedComment}
+`.trim();
+
+            const payload: LogConversation = {
+              projectID: this.project?.projectID,
+              rfqID: this.rfqId ?? null,
+              subcontractorID: this.subId,
+              projectManagerID: this.project?.projectManagerID,
+              conversationType: 'Email',
+              subject: 'Quote Submitted',
+              message,
+              messageDateTime: new Date(),
+            };
+
+            if (payload.projectID && payload.projectManagerID) {
+              this.projectService.createLogConversation(payload).subscribe({
+                next: (res) => console.log('Quote comment logged successfully:', res),
+                error: (err) => console.error('Failed to log quote comment:', err),
+              });
+            }
+          }
 
           // ✅ RESET FORM
           this.quoteForm.reset({ quoteAmount: '', comments: '' });
           this.selectedFiles = [];
           this.formSubmitted = false;
 
-          // ✅ CLEAR FILE INPUT
           if (this.fileInput) {
             this.fileInput.nativeElement.value = '';
           }
