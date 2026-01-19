@@ -101,23 +101,23 @@
         <div class="rfq-card" *ngIf="!isLoading">
           <!-- 🔹 Tabs -->
           <div class="tabs">
-           <button 
-    [class.active]="selectedTab === 'response'" 
-    (click)="setActiveTab('response')">
-    RFQ Response
-  </button>
+            <button [class.active]="selectedTab === 'response'" (click)="setActiveTab('response')">
+              RFQ Response
+            </button>
 
-         <button 
-    [class.active]="selectedTab === 'rfq'" 
-    (click)="setActiveTab('rfq'); loadRfqData()">
-    RFQ
-  </button>
+            <button
+              [class.active]="selectedTab === 'rfq'"
+              (click)="setActiveTab('rfq'); loadRfqData()"
+            >
+              RFQ
+            </button>
 
-              <button
-    [class.active]="selectedTab === 'conversation'"
-    (click)="setActiveTab('conversation'); loadConversationSubcontractors()">
-    Conversation
-  </button>
+            <button
+              [class.active]="selectedTab === 'conversation'"
+              (click)="setActiveTab('conversation'); loadConversationSubcontractors()"
+            >
+              Conversation
+            </button>
           </div>
 
           <!-- TAB 1: RFQ RESPONSE (Accordion Section) -->
@@ -722,6 +722,7 @@
                       placeholder="Enter Subject"
                       [(ngModel)]="subject"
                       [class.invalid]="subject"
+                      (ngModelChange)="onInputChange()"
                     />
 
                     <input
@@ -730,11 +731,12 @@
                       placeholder="Enter your message..."
                       [(ngModel)]="messageText"
                       [class.invalid]="messageText"
+                      (ngModelChange)="onInputChange()"
                     />
 
-                     <div class="error-msg" *ngIf="(messageText ?? '').length > 5000">
-      Message is too long. Please shorten your message.
-    </div>
+                    <div class="error-msg" *ngIf="(messageText ?? '').length > 5000">
+                      Message is too long. Please shorten your message.
+                    </div>
 
                     <!-- Hidden file input -->
                     <input
@@ -753,9 +755,15 @@
                     ></i>
 
                     <!-- Send icon -->
-                    <i class="fa fa-paper-plane send-icon" title="Send" [class.disabled]="(messageText ?? '').length > 5000" (click)="sendMessage()"></i>
+                    <i
+                      class="fa fa-paper-plane send-icon"
+                      title="Send"
+                      [class.disabled]="(messageText ?? '').length > 5000"
+                      (click)="sendMessage()"
+                    ></i>
                   </div>
                 </div>
+                <span class="error-span" *ngIf="showInvalid"> Fields cannot be empty. </span>
               </div>
             </div>
           </div>
@@ -921,11 +929,16 @@
       <div class="row">
         <label class="label">Date & Time</label>
         <div class="time-wrapper">
-          <input type="datetime-local" class="date-time-input"   (change)="dateTimeTouched = true"
- [max]="maxDateTime" [(ngModel)]="conversationDateTime" />
-       <small class="error-text" *ngIf="dateTimeError">
-      {{ dateTimeError }}
-    </small>
+          <input
+            type="datetime-local"
+            class="date-time-input"
+            (change)="dateTimeTouched = true"
+            [max]="maxDateTime"
+            [(ngModel)]="conversationDateTime"
+          />
+          <small class="error-text" *ngIf="dateTimeError">
+            {{ dateTimeError }}
+          </small>
         </div>
       </div>
       <!-- Add Subject -->
@@ -937,9 +950,9 @@
       <div class="modal-section">
         <label class="label block">Add Conversation</label>
         <textarea class="add-convo-textarea" rows="4" [(ngModel)]="conversationText"></textarea>
-       <small class="error-text" *ngIf="notesError">
-    {{ notesError }}
-  </small>
+        <small class="error-text" *ngIf="notesError">
+          {{ notesError }}
+        </small>
       </div>
     </div>
 

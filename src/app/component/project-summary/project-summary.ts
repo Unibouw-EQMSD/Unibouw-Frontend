@@ -324,12 +324,62 @@ export class ProjectSummary implements OnInit {
     // ✅ Set status BEFORE calling submitInterest
     wi.status = 'Maybe Later';
 
-    console.log('🔵 Maybe Later confirmed - Status set to:', wi.status);
-
     this.submitInterest('Maybe Later', wi);
 
+    const workItemName = wi?.name || '';
+    const rfqNumber = this.rfq?.rfqNumber || '';
+    const maybeLaterDate = wi.maybeLaterDate;
+
+    const message = `
+Maybe Later – Confirmation
+
+RFQ Number     : ${rfqNumber}
+Work Item Name : ${workItemName}
+Follow-up Date : ${maybeLaterDate}
+`.trim();
+
+    const payload: LogConversation = {
+      projectID: this.project?.projectID,
+      rfqID: this.rfqId ?? null,
+      subcontractorID: this.subId,
+      projectManagerID: this.project?.projectManagerID,
+      conversationType: 'Email',
+      subject: 'Marked as Maybe Later',
+      message,
+      messageDateTime: new Date(),
+    };
+
+    if (!payload.projectID || !payload.projectManagerID) {
+      alert('Project data not loaded yet. Please try again.');
+      return;
+    }
+
+    this.isLoading = true;
+
+    this.projectService
+      .createLogConversation(payload)
+      .pipe(
+        tap((res) => console.log('Log conversation saved:', res)),
+        finalize(() => (this.isLoading = false))
+      )
+      .subscribe({
+        next: () => {
+          // ✅ Set status BEFORE calling submitInterest
+          wi.status = 'Maybe Later';
+
+          console.log('🔵 Maybe Later confirmed - Status set to:', wi.status);
+
+          this.submitInterest('Maybe Later', wi);
+          this.closeDropdowns();
+        },
+        error: (err) => {
+          console.error('Error saving conversation:', err);
+          alert('Failed to save conversation. Please try again.');
+        },
+      });
+
     // ✅ Close dropdown after submission
-    this.closeDropdowns();
+    // this.closeDropdowns();
   }
 
   confirmNotInterested(wi: any): void {

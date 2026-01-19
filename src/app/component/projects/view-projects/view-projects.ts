@@ -1055,7 +1055,8 @@ export class ViewProjects implements AfterViewChecked {
 
     for (const file of Array.from(input.files)) {
       if (file.size > this.MAX_FILE_SIZE) {
-        alert(`"${file.name}" exceeds the 10 MB limit.`);
+        //alert(`"${file.name}" exceeds the 10 MB limit.`);
+        alert('Attachment exceeds the maximum size of 10 MB.');
         continue;
       }
       this.attachments.push(file);
@@ -1367,6 +1368,20 @@ export class ViewProjects implements AfterViewChecked {
         switchMap((res) => {
           const localDate = new Date(res.messageDateTime);
 
+          // const localDate =
+          //   res.messageDateTime instanceof Date
+          //     ? res.messageDateTime
+          //     : new Date(res.messageDateTime);
+
+          // const formattedDateTime = localDate.toLocaleString('en-IN', {
+          //   day: '2-digit',
+          //   month: '2-digit',
+          //   year: 'numeric',
+          //   hour: '2-digit',
+          //   minute: '2-digit',
+          //   hour12: true,
+          // });
+
           this.pmSubConversationData.push({
             ...res,
             messageText: res.message,
@@ -1488,6 +1503,10 @@ export class ViewProjects implements AfterViewChecked {
         },
       });
   }
+  onInputChange(): void {
+    //this.showInvalid = !this.subject?.trim() || !this.messageText?.trim();
+    this.showInvalid = false;
+  }
   startReply(convo: RFQConversationMessage) {
     console.log('▶ startReply clicked');
     console.log('Convo object received:', convo);
@@ -1557,7 +1576,8 @@ export class ViewProjects implements AfterViewChecked {
 
     for (const file of Array.from(input.files)) {
       if (file.size > this.MAX_FILE_SIZE) {
-        alert(`"${file.name}" exceeds the 10 MB limit.`);
+        //alert(`"${file.name}" exceeds the 10 MB limit.`);
+        alert('Attachment exceeds the maximum size of 10 MB.');
         continue;
       }
       this.replyAttachments.push(file);

@@ -885,6 +885,7 @@
   flex: 1;
   display: flex;
   flex-direction: column;
+  min-width: 0;
 }
 
 .chat-header {
@@ -896,7 +897,7 @@
 .chat-messages {
   flex: 1; /*  fills space */
   overflow-y: auto; /*  scroll */
-  padding: 20px;
+  padding: 10px;
 }
 
 .convoType-icon {
@@ -959,7 +960,7 @@
   gap: 8px;
   padding: 10px;
   border: 1px solid #ddd;
-  margin: 0px 12px 12px;
+  margin: 0px 12px 0px;
 }
 
 /* Row 1 – Attachments */
@@ -1421,4 +1422,12 @@
 .chat-input.invalid {
   border: 1px solid red;
   outline: none;
+}
+
+.error-span {
+  color: red;
+  font-size: 0.85rem;
+  margin-top: 1px;
+  margin-bottom: 10px;
+  padding-left: 25px;
 }
