@@ -34,7 +34,7 @@ interface LogConversation {
   conversationType: string;
   subject: string;
   message: string;
-  messageDateTime: Date;
+  messageDateTime?: Date | null;
 }
 
 @Component({
@@ -346,7 +346,7 @@ Follow-up Date : ${maybeLaterDate}
       conversationType: 'Email',
       subject: 'Marked as Maybe Later',
       message,
-      messageDateTime: new Date(),
+      messageDateTime: null as any,
     };
 
     if (!payload.projectID || !payload.projectManagerID) {
@@ -416,7 +416,7 @@ Comment        : ${comment || 'No additional comments provided.'}
       conversationType: 'Email',
       subject: 'Marked as Not Interested',
       message,
-      messageDateTime: new Date(),
+      messageDateTime: null as any,
     };
 
     if (!payload.projectID || !payload.projectManagerID) {
@@ -685,7 +685,7 @@ Comment        : ${trimmedComment}
               conversationType: 'Email',
               subject: 'Quote Submitted',
               message,
-              messageDateTime: new Date(),
+              messageDateTime: null as any,
             };
 
             if (payload.projectID && payload.projectManagerID) {

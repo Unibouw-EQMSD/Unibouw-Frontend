@@ -44,7 +44,7 @@ export interface LogConversation {
   conversationType: string;
   subject: string;
   message: string;
-  messageDateTime: Date;
+  messageDateTime?: Date | null;
 }
 
 export interface SendMailRequest {
@@ -72,6 +72,8 @@ export interface ConversationMessageDto {
   parentMessageID?: string;
   parentID: any;
   rfqID?: string | null;
+
+  conversationType?: string;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -88,26 +90,26 @@ export class projectService {
     this.getprojectsurl = this.apiURL + '/Projects';
   }
 
- private async getHeaders(): Promise<HttpHeaders> {
-  const accounts = this.msalService.instance.getAllAccounts();
+  private async getHeaders(): Promise<HttpHeaders> {
+    const accounts = this.msalService.instance.getAllAccounts();
 
-  // 🔐 If not logged in yet, send request without auth
-  if (!accounts.length) {
+    // 🔐 If not logged in yet, send request without auth
+    if (!accounts.length) {
+      return new HttpHeaders({
+        Accept: '*/*',
+      });
+    }
+
+    const result = await this.msalService.instance.acquireTokenSilent({
+      account: accounts[0],
+      scopes: ['api://96b6d570-73e9-4669-98d6-745f22f4acc0/Api.Read'],
+    });
+
     return new HttpHeaders({
-      Accept: '*/*'
+      Accept: '*/*',
+      Authorization: `Bearer ${result.accessToken}`,
     });
   }
-
-  const result = await this.msalService.instance.acquireTokenSilent({
-    account: accounts[0],
-    scopes: ['api://96b6d570-73e9-4669-98d6-745f22f4acc0/Api.Read'],
-  });
-
-  return new HttpHeaders({
-    Accept: '*/*',
-    Authorization: `Bearer ${result.accessToken}`,
-  });
-}
 
   getProjectById(id: string): Observable<projectdetails> {
     return from(this.getHeaders()).pipe(
