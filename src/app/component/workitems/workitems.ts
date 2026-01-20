@@ -5,6 +5,7 @@ import { UserService } from '../../services/User.service.';
 import { MatTableDataSource } from '@angular/material/table';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatSort, Sort } from '@angular/material/sort';
+import { TranslateService } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-workitems',
@@ -35,7 +36,8 @@ export class Workitems implements OnInit, AfterViewInit {
   constructor(
     private workitemService: WorkitemService,
     private msalService: MsalService,
-    private userService: UserService
+    private userService: UserService,  private translate: TranslateService 
+
   ) {}
 
   ngOnInit() {
@@ -205,10 +207,10 @@ loadWorkitems(categoryId: string) {
     const newStatus = !item.isActive;
     item.isActive = newStatus;
     this.workitemService.updateIsActive(item.workItemID, newStatus).subscribe({
-      next: () => this.showPopupMessage('Status updated successfully!'),
+      next: () => this.showPopupMessage(this.translate.instant('MESSAGES.STATUS_UPDATED_SUCCESS')),
       error: () => {
         item.isActive = !newStatus;
-        this.showPopupMessage('Failed to update status. Please try again.', true);
+        this.showPopupMessage(this.translate.instant('MESSAGES.STATUS_UPDATED_FAILED'), true);
       }
     });
   }

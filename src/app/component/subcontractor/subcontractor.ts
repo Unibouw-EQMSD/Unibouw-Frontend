@@ -5,6 +5,7 @@ import { MatTableDataSource } from '@angular/material/table';
 import { MatPaginator, PageEvent } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
 import { forkJoin } from 'rxjs/internal/observable/forkJoin';
+import { TranslateService } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-subcontractor',
@@ -38,7 +39,7 @@ export class Subcontractor implements OnInit, AfterViewInit {
   popupError = false;
   constructor(
     private subcontractorService: SubcontractorService,
-    private userService: UserService
+    private userService: UserService,private translate: TranslateService
   ) {}
 
   ngOnInit() {
@@ -160,10 +161,10 @@ export class Subcontractor implements OnInit, AfterViewInit {
     item.isActive = newStatus;
 
     this.subcontractorService.updateIsActive(item.subcontractorID, newStatus).subscribe({
-      next: () => this.showPopupMessage('Status updated successfully!'),
+      next: () => this.showPopupMessage(this.translate.instant('MESSAGES.STATUS_UPDATED_SUCCESS')),
       error: () => {
         item.isActive = !newStatus;
-        this.showPopupMessage('Failed to update status. Please try again.', true);
+        this.showPopupMessage(this.translate.instant('MESSAGES.STATUS_UPDATED_FAILED'), true);
       },
     });
   }

@@ -1,0 +1,334 @@
+{
+  "COMMON": {
+    "ADD": "Toevoegen",
+    "EDIT": "Bewerken",
+    "DELETE": "Verwijderen",
+    "CANCEL": "Annuleren",
+    "SUBMIT": "Indienen",
+    "SEND": "Versturen",
+    "RESET": "Resetten",
+    "SAVE": "Opslaan",
+    "SEARCH": "Zoeken",
+    "ACTIONS": "Acties",
+    "NO_DATA": "Geen gegevens beschikbaar",
+    "LOADING": "Laden...",
+    "ITEMS": "Artikelen per pagina:"
+
+  },
+  "HEADER": {
+    "LOGOUT": "Uitloggen",
+    "LANG_EN": "EN",
+    "LANG_NL": "NL",
+    "MY_PROFILE": "Mijn Profiel",
+    "SIGN_OUT": "Uitloggen",
+    "WORKITEMS": "Werkonderdelen",
+    "SUBCONTRACTORS": "Onderaannemers",
+    "PROJECTS": "Projecten",
+    "SETTINGS": "Instellingen",
+    "MAX_REMINDER_LABEL": "Maximum herinneringsreeks",
+    "SET_REMINDER_LABEL" :"Tijd instellen",
+    "REMINDER_SEQUENCE" : "Herinneringsreeks",
+    "REMINDER_FORM_ERROR" : "Dit veld is verplicht",
+    "REMINDER_FORM_ERROR2" : "Selecteer een geldig tijdstip.",
+    "REMINDER_FORM_ERROR3": "De herinneringstijd mag niet 00:00 zijn",
+    "REMINDER_CONFIG_TITLE": "Globale herinneringsconfiguratie voor het instellen van standaard herinneringsinstellingen voor alle offerteaanvragen",
+    "REMINDER_CONFIG_SUBTITLE": "Stel standaard herinneringsinstellingen in voor alle RFQ's",
+    "EMAIL_BODY": "E-mailtekst",
+    "GLOBAL_REMINDER": "Schakel geautomatiseerde herinneringen wereldwijd in"
+
+  },
+  "FOOTER": {
+    "COPYRIGHT": "Alle rechten voorbehouden"
+  },
+  "PROJECT": {
+    "TITLE": "Projecten",
+    "ADD_PROJECT": "Project toevoegen",
+    "PROJECT_NAME": "Projectnaam",
+    "CLIENT_NAME": "Klant",
+    "PROJECT_MANAGER": "Projectmanager",
+    "PROJECT_CODE": "Projectcode",
+    "STATUS": "Status",
+    "START_DATE": "Startdatum",
+    "END_DATE": "Gecommitteerde datum",
+    "SPECIFICATION": "Projectbestanden",
+    "VIEW_DETAILS": "Bekijk details"
+  },
+   "PROJECT_DETAILS": {
+    "DETAILS_TITLE": "Details",
+    "PROJECT_CODE": "Projectcode",
+    "PROJECT": "Project",
+    "CUSTOMER": "Klant",
+    "PROJECT_MANAGER": "Projectmanager",
+    "START_DATE": "Startdatum",
+    "COMMITTED_DATE": "Vastgelegde datum",
+    "STATUS": "Status",
+    "SPECIFICATION": "Specificatie",
+    "PROJECT_FILES": "Projectbestanden"
+  },
+
+  "RESPONSE_VIEW": {
+    "LOADING": "Bezig met laden...",
+    "NO_RFQ_RESPONSES": "Geen RFQ-reacties beschikbaar",
+    "NO_RESPONSES_FOUND": "Geen reacties gevonden",
+    "RFQ Response" : "Reactie op RFQ",
+    "REQUESTS_SENT": "Verzoeken verzonden",
+    "VIEWED": "Bekeken",
+    "NOT_RESPONDED": "Niet gereageerd",
+    "QUOTE_AMOUNT": "Offertebedrag",
+    "NAME": "Naam",
+    "DATE": "Datum",
+    "RFQ_ID": "RFQ-ID",
+    "WORK_ITEM": "Werkonderdeel",
+    "SUBCONTRACTOR": "Onderaannemer"
+
+
+
+  },
+
+
+  "RFQ_SUMMARY": {
+    "TITLE": "Offerteaanvraag (RFQ)",
+    "DETAILS": "RFQ-gegevens",
+    "DUE_DATE": "Deadline",
+    "STATUS": "Status",
+    "INTEREST": "Deel uw interesse",
+    "INTERESTED": "Geïnteresseerd",
+    "MAYBE_LATER": "Misschien later",
+    "NOT_INTERESTED": "Niet geïnteresseerd",
+    "SUBMIT_QUOTE": "Offerte indienen",
+    "RESUBMIT_QUOTE": "Offerte opnieuw indienen",
+    "NO_RFQ": "Geen RFQ beschikbaar",
+    "EXPIRED_MSG": "Deze RFQ-link is verlopen. U kunt niet langer reageren.",
+    "EXPIRED_CHANGE_MSG": "Deze RFQ-link is verlopen. U kunt uw reactie niet meer wijzigen.",
+    "STATUS_BADGE": "Status",
+    "PREVIOUS_SUBMISSIONS": "Vorige inzendingen",
+    "SUBMITTED_ON": "Ingediend op",
+    "TOTAL_QUOTE_AMOUNT": "Totale offertebedrag",
+    "ATTACHMENT": "Bijlage",
+    "COMMENT": "Opmerking",
+    "COMMENTS_PLACEHOLDER": "Voeg opmerkingen toe",
+    "QUOTE_AMOUNT": "Totaal offertebedrag (€)",
+    "ATTACHMENTS": "Bijlagen",
+    "MAX_FILE_SIZE_HINT": "Maximale bestandsgrootte: 10 MB"
+  },
+  "RFQ_TABLE": {
+    "TITLE": "Offerteaanvraag",
+    "NAME": "Naam",
+    "RFQ_NUMBER": "Offerteaanvraagnummer",
+    "DATE": "Datum",
+    "RFQ_ID": "RFQ-ID",
+    "QUOTE_AMOUNT": "Offertebedrag",
+    "WORK_ITEM": "Werkonderdeel",
+    "SENT_DATE": "Verzenddatum",
+    "DUE_DATE": "Vervaldatum",
+    "NO_OF_SUBCONTRACTORS": "Aantal onderaannemers",
+    "QUOTE_RECEIVED": "Offerte ontvangen",
+    "STATUS": "Status"
+  },
+
+   "RFQ_PAGE": {
+    "ADD_RFQ_TITLE": "RFQ toevoegen",
+    "EDIT_RFQ_TITLE": "RFQ bewerken",
+
+    "CREATED_DATE": "Aanmaakdatum",
+    "WORK_ITEM": "Werkonderdeel",
+
+    "TAB_UNIBOUW": "Unibouw",
+    "TAB_STANDARD": "Standaard",
+
+    "SELECT": "Selecteren",
+
+    "SUBCONTRACTORS": "Onderaannemers",
+    "ADD_SUBCONTRACTOR": "Onderaannemer toevoegen",
+
+    "DUE_DATE": "Vervaldatum",
+    "SHOW_ALL": "Alles tonen",
+
+    "NAME": "Naam",
+
+    "SELECT_WORKITEM_MESSAGE": "Selecteer een werkonderdeel om onderaannemers te bekijken.",
+    "SELECT_SUBCONTRACTOR_ERROR": "Selecteer minstens één onderaannemer om de vervaldatum toe te passen"
+  },
+
+  "RFQ_FOOTER_ACTIONS": {
+    "CANCEL": "Annuleren",
+    "PREVIEW": "Voorbeeld",
+    "SAVE_DRAFT": "Concept opslaan",
+    "SEND_TO_SUBCONTRACTORS": "Verzenden naar onderaannemers"
+  },
+
+  "RFQ_PREVIEW": {
+    "TITLE": "Offerteaanvraag",
+    "SUBTITLE": "RFQ-uitnodiging voor onderaannemers",
+
+    "RFQ_ID": "RFQ-ID",
+    "PROJECT": "Project",
+    "WORK_ITEMS": "Werkonderdelen",
+    "DUE_DATE": "Vervaldatum",
+
+    "THANK_YOU": "Dank u voor uw snelle reactie.",
+    "TEAM": "Unibouw-team",
+
+    "CLOSE": "Sluiten",
+    "SEND": "Verzenden"
+  },
+
+  "RFQ_ACTIONS": {
+    "DOWNLOAD_QUOTE": "Offerte downloaden",
+    "NO_QUOTE_UPLOADED": "Geen offerte geüpload",
+    "SET_REMINDER": "Herinnering instellen",
+    "EDIT_RFQ": "RFQ bewerken",
+    "DELETE_RFQ": "RFQ verwijderen",
+    "ADD_RFQ": "RFQ toevoegen"
+  },
+
+  "CONVERSATION": {
+    "TITLE": "Gesprek",
+    "LOG_CONVERSATION": "Gesprek vastleggen",
+    "SEARCH_CONVERSATION": "Zoeken in gesprek",
+    "DRAFT": "Concept",
+    "REPLY": "Beantwoorden",
+    "ATTACH": " 📎 Bijvoegen",
+    "WRITE_REPLY": "Schrijf een antwoord…",
+    "ENTER_SUBJECT": "Onderwerp invoeren",
+    "ENTER_MESSAGE": "Voer uw bericht in...",
+    "MESSAGE_TOO_LONG": "Het bericht is te lang. Verkort uw bericht."
+  },
+
+  "REMINDER_MODAL": {
+    "SETTINGS": "Instellingen",
+    "SENDING_REMINDER": "Herinnering verzenden...",
+    "DUE_DATE": "Vervaldatum",
+    "DEFAULT_REMINDER": "Standaard herinnering",
+    "CUSTOM_REMINDER": "Aangepaste herinnering",
+    "SELECT_DATE": "Selecteer datum",
+    "SET_TIME": "Tijd instellen:",
+    "EMAIL_BODY": "E-mailinhoud",
+    "EMAIL_BODY_REQUIRED": "Dit veld is verplicht",
+    "SEND_REMINDER": "Herinnering verzenden"
+  },
+
+  "LOG_CONVERSATION_MODAL": {
+    "TITLE": "Gesprek vastleggen",
+    "CONVERSATION_TYPE": "Type gesprek",
+    "DATE_TIME": "Datum en tijd",
+    "SUBJECT": "Onderwerp",
+    "ADD_CONVERSATION": "Gesprek toevoegen",
+    "EMAIL": "E-mail",
+    "MEETING": "Vergadering",
+    "PHONE": "Telefoon",
+    "OTHER": "Overig"
+  },
+
+  "EMPTY_STATES": {
+    "NO_RFQ_RESPONSES": "Geen RFQ-reacties beschikbaar",
+    "NO_RFQS": "Geen RFQ’s beschikbaar.",
+    "NO_RESPONSES_FOUND": "Geen reacties gevonden",
+    "NO_CONVERSATION": "Geen gesprekken"
+  },
+
+  "GROUPING": {
+    "GROUP_BY_WORK_ITEM": "Groeperen op werkonderdeel",
+    "GROUP_BY_SUBCONTRACTOR": "Groeperen op onderaannemer"
+  },
+
+  "WORKITEM": {
+    "TITLE": "Werkonderdelen",
+    "CODE": "Werkonderdeel code",
+    "NAME": "Werkonderdeel",
+    "TAB_UNIBOUW": "Unibouw",
+    "TAB_STANDARD": "NL-SfB"
+  },
+  "SUBCONTRACTOR": {
+    "TITLE": "Onderaannemers",
+    "ADD": "Onderaannemer toevoegen",
+    "NAME": "Naam onderaannemer",
+    "EMAIL": "E-mail",
+    "PHONE": "Contactnummer",
+    "PERSON": "Contactpersoon",
+    "LOCATION": "Locatie",
+    "COUNTRY": "Land",
+    "STATUS": "Status",
+    "ACTIVE": "Actief",
+    "INACTIVE": "Inactief",
+    "WORKITEMS": "Werkonderdelen",
+    "NO_WORKITEMS": "Geen toegewezen werkonderdelen"
+  },
+  "NOT_INTERESTED_REASONS": {
+    "REASON_1": "Onvoldoende capaciteit / planning zit vol",
+    "REASON_2": "Geen interesse in het project / past niet binnen strategie",
+    "REASON_3": "Project is te groot",
+    "REASON_4": "Project is te klein",
+    "REASON_5": "Technisch niet passend bij onze expertise",
+    "REASON_6": "Tijdslijnen zijn te krap",
+    "REASON_7": "Locatie te ver / logistiek niet rendabel",
+    "REASON_8": "Te veel concurrentie / lage kans op gunning",
+    "REASON_9": "Problemen met beschikbaarheid materialen",
+    "REASON_10": "Negatieve ervaring uit eerdere samenwerking",
+    "REASON_11": "Andere lopende offertes/projecten hebben voorrang",
+    "REASON_12": "Anders"
+  },
+  "VALIDATION": {
+    "REQUIRED": "Dit veld is verplicht",
+    "INVALID_EMAIL": "Ongeldig e-mailadres",
+    "INVALID_PHONE": "Ongeldig telefoonnummer",
+    "QUOTE_AMOUNT_REQUIRED": "Offertebedrag is verplicht.",
+    "QUOTE_AMOUNT_PATTERN": "Alleen cijfers, punt (.) en komma (,) toegestaan.",
+    "COMMENTS_REQUIRED": "Opmerkingen zijn verplicht.",
+    "FILE_REQUIRED": "Upload minstens één bestand.",
+    "MAYBE_LATER_DATE_REQUIRED": "Selecteer een datum.",
+    "MAYBE_LATER_DATE_PAST": "Datum mag niet in het verleden liggen.",
+    "MAYBE_LATER_DATE_EXCEEDS_DUE": "Datum moet op of vóór de RFQ-deadline liggen.",
+    "NOT_INTERESTED_REASON_REQUIRED": "Selecteer een reden.",
+    "NOT_INTERESTED_COMMENT_REQUIRED": "Voer een reden in.",
+    "DATE_TIME_REQUIRED": "Voer de datum en tijd in.",
+    "NOTES_ERROR": "Vul de berichtgegevens in.",
+    "REPLY_ERROR": "Het antwoord mag niet leeg zijn.",
+    "PROJECT_NOT_LOADED": "Projectgegevens zijn nog niet geladen. Probeer opnieuw.",
+    "FILE_SIZE_EXCEEDED": "Bestandsgrootte mag niet groter zijn dan 10 MB.",
+    "REMINDER_MAX_SEQUENCE": "Waarde moet groter zijn dan 0",
+    "REMINDER_SEQUENCE_REQUIRED": "Dit veld is verplicht",
+    "REMINDER_TIME_REQUIRED": "Selecteer een geldige tijd",
+    "REMINDER_TIME_MIDNIGHT": "Herinneringstijd kan niet 00:00 zijn",
+    "DATE_TIME_REQUIRED": "Datum en tijd zijn verplicht",
+    "NOTES_REQUIRED": "Notities zijn verplicht"
+  },
+  "MESSAGES": {
+    "SAVE_SUCCESS": "Succesvol opgeslagen",
+    "SAVE_FAILED": "Opslaan mislukt",
+    "DELETE_CONFIRM": "Weet u zeker dat u wilt verwijderen?",
+    "YES": "Ja",
+    "NO": "Nee",
+    "NO_SUBCONTRACTORS": "Geen onderaannemers gevonden.",
+    "NO_PROJECTS": "Geen projecten gevonden.",
+    "MAYBE_LATER_SUCCESS": "Uw voorkeur is geregistreerd. U kunt op elk moment vóór de deadline reageren.",
+    "INTERESTED_SUCCESS": "Uw reactie \"{{status}}\" is succesvol geregistreerd!",
+    "QUOTE_SUBMITTED": "Offerte ingediend!",
+    "QUOTE_RESUBMITTED": "Offerte opnieuw ingediend!",
+    "QUOTE_UPLOAD_FAILED": "Offerte upload mislukt",
+    "CONVERSATION_LOGGED_FAILED": "Gesprek opslaan mislukt. Probeer het opnieuw.",
+    "STATUS_UPDATED_SUCCESS": "Status succesvol bijgewerkt!",
+    "STATUS_UPDATED_FAILED": "Status bijwerken mislukt. Probeer het opnieuw.",
+    "REMINDER_SAVED": "Herinneringsconfiguratie succesvol opgeslagen",
+    "REMINDER_RESET": "Herinneringsconfiguratie gereset"
+  },
+  "MODAL": {
+    "COMMENTS_TITLE": "Opmerkingen",
+    "COMMENTS_NONE": "Geen opmerkingen beschikbaar.",
+    "COMMENTS_CLOSE": "Sluiten"
+  },
+  "BUTTONS": {
+    "CONFIRM": "Bevestigen",
+    "CANCEL": "Annuleren",
+    "RESET": "Resetten",
+    "SAVE": "Opslaan",
+    "SAVE_CONFIGURATION" : "Configuratie opslaan"
+
+  },
+  "FORM_ACTIONS": {
+    "CANCEL": "Annuleren",
+    "PREVIEW": "Voorbeeld",
+    "SAVE_DRAFT": "Concept opslaan",
+    "SEND_TO_SUBCONTRACTORS": "Verstuur naar onderaannemers"
+  }
+}

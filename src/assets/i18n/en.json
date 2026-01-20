@@ -1,0 +1,329 @@
+{
+  "COMMON": {
+    "ADD": "Add",
+    "EDIT": "Edit",
+    "DELETE": "Delete",
+    "CANCEL": "Cancel",
+    "SUBMIT": "Submit",
+    "SEND": "Send",
+    "RESET": "Reset",
+    "SAVE": "Save",
+    "SEARCH": "Search",
+    "ACTIONS": "Actions",
+    "NO_DATA": "No data available",
+    "LOADING": "Loading...",
+    "ITEMS": "Items per page:"
+  },
+  "HEADER": {
+    "LOGOUT": "Logout",
+    "LANG_EN": "EN",
+    "LANG_NL": "NL",
+    "MY_PROFILE": "My Profile",
+    "SIGN_OUT": "Sign Out",
+    "WORKITEMS": "Work Items",
+    "SUBCONTRACTORS": "Subcontractors",
+    "PROJECTS": "Projects",
+    "SETTINGS": "Settings",
+    "MAX_REMINDER_LABEL": "Max Reminder Sequence",
+    "SET_REMINDER_LABEL" :"Set Time",
+    "REMINDER_SEQUENCE" : "Reminder Sequence",
+    "REMINDER_FORM_ERROR" : "This field is required",
+    "REMINDER_FORM_ERROR2" : "Please select a valid time.",
+    "REMINDER_FORM_ERROR3": "Reminder time cannot be 00:00",
+    "REMINDER_CONFIG_TITLE": "Global Reminder Configuration for configuring default reminder settings for all RFQs",
+    "REMINDER_CONFIG_SUBTITLE": "Configure default reminder settings for all RFQs",
+    "EMAIL_BODY": "Email Body",
+    "GLOBAL_REMINDER": "Enable automated reminders globally"
+  },
+  "FOOTER": {
+    "COPYRIGHT": "All rights reserved"
+  },
+  "PROJECT": {
+    "TITLE": "Projects",
+    "ADD_PROJECT": "Add Project",
+    "PROJECT_NAME": "Name",
+    "CLIENT_NAME": "Customer",
+    "PROJECT_MANAGER": "Project Manager",
+    "PROJECT_CODE": "Code",
+    "STATUS": "Status",
+    "START_DATE": "Start",
+    "END_DATE": "Committed",
+    "SPECIFICATION": "Project Files",
+    "VIEW_DETAILS": "View Details"
+  },
+
+  "PROJECT_DETAILS": {
+    "DETAILS_TITLE": "Details",
+    "PROJECT_CODE": "Project Code",
+    "PROJECT": "Project",
+    "CUSTOMER": "Customer",
+    "PROJECT_MANAGER": "Project Manager",
+    "START_DATE": "Start Date",
+    "COMMITTED_DATE": "Committed Date",
+    "STATUS": "Status",
+    "SPECIFICATION": "Specification",
+    "PROJECT_FILES": "Project Files"
+  },
+
+   "RESPONSE_VIEW": {
+    "LOADING": "Loading...",
+    "NO_RFQ_RESPONSES": "No RFQ responses available",
+    "NO_RESPONSES_FOUND": "No responses found",
+    "RFQ Response" : "RFQ Response",
+    "REQUESTS_SENT": "Requests Sent",
+    "VIEWED": "Viewed",
+    "NOT_RESPONDED": "Not Responded",
+    "QUOTE_AMOUNT": "Quote Amount",
+    "NAME": "Name",
+    "DATE": "Date",
+    "RFQ_ID": "RFQ ID",
+    "WORK_ITEM": "Work Item",
+    "SUBCONTRACTOR": "Subcontractor"
+
+
+
+   },
+
+  "RFQ_SUMMARY": {
+    "TITLE": "Quote Request (RFQ)",
+    "DETAILS": "RFQ Details",
+    "DUE_DATE": "Due Date",
+    "STATUS": "Status",
+    "INTEREST": "Share your Interest",
+    "INTERESTED": "Interested",
+    "MAYBE_LATER": "Maybe Later",
+    "NOT_INTERESTED": "Not Interested",
+    "SUBMIT_QUOTE": "Submit Quote",
+    "RESUBMIT_QUOTE": "Resubmit Quote",
+    "NO_RFQ": "No RFQs available",
+    "EXPIRED_MSG": "This RFQ link has expired. You can no longer respond.",
+    "EXPIRED_CHANGE_MSG": "This RFQ link has expired. You can no longer change your response.",
+    "STATUS_BADGE": "Status",
+    "PREVIOUS_SUBMISSIONS": "Previous Submissions",
+    "SUBMITTED_ON": "Submitted on",
+    "TOTAL_QUOTE_AMOUNT": "Total Quote Amount",
+    "ATTACHMENT": "Attachment",
+    "COMMENT": "Comment",
+    "COMMENTS_PLACEHOLDER": "Add Comments",
+    "QUOTE_AMOUNT": "Total Quote Amount (€)",
+    "ATTACHMENTS": "Attachments",
+    "MAX_FILE_SIZE_HINT": "Maximum file size: 10 MB"
+  },
+  "RFQ_TABLE": {
+    "TITLE": "RFQ",
+    "NAME": "Name",
+    "RFQ_NUMBER": "RFQ Number",
+    "DATE": "Date",
+    "RFQ_ID": "RFQ ID",
+    "QUOTE_AMOUNT": "Quote Amount",
+    "WORK_ITEM": "Work Item",
+    "SENT_DATE": "Sent Date",
+    "DUE_DATE": "Due Date",
+    "NO_OF_SUBCONTRACTORS": "No. of Subcontractors",
+    "QUOTE_RECEIVED": "Quote Recieved",
+    "STATUS": "Status"
+  },
+
+  "RFQ_PAGE": {
+    "ADD_RFQ_TITLE": "Add RFQ",
+    "EDIT_RFQ_TITLE": "Edit RFQ",
+
+    "CREATED_DATE": "Created Date",
+    "WORK_ITEM": "Work Item",
+
+
+    "SELECT": "Select",
+
+    "SUBCONTRACTORS": "Subcontractors",
+    "ADD_SUBCONTRACTOR": "Add Subcontractor",
+
+    "DUE_DATE": "Due Date",
+    "SHOW_ALL": "Show all",
+
+    "NAME": "Name",
+
+    "SELECT_WORKITEM_MESSAGE": "Please select a work item to view subcontractors.",
+    "SELECT_SUBCONTRACTOR_ERROR": "Select at least one subcontractor to apply the due date"
+  },
+
+  "RFQ_FOOTER_ACTIONS": {
+    "CANCEL": "Cancel",
+    "PREVIEW": "Preview",
+    "SAVE_DRAFT": "Save Draft",
+    "SEND_TO_SUBCONTRACTORS": "Send to Subcontractors"
+  },
+
+  "RFQ_PREVIEW": {
+    "TITLE": "Quote Request",
+    "SUBTITLE": "RFQ Invitation for Subcontractors",
+
+    "RFQ_ID": "RFQ ID",
+    "PROJECT": "Project",
+    "WORK_ITEMS": "Work Item(s)",
+    "DUE_DATE": "Due Date",
+
+    "THANK_YOU": "Thank you for your prompt response.",
+    "TEAM": "Unibouw Team",
+
+    "CLOSE": "Close",
+    "SEND": "Send"
+  },
+
+  "RFQ_ACTIONS": {
+    "DOWNLOAD_QUOTE": "Download Quote",
+    "NO_QUOTE_UPLOADED": "No Quote Uploaded",
+    "SET_REMINDER": "Set Reminder",
+    "EDIT_RFQ": "Edit RFQ",
+    "DELETE_RFQ": "Delete RFQ",
+    "ADD_RFQ": "Add RFQ"
+  },
+
+  "CONVERSATION": {
+    "TITLE": "Conversation",
+    "LOG_CONVERSATION": "Log conversation",
+    "SEARCH_CONVERSATION": "Search in conversation",
+    "DRAFT": "Draft",
+    "REPLY": "Reply",
+    "ATTACH": " 📎 Attach",
+    "WRITE_REPLY": "Write a reply…",
+    "ENTER_SUBJECT": "Enter Subject",
+    "ENTER_MESSAGE": "Enter your message...",
+    "MESSAGE_TOO_LONG": "Message is too long. Please shorten your message."
+  },
+
+  "REMINDER_MODAL": {
+    "SETTINGS": "Settings",
+    "SENDING_REMINDER": "Sending Reminder...",
+    "DUE_DATE": "Due Date",
+    "DEFAULT_REMINDER": "Default Reminder",
+    "CUSTOM_REMINDER": "Custom Reminder",
+    "SELECT_DATE": "Select date",
+    "SET_TIME": "Set Time:",
+    "EMAIL_BODY": "Email Body",
+    "EMAIL_BODY_REQUIRED": "This field is required",
+    "SEND_REMINDER": "Send Reminder"
+  },
+
+  "LOG_CONVERSATION_MODAL": {
+    "TITLE": "Log Conversation",
+    "CONVERSATION_TYPE": "Conversation Type",
+    "DATE_TIME": "Date & Time",
+    "SUBJECT": "Subject",
+    "ADD_CONVERSATION": "Add Conversation",
+    "EMAIL": "Email",
+    "MEETING": "Meeting",
+    "PHONE": "Phone",
+    "OTHER": "Other"
+  },
+
+  "EMPTY_STATES": {
+    "NO_RFQ_RESPONSES": "No RFQ responses available",
+    "NO_RFQS": "No RFQs available.",
+    "NO_RESPONSES_FOUND": "No responses found",
+    "NO_CONVERSATION": "No Conversation"
+  },
+
+  "GROUPING": {
+    "GROUP_BY_WORK_ITEM": "Group by Work Item",
+    "GROUP_BY_SUBCONTRACTOR": "Group by Subcontractor"
+  },
+
+  "WORKITEM": {
+    "TITLE": "Workitems",
+    "CODE": "Workitem Code",
+    "NAME": "Workitem",
+    "TAB_UNIBOUW": "Unibouw",
+    "TAB_STANDARD": "Standard"
+  },
+  "SUBCONTRACTOR": {
+    "TITLE": "Subcontractors",
+    "ADD": "Add Subcontractor",
+    "NAME": "Name",
+    "EMAIL": "Email",
+    "PHONE": "Contact Number",
+    "PERSON": "Contact Person",
+    "LOCATION": "Location",
+    "COUNTRY": "Country",
+    "STATUS": "Status",
+    "ACTIVE": "Active",
+    "INACTIVE": "Inactive",
+    "WORKITEMS": "Workitems",
+    "NO_WORKITEMS": "No workitems assigned"
+  },
+  "NOT_INTERESTED_REASONS": {
+    "REASON_1": "Onvoldoende capaciteit / planning zit vol",
+    "REASON_2": "Geen interesse in het project / past niet binnen strategie",
+    "REASON_3": "Project is te groot",
+    "REASON_4": "Project is te klein",
+    "REASON_5": "Technisch niet passend bij onze expertise",
+    "REASON_6": "Tijdslijnen zijn te krap",
+    "REASON_7": "Locatie te ver / logistiek niet rendabel",
+    "REASON_8": "Te veel concurrentie / lage kans op gunning",
+    "REASON_9": "Problemen met beschikbaarheid materialen",
+    "REASON_10": "Negatieve ervaring uit eerdere samenwerking",
+    "REASON_11": "Andere lopende offertes/projecten hebben voorrang",
+    "REASON_12": "Anders"
+  },
+  "VALIDATION": {
+    "REQUIRED": "This field is required",
+    "INVALID_EMAIL": "Invalid email address",
+    "INVALID_PHONE": "Invalid phone number",
+    "QUOTE_AMOUNT_REQUIRED": "Quote amount is required.",
+    "QUOTE_AMOUNT_PATTERN": "Accepted only numbers, dot (.) and comma (,).",
+    "COMMENTS_REQUIRED": "Comments are required.",
+    "FILE_REQUIRED": "Please upload at least one file.",
+    "MAYBE_LATER_DATE_REQUIRED": "Please select a date.",
+    "MAYBE_LATER_DATE_PAST": "Date cannot be in the past.",
+    "MAYBE_LATER_DATE_EXCEEDS_DUE": "Date must be on or before RFQ due date.",
+    "NOT_INTERESTED_REASON_REQUIRED": "Please select a reason.",
+    "NOT_INTERESTED_COMMENT_REQUIRED": "Please enter a reason.",
+    "DATE_TIME_REQUIRED": "Please enter the date and time.",
+    "NOTES_ERROR": "Please enter the message details.",
+    "REPLY_ERROR": "Reply cannot be empty",
+    "PROJECT_NOT_LOADED": "Project data not loaded yet. Please try again.",
+    "FILE_SIZE_EXCEEDED": "File size must not exceed 10 MB.",
+    "REMINDER_MAX_SEQUENCE": "Value must be greater than 0",
+    "REMINDER_SEQUENCE_REQUIRED": "This field is required",
+    "REMINDER_TIME_REQUIRED": "Please select a valid time",
+    "REMINDER_TIME_MIDNIGHT": "Reminder time cannot be 00:00",
+    "DATE_TIME_REQUIRED": "Date & Time is required",
+    "NOTES_REQUIRED": "Notes are required"
+  },
+  "MESSAGES": {
+    "SAVE_SUCCESS": "Saved successfully",
+    "SAVE_FAILED": "Failed to save data",
+    "DELETE_CONFIRM": "Are you sure you want to delete?",
+    "YES": "Yes",
+    "NO": "No",
+    "NO_SUBCONTRACTORS": "No subcontractors found.",
+    "NO_PROJECTS": " No projects found.",
+    "MAYBE_LATER_SUCCESS": "Your preference has been recorded. You may respond any time before the due date.",
+    "INTERESTED_SUCCESS": "Your response \"{{status}}\" was recorded successfully!",
+    "QUOTE_SUBMITTED": "Quote submitted!",
+    "QUOTE_RESUBMITTED": "Quote re-submitted!",
+    "QUOTE_UPLOAD_FAILED": "Failed to upload quote",
+    "CONVERSATION_LOGGED_FAILED": "Failed to save conversation. Please try again.",
+    "STATUS_UPDATED_SUCCESS": "Status updated successfully!",
+    "STATUS_UPDATED_FAILED": "Failed to update status. Please try again.",
+    "REMINDER_SAVED": "Reminder configuration saved successfully",
+    "REMINDER_RESET": "Reminder configuration reset"
+  },
+  "MODAL": {
+    "COMMENTS_TITLE": "Comments",
+    "COMMENTS_NONE": "No comments available.",
+    "COMMENTS_CLOSE": "Close"
+  },
+  "BUTTONS": {
+    "CONFIRM": "Confirm",
+    "CANCEL": "Cancel",
+    "RESET": "Reset",
+    "SAVE": "Save",
+    "SAVE_CONFIGURATION" : "Save Configuration"
+  },
+  "FORM_ACTIONS": {
+    "CANCEL": "Cancel",
+    "PREVIEW": "Preview",
+    "SAVE_DRAFT": "Save Draft",
+    "SEND_TO_SUBCONTRACTORS": "Send to Subcontractors"
+  }
+}

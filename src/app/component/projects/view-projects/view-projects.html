@@ -48,35 +48,35 @@
         <!-- LEFT: Project Details -->
         <div class="details-card" *ngIf="projectDetails">
           <div class="details-header">
-            <h3>Details</h3>
+            <h3>{{'PROJECT_DETAILS.DETAILS_TITLE' | translate}}</h3>
           </div>
 
           <div class="details-content">
             <div class="detail-row">
-              <span class="label">Project Code</span
+              <span class="label">{{'PROJECT_DETAILS.PROJECT_CODE' | translate}}</span
               ><span class="value">{{ projectDetails.number }}</span>
             </div>
             <div class="detail-row">
-              <span class="label">Project</span><span class="value">{{ projectDetails.name }}</span>
+              <span class="label">{{'PROJECT_DETAILS.PROJECT' | translate}}</span><span class="value">{{ projectDetails.name }}</span>
             </div>
             <div class="detail-row">
-              <span class="label">Customer</span
+              <span class="label">{{'PROJECT_DETAILS.CUSTOMER' | translate}}</span
               ><span class="value">{{ projectDetails.customerName }}</span>
             </div>
             <div class="detail-row">
-              <span class="label">Project Manager</span
+              <span class="label">{{'PROJECT_DETAILS.PROJECT_MANAGER' | translate}}</span
               ><span class="value">{{ projectDetails.projectManagerName }}</span>
             </div>
             <div class="detail-row">
-              <span class="label">Start Date</span
+              <span class="label">{{'PROJECT_DETAILS.START_DATE' | translate}}</span
               ><span class="value">{{ projectDetails.startDate | date : 'dd-MM-yyyy' }}</span>
             </div>
             <div class="detail-row">
-              <span class="label">Committed Date</span
+              <span class="label">{{'PROJECT_DETAILS.COMMITTED_DATE' | translate}}</span
               ><span class="value">{{ projectDetails.completionDate | date : 'dd-MM-yyyy' }}</span>
             </div>
             <div class="detail-row">
-              <span class="label">Status</span>
+              <span class="label">{{'PROJECT_DETAILS.STATUS' | translate}}</span>
               <span
                 class="value status"
                 [ngClass]="{
@@ -89,7 +89,7 @@
               </span>
             </div>
             <div class="detail-row">
-              <span class="label">Specification</span>
+              <span class="label">{{'PROJECT_DETAILS.SPECIFICATION' | translate}}</span>
               <span class="value">
                 <a [href]="projectDetails.sharepointURL" target="_blank">Project Files</a>
               </span>
@@ -101,23 +101,21 @@
         <div class="rfq-card" *ngIf="!isLoading">
           <!-- 🔹 Tabs -->
           <div class="tabs">
-            <button [class.active]="selectedTab === 'response'" (click)="setActiveTab('response')">
-              RFQ Response
-            </button>
+           <button 
+    [class.active]="selectedTab === 'response'" 
+    (click)="setActiveTab('response')">
+{{'RESPONSE_VIEW.RFQ Response' | translate}}  </button>
 
-            <button
-              [class.active]="selectedTab === 'rfq'"
-              (click)="setActiveTab('rfq'); loadRfqData()"
-            >
-              RFQ
-            </button>
+         <button 
+    [class.active]="selectedTab === 'rfq'" 
+    (click)="setActiveTab('rfq'); loadRfqData()">
+{{'RFQ_TABLE.TITLE' | translate}}  </button>
 
-            <button
-              [class.active]="selectedTab === 'conversation'"
-              (click)="setActiveTab('conversation'); loadConversationSubcontractors()"
-            >
-              Conversation
-            </button>
+              <button
+    [class.active]="selectedTab === 'conversation'"
+    (click)="setActiveTab('conversation'); loadConversationSubcontractors()">
+    {{'CONVERSATION.TITLE' | translate}}
+  </button>
           </div>
 
           <!-- TAB 1: RFQ RESPONSE (Accordion Section) -->
@@ -127,8 +125,7 @@
               <div class="group-options">
                 <label class="cursor-pointer">
                   <input type="radio" name="groupBy" [(ngModel)]="groupBy" value="workItem" />
-                  Group by Work Item
-                </label>
+{{'GROUPING.GROUP_BY_WORK_ITEM'|translate}}                </label>
                 <label class="cursor-pointer">
                   <input
                     type="radio"
@@ -137,8 +134,7 @@
                     value="subcontractor"
                     class="cursor-pointer"
                   />
-                  Group by Subcontractor
-                </label>
+{{'GROUPING.GROUP_BY_SUBCONTRACTOR'|translate}}                 </label>
               </div>
             </div>
             <div class="text-center pt-20" *ngIf="isLoading">Loading...</div>
@@ -148,40 +144,39 @@
               <div *ngIf="groupBy === 'workItem' && !isLoading" class="h-24">
                 <!-- NO DATA (no work items) -->
                 <div *ngIf="!workItems || workItems.length === 0" class="noData">
-                  No RFQ responses available
-                </div>
+{{'EMPTY_STATES.NO_RFQ_RESPONSES'|translate}}                </div>
                 <div *ngFor="let work of workItems" class="work-item">
                   <!-- Work Item Header -->
                   <div class="work-item-header" (click)="work.open = !work.open">
                     <div class="rfq-summary">
                       <div style="width: 100px">
-                        <span class="label">Work Item</span>
+                        <span class="label">{{'RFQ_TABLE.WORK_ITEM'|translate}}</span>
                         <div class="highlight text-ellipsis" [title]="work.name">
                           {{ work.name }}
                         </div>
                       </div>
                       <div>
-                        <span class="label">Requests Sent</span>
+                        <span class="label">{{'RESPONSE_VIEW.REQUESTS_SENT'|translate}}</span>
                         <div>{{ work.requestsSent }}</div>
                       </div>
                       <div>
-                        <span class="label">Viewed</span>
+                        <span class="label">{{'RESPONSE_VIEW.VIEWED'|translate}}</span>
                         <div>{{ work.viewed }}</div>
                       </div>
                       <div>
-                        <span class="label">Interested</span>
+                        <span class="label">{{'RFQ_SUMMARY.INTERESTED'|translate}}</span>
                         <div>{{ work.interested }}</div>
                       </div>
                       <div>
-                        <span class="label">Not Interested</span>
+                        <span class="label">{{'RFQ_SUMMARY.NOT_INTERESTED'|translate}}</span>
                         <div>{{ work.notInterested }}</div>
                       </div>
                       <div>
-                        <span class="label">Maybe Later</span>
+                        <span class="label">{{'RFQ_SUMMARY.MAYBE_LATER'|translate}}</span>
                         <div>{{ work.maybeLater }}</div>
                       </div>
                       <div>
-                        <span class="label">Not Responded</span>
+                        <span class="label">{{'RESPONSE_VIEW.NOT_RESPONDED'|translate}}</span>
                         <div>{{ work.notResponded }}</div>
                       </div>
                     </div>
@@ -193,7 +188,7 @@
                   <div class="work-item-body" *ngIf="work.open">
                     <!-- Search -->
                     <div class="search-box" style="margin-bottom: 12px">
-                      <input type="text" [(ngModel)]="work.searchText" placeholder="Search" />
+                      <input type="text" [(ngModel)]="work.searchText" placeholder="{{'COMMON.SEARCH' | translate}}"  />
                     </div>
 
                     <!-- Table -->
@@ -201,14 +196,14 @@
                       <table class="rfq-table">
                         <thead>
                           <tr>
-                            <th>Name</th>
-                            <th>Date</th>
-                            <th>RFQ ID</th>
-                            <th style="text-align: center">Viewed</th>
-                            <th style="text-align: center">Interested</th>
-                            <th style="text-align: center">Maybe Later</th>
-                            <th style="text-align: center">Quote Amount</th>
-                            <th style="text-align: center">Actions</th>
+                            <th>{{'RESPONSE_VIEW.NAME'|translate}}</th>
+                            <th>{{'RESPONSE_VIEW.DATE'|translate}}</th>
+                            <th>{{'RESPONSE_VIEW.RFQ_ID'|translate}}</th>
+                            <th style="text-align: center">{{'RESPONSE_VIEW.VIEWED'|translate}}</th>
+                            <th style="text-align: center">{{'RFQ_SUMMARY.INTERESTED'|translate}}</th>
+                            <th style="text-align: center">{{'RFQ_SUMMARY.MAYBE_LATER'|translate}}</th>
+                            <th style="text-align: center">{{'RESPONSE_VIEW.QUOTE_AMOUNT'|translate}}</th>
+                            <th style="text-align: center">{{'COMMON.ACTIONS' | translate}}</th>
                           </tr>
                         </thead>
 
@@ -276,8 +271,7 @@
                                 class="no-records-cell"
                                 style="text-align: center; padding: 20px; color: #888"
                               >
-                                No responses found
-                              </td>
+{{'RESPONSE_VIEW.NO_RESPONSES_FOUND'|translate}}                              </td>
                             </ng-template>
                           </tr>
 
@@ -288,8 +282,7 @@
                               class="no-records-cell"
                               style="text-align: center; padding: 20px; color: #888"
                             >
-                              No responses found
-                            </td>
+{{'RESPONSE_VIEW.NO_RESPONSES_FOUND'|translate}}                                  </td>
                           </tr>
                         </tbody>
                       </table>
@@ -305,39 +298,39 @@
                   *ngIf="!subcontractorGroups || subcontractorGroups.length === 0"
                   class="noData"
                 >
-                  No RFQ responses available
-                </div>
+{{'RESPONSE_VIEW.NO_RFQ_RESPONSES'|translate}}
+                   </div>
 
                 <div *ngFor="let sub of subcontractorGroups" class="work-item">
                   <!-- Header -->
                   <div class="work-item-header" (click)="sub.open = !sub.open">
                     <div class="rfq-summary">
                       <div>
-                        <span class="label">Subcontractor</span>
+                        <span class="label">{{'RESPONSE_VIEW.SUBCONTRACTOR'|translate}}</span>
                         <div class="highlight">{{ sub.subcontractorName }}</div>
                       </div>
                       <div>
-                        <span class="label">Requests Sent</span>
+                        <span class="label">{{'RESPONSE_VIEW.REQUESTS_SENT'|translate}}</span>
                         <div>{{ sub.requestsSent }}</div>
                       </div>
                       <div>
-                        <span class="label">Viewed</span>
+                        <span class="label">{{'RESPONSE_VIEW.VIEWED'|translate}}</span>
                         <div>{{ sub.viewed }}</div>
                       </div>
                       <div>
-                        <span class="label">Interested</span>
+                        <span class="label">{{'RFQ_SUMMARY.INTERESTED'|translate}}</span>
                         <div>{{ sub.interested }}</div>
                       </div>
                       <div>
-                        <span class="label">Not Interested</span>
+                        <span class="label">{{'RFQ_SUMMARY.NOT_INTERESTED'|translate}}</span>
                         <div>{{ sub.notInterested }}</div>
                       </div>
                       <div>
-                        <span class="label">Maybe Later</span>
+                        <span class="label">{{'RFQ_SUMMARY.MAYBE_LATER'|translate}}</span>
                         <div>{{ sub.maybeLater }}</div>
                       </div>
                       <div>
-                        <span class="label">Not Responded</span>
+                        <span class="label">{{'RESPONSE_VIEW.NOT_RESPONDED'|translate}}</span>
                         <div>{{ sub.notResponded }}</div>
                       </div>
                     </div>
@@ -349,7 +342,7 @@
                   <div class="work-item-body" *ngIf="sub.open">
                     <!-- Search -->
                     <div class="search-box" style="margin-bottom: 12px">
-                      <input [(ngModel)]="sub.searchText" placeholder="Search" />
+                      <input [(ngModel)]="sub.searchText" placeholder="{{'COMMON.SEARCH' | translate}}" />
                     </div>
 
                     <!-- Table -->
@@ -357,14 +350,14 @@
                       <table class="rfq-table">
                         <thead>
                           <tr>
-                            <th>Work Item</th>
-                            <th>Date</th>
-                            <th>RFQ ID</th>
-                            <th style="text-align: center">Viewed</th>
-                            <th style="text-align: center">Interested</th>
-                            <th style="text-align: center">Maybe Later</th>
-                            <th style="text-align: center">Quote Amount</th>
-                            <th>Actions</th>
+                            <th>{{'RESPONSE_VIEW.WORK_ITEM'|translate}}</th>
+                             <th>{{'RESPONSE_VIEW.DATE'|translate}}</th>
+                            <th>{{'RESPONSE_VIEW.RFQ_ID'|translate}}</th>
+                            <th style="text-align: center">{{'RESPONSE_VIEW.VIEWED'|translate}}</th>
+                            <th style="text-align: center">{{'RFQ_SUMMARY.INTERESTED'|translate}}</th>
+                            <th style="text-align: center">{{'RFQ_SUMMARY.MAYBE_LATER'|translate}}</th>
+                            <th style="text-align: center">{{'RESPONSE_VIEW.QUOTE_AMOUNT'|translate}}</th>
+                            <th style="text-align: center">{{'COMMON.ACTIONS' | translate}}</th>
                           </tr>
                         </thead>
                         <tbody>
@@ -422,7 +415,7 @@
           <div *ngIf="selectedTab === 'rfq'">
             <div class="button-container">
               <button type="button" class="addbtn" (click)="addRfq()">
-                <b>Add RFQ</b>
+                <b>{{'RFQ_ACTIONS.ADD_RFQ'|translate}}</b>
               </button>
             </div>
             <div class="table-scroll">
@@ -445,43 +438,42 @@
                     "
                     [attr.colspan]="displayedColumns.length"
                   >
-                    No RFQs available.
-                  </td>
+{{'RFQ_SUMMARY.NO_RFQ'|translate}}                  </td>
                 </tr>
                 <ng-container matColumnDef="number">
-                  <th mat-header-cell *matHeaderCellDef mat-sort-header>RFQ ID</th>
+                  <th mat-header-cell *matHeaderCellDef mat-sort-header>{{'RFQ_TABLE.RFQ_ID'|translate}}</th>
                   <td mat-cell *matCellDef="let row">{{ row.number }}</td>
                 </ng-container>
                 <ng-container matColumnDef="workitem">
-                  <th mat-header-cell *matHeaderCellDef mat-sort-header>WorkItem</th>
+                  <th mat-header-cell *matHeaderCellDef mat-sort-header>{{'RFQ_TABLE.WORK_ITEM'|translate}}</th>
                   <td mat-cell *matCellDef="let row">{{ row.workItem }}</td>
                 </ng-container>
 
                 <ng-container matColumnDef="rfqSentDate">
-                  <th mat-header-cell *matHeaderCellDef mat-sort-header>Sent Date</th>
+                  <th mat-header-cell *matHeaderCellDef mat-sort-header>{{'RFQ_TABLE.SENT_DATE'|translate}}</th>
                   <td mat-cell *matCellDef="let row">{{ row.rfqSentDate }}</td>
                 </ng-container>
                 <ng-container matColumnDef="dueDate">
-                  <th mat-header-cell *matHeaderCellDef mat-sort-header>Due Date</th>
+                  <th mat-header-cell *matHeaderCellDef mat-sort-header>{{'RFQ_TABLE.DUE_DATE'|translate}}</th>
 
                   <td mat-cell *matCellDef="let row">{{ row.dueDate }}</td>
                 </ng-container>
 
                 <ng-container matColumnDef="totalSubcontractors">
-                  <th mat-header-cell *matHeaderCellDef mat-sort-header>No. of Subcontractors</th>
+                  <th mat-header-cell *matHeaderCellDef mat-sort-header>{{'RFQ_TABLE.NO_OF_SUBCONTRACTORS'|translate}}</th>
                   <td mat-cell *matCellDef="let row">{{ row.subcontractorCount }}</td>
                 </ng-container>
                 <ng-container matColumnDef="quoteRecieved">
-                  <th mat-header-cell *matHeaderCellDef mat-sort-header>Quote Recieved</th>
+                  <th mat-header-cell *matHeaderCellDef mat-sort-header>{{'RFQ_TABLE.QUOTE_RECEIVED'|translate}}</th>
                   <td mat-cell *matCellDef="let row">{{ row.quoteReceived }}</td>
                 </ng-container>
                 <ng-container matColumnDef="status">
-                  <th mat-header-cell *matHeaderCellDef mat-sort-header>Status</th>
+                  <th mat-header-cell *matHeaderCellDef mat-sort-header>{{'RFQ_TABLE.STATUS'|translate}}</th>
                   <td mat-cell *matCellDef="let row">{{ row.status }}</td>
                 </ng-container>
 
                 <ng-container matColumnDef="actions">
-                  <th mat-header-cell *matHeaderCellDef>Actions</th>
+                  <th mat-header-cell *matHeaderCellDef>{{'COMMON.ACTIONS' | translate}}</th>
                   <td mat-cell *matCellDef="let row">
                     <i
                       class="fa-regular fa-pen-to-square edit-icon"
@@ -513,9 +505,9 @@
           <!-- TAB 3: CONVERSATION -->
           <div *ngIf="selectedTab === 'conversation'">
             <div class="noData" *ngIf="!convoSubcontractors || convoSubcontractors.length === 0">
-              No Conversation.
-            </div>
+{{'EMPTY_STATES.NO_CONVERSATION'|translate}}            </div>
             <div class="chat-container" *ngIf="(convoSubcontractors?.length ?? 0) > 0">
+              
               <!-- LEFT SIDEBAR -->
               <div class="chat-sidebar">
                 <div class="sidebar-list" *ngIf="(convoSubcontractors?.length ?? 0) > 0">
@@ -530,7 +522,7 @@
                 </div>
 
                 <!-- Button moved to bottom -->
-                <button class="log-btn" (click)="openLogConvo()">Log conversation</button>
+                <button class="log-btn" (click)="openLogConvo()">{{'CONVERSATION.LOG_CONVERSATION'|translate}}</button>
               </div>
 
               <!-- RIGHT CHAT AREA -->
@@ -541,6 +533,28 @@
                 </div>
 
                 <ng-container *ngIf="!isLoading">
+
+                  <div class="chat-search">
+  <mat-form-field appearance="outline" class="chat-search-field">
+    <mat-icon matPrefix>search</mat-icon>
+
+    <input
+      matInput
+      placeholder="{{'CONVERSATION.SEARCH_CONVERSATION'|translate}}"
+      [(ngModel)]="conversationSearchText"
+      (input)="filterConversations()"
+    />
+
+    <button
+      matSuffix
+      mat-icon-button
+      *ngIf="conversationSearchText"
+      (click)="clearConversationSearch()"
+    >
+      <mat-icon>close</mat-icon>
+    </button>
+  </mat-form-field>
+</div>
                   <!-- Scrollable MESSAGES -->
                   <div class="chat-messages" #chatMessages>
                     <!-- No Data -->
@@ -551,8 +565,7 @@
                         (!pmSubConversationData || pmSubConversationData.length === 0)
                       "
                     >
-                      No Conversation
-                    </div>
+{{'EMPTY_STATES.NO_CONVERSATION'|translate}}                    </div>
 
                     <!-- Chat Messages -->
                     <!-- <div
@@ -571,7 +584,7 @@
                       }"
                     >
                       <div class="message-header">
-                        <span class="draft" *ngIf="convo.status === 'Draft'"> Draft </span>
+                        <span class="draft" *ngIf="convo.status === 'Draft'"> {{'CONVERSATION.DRAFT'|translate}} </span>
                       </div>
                       <!-- Subcontractor Meta -->
                       <ng-container *ngIf="convo.senderType !== 'PM'">
@@ -610,7 +623,7 @@
                             *ngIf="convo.conversationMessageID"
                             (click)="startReply(convo)"
                           >
-                            Reply
+{{'CONVERSATION.REPLY'|translate}}
                           </button>
                         </div>
                       </ng-container>
@@ -688,12 +701,12 @@
                         <!-- Actions -->
                         <div class="reply-actions">
                           <button class="attach-btn" (click)="replyFileInput.click()">
-                            📎 Attach
+{{'CONVERSATION.ATTACH'|translate}}
                           </button>
 
                           <div class="action-right">
-                            <button class="cancel-btn" (click)="cancelReply()">Cancel</button>
-                            <button class="send-btn" (click)="sendReply(convo)">Send</button>
+                            <button class="cancel-btn" (click)="cancelReply()">{{'COMMON.CANCEL'| translate}}</button>
+                            <button class="send-btn" (click)="sendReply(convo)">{{'COMMON.SEND'| translate}}</button>
                           </div>
                         </div>
 
@@ -734,9 +747,9 @@
                       (ngModelChange)="onInputChange()"
                     />
 
-                    <div class="error-msg" *ngIf="(messageText ?? '').length > 5000">
-                      Message is too long. Please shorten your message.
-                    </div>
+                     <div class="error-msg" *ngIf="(messageText ?? '').length > 5000">
+{{'CONVERSATION.MESSAGE_TOO_LONG'|translate}}
+    </div>
 
                     <!-- Hidden file input -->
                     <input
@@ -781,7 +794,7 @@
         <p class="text-xl font-semibold">Settings</p>
       </div>
       <div class="loading-overlay" *ngIf="isLoading">
-        <p>Sending Reminder...</p>
+        <p>{{'REMINDER_MODAL.SENDING_REMINDER'|translate}}</p>
       </div>
       <!-- Modal Body -->
       <div class="modal-body space-y-6 px-4 pt-6 pb-3" *ngIf="!isLoading">
@@ -793,7 +806,7 @@
             </div>
 
             <div class="due-date-content">
-              <span class="due-date-label">Due Date</span>
+              <span class="due-date-label">{{'REMINDER_MODAL.DUE_DATE'|translate}}</span>
               <span class="due-date-value">{{ dueDate }}</span>
             </div>
           </div>
@@ -802,12 +815,12 @@
           <div class="reminder-radio-row">
             <label class="radio-label" style="cursor: pointer">
               <input type="radio" name="reminderType" value="default" [(ngModel)]="reminderType" />
-              <span>Default Reminder</span>
+              <span>{{'REMINDER_MODAL.DEFAULT_REMINDER'|translate}}</span>
             </label>
 
             <label class="radio-label" style="cursor: pointer">
               <input type="radio" name="reminderType" value="custom" [(ngModel)]="reminderType" />
-              <span>Custom Reminder</span>
+              <span>{{'REMINDER_MODAL.CUSTOM_REMINDER'|translate}}</span>
             </label>
           </div>
 
@@ -852,7 +865,7 @@
 
           <!-- Time Picker -->
           <div class="time-row">
-            <label>Set Time: </label>
+            <label>{{'REMINDER_MODAL.SET_TIME'|translate}} </label>
             <input type="time" class="time-input readonly-bg" [value]="reminderTime" readonly />
             <i class="fa fa-clock-o time-icon"></i>
           </div>
@@ -860,7 +873,7 @@
 
         <!-- Email Body -->
         <div class="modal-section">
-          <label class="email-label">Email Body</label>
+          <label class="email-label">{{'REMINDER_MODAL.EMAIL_BODY'|translate}} </label>
           <textarea
             class="reminder-body"
             rows="4"
@@ -875,7 +888,7 @@
          </textarea
           >
           <!-- Error text -->
-          <p *ngIf="emailBodyError" class="error-text">This field is required</p>
+          <p *ngIf="emailBodyError" class="error-text">{{'REMINDER_MODAL.EMAIL_BODY_REQUIRED'|translate}}</p>
         </div>
       </div>
 
@@ -889,7 +902,7 @@
         >
           Reset
         </button>
-        <button class="btn submit-btn" (click)="sendReminder()">Send Reminder</button>
+        <button class="btn submit-btn" (click)="sendReminder()">{{'REMINDER_MODAL.SEND_REMINDER'|translate}}</button>
       </div>
     </div>
   </div>
@@ -903,7 +916,7 @@
   <div class="modal-content-box">
     <!-- Modal Header -->
     <div class="modal-header">
-      <p class="modal-title">Log Conversation</p>
+      <p class="modal-title">{{'LOG_CONVERSATION_MODAL.TITLE'|translate}}</p>
       <!-- Close Icon -->
       <button class="modal-close" title="Close" (click)="closeLogConvo()" aria-label="Close">
         &times;
@@ -914,20 +927,20 @@
     <div class="modal-body">
       <!-- Conversation Type-->
       <div class="row">
-        <label class="label">Conversation Type</label>
+        <label class="label">{{'LOG_CONVERSATION_MODAL.CONVERSATION_TYPE'|translate}}</label>
         <div class="time-wrapper">
           <select class="drop-down-type" [(ngModel)]="conversationType">
-            <option>Email</option>
-            <option>Meeting</option>
-            <option>Phone</option>
-            <option>Other</option>
+            <option>{{'LOG_CONVERSATION_MODAL.EMAIL'|translate}}</option>
+            <option>{{'LOG_CONVERSATION_MODAL.MEETING'|translate}}</option>
+            <option>{{'LOG_CONVERSATION_MODAL.PHONE'|translate}}</option>
+            <option>{{'LOG_CONVERSATION_MODAL.OTHER'|translate}}</option>
           </select>
         </div>
       </div>
 
       <!-- Date & Time -->
       <div class="row">
-        <label class="label">Date & Time</label>
+        <label class="label">{{'LOG_CONVERSATION_MODAL.DATE_TIME'|translate}}</label>
         <div class="time-wrapper">
           <input
             type="datetime-local"
@@ -943,12 +956,12 @@
       </div>
       <!-- Add Subject -->
       <div class="modal-section">
-        <label class="label block">Subject</label>
+        <label class="label block">{{'LOG_CONVERSATION_MODAL.SUBJECT'|translate}}</label>
         <input type="text" class="input-text" [(ngModel)]="conversationSubject" />
       </div>
       <!-- Add Conversation -->
       <div class="modal-section">
-        <label class="label block">Add Conversation</label>
+        <label class="label block">{{'LOG_CONVERSATION_MODAL.ADD_CONVERSATION'|translate}}</label>
         <textarea class="add-convo-textarea" rows="4" [(ngModel)]="conversationText"></textarea>
         <small class="error-text" *ngIf="notesError">
           {{ notesError }}
@@ -958,9 +971,9 @@
 
     <!-- Footer -->
     <div class="modal-footer">
-      <button class="btn cancel-btn" (click)="closeLogConvo()">Cancel</button>
-      <button class="btn reset-btn" (click)="resetLogConvo()">Reset</button>
-      <button class="btn submit-btn" (click)="saveLogConvo()">Save</button>
+      <button class="btn cancel-btn" (click)="closeLogConvo()">{{'COMMON.CANCEL'|translate}}</button>
+      <button class="btn reset-btn" (click)="resetLogConvo()">{{'COMMON.RESET'|translate}}</button>
+      <button class="btn submit-btn" (click)="saveLogConvo()">{{'COMMON.SAVE'|translate}}</button>
     </div>
   </div>
 </div>
