@@ -22,6 +22,7 @@ import { Location } from '@angular/common';
 import { switchMap, finalize, map } from 'rxjs/operators';
 import { Observable, of } from 'rxjs';
 import { TranslateService } from '@ngx-translate/core';
+import { UserService } from '../../../services/User.service.';
 
 interface RfqResponse {
   name: string;
@@ -113,7 +114,7 @@ export const MY_FORMATS = {
   templateUrl: './view-projects.html',
   styleUrls: ['./view-projects.css'],
 })
-export class ViewProjects implements AfterViewChecked {
+export class ViewProjects {
   projectId!: string;
   projectDetails: any;
   projectData?: projectdetails;
@@ -197,9 +198,7 @@ export class ViewProjects implements AfterViewChecked {
   }
 
   @ViewChild('chatMessages') private chatMessages!: ElementRef;
-  ngAfterViewChecked(): void {
-    this.scrollToBottom();
-  }
+ 
 
   private scrollToBottom(): void {
     try {
@@ -254,21 +253,36 @@ export class ViewProjects implements AfterViewChecked {
     private projectService: projectService,
     private reminderService: ReminderService,
     private location: Location,
-    private translate: TranslateService
+    private translate: TranslateService,
+    public userService: UserService
   ) {
     registerLocaleData(localeNl);
-    const now = new Date();
-
-    const yyyy = now.getFullYear();
-    const mm = String(now.getMonth() + 1).padStart(2, '0'); // Months are 0-based
-    const dd = String(now.getDate()).padStart(2, '0');
-    const hh = String(now.getHours()).padStart(2, '0');
-    const min = String(now.getMinutes()).padStart(2, '0');
-
-    this.maxDateTime = `${yyyy}-${mm}-${dd}T${hh}:${min}`;
+    
   }
 
+
+  ngDoCheck(): void {
+  if (!this.conversationDateTime) return;
+
+  const selected = new Date(this.conversationDateTime);
+  const now = new Date();
+
+  if (selected.getTime() > now.getTime()) {
+    this.dateTimeError = 'Future time selection is not allowed';
+    this.conversationDateTime = null;
+  } else {
+    this.dateTimeError = '';
+  }
+}
   ngOnInit(): void {
+    const now = new Date();
+ const yyyy = now.getFullYear();
+  const mm = String(now.getMonth() + 1).padStart(2, '0');
+  const dd = String(now.getDate()).padStart(2, '0');
+  const hh = String(now.getHours()).padStart(2, '0');
+  const min = String(now.getMinutes()).padStart(2, '0');
+
+  this.maxDateTime = `${yyyy}-${mm}-${dd}T${hh}:${min}`;
     // 🔹 Restore tab from localStorage (default: 'response')
     const savedTab = localStorage.getItem('activeTab');
     this.selectedTab = savedTab || 'response';
@@ -289,6 +303,7 @@ export class ViewProjects implements AfterViewChecked {
     }
   }
 
+  
   setActiveTab(tab: string): void {
     this.selectedTab = tab;
     localStorage.setItem('activeTab', tab);
@@ -1462,6 +1477,7 @@ export class ViewProjects implements AfterViewChecked {
         switchMap(({ res, paths }) =>
           this.projectService.sendMail({
             subcontractorID: draftConvo.subcontractorID,
+            projectID: draftConvo.projectID,
             subject: this.subject,
             body: this.messageText,
             attachmentFilePaths: paths,

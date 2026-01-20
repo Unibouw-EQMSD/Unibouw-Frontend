@@ -527,12 +527,13 @@
                       (click)="editRfq(row.id)"
                       title="Edit RFQ"
                     ></i>
-                    <i
-                      class="fa-regular fa-trash-can delete-icon"
-                      (click)="deleteRfq(row.id)"
-                      style="color: #dc3545; cursor: pointer; margin-left: 12px"
-                      title="Delete RFQ"
-                    ></i>
+                  <i
+  *ngIf="userService.isAdmin()"
+  class="fa-regular fa-trash-can delete-icon"
+  (click)="deleteRfq(row.id)"
+  style="color: #dc3545; cursor: pointer; margin-left: 12px"
+  title="Delete RFQ"
+></i>
                   </td>
                 </ng-container>
 
@@ -809,9 +810,9 @@
                       (ngModelChange)="onInputChange()"
                     />
 
-                    <div class="error-msg" *ngIf="(messageText ?? '').length > 5000">
-                      {{ 'CONVERSATION.MESSAGE_TOO_LONG' | translate }}
-                    </div>
+                     <div class="error-msg"  style="color: red;" *ngIf="(messageText ?? '').length > 5000">
+{{'CONVERSATION.MESSAGE_TOO_LONG'|translate}}
+    </div>
 
                     <!-- Hidden file input -->
                     <input
@@ -1039,15 +1040,9 @@
 
     <!-- Footer -->
     <div class="modal-footer">
-      <button class="btn cancel-btn" (click)="closeLogConvo()">
-        {{ 'COMMON.CANCEL' | translate }}
-      </button>
-      <button class="btn reset-btn" (click)="resetLogConvo()">
-        {{ 'COMMON.RESET' | translate }}
-      </button>
-      <button class="btn submit-btn" (click)="saveLogConvo()">
-        {{ 'COMMON.SAVE' | translate }}
-      </button>
+      <button class="btn cancel-btn" (click)="closeLogConvo()">{{'COMMON.CANCEL'|translate}}</button>
+      <button class="btn reset-btn" (click)="resetLogConvo()">{{'COMMON.RESET'|translate}}</button>
+      <button class="btn submit-btn" [disabled]="dateTimeError" (click)="saveLogConvo()">{{'COMMON.SAVE'|translate}}</button>
     </div>
   </div>
 </div>

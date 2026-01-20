@@ -390,7 +390,7 @@ Follow-up Date : ${formattedDate}
 
   confirmNotInterested(wi: any): void {
     const reason = wi?.notInterested?.reason?.trim();
-    const comment = wi?.notInterested?.comment?.trim();
+    let comment = wi?.notInterested?.comment?.trim();
     const workItemName = wi?.name || '';
     const rfqNumber = this.rfq?.rfqNumber || '';
 
@@ -399,6 +399,10 @@ Follow-up Date : ${formattedDate}
       alert('Please select a reason.');
       return;
     }
+if (reason !== 'Anders') {
+  wi.notInterested.comment = '';
+  comment = '';
+}
 
     if (reason === 'Anders' && !comment) {
       alert('Please enter a reason.');
@@ -411,7 +415,7 @@ Not Interested – Confirmation
 RFQ Number     : ${rfqNumber}
 Work Item Name : ${workItemName}
 Reason         : ${reason}
-Comment        : ${comment || 'No additional comments provided.'}
+${reason === 'Anders' ? `Comment        : ${comment}` : ''}
 `.trim();
 
     const payload: LogConversation = {
