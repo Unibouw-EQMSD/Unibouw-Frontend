@@ -8,21 +8,20 @@
 
     <!-- Right side -->
     <div class="header-right">
+      <!-- Translator -->
+      <label class="lang-toggle">
+        <input type="checkbox" [checked]="currentLang === 'nl'" (change)="toggleLanguage($event)" />
+        <span class="slider">
+          <span class="lang en">EN</span>
+          <span class="lang nl">NL</span>
+        </span>
+      </label>
+
       <!-- Notification -->
       <div class="notification" *ngIf="isAdmin">
         <i class="fa fa-gear" title="Set RFQ Reminder" (click)="openReminderConfig()"></i>
       </div>
-<label class="lang-toggle">
-  <input
-    type="checkbox"
-    [checked]="currentLang === 'nl'"
-    (change)="toggleLanguage($event)"
-  />
-  <span class="slider">
-    <span class="lang en">EN</span>
-    <span class="lang nl">NL</span>
-  </span>
-</label>
+
       <!-- User Dropdown -->
       <div class="user-dropdown">
         <button
@@ -52,11 +51,11 @@
 
           <!-- FIX: remove href -->
           <a class="dropdown-item" (click)="$event.preventDefault()">
-            <i class="fa-regular fa-user"></i> {{'HEADER.MY_PROFILE' | translate}}
+            <i class="fa-regular fa-user"></i> {{ 'HEADER.MY_PROFILE' | translate }}
           </a>
 
           <a class="dropdown-item" (click)="signOut()">
-            <i class="fa-solid fa-right-from-bracket"></i> {{'HEADER.SIGN_OUT' | translate}}
+            <i class="fa-solid fa-right-from-bracket"></i> {{ 'HEADER.SIGN_OUT' | translate }}
           </a>
         </div>
       </div>
@@ -67,12 +66,20 @@
   <nav class="navbar">
     <ul>
       <!-- <li><i class="fa-solid fa-gauge-simple-high" style="color: white;"></i></li> -->
-      <li><a routerLink="/workitems" [class.active]="isWorkitemActive()">{{'HEADER.WORKITEMS' | translate}}</a></li>
       <li>
-        <a routerLink="/subcontractor" [class.active]="isSubcontractorActive()">{{'HEADER.SUBCONTRACTORS' | translate}}</a>
+        <a routerLink="/workitems" [class.active]="isWorkitemActive()">{{
+          'HEADER.WORKITEMS' | translate
+        }}</a>
       </li>
       <li>
-        <a [routerLink]="'/projectdetails'" [class.active]="isProjectsActive()">{{'HEADER.PROJECTS' | translate}}</a>
+        <a routerLink="/subcontractor" [class.active]="isSubcontractorActive()">{{
+          'HEADER.SUBCONTRACTORS' | translate
+        }}</a>
+      </li>
+      <li>
+        <a [routerLink]="'/projectdetails'" [class.active]="isProjectsActive()">{{
+          'HEADER.PROJECTS' | translate
+        }}</a>
       </li>
     </ul>
   </nav>
@@ -85,9 +92,10 @@
   <div class="modal-content-box">
     <!-- Modal Header -->
     <div class="modal-header">
-      <p class="modal-title">{{'HEADER.SETTINGS' | translate}}</p>
+      <p class="modal-title">{{ 'HEADER.SETTINGS' | translate }}</p>
       <p class="modal-subtitle">
-{{'HEADER.REMINDER_CONFIG_TITLE' | translate}}      </p>
+        {{ 'HEADER.REMINDER_CONFIG_TITLE' | translate }}
+      </p>
     </div>
 
     <!-- Modal Body -->
@@ -96,7 +104,7 @@
       <div class="modal-section">
         <!-- Max Reminder Sequence -->
         <div class="row">
-          <label class="label">{{'HEADER.MAX_REMINDER_LABEL' | translate}}</label>
+          <label class="label">{{ 'HEADER.MAX_REMINDER_LABEL' | translate }}</label>
 
           <div
             class="custom-dropdown"
@@ -141,7 +149,7 @@
 
         <!-- Reminder Sequence -->
         <div class="row">
-          <label class="label">{{'HEADER.REMINDER_SEQUENCE' | translate}}</label>
+          <label class="label">{{ 'HEADER.REMINDER_SEQUENCE' | translate }}</label>
 
           <div
             class="dropdown"
@@ -205,13 +213,14 @@
               reminderForm.get('reminderSequence')?.invalid
             "
           >
-{{'HEADER.REMINDER_FORM_ERROR' | translate}}          </div>
+            {{ 'HEADER.REMINDER_FORM_ERROR' | translate }}
+          </div>
         </div>
       </div>
 
       <!-- Set Time -->
       <div class="row">
-        <label class="label">{{'HEADER.SET_REMINDER_LABEL' | translate}}</label>
+        <label class="label">{{ 'HEADER.SET_REMINDER_LABEL' | translate }}</label>
         <div class="time-wrapper">
           <input
             type="time"
@@ -232,16 +241,18 @@
           "
         >
           <span *ngIf="reminderForm.get('reminderTime')?.errors?.['required']">
-{{'HEADER.REMINDER_FORM_ERROR2' | translate}}          </span>
+            {{ 'HEADER.REMINDER_FORM_ERROR2' | translate }}
+          </span>
 
           <span *ngIf="reminderForm.get('reminderTime')?.errors?.['midnightNotAllowed']">
-{{'HEADER.REMINDER_FORM_ERROR3' | translate}}          </span>
+            {{ 'HEADER.REMINDER_FORM_ERROR3' | translate }}
+          </span>
         </div>
       </div>
 
       <!-- Email Body -->
       <div class="modal-section">
-        <label class="label block">{{'HEADER.EMAIL_BODY' | translate}}</label>
+        <label class="label block">{{ 'HEADER.EMAIL_BODY' | translate }}</label>
         <textarea
           class="email-body"
           rows="4"
@@ -260,25 +271,31 @@
             reminderForm.get('reminderEmailBody')?.invalid
           "
         >
-{{'HEADER.REMINDER_FORM_ERROR' | translate}}        </div>
+          {{ 'HEADER.REMINDER_FORM_ERROR' | translate }}
+        </div>
       </div>
 
       <!-- Enable Reminder -->
       <div class="checkbox-row">
         <input type="checkbox" id="enableGlobalReminders" formControlName="isEnable" />
-        <label for="enableGlobalReminders"> {{'HEADER.GLOBAL_REMINDER' | translate}} </label>
+        <label for="enableGlobalReminders"> {{ 'HEADER.GLOBAL_REMINDER' | translate }} </label>
       </div>
 
       <!-- Footer -->
       <div class="modal-footer">
-        <button type="button" class="btn cancel-btn" (click)="closeReminderConfig()">{{'FORM_ACTIONS.CANCEL' | translate}}</button>
-        <button type="button" class="btn reset-btn" (click)="resetReminderConfig()">{{'BUTTONS.RESET'|translate}}</button>
+        <button type="button" class="btn cancel-btn" (click)="closeReminderConfig()">
+          {{ 'FORM_ACTIONS.CANCEL' | translate }}
+        </button>
+        <button type="button" class="btn reset-btn" (click)="resetReminderConfig()">
+          {{ 'BUTTONS.RESET' | translate }}
+        </button>
         <button
           type="button"
           class="btn submit-btn"
           (click)="reminderForm.markAllAsTouched(); setReminderConfig()"
         >
-{{'BUTTONS.SAVE_CONFIGURATION'|translate}}        </button>
+          {{ 'BUTTONS.SAVE_CONFIGURATION' | translate }}
+        </button>
       </div>
     </form>
   </div>
