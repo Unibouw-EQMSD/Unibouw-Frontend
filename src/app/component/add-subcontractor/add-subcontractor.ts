@@ -26,10 +26,8 @@ export class AddSubcontractor implements OnInit {
   selectedCount = 0;
 
   persons: any[] = [];
-  categories: WorkitemCategory[] = [
-    { categoryID: '213cf69b-627e-4962-83ec-53463c8664d2', categoryName: 'Unibouw' },
-    { categoryID: '60a1a614-05fd-402d-81b3-3ba05fdd2d8a', categoryName: 'Standard' },
-  ];
+  categories: WorkitemCategory[] = [];
+
   selectedCategoryId: string = '';
   attachments: File[] = [];
   uploadedFiles: { name: string; type: string; path: string }[] = [];
@@ -209,10 +207,7 @@ ${workItemsText}
 
     this.loadPersons();
 
-    if (this.categories.length > 0) {
-      this.selectedCategoryId = this.categories[0].categoryID;
-      this.loadWorkitems();
-    }
+   this.loadCategories();
 
     const officeCtrl = this.subcontractorForm.get('officeAddress');
     const billingCtrl = this.subcontractorForm.get('billingAddress');
@@ -257,21 +252,73 @@ ${workItemsText}
   }
 
   /** Load workitems per category */
-  loadWorkitems() {
-    this.workItemService.getWorkitems(this.selectedCategoryId).subscribe((items) => {
-      this.workitems = (items || [])
-        .filter((w) => w.isActive !== false)
-        .map((w) => ({ ...w, categoryID: this.selectedCategoryId }))
-        .sort((a, b) => a.name.localeCompare(b.name));
+ async loadCategories() {
+  try {
+    const data = await this.workItemService.getCategoriesAsync();
+    
+    this.categories = data
+      .map(cat => ({
+        categoryID: cat.categoryID,
+        categoryName: this.getCategoryTranslationKey(cat.categoryName),
+        originalName: cat.categoryName // Keep original for sorting
+      }))
+      .sort((a, b) => {
+        // Define custom order
+        const order = ['Unibouw', 'Standard'];
+        return order.indexOf(a.originalName) - order.indexOf(b.originalName);
+      });
 
-      // Restore selections for this category
-      this.selectedWorkitems = this.selectionsByCategory.get(this.selectedCategoryId) || [];
-      this.selectedCount = this.selectedWorkitems.length;
+    // Auto-select first category and load its workitems
+    if (this.categories.length > 0) {
+      this.selectedCategoryId = this.categories[0].categoryID;
+      this.loadWorkitems();
+    }
+  } catch (err) {
+    console.error('Failed to load categories', err);
+  }
+}
+
+
+  /**
+   * Map backend category names to translation keys
+   */
+  getCategoryTranslationKey(categoryName: string): string {
+    const keyMap: { [key: string]: string } = {
+      'Unibouw': 'WORKITEM.TAB_UNIBOUW',
+      'Standard': 'WORKITEM.TAB_STANDARD'
+    };
+    return keyMap[categoryName] || categoryName;
+  }
+
+  /**
+   * Load workitems for the selected category
+   */
+  loadWorkitems() {
+    this.workItemService.getWorkitems(this.selectedCategoryId).subscribe({
+      next: (items) => {
+        this.workitems = (items || [])
+          .filter((w) => w.isActive !== false)
+          .map((w) => ({ ...w, categoryID: this.selectedCategoryId }))
+          .sort((a, b) => a.name.localeCompare(b.name));
+
+        // Restore selections for this category
+        this.selectedWorkitems = this.selectionsByCategory.get(this.selectedCategoryId) || [];
+        this.selectedCount = this.selectedWorkitems.length;
+      },
+      error: (err) => {
+        console.error('Failed to load workitems', err);
+      }
     });
   }
 
+  /**
+   * Switch category and preserve selections
+   */
   selectCategory(id: string) {
+    // Save current category selections
     this.selectionsByCategory.set(this.selectedCategoryId, this.selectedWorkitems);
+    
+    // Switch to new category
     this.selectedCategoryId = id;
     this.loadWorkitems();
   }

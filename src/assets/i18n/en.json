@@ -250,6 +250,44 @@
     "WORKITEMS": "Workitems",
     "NO_WORKITEMS": "No workitems assigned"
   },
+
+  "SUBCONTRACTOR_FORM": {
+    "TITLE": "Add Subcontractors",
+
+    "SUBCONTRACTOR_NAME": "Subcontractor Name",
+    "EMAIL": "Email",
+    "LOCATION": "Location",
+    "COUNTRY": "Country",
+    "CONTACT_NAME": "Contact Name",
+    "CONTACT_PHONE": "Contact Phone",
+    "CONTACT_EMAIL": "Contact Email ID",
+    "STATUS": "Status",
+    "OFFICE_ADDRESS": "Office Address",
+    "BILLING_ADDRESS": "Billing Address",
+    "SAME_AS_OFFICE": "Same as Office Address",
+
+    "ACTIVE": "Active",
+    "INACTIVE": "Inactive",
+
+    "WORKITEMS": "Workitems",
+    "SEARCH_WORKITEMS": "Search workitems...",
+    "NO_WORKITEMS_FOUND": "No workitems found",
+    "WORKITEM_REQUIRED": "At least one workitem is required.",
+
+    "CANCEL": "Cancel",
+    "RESET": "Reset",
+    "SUBMIT": "Submit",
+
+    "REQUIRED": "This field is required.",
+    "INVALID_EMAIL": "Enter a valid email address.",
+    "INVALID_PHONE": "Enter a valid phone number (8–15 digits).",
+
+    "ADDRESS_PLACEHOLDER_1": "Address 1",
+    "ADDRESS_PLACEHOLDER_2": "Address 2",
+
+    "SUCCESS": "Saved successfully",
+    "ERROR": "Something went wrong"
+  },
   "NOT_INTERESTED_REASONS": {
     "REASON_1": "Onvoldoende capaciteit / planning zit vol",
     "REASON_2": "Geen interesse in het project / past niet binnen strategie",
