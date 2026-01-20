@@ -508,4 +508,58 @@ select option {
   margin-top: 4px;
 }
 
+
+.lang-toggle {
+  position: relative;
+  display: inline-block;
+  width: 70px;
+  height: 32px;
+}
+
+.lang-toggle input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  inset: 0;
+  background-color: #f97316;
+  border-radius: 16px;
+  transition: 0.3s;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 8px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.lang-toggle input:checked + .slider {
+  background-color: #f97316;
+}
+
+.slider::before {
+  content: '';
+  position: absolute;
+  height: 26px;
+  width: 26px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  border-radius: 50%;
+  transition: 0.3s;
+}
+
+.lang-toggle input:checked + .slider::before {
+  transform: translateX(38px);
+}
+
+.lang {
+  color: #fff;
+  z-index: 1;
+}
+
 /* ----------------- Model End ---------------- */

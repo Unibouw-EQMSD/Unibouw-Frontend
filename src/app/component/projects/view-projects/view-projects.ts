@@ -21,6 +21,7 @@ import localeNl from '@angular/common/locales/nl';
 import { Location } from '@angular/common';
 import { switchMap, finalize, map } from 'rxjs/operators';
 import { Observable, of } from 'rxjs';
+import { TranslateService } from '@ngx-translate/core';
 
 interface RfqResponse {
   name: string;
@@ -143,6 +144,9 @@ export class ViewProjects implements AfterViewChecked {
     'status',
     'actions',
   ];
+  filteredConvoSubcontractors: any[] = [];
+allPmSubConversationData: any[] = [];
+
   dataSource = new MatTableDataSource<any>([]);
   isLoading = false;
   isSpinLoading = false;
@@ -158,6 +162,7 @@ export class ViewProjects implements AfterViewChecked {
   dateTimeError = '';
   notesError = '';
   dateTimeTouched = false;
+conversationSearchText = '';
 
   convoSubcontractors: { id: string; name: string }[] = [];
   replyingToMessageId: string | null = null;
@@ -248,7 +253,7 @@ export class ViewProjects implements AfterViewChecked {
     private route: ActivatedRoute,
     private projectService: projectService,
     private reminderService: ReminderService,
-    private location: Location
+    private location: Location,private translate: TranslateService
   ) {
     registerLocaleData(localeNl);
     const now = new Date();
@@ -1164,6 +1169,25 @@ export class ViewProjects implements AfterViewChecked {
   //     });
   // }
 
+filterConversations(): void {
+  const search = this.conversationSearchText.trim().toLowerCase();
+
+  if (!search) {
+    this.pmSubConversationData = [...this.allPmSubConversationData];
+    return;
+  }
+
+  this.pmSubConversationData = this.allPmSubConversationData.filter(convo =>
+    convo.messageText?.toLowerCase().includes(search) ||
+    convo.subject?.toLowerCase().includes(search) ||
+    convo.senderType?.toLowerCase().includes(search)
+  );
+}
+clearConversationSearch(): void {
+  this.conversationSearchText = '';
+  this.pmSubConversationData = [...this.allPmSubConversationData];
+}
+
   loadConversationBySub(subId: string): void {
     if (!subId) return;
 
@@ -1244,8 +1268,10 @@ export class ViewProjects implements AfterViewChecked {
       )
       .subscribe({
         next: (res: any[]) => {
-          this.pmSubConversationData = res || [];
+ this.allPmSubConversationData = res || [];
+  this.pmSubConversationData = [...this.allPmSubConversationData];
 
+  setTimeout(() => this.scrollToBottom(), 0);
           // 🔹 Debug PM IDs
           console.log(
             'Loaded projectManagerIDs:',
@@ -1308,15 +1334,15 @@ export class ViewProjects implements AfterViewChecked {
 
     // 🔹 Notes validation
     if (!this.conversationText?.trim()) {
-      this.notesError = 'Please enter the message details.';
+      this.notesError =  this.translate.instant('VALIDATION.NOTES_ERROR'); 
       return;
     }
 
     // 🔹 Date & Time validation
-    if (!this.dateTimeTouched) {
-      this.dateTimeError = 'Please enter the date and time.';
-      return;
-    }
+  if (!this.dateTimeTouched) {
+  this.dateTimeError = this.translate.instant('VALIDATION.DATE_TIME_REQUIRED');
+  return;
+}
 
     const selectedDate = new Date(this.conversationDateTime!);
     const now = new Date();
@@ -1595,7 +1621,7 @@ export class ViewProjects implements AfterViewChecked {
     const replyText = this.replyTexts[parentId!] ?? '';
 
     if (!replyText.trim()) {
-      this.replyError = 'Reply cannot be empty';
+      this.replyError = this.translate.instant('VALIDATION.REPLY_ERROR');
       return;
     }
 

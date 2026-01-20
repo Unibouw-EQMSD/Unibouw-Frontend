@@ -45,13 +45,18 @@ import { MatNativeDateModule } from '@angular/material/core';
 import { MAT_DATE_FORMATS, DateAdapter } from '@angular/material/core';
 import { CustomDateAdapter } from './component/custom-date-adapter';
 import { ConfirmDialogComponent } from './confirm-dialog-component/confirm-dialog-component';
-
+import { TranslateModule, TranslateLoader, TranslateService } from '@ngx-translate/core';
+import { TRANSLATE_HTTP_LOADER_CONFIG, TranslateHttpLoader, TranslateHttpLoaderConfig } from '@ngx-translate/http-loader';
+import { HttpClient } from '@angular/common/http';
 
 export function MSALInstanceFactory(): PublicClientApplication {
   return (window as any).msalInstance;
 }
 export function initConfig(appConfig: AppConfigService) {
   return () => appConfig.loadConfig();
+}
+export function HttpLoaderFactory() {
+  return new TranslateHttpLoader(); // no arguments
 }
 @NgModule({
   declarations: [
@@ -70,23 +75,22 @@ export function initConfig(appConfig: AppConfigService) {
     // ConfirmDialogComponent,
     // ProjectSummary,
   ],
-  imports: [
+ imports: [
     BrowserModule,
     CommonModule,
     RouterModule,
-     BrowserAnimationsModule,
-     MatButtonModule,
+    BrowserAnimationsModule,
     AppRoutingModule,
     FormsModule,
     ReactiveFormsModule,
     HttpClientModule,
     SSOLogin,
-  NgxIntlTelInputModule,
-      MatDatepickerModule,
-      MatNativeDateModule,
-MatDialogModule,
+    NgxIntlTelInputModule,
+    MatDatepickerModule,
+    MatNativeDateModule,
+    MatDialogModule,
 
-    // Material
+    // Angular Material
     MatTableModule,
     MatPaginatorModule,
     MatSortModule,
@@ -97,40 +101,50 @@ MatDialogModule,
     MatSlideToggleModule,
     MatTabsModule,
     MatProgressSpinnerModule,
-MatTooltipModule,
+    MatTooltipModule,
+
     // MSAL
     MsalModule.forRoot(
       MSALInstanceFactory(),
       null as any,
       null as any
     ),
+
+    // ngx-translate
+    TranslateModule.forRoot({
+      defaultLanguage: 'en',
+      loader: {
+        provide: TranslateLoader,
+        useFactory: HttpLoaderFactory,
+        deps: [HttpClient]
+      }
+    }),
   ],
-  providers: [
+ providers: [
     provideBrowserGlobalErrorListeners(),
 
-     { provide: DateAdapter, useClass: CustomDateAdapter },
-  { 
-    provide: MAT_DATE_FORMATS, 
-    useValue: {
-      parse: { dateInput: 'DD-MM-YYYY' },
-      display: {
-        dateInput: 'DD-MM-YYYY',
-        monthYearLabel: 'MMM YYYY',
-        dateA11yLabel: 'DD-MM-YYYY',
-        monthYearA11yLabel: 'MMMM YYYY',
+    { provide: DateAdapter, useClass: CustomDateAdapter },
+    { 
+      provide: MAT_DATE_FORMATS, 
+      useValue: {
+        parse: { dateInput: 'DD-MM-YYYY' },
+        display: {
+          dateInput: 'DD-MM-YYYY',
+          monthYearLabel: 'MMM YYYY',
+          dateA11yLabel: 'DD-MM-YYYY',
+          monthYearA11yLabel: 'MMMM YYYY',
+        }
       }
-    }
-  },
-    {
-      provide: MSAL_INSTANCE,
-      useFactory: MSALInstanceFactory
     },
-    {
-            provide: APP_INITIALIZER,
-            useFactory: initConfig,
-            deps: [AppConfigService],
-            multi: true,
+
+    { provide: TRANSLATE_HTTP_LOADER_CONFIG, useValue: <TranslateHttpLoaderConfig>{
+        prefix: './assets/i18n/',
+        suffix: '.json',
+      } 
     },
+
+    { provide: MSAL_INSTANCE, useFactory: MSALInstanceFactory },
+    { provide: APP_INITIALIZER, useFactory: initConfig, deps: [AppConfigService], multi: true },
     MsalService
   ],
   bootstrap: [App]
