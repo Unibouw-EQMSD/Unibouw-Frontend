@@ -9,7 +9,7 @@
     <!-- Right side -->
     <div class="header-right">
       <!-- Translator -->
-      <label class="lang-toggle">
+      <label class="lang-toggle" title="Translate">
         <input type="checkbox" [checked]="currentLang === 'nl'" (change)="toggleLanguage($event)" />
         <span class="slider">
           <span class="lang en">EN</span>
@@ -113,6 +113,7 @@
           >
             <div
               class="dropdown-btn"
+              style="padding-left: 12px"
               (click)="reminderForm.get('isEnable')?.value && toggleMaxSequenceDropdown()"
               [class.is-invalid]="
                 reminderForm.get('maxReminderSequence')?.touched &&
@@ -120,9 +121,12 @@
               "
             >
               {{ reminderForm.get('maxReminderSequence')?.value || '0' }}
-              <svg class="dropdown-icon" viewBox="0 0 24 24">
+              <!-- <svg class="dropdown-icon" viewBox="0 0 24 24">
                 <path d="M6 9l6 6 6-6" />
-              </svg>
+              </svg> -->
+              <span style="font-size: 12px; margin-left: auto; padding-right: 10px">{{
+                open ? '▲' : '▼'
+              }}</span>
             </div>
 
             <ul class="dropdown-list" *ngIf="open && reminderForm.get('isEnable')?.value">
@@ -163,6 +167,7 @@
             <div
               class="dropdown-btn"
               (click)="reminderForm.get('isEnable')?.value && toggleReminderDropdown()"
+              style="padding-left: 12px; padding-right: 12px"
             >
               <span class="dropdown-text" [class.placeholder]="!selectedReminderSequence.length">
                 {{
@@ -177,10 +182,11 @@
                   class="clear"
                   *ngIf="selectedReminderSequence.length"
                   (click)="clearSelected($event)"
+                  title="Clear"
                 >
                   ×
                 </span>
-                <span>{{ dropdownOpen ? '▲' : '▼' }}</span>
+                <span style="font-size: 12px">{{ dropdownOpen ? '▲' : '▼' }}</span>
               </div>
             </div>
 

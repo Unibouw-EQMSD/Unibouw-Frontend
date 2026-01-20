@@ -25,14 +25,14 @@
 }
 
 .notification:hover {
-  color: orange;
+  color: #f97316;
 }
 
 .notification .badge {
   position: absolute;
   top: -8px;
   right: -8px;
-  background: orange;
+  background: #f97316;
   color: white;
   font-size: 12px;
   font-weight: bold;
@@ -106,7 +106,6 @@
   padding: 10px;
   text-decoration: none;
   color: #f97316;
-  /* Orange */
   font-size: 14px;
   font-weight: 500;
   transition: background 0.2s;

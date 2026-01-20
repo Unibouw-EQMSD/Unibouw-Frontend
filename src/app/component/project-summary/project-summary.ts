@@ -330,12 +330,18 @@ export class ProjectSummary implements OnInit {
     const rfqNumber = this.rfq?.rfqNumber || '';
     const maybeLaterDate = wi.maybeLaterDate;
 
+    const formattedDate = maybeLaterDate
+      ? new Date(maybeLaterDate)
+          .toLocaleDateString('en-GB') // DD/MM/YYYY
+          .replace(/\//g, '-')
+      : '';
+
     const message = `
 Maybe Later – Confirmation
 
 RFQ Number     : ${rfqNumber}
 Work Item Name : ${workItemName}
-Follow-up Date : ${maybeLaterDate}
+Follow-up Date : ${formattedDate}
 `.trim();
 
     const payload: LogConversation = {

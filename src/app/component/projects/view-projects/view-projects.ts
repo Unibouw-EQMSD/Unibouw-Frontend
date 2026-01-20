@@ -1062,7 +1062,12 @@ export class ViewProjects implements AfterViewChecked {
     for (const file of Array.from(input.files)) {
       if (file.size > this.MAX_FILE_SIZE) {
         //alert(`"${file.name}" exceeds the 10 MB limit.`);
-        alert('Attachment exceeds the maximum size of 10 MB.');
+        const message =
+          input.files.length === 1
+            ? 'The selected file exceeds the maximum allowed size of 10 MB.'
+            : 'One or more selected files exceed the maximum allowed size of 10 MB.';
+
+        alert(message);
         continue;
       }
       this.attachments.push(file);
@@ -1554,7 +1559,12 @@ export class ViewProjects implements AfterViewChecked {
     for (const file of Array.from(input.files)) {
       if (file.size > this.MAX_FILE_SIZE) {
         //alert(`"${file.name}" exceeds the 10 MB limit.`);
-        alert('Attachment exceeds the maximum size of 10 MB.');
+        const message =
+          input.files.length === 1
+            ? 'The selected file exceeds the maximum allowed size of 10 MB.'
+            : 'One or more selected files exceed the maximum allowed size of 10 MB.';
+
+        alert(message);
         continue;
       }
       this.replyAttachments.push(file);
