@@ -10,8 +10,7 @@
           title="Back"
           (click)="goBack()"
         ></i> -->
-        Edit RFQ
-      </h1>
+{{'RFQ_ACTIONS.EDIT_RFQ'|translate}}      </h1>
     </div>
 
     <div class="pagetitle" *ngIf="!rfqIdForEdit">
@@ -22,7 +21,7 @@
           title="Back"
           (click)="goBack()"
         ></i> -->
-        Add RFQ
+ {{'RFQ_ACTIONS.ADD_RFQ'|translate}}  
       </h1>
     </div>
 
@@ -53,27 +52,27 @@
         >
           <!-- Project Name Section (Always visible) -->
           <div style="display: flex; align-items: baseline; gap: 10px">
-            <span style="color: #6f42c1; font-weight: 500">Project</span>
+            <span style="color: #6f42c1; font-weight: 500">{{'PROJECT_DETAILS.PROJECT'|translate}}</span>
             <span style="color: #000; font-weight: 400; font-size: 16px">
-              {{ projectDetails?.name || 'Loading...' }}
+{{ projectDetails?.name || ('COMMON.LOADING' | translate) }}
             </span>
           </div>
 
           <!-- ⭐ RFQ ID Section (Only in Edit Mode) -->
           <div *ngIf="rfqIdForEdit" style="display: flex; align-items: baseline; gap: 10px">
-            <span style="color: #6f42c1; font-weight: 500">RFQ Number</span>
+            <span style="color: #6f42c1; font-weight: 500">{{'RFQ_TABLE.RFQ_NUMBER'| translate}}</span>
             <span style="color: #333; font-weight: 500; font-size: 16px">{{ rfqNumber }}</span>
           </div>
 
           <!-- ⭐ Created Date Section (Only in Edit Mode) -->
           <div *ngIf="rfqIdForEdit" style="display: flex; align-items: baseline; gap: 10px">
-            <span style="color: #6f42c1; font-weight: 500">Created Date</span>
+            <span style="color: #6f42c1; font-weight: 500">{{'RFQ_PAGE.CREATED_DATE'|translate}}</span>
             <span style="color: #333; font-weight: 500; font-size: 16px">{{
               createdDateDisplay
             }}</span>
           </div>
           <div *ngIf="rfqIdForEdit" style="display: flex; align-items: baseline; gap: 10px">
-            <span style="color: #6f42c1; font-weight: 500">Work Item</span>
+            <span style="color: #6f42c1; font-weight: 500">{{'RFQ_PAGE.WORK_ITEM'|translate}}</span>
             <span style="color: #333; font-weight: 500; font-size: 16px">{{ workItemName }}</span>
           </div>
         </div>
@@ -89,7 +88,7 @@
               (click)="selectedTab = 'unibouw'"
               [class.active]="selectedTab === 'unibouw'"
             >
-              Unibouw
+              {{'WORKITEM.TAB_UNIBOUW'|translate}}
               <span class="count-badge" *ngIf="getSelectedCountByTab('unibouw') > 0">
                 {{ getSelectedCountByTab('unibouw') }}
               </span>
@@ -99,8 +98,7 @@
               (click)="selectedTab = 'standard'"
               [class.active]="selectedTab === 'standard'"
             >
-              Standard
-              <span class="count-badge" *ngIf="getSelectedCountByTab('standard') > 0">
+    {{'WORKITEM.TAB_STANDARD'|translate}}              <span class="count-badge" *ngIf="getSelectedCountByTab('standard') > 0">
                 {{ getSelectedCountByTab('standard') }}
               </span>
             </button>
@@ -116,8 +114,8 @@
             <table class="workitems-table">
               <thead>
                 <tr>
-                  <th>Select</th>
-                  <th>Work Item</th>
+                  <th>{{'RFQ_PAGE.SELECT'|translate}}</th>
+                  <th>{{'RFQ_PAGE.WORK_ITEM'|translate}}</th>
                 </tr>
               </thead>
               <tbody>
@@ -149,8 +147,7 @@
             *ngIf="globalDateError"
             style="margin-top: 6px; color: #dc3545; font-size: 13px; font-weight: 500"
           >
-            Select at least one subcontractor to apply the due date
-          </div>
+{{'RFQ_PAGE.SELECT_SUBCONTRACTOR_ERROR'|translate}}          </div>
           <div
             class="card-header"
             style="
@@ -162,7 +159,7 @@
             "
           >
             <div style="display: flex; align-items: center; gap: 3px; margin-right: 10px">
-              <h3 style="margin: 0; font-size: 16px">Subcontractors</h3>
+              <h3 style="margin: 0; font-size: 16px">{{'RFQ_PAGE.SUBCONTRACTORS'|translate}} </h3>
               <button
                 type="button"
                 (click)="addSub()"
@@ -176,7 +173,7 @@
             <div style="display: flex; align-items: center; gap: 15px">
               <!-- Global Due Date -->
               <div style="display: flex; align-items: center; gap: 8px">
-                <span style="color: #6f42c1; font-weight: 500; font-size: 14px">Due Date</span>
+                <span style="color: #6f42c1; font-weight: 500; font-size: 14px">{{'RFQ_PAGE.DUE_DATE'|translate}} </span>
                 <input
                   type="date"
                   [(ngModel)]="globalDueDate"
@@ -214,8 +211,7 @@
                   [(ngModel)]="showAll"
                   (change)="toggleSelectAll()"
                 />
-                Show all
-              </label>
+{{'RFQ_PAGE.SHOW_ALL'|translate}}              </label>
             </div>
           </div>
 
@@ -231,8 +227,8 @@
             "
           >
             <div style="width: 30px"></div>
-            <div style="flex: 1; padding-left: 10px">Name</div>
-            <div style="width: 125px">Due Date</div>
+            <div style="flex: 1; padding-left: 10px">{{'RFQ_PAGE.NAME'|translate}}  </div>
+            <div style="width: 125px">{{'RFQ_PAGE.DUE_DATE'|translate}}</div>
           </div>
 
           <!-- List -->
@@ -284,8 +280,7 @@
               *ngIf="!selectedWorkItems.length"
               style="padding: 20px; text-align: center; color: #999; font-style: italic"
             >
-              Please select a work item to view subcontractors.
-            </div>
+{{'RFQ_PAGE.SELECT_WORKITEM_MESSAGE'|translate}}            </div>
 
             <div
               *ngIf="selectedWorkItems.length && noSubMessage"
@@ -301,8 +296,7 @@
             *ngIf="globalDateError"
             style="margin-top: 6px; color: #dc3545; font-size: 13px; font-weight: 500"
           >
-            Select at least one subcontractor to apply the due date
-          </div>
+{{'RFQ_PAGE.SELECT_SUBCONTRACTOR_ERROR'|translate}}             </div>
           <div
             class="card-header"
             style="
@@ -314,7 +308,7 @@
             "
           >
             <div style="display: flex; align-items: center; gap: 10px">
-              <h3 style="margin: 0; font-size: 16px">Subcontractors</h3>
+              <h3 style="margin: 0; font-size: 16px">{{'RFQ_PAGE.SUBCONTRACTORS'|translate}}  </h3>
               <button
                 type="button"
                 (click)="addSub()"
@@ -328,7 +322,7 @@
             <div style="display: flex; align-items: center; gap: 15px">
               <!-- Global Due Date -->
               <div style="display: flex; align-items: center; gap: 8px">
-                <span style="color: #6f42c1; font-weight: 500; font-size: 14px">Due Date</span>
+                <span style="color: #6f42c1; font-weight: 500; font-size: 14px">{{'RFQ_PAGE.DUE_DATE'|translate}}</span>
                 <input
                   type="date"
                   [(ngModel)]="globalDueDate"
@@ -366,8 +360,7 @@
                   (change)="toggleSelectAll()"
                   class="cursor-pointer"
                 />
-                Show all
-              </label>
+{{'RFQ_PAGE.SHOW_ALL'|translate}}                 </label>
             </div>
           </div>
 
@@ -383,8 +376,8 @@
             "
           >
             <div style="width: 30px"></div>
-            <div style="flex: 1; padding-left: 10px">Name</div>
-            <div style="width: 125px">Due Date</div>
+            <div style="flex: 1; padding-left: 10px">{{'RFQ_PAGE.NAME'|translate}}   </div>
+            <div style="width: 125px">{{'RFQ_PAGE.DUE_DATE'|translate}} </div>
           </div>
 
           <!-- List -->
@@ -433,8 +426,7 @@
               *ngIf="!selectedWorkItems.length"
               style="padding: 20px; text-align: center; color: #999; font-style: italic"
             >
-              Please select a work item to view subcontractors.
-            </div>
+{{'RFQ_PAGE.SELECT_WORKITEM_MESSAGE'|translate}}              </div>
 
             <div
               *ngIf="selectedWorkItems.length && noSubMessage"
@@ -447,19 +439,17 @@
 
         <!-- Footer Buttons -->
         <div class="form-actions main-actions" *ngIf="!isLoader">
-          <button type="button" class="btn cancel-btn" (click)="confirmCancel()">Cancel</button>
-          <button type="button" class="btn submit-btn" (click)="openPreview()">Preview</button>
+          <button type="button" class="btn cancel-btn" (click)="confirmCancel()">{{'RFQ_FOOTER_ACTIONS.CANCEL'|translate}}</button>
+          <button type="button" class="btn submit-btn" (click)="openPreview()">{{'RFQ_FOOTER_ACTIONS.PREVIEW'|translate}}</button>
           <button
             type="button"
             class="btn submit-btn"
             *ngIf="!rfqIdForEdit"
             (click)="onSubmit(false)"
           >
-            Save Draft
-          </button>
+{{'RFQ_FOOTER_ACTIONS.SAVE_DRAFT'|translate}}          </button>
           <button type="button" class="btn submit-btn" (click)="onSubmit(true)">
-            Send to Subcontractors
-          </button>
+{{'RFQ_FOOTER_ACTIONS.SEND_TO_SUBCONTRACTORS'|translate}}           </button>
         </div>
       </div>
     </div>
@@ -477,8 +467,8 @@
   >
     <!-- ================= HEADER ================= -->
     <div class="modal-header">
-      <h2 id="previewTitle">Quote Request</h2>
-      <p class="subtitle">RFQ Invitation for Subcontractors</p>
+      <h2 id="previewTitle">{{'RFQ_PREVIEW.TITLE'|translate}}</h2>
+      <p class="subtitle">{{'RFQ_PREVIEW.SUBTITLE'|translate}}</p>
     </div>
 
     <!-- ================= BODY ================= -->
@@ -494,15 +484,15 @@
 
       <div class="details-box">
         <div class="detail-item">
-          <div class="detail-label">RFQ ID</div>
+          <div class="detail-label">{{'RFQ_PREVIEW.RFQ_ID'|translate}}</div>
           <div class="detail-value">{{ previewData?.rfqId }}</div>
         </div>
         <div class="detail-item">
-          <div class="detail-label">Project</div>
+          <div class="detail-label">{{'RFQ_PREVIEW.PROJECT'|translate}}</div>
           <div class="detail-value">{{ previewData?.projectName }}</div>
         </div>
         <div class="detail-item">
-          <div class="detail-label">Work Item(s)</div>
+          <div class="detail-label">{{'RFQ_PREVIEW.WORK_ITEMS'|translate}}</div>
           <div class="detail-value">
             <ul class="workitem-list">
               <li *ngFor="let wi of previewData?.workItems">
@@ -512,7 +502,7 @@
           </div>
         </div>
         <div class="detail-item">
-          <div class="detail-label">Due Date</div>
+          <div class="detail-label">{{'RFQ_PREVIEW.DUE_DATE'|translate}}</div>
           <div class="detail-value">
             {{ previewData?.dueDate | date : 'dd MMMM yyyy' }}
           </div>
@@ -520,22 +510,22 @@
       </div>
 
       <div class="closing-remarks">
-        <p>Thank you for your prompt response.</p>
-        <p><strong>Unibouw Team</strong></p>
+        <p>{{'RFQ_PREVIEW.THANK_YOU'|translate}}</p>
+        <p><strong>{{'RFQ_PREVIEW.TEAM'|translate}}</strong></p>
       </div>
     </div>
 
     <!-- ================= FOOTER ================= -->
     <div class="modal-footer">
       <button class="btn cancel-btn mr-3" (click)="closePreview()" [disabled]="isLoader">
-        Close
+        {{'RFQ_PREVIEW.CLOSE'|translate}}
       </button>
       <button
         class="btn submit-btn"
         (click)="onSubmit(true, editedEmailBody)"
         [disabled]="isLoader"
       >
-        Send
+        {{'RFQ_PREVIEW.SEND'|translate}}
       </button>
     </div>
   </div>

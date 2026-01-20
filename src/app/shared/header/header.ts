@@ -11,6 +11,7 @@ import {
   AbstractControl,
   ValidationErrors,
 } from '@angular/forms';
+import { TranslateService } from '@ngx-translate/core';
 
 export function midnightNotAllowedValidator(control: AbstractControl): ValidationErrors | null {
   if (control.value === '00:00') {
@@ -28,13 +29,15 @@ export function midnightNotAllowedValidator(control: AbstractControl): Validatio
 export class Header implements OnInit {
   private msalInstance: PublicClientApplication;
   reminderForm: FormGroup;
+currentLang: 'en' | 'nl' = 'en';
 
   constructor(
     public router: Router,
     private userService: UserService,
     private snackBar: MatSnackBar,
     private reminderService: ReminderService,
-    private fb: FormBuilder
+    private fb: FormBuilder,    private translate: TranslateService // ← Add this
+
   ) {
     this.msalInstance = (window as any).msalInstance;
 
@@ -45,6 +48,8 @@ export class Header implements OnInit {
       reminderEmailBody: ['', [Validators.required, this.noWhitespaceValidator]],
       isEnable: [true],
     });
+     this.translate.setDefaultLang('en');
+  this.translate.use('en');
   }
 
   @HostListener('document:click', ['$event'])
@@ -66,7 +71,18 @@ export class Header implements OnInit {
       this.userDropdownOpen = false;
     }
   }
+toggleLanguage(event: Event) {
+  const checked = (event.target as HTMLInputElement).checked;
+  const lang: 'en' | 'nl' = checked ? 'nl' : 'en';
 
+  this.switchLang(lang);
+}
+
+switchLang(lang: 'en' | 'nl') {
+  this.currentLang = lang;
+  this.translate.use(lang);
+  localStorage.setItem('lang', lang);
+}
   isAdmin = false;
   // reminderTimeValue: string = '08:00';
   // reminderEmailBody: string = '';
@@ -79,6 +95,11 @@ export class Header implements OnInit {
   userDropdownOpen = false;
 
   ngOnInit() {
+
+    const savedLang = localStorage.getItem('lang') as 'en' | 'nl' | null;
+
+  this.currentLang = savedLang ?? 'en';
+  this.translate.use(this.currentLang);
     this.isAdmin = this.userService.isAdmin(); // Check role
 
     this.reminderForm.get('isEnable')?.valueChanges.subscribe((enabled) => {
