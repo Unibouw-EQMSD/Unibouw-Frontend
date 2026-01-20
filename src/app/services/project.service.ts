@@ -49,6 +49,7 @@ export interface LogConversation {
 
 export interface SendMailRequest {
   subcontractorID: string;
+  projectID: string;
   subject: string;
   body: string; // message body (HTML or text)
   attachmentFilePaths?: string[]; // optional

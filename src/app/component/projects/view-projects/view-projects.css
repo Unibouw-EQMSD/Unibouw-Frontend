@@ -792,6 +792,12 @@
   color: white;
 }
 
+.submit-btn:disabled{
+  opacity: 0.55;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
 .reset-btn {
   border: 1px solid #003042;
   background-color: #ffffff;
