@@ -145,7 +145,7 @@ export class ViewProjects implements AfterViewChecked {
     'actions',
   ];
   filteredConvoSubcontractors: any[] = [];
-allPmSubConversationData: any[] = [];
+  allPmSubConversationData: any[] = [];
 
   dataSource = new MatTableDataSource<any>([]);
   isLoading = false;
@@ -162,7 +162,7 @@ allPmSubConversationData: any[] = [];
   dateTimeError = '';
   notesError = '';
   dateTimeTouched = false;
-conversationSearchText = '';
+  conversationSearchText = '';
 
   convoSubcontractors: { id: string; name: string }[] = [];
   replyingToMessageId: string | null = null;
@@ -253,7 +253,8 @@ conversationSearchText = '';
     private route: ActivatedRoute,
     private projectService: projectService,
     private reminderService: ReminderService,
-    private location: Location,private translate: TranslateService
+    private location: Location,
+    private translate: TranslateService
   ) {
     registerLocaleData(localeNl);
     const now = new Date();
@@ -1131,62 +1132,25 @@ conversationSearchText = '';
     });
   }
 
-  // loadConversationBySub(subId: string): void {
-  //   if (!subId) {
-  //     this.isSpinLoading = false;
-  //     return;
-  //   }
+  filterConversations(): void {
+    const search = this.conversationSearchText.trim().toLowerCase();
 
-  //   this.projectService
-  //     .getConversationByProjectAndSubcontractor(this.projectId, subId)
-  //     .pipe(
-  //       switchMap((res: any[]) => {
-  //         this.conversationsData = res;
+    if (!search) {
+      this.pmSubConversationData = [...this.allPmSubConversationData];
+      return;
+    }
 
-  //         if (!res || res.length === 0) {
-  //           this.pmSubConversationData = [];
-  //           return of([]);
-  //         }
-
-  //         const draft = res[0];
-  //         return this.projectService.getConversation(
-  //           draft.projectID,
-  //           draft.rfqID,
-  //           draft.subcontractorID
-  //         );
-  //       }),
-  //       finalize(() => (this.isSpinLoading = false))
-  //     )
-  //     .subscribe({
-  //       next: (res) => {
-  //         this.pmSubConversationData = res;
-  //         setTimeout(() => this.scrollToBottom(), 0);
-  //       },
-  //       error: (err) => {
-  //         console.error('■ Error loading conversation:', err);
-  //         this.isSpinLoading = false;
-  //       },
-  //     });
-  // }
-
-filterConversations(): void {
-  const search = this.conversationSearchText.trim().toLowerCase();
-
-  if (!search) {
-    this.pmSubConversationData = [...this.allPmSubConversationData];
-    return;
+    this.pmSubConversationData = this.allPmSubConversationData.filter(
+      (convo) =>
+        convo.messageText?.toLowerCase().includes(search) ||
+        convo.subject?.toLowerCase().includes(search) ||
+        convo.senderType?.toLowerCase().includes(search)
+    );
   }
-
-  this.pmSubConversationData = this.allPmSubConversationData.filter(convo =>
-    convo.messageText?.toLowerCase().includes(search) ||
-    convo.subject?.toLowerCase().includes(search) ||
-    convo.senderType?.toLowerCase().includes(search)
-  );
-}
-clearConversationSearch(): void {
-  this.conversationSearchText = '';
-  this.pmSubConversationData = [...this.allPmSubConversationData];
-}
+  clearConversationSearch(): void {
+    this.conversationSearchText = '';
+    this.pmSubConversationData = [...this.allPmSubConversationData];
+  }
 
   loadConversationBySub(subId: string): void {
     if (!subId) return;
@@ -1246,6 +1210,7 @@ clearConversationSearch(): void {
 
                     projectManagerID: validPMID,
                     senderType: fc.senderType,
+                    conversationType: fc.conversationType,
                     messageText: fc.messageText,
                     subject: fc.subject ?? null,
 
@@ -1268,10 +1233,10 @@ clearConversationSearch(): void {
       )
       .subscribe({
         next: (res: any[]) => {
- this.allPmSubConversationData = res || [];
-  this.pmSubConversationData = [...this.allPmSubConversationData];
+          this.allPmSubConversationData = res || [];
+          this.pmSubConversationData = [...this.allPmSubConversationData];
 
-  setTimeout(() => this.scrollToBottom(), 0);
+          setTimeout(() => this.scrollToBottom(), 0);
           // 🔹 Debug PM IDs
           console.log(
             'Loaded projectManagerIDs:',
@@ -1334,15 +1299,15 @@ clearConversationSearch(): void {
 
     // 🔹 Notes validation
     if (!this.conversationText?.trim()) {
-      this.notesError =  this.translate.instant('VALIDATION.NOTES_ERROR'); 
+      this.notesError = this.translate.instant('VALIDATION.NOTES_ERROR');
       return;
     }
 
     // 🔹 Date & Time validation
-  if (!this.dateTimeTouched) {
-  this.dateTimeError = this.translate.instant('VALIDATION.DATE_TIME_REQUIRED');
-  return;
-}
+    if (!this.dateTimeTouched) {
+      this.dateTimeError = this.translate.instant('VALIDATION.DATE_TIME_REQUIRED');
+      return;
+    }
 
     const selectedDate = new Date(this.conversationDateTime!);
     const now = new Date();
@@ -1392,21 +1357,7 @@ clearConversationSearch(): void {
       .createLogConversation(payload)
       .pipe(
         switchMap((res) => {
-          const localDate = new Date(res.messageDateTime);
-
-          // const localDate =
-          //   res.messageDateTime instanceof Date
-          //     ? res.messageDateTime
-          //     : new Date(res.messageDateTime);
-
-          // const formattedDateTime = localDate.toLocaleString('en-IN', {
-          //   day: '2-digit',
-          //   month: '2-digit',
-          //   year: 'numeric',
-          //   hour: '2-digit',
-          //   minute: '2-digit',
-          //   hour12: true,
-          // });
+          const localDate = res.messageDateTime ? new Date(res.messageDateTime) : new Date();
 
           this.pmSubConversationData.push({
             ...res,
