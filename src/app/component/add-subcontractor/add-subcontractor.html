@@ -3,20 +3,8 @@
   <div class="container">
     <div class="pagetitle">
       <h1>
-        <!-- <i
-          class="fa fa-arrow-left arrow-left"
-          aria-hidden="true"
-          title="Back"
-          (click)="goBack()"
-        ></i> -->
-        Add Subcontractors
+        {{ 'SUBCONTRACTOR_FORM.TITLE' | translate }}
       </h1>
-      <!-- <i
-        class="fa fa-arrow-circle-left back-icon"
-        aria-hidden="true"
-        title="Back"
-        (click)="goBack()"
-      ></i> -->
     </div>
 
     <div class="form-card scroll">
@@ -33,7 +21,7 @@
             <!-- First Row, SubcontractorName & Email -->
             <div class="form-row">
               <div class="form-group">
-                <label>Subcontractor Name <span class="text-danger">*</span></label>
+                <label>{{ 'SUBCONTRACTOR_FORM.SUBCONTRACTOR_NAME' | translate }} <span class="text-danger">*</span></label>
                 <input
                   type="text"
                   formControlName="name"
@@ -50,7 +38,7 @@
                     *ngIf="subcontractorForm.get('name')?.touched && subcontractorForm.get('name')?.errors?.['required']"
                     class="text-danger text-sm"
                   >
-                    This field is required.
+                    {{ 'SUBCONTRACTOR_FORM.REQUIRED' | translate }}
                   </span>
                   <span
                     *ngIf="subcontractorForm.get('name')?.errors?.['nameExists']"
@@ -59,8 +47,7 @@
                     {{ subcontractorForm.get('name')?.errors?.['nameExists'] }}
                   </span>
                   <span
-                    *ngIf="subcontractorForm.get('name')?.touched && subcontractorForm.get('name')?.errors?.['pattern']
-    "
+                    *ngIf="subcontractorForm.get('name')?.touched && subcontractorForm.get('name')?.errors?.['pattern']"
                     class="text-danger text-sm"
                   >
                     Only letters, spaces, dot (.), hyphen (-), and ampersand (&) are allowed.
@@ -81,7 +68,7 @@
               </div>
 
               <div class="form-group">
-                <label>Email <span class="text-danger">*</span></label>
+                <label>{{ 'SUBCONTRACTOR_FORM.EMAIL' | translate }} <span class="text-danger">*</span></label>
                 <input
                   type="email"
                   formControlName="email"
@@ -98,13 +85,13 @@
                     *ngIf="subcontractorForm.get('email')?.errors?.['required'] && subcontractorForm.get('email')?.touched"
                     class="text-danger text-sm"
                   >
-                    This field is required.
+                    {{ 'SUBCONTRACTOR_FORM.REQUIRED' | translate }}
                   </span>
                   <span
                     *ngIf="subcontractorForm.get('email')?.errors?.['pattern']"
                     class="text-danger text-sm"
                   >
-                    Enter a valid email address.
+                    {{ 'SUBCONTRACTOR_FORM.INVALID_EMAIL' | translate }}
                   </span>
                   <span
                     *ngIf="subcontractorForm.get('email')?.errors?.['emailExists']"
@@ -125,7 +112,7 @@
             <!-- Second Row, Location & Country -->
             <div class="form-row">
               <div class="form-group">
-                <label>Location <span class="text-danger">*</span></label>
+                <label>{{ 'SUBCONTRACTOR_FORM.LOCATION' | translate }} <span class="text-danger">*</span></label>
                 <input
                   type="text"
                   formControlName="location"
@@ -141,7 +128,7 @@
                     *ngIf="subcontractorForm.get('location')?.touched && subcontractorForm.get('location')?.errors?.['required']"
                     class="text-danger text-sm"
                   >
-                    This field is required.
+                    {{ 'SUBCONTRACTOR_FORM.REQUIRED' | translate }}
                   </span>
                   <span
                     *ngIf="subcontractorForm.get('location')?.errors?.['pattern']"
@@ -159,7 +146,7 @@
               </div>
 
               <div class="form-group">
-                <label>Country <span class="text-danger">*</span></label>
+                <label>{{ 'SUBCONTRACTOR_FORM.COUNTRY' | translate }} <span class="text-danger">*</span></label>
                 <select
                   formControlName="country"
                   class="form-control"
@@ -178,7 +165,7 @@
                     *ngIf="subcontractorForm.get('country')?.touched && subcontractorForm.get('country')?.errors?.['required']"
                     class="text-danger small"
                   >
-                    This field is required.
+                    {{ 'SUBCONTRACTOR_FORM.REQUIRED' | translate }}
                   </span>
                 </div>
               </div>
@@ -187,7 +174,7 @@
             <!-- Third Row, ContactName & ContactPerson -->
             <div class="form-row">
               <div class="form-group">
-                <label>Contact Name <span class="text-danger">*</span></label>
+                <label>{{ 'SUBCONTRACTOR_FORM.CONTACT_NAME' | translate }} <span class="text-danger">*</span></label>
                 <input
                   type="text"
                   formControlName="contactPerson"
@@ -203,11 +190,10 @@
                     *ngIf="subcontractorForm.get('contactPerson')?.touched && subcontractorForm.get('contactPerson')?.errors?.['required']"
                     class="text-danger text-sm"
                   >
-                    This field is required.
+                    {{ 'SUBCONTRACTOR_FORM.REQUIRED' | translate }}
                   </span>
                   <span
-                    *ngIf="subcontractorForm.get('contactPerson')?.touched && subcontractorForm.get('contactPerson')?.errors?.['pattern']
-    "
+                    *ngIf="subcontractorForm.get('contactPerson')?.touched && subcontractorForm.get('contactPerson')?.errors?.['pattern']"
                     class="text-danger text-sm"
                   >
                     Only letters, spaces, dot (.) and hyphen (-) are allowed.
@@ -228,7 +214,7 @@
               </div>
 
               <div class="form-group">
-                <label>Contact Phone <span class="text-danger">*</span></label>
+                <label>{{ 'SUBCONTRACTOR_FORM.CONTACT_PHONE' | translate }} <span class="text-danger">*</span></label>
                 <div class="contact-number-wrapper">
                   <div class="custom-select-wrapper">
                     <div class="selected-option" (click)="toggleDropdown()">
@@ -266,21 +252,21 @@
                 <div class="form-error-space">
                   <span
                     *ngIf="
-      subcontractorForm.get('contactNumber')?.touched &&
-      subcontractorForm.get('contactNumber')?.errors?.['required']
-    "
+                      subcontractorForm.get('contactNumber')?.touched &&
+                      subcontractorForm.get('contactNumber')?.errors?.['required']
+                    "
                     class="text-danger text-sm"
                   >
-                    This field is required.
+                    {{ 'SUBCONTRACTOR_FORM.REQUIRED' | translate }}
                   </span>
                   <span
                     *ngIf="
-      subcontractorForm.get('contactNumber')?.touched &&
-      subcontractorForm.get('contactNumber')?.errors?.['pattern']
-    "
+                      subcontractorForm.get('contactNumber')?.touched &&
+                      subcontractorForm.get('contactNumber')?.errors?.['pattern']
+                    "
                     class="text-danger text-sm"
                   >
-                    Enter a valid phone number (8–15 digits).
+                    {{ 'SUBCONTRACTOR_FORM.INVALID_PHONE' | translate }}
                   </span>
                 </div>
               </div>
@@ -289,7 +275,7 @@
             <!-- Fourth Row, ContactEmailID & Status -->
             <div class="form-row">
               <div class="form-group">
-                <label>Contact Email ID <span class="text-danger">*</span></label>
+                <label>{{ 'SUBCONTRACTOR_FORM.CONTACT_EMAIL' | translate }} <span class="text-danger">*</span></label>
                 <input
                   type="contactEmail"
                   formControlName="contactEmail"
@@ -306,13 +292,13 @@
                     *ngIf="subcontractorForm.get('contactEmail')?.errors?.['required'] && subcontractorForm.get('contactEmail')?.touched"
                     class="text-danger text-sm"
                   >
-                    This field is required.
+                    {{ 'SUBCONTRACTOR_FORM.REQUIRED' | translate }}
                   </span>
                   <span
                     *ngIf="subcontractorForm.get('contactEmail')?.errors?.['pattern']"
                     class="text-danger text-sm"
                   >
-                    Enter a valid email address.
+                    {{ 'SUBCONTRACTOR_FORM.INVALID_EMAIL' | translate }}
                   </span>
                   <span
                     *ngIf="subcontractorForm.get('contactEmail')?.errors?.['maxlength']"
@@ -324,23 +310,23 @@
               </div>
 
               <div class="form-group">
-                <label>Status <span class="text-danger">*</span></label>
+                <label>{{ 'SUBCONTRACTOR_FORM.STATUS' | translate }} <span class="text-danger">*</span></label>
                 <select
                   formControlName="status"
                   class="form-control"
                   style="cursor: pointer !important"
                 >
-                  <option value="Active">Active</option>
-                  <option value="Inactive">Inactive</option>
+                  <option value="Active">{{ 'SUBCONTRACTOR_FORM.ACTIVE' | translate }}</option>
+                  <option value="Inactive">{{ 'SUBCONTRACTOR_FORM.INACTIVE' | translate }}</option>
                 </select>
                 <div class="form-error-space"></div>
               </div>
             </div>
 
-            <!-- Firth Row, OfficeAddress & BillingAddress -->
+            <!-- Fifth Row, OfficeAddress & BillingAddress -->
             <div class="form-row">
               <div class="form-group">
-                <label>Office Address <span class="text-danger">*</span></label>
+                <label>{{ 'SUBCONTRACTOR_FORM.OFFICE_ADDRESS' | translate }} <span class="text-danger">*</span></label>
                 <textarea
                   rows="4"
                   formControlName="officeAddress"
@@ -350,25 +336,23 @@
                       subcontractorForm.get('officeAddress')?.touched &&
                       subcontractorForm.get('officeAddress')?.invalid
                   }"
-                  placeholder="Address 1"
+                  [placeholder]="'SUBCONTRACTOR_FORM.ADDRESS_PLACEHOLDER_1' | translate"
                 ></textarea>
                 <div class="form-error-space" style="margin-bottom: 20px">
                   <span
                     *ngIf="
-      subcontractorForm.get('officeAddress')?.touched &&
-      subcontractorForm.get('officeAddress')?.errors?.['required']
-    "
+                      subcontractorForm.get('officeAddress')?.touched &&
+                      subcontractorForm.get('officeAddress')?.errors?.['required']
+                    "
                     class="text-danger text-sm"
                   >
-                    This field is required.
+                    {{ 'SUBCONTRACTOR_FORM.REQUIRED' | translate }}
                   </span>
                   <span
-                    *ngIf="subcontractorForm.get('officeAddress')?.touched && subcontractorForm.get('officeAddress')?.errors?.['pattern']
-    "
+                    *ngIf="subcontractorForm.get('officeAddress')?.touched && subcontractorForm.get('officeAddress')?.errors?.['pattern']"
                     class="text-danger text-sm"
                   >
-                    Only letters, numbers, comma (,), dot(.), hyphen(-), slash(/), and line breaks
-                    are allowed.
+                    Only letters, numbers, comma (,), dot(.), hyphen(-), slash(/), and line breaks are allowed.
                   </span>
                   <span
                     *ngIf="subcontractorForm.get('officeAddress')?.errors?.['minlength']"
@@ -386,7 +370,7 @@
               </div>
               <div class="form-group">
                 <div class="form-billing-row">
-                  <label>Billing Address</label>
+                  <label>{{ 'SUBCONTRACTOR_FORM.BILLING_ADDRESS' | translate }}</label>
                   <div class="checkbox-inline">
                     <input
                       type="checkbox"
@@ -394,25 +378,21 @@
                       id="sameAsOffice"
                       style="cursor: pointer !important"
                     />
-                    <label for="sameAsOffice" class="form-checkbox-label"
-                      >Same as Office Address</label
-                    >
+                    <label for="sameAsOffice" class="form-checkbox-label">{{ 'SUBCONTRACTOR_FORM.SAME_AS_OFFICE' | translate }}</label>
                   </div>
                 </div>
                 <textarea
                   rows="4"
                   formControlName="billingAddress"
                   class="form-control-textarea"
-                  placeholder="Address 2"
+                  [placeholder]="'SUBCONTRACTOR_FORM.ADDRESS_PLACEHOLDER_2' | translate"
                 ></textarea>
                 <div class="form-error-space" style="margin-bottom: 20px">
                   <span
-                    *ngIf="subcontractorForm.get('billingAddress')?.touched && subcontractorForm.get('billingAddress')?.errors?.['pattern']
-    "
+                    *ngIf="subcontractorForm.get('billingAddress')?.touched && subcontractorForm.get('billingAddress')?.errors?.['pattern']"
                     class="text-danger text-sm"
                   >
-                    Only letters, numbers, comma (,), dot(.), hyphen(-), slash(/), and line breaks
-                    are allowed.
+                    Only letters, numbers, comma (,), dot(.), hyphen(-), slash(/), and line breaks are allowed.
                   </span>
                   <span
                     *ngIf="subcontractorForm.get('billingAddress')?.errors?.['minlength']"
@@ -434,27 +414,27 @@
           <div class="right-panel">
             <!-- Workitems Section -->
             <div class="workitems-card">
-              <div><label>Workitems</label> <span class="text-danger"> *</span></div>
+              <div><label>{{ 'SUBCONTRACTOR_FORM.WORKITEMS' | translate }}</label> <span class="text-danger"> *</span></div>
 
               <div
                 *ngIf="submitAttempted && selectedWorkitems.length === 0"
                 class="text-danger text-sm p-1"
               >
-                At least one workitem is required.
+                {{ 'SUBCONTRACTOR_FORM.WORKITEM_REQUIRED' | translate }}
               </div>
               <!-- Category Tabs -->
               <div class="tabs mt-3">
                 <button
-                  *ngFor="let cat of categories"
-                  type="button"
-                  class="tab"
-                  [class.active]="selectedCategoryId === cat.categoryID"
-                  (click)="selectCategory(cat.categoryID)"
-                >
-                  {{ cat.categoryName }}
-                  <span class="count-badge" *ngIf="getSelectedCount(cat.categoryID) > 0">
-                    {{ getSelectedCount(cat.categoryID) }}
-                  </span>
+  *ngFor="let cat of categories"
+  type="button"
+  class="tab"
+  [class.active]="selectedCategoryId === cat.categoryID"
+  (click)="selectCategory(cat.categoryID)"
+>
+  {{ cat.categoryName | translate }}
+  <span class="count-badge" *ngIf="getSelectedCount(cat.categoryID) > 0">
+    {{ getSelectedCount(cat.categoryID) }}
+  </span>
                 </button>
               </div>
 
@@ -464,12 +444,11 @@
                 <input
                   type="text"
                   class="form-control mb-2"
-                  placeholder="Search workitems..."
+                  [placeholder]="'SUBCONTRACTOR_FORM.SEARCH_WORKITEMS' | translate"
                   [(ngModel)]="workitemSearch"
                 />
 
                 <ng-container *ngIf="workitems.length > 0; else noWorkitems">
-                  <!-- <label *ngFor="let w of workitems" style="font-size: 15px"> -->
                   <label
                     *ngFor="let w of filteredWorkitems()"
                     style="font-size: 15px; cursor: pointer"
@@ -484,7 +463,7 @@
                 </ng-container>
 
                 <ng-template #noWorkitems>
-                  <div class="no-workitems">No workitems found</div>
+                  <div class="no-workitems">{{ 'SUBCONTRACTOR_FORM.NO_WORKITEMS_FOUND' | translate }}</div>
                 </ng-template>
               </div>
             </div>
@@ -493,9 +472,9 @@
 
         <!-- Form Actions -->
         <div class="form-actions">
-          <button type="button" class="btn cancel-btn" (click)="onCancel()">Cancel</button>
-          <button type="button" class="btn reset-btn" (click)="onReset()">Reset</button>
-          <button type="submit" class="btn submit-btn">Submit</button>
+          <button type="button" class="btn cancel-btn" (click)="onCancel()">{{ 'SUBCONTRACTOR_FORM.CANCEL' | translate }}</button>
+          <button type="button" class="btn reset-btn" (click)="onReset()">{{ 'SUBCONTRACTOR_FORM.RESET' | translate }}</button>
+          <button type="submit" class="btn submit-btn">{{ 'SUBCONTRACTOR_FORM.SUBMIT' | translate }}</button>
         </div>
       </form>
     </div>

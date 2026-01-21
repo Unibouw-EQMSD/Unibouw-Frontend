@@ -254,6 +254,43 @@
     "WORKITEMS": "Werkonderdelen",
     "NO_WORKITEMS": "Geen toegewezen werkonderdelen"
   },
+  "SUBCONTRACTOR_FORM": {
+    "TITLE": "Onderaannemers toevoegen",
+
+    "SUBCONTRACTOR_NAME": "Naam onderaannemer",
+    "EMAIL": "E-mail",
+    "LOCATION": "Locatie",
+    "COUNTRY": "Land",
+    "CONTACT_NAME": "Contactpersoon",
+    "CONTACT_PHONE": "Telefoonnummer",
+    "CONTACT_EMAIL": "E-mailadres contactpersoon",
+    "STATUS": "Status",
+    "OFFICE_ADDRESS": "Kantooradres",
+    "BILLING_ADDRESS": "Factuuradres",
+    "SAME_AS_OFFICE": "Hetzelfde als kantooradres",
+
+    "ACTIVE": "Actief",
+    "INACTIVE": "Inactief",
+
+    "WORKITEMS": "Werkitems",
+    "SEARCH_WORKITEMS": "Werkitems zoeken...",
+    "NO_WORKITEMS_FOUND": "Geen werkitems gevonden",
+    "WORKITEM_REQUIRED": "Minstens één werkitem is verplicht.",
+
+    "CANCEL": "Annuleren",
+    "RESET": "Resetten",
+    "SUBMIT": "Indienen",
+
+    "REQUIRED": "Dit veld is verplicht.",
+    "INVALID_EMAIL": "Voer een geldig e-mailadres in.",
+    "INVALID_PHONE": "Voer een geldig telefoonnummer in (8–15 cijfers).",
+
+    "ADDRESS_PLACEHOLDER_1": "Adres 1",
+    "ADDRESS_PLACEHOLDER_2": "Adres 2",
+
+    "SUCCESS": "Succesvol opgeslagen",
+    "ERROR": "Er is iets misgegaan"
+  },
   "NOT_INTERESTED_REASONS": {
     "REASON_1": "Onvoldoende capaciteit / planning zit vol",
     "REASON_2": "Geen interesse in het project / past niet binnen strategie",
