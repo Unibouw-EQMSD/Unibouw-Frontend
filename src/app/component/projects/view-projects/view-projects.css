@@ -252,7 +252,7 @@
   height: 45px;
   background-color: #f8f8f8;
   border-bottom: 1px solid #dedede;
-  width: 113%;
+  width: 100%;
 }
 
 .table-scroll {
@@ -792,7 +792,7 @@
   color: white;
 }
 
-.submit-btn:disabled{
+.submit-btn:disabled {
   opacity: 0.55;
   cursor: not-allowed;
   pointer-events: none;
@@ -1196,7 +1196,8 @@
   font-weight: 400;
   width: 100%;
 }
-.send-icon.disabled {
+.send-icon.disabled,
+.sendReminderBtn.disabled {
   opacity: 0.5;
   pointer-events: none;
   cursor: not-allowed;

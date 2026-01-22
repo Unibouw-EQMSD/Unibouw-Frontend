@@ -1,10 +1,4 @@
-import {
-  ChangeDetectorRef,
-  Component,
-  ViewChild,
-  ElementRef,
-  AfterViewChecked,
-} from '@angular/core';
+import { ChangeDetectorRef, Component, ViewChild, ElementRef } from '@angular/core';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
 import { MatTableDataSource } from '@angular/material/table';
@@ -211,8 +205,6 @@ export class ViewProjects {
   }
 
   @ViewChild('chatMessages') private chatMessages!: ElementRef;
- 
-
   private scrollToBottom(): void {
     try {
       const el = this.chatMessages.nativeElement;
@@ -270,32 +262,30 @@ export class ViewProjects {
     public userService: UserService
   ) {
     registerLocaleData(localeNl);
-    
   }
-
 
   ngDoCheck(): void {
-  if (!this.conversationDateTime) return;
+    if (!this.conversationDateTime) return;
 
-  const selected = new Date(this.conversationDateTime);
-  const now = new Date();
+    const selected = new Date(this.conversationDateTime);
+    const now = new Date();
 
-  if (selected.getTime() > now.getTime()) {
-    this.dateTimeError = 'Future time selection is not allowed';
-    this.conversationDateTime = null;
-  } else {
-    this.dateTimeError = '';
+    if (selected.getTime() > now.getTime()) {
+      this.dateTimeError = 'Future time selection is not allowed';
+      this.conversationDateTime = null;
+    } else {
+      this.dateTimeError = '';
+    }
   }
-}
   ngOnInit(): void {
     const now = new Date();
- const yyyy = now.getFullYear();
-  const mm = String(now.getMonth() + 1).padStart(2, '0');
-  const dd = String(now.getDate()).padStart(2, '0');
-  const hh = String(now.getHours()).padStart(2, '0');
-  const min = String(now.getMinutes()).padStart(2, '0');
+    const yyyy = now.getFullYear();
+    const mm = String(now.getMonth() + 1).padStart(2, '0');
+    const dd = String(now.getDate()).padStart(2, '0');
+    const hh = String(now.getHours()).padStart(2, '0');
+    const min = String(now.getMinutes()).padStart(2, '0');
 
-  this.maxDateTime = `${yyyy}-${mm}-${dd}T${hh}:${min}`;
+    this.maxDateTime = `${yyyy}-${mm}-${dd}T${hh}:${min}`;
     // 🔹 Restore tab from localStorage (default: 'response')
     const savedTab = localStorage.getItem('activeTab');
     this.selectedTab = savedTab || 'response';
@@ -315,8 +305,6 @@ export class ViewProjects {
       }
     }
   }
-
-  
   setActiveTab(tab: string): void {
     this.selectedTab = tab;
     localStorage.setItem('activeTab', tab);
@@ -360,8 +348,6 @@ export class ViewProjects {
   checkAndTriggerReminder() {
     this.sendReminder();
   }
-
-  reminderType: string = 'default';
 
   loadProjectDetails(id: string) {
     // this.isLoading = true;
@@ -928,10 +914,51 @@ export class ViewProjects {
     return true;
   }
 
+  // helper function
+  formatDateForBackend(dateStr: string | Date): string | null {
+    if (!dateStr) return null;
+
+    if (dateStr instanceof Date) {
+      return dateStr.toISOString().split('T')[0]; // "yyyy-MM-dd"
+    }
+
+    // If it's a string in "dd-MM-yyyy"
+    const parts = dateStr.split('-');
+    if (parts.length !== 3) return null;
+
+    const day = parseInt(parts[0], 10);
+    const month = parseInt(parts[1], 10) - 1; // JS months are 0-based
+    const year = parseInt(parts[2], 10);
+
+    const date = new Date(year, month, day);
+    if (isNaN(date.getTime())) return null; // invalid date check
+
+    return date.toISOString().split('T')[0];
+  }
+
   showReminderPopup = false;
+  reminderType: string = 'default';
   customReminderDates: (Date | null)[] = [];
 
+  isDueDatePast = false;
+
   openReminderPopup(rfq: any) {
+    //Check for due date past
+    this.isDueDatePast = false; // reset first
+    if (rfq.dueDate) {
+      // Convert "DD-MM-YYYY" → Date
+      const [day, month, year] = rfq.dueDate.split('-').map(Number);
+      const dueDate = new Date(year, month - 1, day);
+
+      // Normalize today's date (remove time)
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+
+      this.isDueDatePast = dueDate < today;
+    } else {
+      this.isDueDatePast = false;
+    }
+
     this.reminderService.getGlobalReminderConfig().subscribe({
       next: (res) => {
         const config = Array.isArray(res) && res.length > 0 ? res[0] : null;
@@ -977,25 +1004,10 @@ export class ViewProjects {
     this.showReminderPopup = false;
   }
 
-  private _reminderDates: string[] = [];
-
-  get reminderDates1(): string[] {
-    return this._reminderDates;
-  }
-
-  set reminderDates1(dates: string[]) {
-    this._reminderDates = dates;
-    if (this.showReminderPopup && dates && dates.length > 0) {
-      // ⏳ Trigger after a delay (example 5 sec)
-      setTimeout(() => {
-        this.sendReminder();
-      }, 60000);
-    }
-  }
-
   emailBodyError = false;
 
-  sendReminder() {
+  //Delete this later
+  sendReminder1() {
     // Email body validation
     if (!this.reminderEmailBody || !this.reminderEmailBody.trim()) {
       this.emailBodyError = true;
@@ -1031,6 +1043,60 @@ export class ViewProjects {
           this.showReminderPopup = false;
         },
       });
+  }
+
+  formatDateLocal(date: Date): string {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+
+    return `${year}-${month}-${day}`; // yyyy-MM-dd
+  }
+
+  sendReminder() {
+    // Email body validation
+    if (!this.reminderEmailBody || !this.reminderEmailBody.trim()) {
+      this.emailBodyError = true;
+      return;
+    }
+
+    this.emailBodyError = false;
+    this.isLoading = true;
+
+    // Decide reminderDates based on reminderType
+    let reminderDatesToSend: string[] = [];
+
+    if (this.reminderType === 'default') {
+      reminderDatesToSend = this.reminderDates;
+    } else if (this.reminderType === 'custom') {
+      reminderDatesToSend = this.customReminderDates
+        .filter((d): d is Date => d !== null)
+        .map((d) => this.formatDateLocal(d));
+    }
+
+    const payload = {
+      reminderType: this.reminderType,
+      reminderDates: reminderDatesToSend,
+      reminderTime: this.reminderTime,
+      reminderEmailBody: this.reminderEmailBody,
+      dueDate: this.dueDate ? this.formatDateForBackend(this.dueDate) : null,
+      rfqId: this.selectedRfqId,
+      subcontractorID: this.subId,
+    };
+
+    console.log('Reminder Payload:', payload);
+
+    // Example API call
+    this.rfqResponseService.rfqReminderSet(payload).subscribe({
+      next: () => {
+        this.isLoading = false;
+        this.closeReminderPopup();
+      },
+      error: (err) => {
+        this.isLoading = false;
+        console.error('Error sending reminder:', err);
+      },
+    });
   }
 
   // Remove a custom reminder date
@@ -1581,10 +1647,12 @@ trackByMessageId(index: number, convo: any): string {
         },
       });
   }
+
   onInputChange(): void {
     //this.showInvalid = !this.subject?.trim() || !this.messageText?.trim();
     this.showInvalid = false;
   }
+
   startReply(convo: RFQConversationMessage) {
     console.log('▶ startReply clicked');
     console.log('Convo object received:', convo);
@@ -1635,11 +1703,6 @@ trackByMessageId(index: number, convo: any): string {
   setReplyText(id: string, text: string) {
     this.replyTexts[id] = text;
   }
-
-  // onReplyFileSelected(event: any) {
-  //   const files: File[] = Array.from(event.target.files);
-  //   this.replyAttachments.push(...files);
-  // }
 
   onReplyFileSelected(event: Event) {
     const input = event.target as HTMLInputElement;

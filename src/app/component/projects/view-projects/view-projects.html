@@ -527,13 +527,13 @@
                       (click)="editRfq(row.id)"
                       title="Edit RFQ"
                     ></i>
-                  <i
-  *ngIf="userService.isAdmin()"
-  class="fa-regular fa-trash-can delete-icon"
-  (click)="deleteRfq(row.id)"
-  style="color: #dc3545; cursor: pointer; margin-left: 12px"
-  title="Delete RFQ"
-></i>
+                    <i
+                      *ngIf="userService.isAdmin()"
+                      class="fa-regular fa-trash-can delete-icon"
+                      (click)="deleteRfq(row.id)"
+                      style="color: #dc3545; cursor: pointer; margin-left: 12px"
+                      title="Delete RFQ"
+                    ></i>
                   </td>
                 </ng-container>
 
@@ -791,13 +791,22 @@
             (ngModelChange)="onInputChange()"
           />
 
-          <input
-            type="file"
-            #fileInput
-            hidden
-            multiple
-            (change)="onFileSelected($event)"
-          />
+                    <div
+                      class="error-msg"
+                      style="color: red"
+                      *ngIf="(messageText ?? '').length > 5000"
+                    >
+                      {{ 'CONVERSATION.MESSAGE_TOO_LONG' | translate }}
+                    </div>
+
+                    <!-- Hidden file input -->
+                    <input
+                      type="file"
+                      #fileInput
+                      multiple
+                      hidden
+                      (change)="onFileSelected($event)"
+                    />
 
           <i class="fa fa-paperclip attach-icon" (click)="fileInput.click()"></i>
           <i class="fa fa-paper-plane send-icon" (click)="sendMessage()"></i>
@@ -831,6 +840,7 @@
       <div class="modal-body space-y-6 px-4 pt-6 pb-3" *ngIf="!isLoading">
         <div class="modal-section">
           <!-- Due Date Box -->
+          <span *ngIf="isDueDatePast" style="color: #dc3545"> Due date is crossed. </span>
           <div class="due-date-box">
             <div class="due-date-icon">
               <i class="fa fa-clock"></i>
@@ -845,12 +855,24 @@
           <!-- Radio buttons -->
           <div class="reminder-radio-row">
             <label class="radio-label" style="cursor: pointer">
-              <input type="radio" name="reminderType" value="default" [(ngModel)]="reminderType" />
+              <input
+                type="radio"
+                name="reminderType"
+                value="default"
+                [(ngModel)]="reminderType"
+                [disabled]="isDueDatePast"
+              />
               <span>{{ 'REMINDER_MODAL.DEFAULT_REMINDER' | translate }}</span>
             </label>
 
             <label class="radio-label" style="cursor: pointer">
-              <input type="radio" name="reminderType" value="custom" [(ngModel)]="reminderType" />
+              <input
+                type="radio"
+                name="reminderType"
+                value="custom"
+                [(ngModel)]="reminderType"
+                [disabled]="isDueDatePast"
+              />
               <span>{{ 'REMINDER_MODAL.CUSTOM_REMINDER' | translate }}</span>
             </label>
           </div>
@@ -935,7 +957,11 @@
         >
           Reset
         </button>
-        <button class="btn submit-btn" (click)="sendReminder()">
+        <button
+          class="btn submit-btn sendReminderBtn"
+          (click)="sendReminder()"
+          [disabled]="isDueDatePast || isLoading"
+        >
           {{ 'REMINDER_MODAL.SEND_REMINDER' | translate }}
         </button>
       </div>
@@ -1008,9 +1034,15 @@
 
     <!-- Footer -->
     <div class="modal-footer">
-      <button class="btn cancel-btn" (click)="closeLogConvo()">{{'COMMON.CANCEL'|translate}}</button>
-      <button class="btn reset-btn" (click)="resetLogConvo()">{{'COMMON.RESET'|translate}}</button>
-      <button class="btn submit-btn" [disabled]="dateTimeError" (click)="saveLogConvo()">{{'COMMON.SAVE'|translate}}</button>
+      <button class="btn cancel-btn" (click)="closeLogConvo()">
+        {{ 'COMMON.CANCEL' | translate }}
+      </button>
+      <button class="btn reset-btn" (click)="resetLogConvo()">
+        {{ 'COMMON.RESET' | translate }}
+      </button>
+      <button class="btn submit-btn" [disabled]="dateTimeError" (click)="saveLogConvo()">
+        {{ 'COMMON.SAVE' | translate }}
+      </button>
     </div>
   </div>
 </div>
