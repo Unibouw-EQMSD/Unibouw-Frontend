@@ -1,6 +1,6 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Component, HostListener } from '@angular/core';
-import { forkJoin, lastValueFrom, Observable, ObservableInput } from 'rxjs';
+import { ChangeDetectorRef, Component, HostListener } from '@angular/core';
+import { firstValueFrom, forkJoin, lastValueFrom, Observable, ObservableInput } from 'rxjs';
 import { Subcontractors, SubcontractorService } from '../../../services/subcontractor.service';
 import { Workitem, WorkitemCategory, WorkitemService } from '../../../services/workitem.service';
 import { Rfq, RfqService } from '../../../services/rfq.service';
@@ -19,6 +19,8 @@ interface SubcontractorItem {
   personName?: string;
   phoneNumber1?: string;
   emailID?: string;
+    linkedWorkItemIDs?: string[];
+
 }
 
 @Component({
@@ -53,15 +55,18 @@ export class RfqAdd {
   workItemName: string = 'N/A';
   globalDateError = false;
   originalRfqSubcontractors: any[] = [];
+  
   private readonly RFQ_DRAFT_KEY = 'rfq_add_state';
 private skipDraftSave = false;
 originalSubcontractorState: {
   subcontractorID: string;
   dueDate?: string;
   selected: boolean;
+  
 }[] = [];
 
   constructor(
+    private cdr: ChangeDetectorRef,
     private workitemService: WorkitemService,
     private subcontractorService: SubcontractorService,
     private rfqService: RfqService,
@@ -85,7 +90,7 @@ ngOnInit() {
   this.minDate = today.toISOString().split('T')[0]; // yyyy-MM-dd
 
   // Default message
-  this.noSubMessage = 'Select a work item to view subcontractors.';
+  // this.noSubMessage = 'Select a work item to view subcontractors.';
 
   // 🔹 Load categories & workitems FIRST
   this.loadCategoriesAndWorkitems();
@@ -101,7 +106,7 @@ ngOnInit() {
 
   if (this.rfqIdForEdit) {
     this.loadRfqForEdit(this.rfqIdForEdit);
-    this.noSubMessage = 'Select a work item to view subcontractors.';
+    // this.noSubMessage = 'Select a work item to view subcontractors.';
   }
 
   // 🔹 Load projects (DO NOT override restored project)
@@ -268,124 +273,104 @@ onCancelConfirmed() {
     return (id || '').toUpperCase();
   }
 
-loadRfqForEdit(rfqId: string) {
+async loadRfqForEdit(rfqId: string) {
   console.log('🟦 loadRfqForEdit START → RFQ ID:', rfqId);
 
   this.rfqIdForEdit = rfqId;
   this.isLoader = true;
 
-  this.rfqService.getRfqById(rfqId).subscribe({
-    next: (res: any) => {
-      console.log('🟦 RFQ HEADER RESPONSE:', res);
-
-      this.originalRfq = res;
-      if (!this.originalRfq) {
-        this.isLoader = false;
-        return;
-      }
-
-      this.rfqNumber = this.originalRfq.rfqNumber || 'N/A';
-      this.createdDateDisplay = this.formatDateDisplay(this.originalRfq.createdOn);
-      this.customerNote = this.originalRfq.customerNote;
-      this.selectedProject = this.originalRfq.projectID;
-
+  try {
+    // 🚀 Load all 3 APIs in parallel
+    const [res, info, subDates]: [any, any[], any[]] = await firstValueFrom(
       forkJoin([
-        this.rfqService.getWorkItemInfo(rfqId),
-        this.rfqService.getRfqSubcontractorDueDates(rfqId),
-      ]).subscribe({
-        next: async ([info, subDates]: [any, any[]]) => {
-          console.log('🟦 WorkItemInfo:', info);
-          console.log('🟦 Raw Sub Dates:', subDates);
+        this.rfqService.getRfqById(rfqId),
+        this.rfqService.getRfqWorkItems(rfqId), 
+        this.rfqService.getRfqSubcontractorDueDates(rfqId)
+      ])
+    );
 
-          /** Normalize subcontractor payload */
-          const fixedSubDates = subDates.map(s => ({
-            ...s,
-            subcontractorID: s.subcontractorID || s.subcontractorId,
-            workItemID: s.WorkItemID || s.workItemID,
-            dueDate: s.DueDate || s.dueDate
-          }));
+    this.originalRfq = res;
 
-          /** All available work items */
-          const allWorkItems = [
-            ...this.unibouwWorkitems,
-            ...this.standardWorkitems
-          ];
-
-          /** 🔑 Collect UNIQUE workItemIDs from subcontractor table */
-          const uniqueWorkItemIds = [
-            ...new Set(fixedSubDates.map(s => this.normalizeId(s.workItemID)))
-          ];
-
-          console.log('🟦 Unique WorkItem IDs:', uniqueWorkItemIds);
-
-          /** Match work items */
-          this.selectedWorkItems = allWorkItems.filter(w =>
-            uniqueWorkItemIds.includes(this.normalizeId(w.workItemID))
-          );
-
-          // 🔹 Force workItemName update immediately
-          this.workItemName = this.selectedWorkItems.map(w => w.name).join(', ');
-
-          /** Set tab (first item decides UI tab) */
-          if (this.selectedWorkItems.length) {
-            const first = this.selectedWorkItems[0];
-
-            this.selectedTab = this.standardWorkitems.some(
-              w => w.workItemID === first.workItemID
-            ) ? 'standard' : 'unibouw';
-          }
-
-          /** 🔑 PRESERVE DUE DATE */
-         const dueDates = fixedSubDates
-  .map(s => s.GlobalDueDate || s.dueDate)
-  .filter(Boolean)
-  .sort();
-
-this.globalDueDate = dueDates.length
-  ? new Date(dueDates[0]).toISOString().split('T')[0] // ensures binding YYYY-MM-DD
-  : '';
-
-          console.log('🟦 Global Due Date:', this.globalDueDate);
-
-          /** 🔑 Load subcontractors PER work item */
-          this.subcontractors = [];
-
-          // 🔹 Await all loadSubcontractors calls before taking snapshot
-          const loadPromises = this.selectedWorkItems.map(wi => {
-            const subsForWorkItem = fixedSubDates.filter(
-              s => this.normalizeId(s.workItemID) === this.normalizeId(wi.workItemID)
-            );
-            return this.loadSubcontractors(wi.workItemID, subsForWorkItem);
-          });
-
-          await Promise.all(loadPromises);
-
-          // 🔹 Take snapshot only AFTER all subcontractors are loaded
-          this.originalSubcontractorState = this.subcontractors.map(s => ({
-            subcontractorID: s.subcontractorID,
-            selected: !!s.selected,
-            dueDate: s.dueDate
-          }));
-
-          console.log('🟦 ORIGINAL SNAPSHOT:', this.originalSubcontractorState);
-
-          this.isLoader = false;
-          console.log('🟦 loadRfqForEdit COMPLETED');
-        },
-        error: err => {
-          console.error('❌ Linked API error:', err);
-          this.isLoader = false;
-        }
-      });
-    },
-    error: err => {
-      console.error('❌ RFQ load error:', err);
+    if (!this.originalRfq) {
       this.isLoader = false;
+      return;
     }
-  });
+
+    // Basic RFQ fields
+    this.rfqNumber = this.originalRfq.rfqNumber || 'N/A';
+    this.createdDateDisplay = this.formatDateDisplay(this.originalRfq.createdOn);
+    this.customerNote = this.originalRfq.customerNote;
+    this.selectedProject = this.originalRfq.projectID;
+
+    // ✅ Correct mapping from API response
+    const fixedSubDates = subDates.map(s => ({
+      subcontractorID: s.SubcontractorID || '',  // ✅ Uppercase from API
+      workItemID: s.WorkItemID || '',            // ✅ Uppercase from API
+      dueDate: s.DueDate || '',                  // ✅ Uppercase from API
+      globalDueDate: s.GlobalDueDate || ''       // ✅ Add GlobalDueDate
+    }));
+
+    // 🚀 Use work items directly from backend
+    this.selectedWorkItems = info;
+    this.workItemName = this.selectedWorkItems.map(w => w.name).join(', ');
+    
+    this.cdr.detectChanges();
+
+    if (this.selectedWorkItems.length) {
+      const first = this.selectedWorkItems[0];
+      this.selectedTab = this.standardWorkitems.some(w => w.workItemID === first.workItemID)
+        ? 'standard'
+        : 'unibouw';
+    }
+
+    // 🚀 Single-pass to find earliest date (prioritize GlobalDueDate)
+    let earliestDate = '';
+    for (const s of fixedSubDates) {
+      const date = s.globalDueDate || s.dueDate;  // ✅ Use globalDueDate first
+      if (date && (!earliestDate || new Date(date) < new Date(earliestDate))) {
+        earliestDate = date;
+      }
+    }
+this.globalDueDate = earliestDate ? earliestDate.split('T')[0] : '';
+    // Clear subcontractors
+    this.subcontractors = [];
+
+    // 🚀 Pre-build lookup map for faster subcontractor filtering
+    const subsByWorkItem = new Map<string, any[]>();
+    fixedSubDates.forEach(s => {
+      const key = this.normalizeId(s.workItemID);
+      if (!subsByWorkItem.has(key)) subsByWorkItem.set(key, []);
+      subsByWorkItem.get(key)!.push(s);
+    });
+
+    // Load subcontractors in parallel per work item
+    await Promise.all(this.selectedWorkItems.map(wi => {
+      const subsForWorkItem = subsByWorkItem.get(this.normalizeId(wi.workItemID)) || [];
+      return this.loadSubcontractors(wi.workItemID, subsForWorkItem);
+    }));
+
+    // 🚀 Use Set for O(1) lookup
+    const selectedWorkItemIds = new Set(this.selectedWorkItems.map(w => this.normalizeId(w.workItemID)));
+    this.subcontractors = this.subcontractors.filter(sub =>
+      sub.linkedWorkItemIDs?.some(id => selectedWorkItemIds.has(id))
+    );
+
+    // Take snapshot for original state
+    this.originalSubcontractorState = this.subcontractors.map(s => ({
+      subcontractorID: s.subcontractorID,
+      selected: !!s.selected,
+      dueDate: s.dueDate
+    }));
+
+    this.isLoader = false;
+    this.cdr.detectChanges();
+    console.log('🟦 loadRfqForEdit COMPLETED');
+
+  } catch (err) {
+    console.error('❌ Error in loadRfqForEdit:', err);
+    this.isLoader = false;
+  }
 }
-
-
 
   formatDateForHtml(dateStr: string): string {
     if (!dateStr) return '';
@@ -421,129 +406,53 @@ this.globalDueDate = dueDates.length
     return `${d.getFullYear()}-${m}-${day}`;
   }
 
-  // End Helpers
-loadSubcontractors(workItemID: string, existingSubs: any[] = []): Promise<void> {
+
+  
+async loadSubcontractors(workItemID: string, existingSubs: any[] = []): Promise<void> {
   this.isLoader = true;
 
-  // 🔒 DO NOT CHANGE — this is the working RFQ structure
-  const normalizedExistingSubs = existingSubs.map(s => ({
-    workItemID: s.WorkItemID ?? s.workItemID,
-    subcontractorID: s.SubcontractorID ?? s.subcontractorID,
-    dueDate: s.DueDate ?? s.dueDate
-  }));
+  try {
+    const { mappings, subs } = await firstValueFrom(
+      forkJoin({
+        mappings: this.subcontractorService.getSubcontractorWorkItemMappings(),
+        subs: this.subcontractorService.getSubcontractors(),
+      })
+    );
 
-  return new Promise((resolve, reject) => {
-    forkJoin({
-      mappings: this.subcontractorService.getSubcontractorWorkItemMappings(),
-      subs: this.subcontractorService.getSubcontractors(),
-    }).subscribe({
-      next: ({ mappings, subs }) => {
-        const normalizedWorkItemID = this.normalizeId(workItemID);
+    const rfqDueDateMap = new Map<string, string>();
+    existingSubs.forEach(s => {
+      const subId = this.normalizeId(s.subcontractorID);
+      if (subId) rfqDueDateMap.set(subId, this.formatDateForHtml(s.dueDate));
+    });
 
-        /* =====================================================
-           1️⃣ RFQ DUE DATE MAP (SOURCE OF TRUTH)
-        ====================================================== */
-        const rfqDueDateMap = new Map<string, string>();
-        normalizedExistingSubs.forEach(s => {
-          const subId = this.normalizeId(s.subcontractorID);
-          if (!subId) return;
-          rfqDueDateMap.set(subId, this.formatDateForHtml(s.dueDate));
-        });
+    // Build new subcontractors for this work item
+    const newSubsForWorkItem: SubcontractorItem[] = subs.map(s => ({
+      subcontractorID: String(s.subcontractorID ?? ''),
+      name: String(s.name ?? ''),
+      emailID: String(s.emailID ?? ''),
+      selected: rfqDueDateMap.has(this.normalizeId(s.subcontractorID)),
+      dueDate: rfqDueDateMap.get(this.normalizeId(s.subcontractorID)) ?? '',
+      linkedWorkItemIDs: mappings
+        .filter(m => this.normalizeId(m.subcontractorID) === this.normalizeId(s.subcontractorID))
+        .map(m => this.normalizeId(m.workItemID))
+    }));
 
-        /* =====================================================
-           2️⃣ LINKED SUBCONTRACTORS FOR WORK ITEM
-        ====================================================== */
-        const linkedIds = mappings
-          .filter(m => this.normalizeId(m.workItemID) === normalizedWorkItemID)
-          .map(m => this.normalizeId(m.subcontractorID));
-
-        /* =====================================================
-           3️⃣ BUILD SUBCONTRACTORS (DO NOT TOUCH DUE DATE LOGIC)
-        ====================================================== */
-        let mappedSubcontractors = subs.map(s => {
-          const subId = this.normalizeId(s.subcontractorID);
-          const rfqDueDate = rfqDueDateMap.get(subId);
-
-          const existingUI = existingSubs.find(
-            e => this.normalizeId(e.subcontractorID) === subId
-          );
-
-          return {
-            subcontractorID: s.subcontractorID,
-            name: s.name,
-            emailID: s.emailID || '',
-            selected: this.rfqIdForEdit
-  ? rfqDueDateMap.has(subId) // ✅ EDIT → only previously emailed
-  : linkedIds.includes(subId),
-            dueDate: existingUI?.dueDate ?? rfqDueDate ?? '',
-          };
-        });
-
-        /* =====================================================
-           4️⃣ SHOW ALL TOGGLE
-        ====================================================== */
-        if (!this.showAll) {
-          mappedSubcontractors = mappedSubcontractors.filter(
-            s => s.selected || linkedIds.includes(this.normalizeId(s.subcontractorID))
-          );
-        }
-
-        /* =====================================================
-           5️⃣ SORT
-        ====================================================== */
-        mappedSubcontractors.sort((a, b) => {
-          if (a.selected && !b.selected) return -1;
-          if (!a.selected && b.selected) return 1;
-          return a.name.localeCompare(b.name);
-        });
-
-        /* =====================================================
-           6️⃣ EMAIL DE-DUPLICATION (SAFE — NO DATE LOSS)
-        ====================================================== */
-        const emailMap = new Map<string, any>();
-
-        // ✅ Merge with previously loaded subcontractors
-        this.subcontractors.forEach(sub => {
-          const emailKey = (sub.emailID || '').toLowerCase().trim();
-          if (!emailKey) return;
-          emailMap.set(emailKey, { ...sub });
-        });
-
-        mappedSubcontractors.forEach(sub => {
-          const emailKey = (sub.emailID || '').toLowerCase().trim();
-          if (!emailKey) return;
-
-          if (!emailMap.has(emailKey)) {
-            emailMap.set(emailKey, { ...sub });
-          } else {
-            const existing = emailMap.get(emailKey);
-            existing.selected = existing.selected || sub.selected;
-
-            if (!existing.dueDate && sub.dueDate) {
-              existing.dueDate = sub.dueDate;
-            }
-          }
-        });
-
-        /* =====================================================
-           7️⃣ FINAL UI ASSIGNMENT
-        ====================================================== */
-        this.subcontractors = Array.from(emailMap.values());
-
-        this.noSubMessage = this.subcontractors.length
-          ? ''
-          : 'No subcontractors linked to this work item.';
-
-        this.isLoader = false;
-        resolve();
-      },
-      error: err => {
-        console.error('❌ Error loading subcontractors:', err);
-        this.isLoader = false;
-        reject(err);
+    // Merge without duplicates
+    newSubsForWorkItem.forEach(sub => {
+      if (!this.subcontractors.find(existing => existing.subcontractorID === sub.subcontractorID)) {
+        this.subcontractors.push(sub);
       }
     });
-  });
+
+    // IMMEDIATE CHANGE DETECTION
+    this.subcontractors = [...this.subcontractors];
+    this.cdr.detectChanges(); // Force UI update NOW
+
+  } catch (err) {
+    console.error('❌ Error loading subcontractors:', err);
+  } finally {
+    this.isLoader = false;
+  }
 }
 
 getNewOrModifiedSubcontractors() {
@@ -795,41 +704,57 @@ onWorkitemToggle(item: Workitem, checked: boolean) {
   const normalizedWorkItemID = this.normalizeId(item.workItemID);
 
   if (checked) {
-      this.saveDraft();
+    this.saveDraft();
 
     // Add to selected work items if not already present
-    if (!this.selectedWorkItems.some((w) => w.workItemID === item.workItemID)) {
+    if (!this.selectedWorkItems.some(w => w.workItemID === item.workItemID)) {
       this.selectedWorkItems.push(item);
     }
 
-    // Load subcontractors for the newly checked work item
+    // Load subcontractors for this work item
     this.loadSubcontractors(item.workItemID).then(() => {
-      // Store a **snapshot** of the current subcontractors for this work item
-      const currentSubs = this.subcontractors.filter(sub =>
-        // Keep only subs relevant to this work item
-        !Array.from(this.subcontractorsByWorkItem.values())
-          .flat()
-          .some(s => this.normalizeId(s.subcontractorID) === this.normalizeId(sub.subcontractorID))
-      );
+      // Store only subcontractors linked to this work item
+      const subsForCurrentWorkItem = this.subcontractors.filter(sub =>
+        sub.linkedWorkItemIDs?.includes(normalizedWorkItemID)
+      ).map(sub => ({ ...sub }));
 
-      this.subcontractorsByWorkItem.set(normalizedWorkItemID, currentSubs);
+      this.subcontractorsByWorkItem.set(normalizedWorkItemID, subsForCurrentWorkItem);
 
       // Merge all subcontractors from selected work items
-      this.subcontractors = Array.from(this.subcontractorsByWorkItem.values()).flat();
+      const mergedSubs = Array.from(this.subcontractorsByWorkItem.values()).flat();
+
+      // Deduplicate by subcontractorID
+      const uniqueSubsMap = new Map<string, any>();
+      mergedSubs.forEach(sub => {
+        const subId = this.normalizeId(sub.subcontractorID);
+        if (!uniqueSubsMap.has(subId)) {
+          uniqueSubsMap.set(subId, { ...sub });
+        } else {
+          const existing = uniqueSubsMap.get(subId);
+          existing.selected = existing.selected || sub.selected;
+          if (!existing.dueDate && sub.dueDate) existing.dueDate = sub.dueDate;
+        }
+      });
+
+      this.subcontractors = Array.from(uniqueSubsMap.values());
     });
   } else {
     // Remove from selected work items
     this.selectedWorkItems = this.selectedWorkItems.filter(
-      (w) => w.workItemID !== item.workItemID
+      w => w.workItemID !== item.workItemID
     );
 
-    // Remove subcontractors that belong to this unchecked work item only
+    // Remove subcontractors linked to this work item only
     const subsToRemove = this.subcontractorsByWorkItem.get(normalizedWorkItemID) || [];
     const subsToRemoveIds = subsToRemove.map(sub => this.normalizeId(sub.subcontractorID));
 
-    this.subcontractors = this.subcontractors.filter(
-      sub => !subsToRemoveIds.includes(this.normalizeId(sub.subcontractorID))
-    );
+    this.subcontractors = this.subcontractors.filter(sub => {
+      const subId = this.normalizeId(sub.subcontractorID);
+      // Keep if not in removal list OR still used in another work item
+      const usedInOtherWorkItem = Array.from(this.subcontractorsByWorkItem.entries())
+        .some(([wid, subs]) => wid !== normalizedWorkItemID && subs.some(s => this.normalizeId(s.subcontractorID) === subId));
+      return !subsToRemoveIds.includes(subId) || usedInOtherWorkItem;
+    });
 
     // Remove from the map
     this.subcontractorsByWorkItem.delete(normalizedWorkItemID);
@@ -839,7 +764,7 @@ onWorkitemToggle(item: Workitem, checked: boolean) {
   loadSubcontractorsForSelectedWorkitems() {
     if (!this.selectedWorkItems.length) {
       this.subcontractors = [];
-      this.noSubMessage = 'Select a work item to view subcontractors.'; // keep default
+      // this.noSubMessage = 'Select a work item to view subcontractors.'; // keep default
       return;
     }
 

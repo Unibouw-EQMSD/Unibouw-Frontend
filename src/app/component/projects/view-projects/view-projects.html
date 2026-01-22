@@ -550,299 +550,267 @@
           >
           </mat-paginator>
           <!-- TAB 3: CONVERSATION -->
-          <div *ngIf="selectedTab === 'conversation'">
-            <div class="noData" *ngIf="!convoSubcontractors || convoSubcontractors.length === 0">
-              {{ 'EMPTY_STATES.NO_CONVERSATION' | translate }}
-            </div>
-            <div class="chat-container" *ngIf="(convoSubcontractors?.length ?? 0) > 0">
-              <!-- LEFT SIDEBAR -->
-              <div class="chat-sidebar">
-                <div class="sidebar-list" *ngIf="(convoSubcontractors?.length ?? 0) > 0">
-                  <div
-                    class="sidebar-item"
-                    *ngFor="let sub of convoSubcontractors ?? []; let i = index"
-                    [class.active]="selectedIndex === i"
-                    (click)="onSubClick(sub.id, i)"
-                  >
-                    {{ sub.name }}
-                  </div>
-                </div>
+         <div *ngIf="selectedTab === 'conversation'">
 
-                <!-- Button moved to bottom -->
-                <button class="log-btn" (click)="openLogConvo()">
-                  {{ 'CONVERSATION.LOG_CONVERSATION' | translate }}
-                </button>
-              </div>
+  <!-- NO DATA -->
+  <div
+    class="noData"
+    *ngIf="!convoSubcontractors || convoSubcontractors.length === 0"
+  >
+    {{ 'EMPTY_STATES.NO_CONVERSATION' | translate }}
+  </div>
 
-              <!-- RIGHT CHAT AREA -->
-              <div class="chat-content">
-                <!-- Loader -->
-                <div *ngIf="isSpinLoading" class="chat-loader">
-                  <mat-spinner diameter="40"></mat-spinner>
-                </div>
+  <div
+    class="chat-container"
+    *ngIf="(convoSubcontractors?.length ?? 0) > 0"
+  >
 
-                <ng-container *ngIf="!isLoading">
-                  <div class="chat-search" style="padding-top: 6px">
-                    <mat-form-field
-                      appearance="outline"
-                      class="chat-search-field"
-                      style="width: 99%"
-                    >
-                      <mat-icon
-                        matPrefix
-                        style="padding-top: 3px; font-size: 19px !important; padding-right: 0px"
-                        >search</mat-icon
-                      >
+    <!-- LEFT SIDEBAR -->
+    <div class="chat-sidebar">
+      <div
+        class="sidebar-list"
+        *ngIf="(convoSubcontractors?.length ?? 0) > 0"
+      >
+        <div
+          class="sidebar-item"
+          *ngFor="let sub of convoSubcontractors; let i = index"
+          [class.active]="selectedIndex === i"
+          (click)="onSubClick(sub.id, i)"
+        >
+          {{ sub.name }}
+        </div>
+      </div>
 
-                      <input
-                        matInput
-                        placeholder="{{ 'CONVERSATION.SEARCH_CONVERSATION' | translate }}"
-                        [(ngModel)]="conversationSearchText"
-                        (input)="filterConversations()"
-                      />
-
-                      <button
-                        matSuffix
-                        mat-icon-button
-                        *ngIf="conversationSearchText"
-                        (click)="clearConversationSearch()"
-                      >
-                        <mat-icon>close</mat-icon>
-                      </button>
-                    </mat-form-field>
-                  </div>
-                  <!-- Scrollable MESSAGES -->
-                  <div class="chat-messages" #chatMessages>
-                    <!-- No Data -->
-                    <div
-                      class="noData"
-                      *ngIf="
-                        !isSpinLoading &&
-                        (!pmSubConversationData || pmSubConversationData.length === 0)
-                      "
-                    >
-                      {{ 'EMPTY_STATES.NO_CONVERSATION' | translate }}
-                    </div>
-
-                    <!-- Chat Messages -->
-                    <!-- <div
-                      class="message-row"
-                      *ngFor="let convo of pmSubConversationData"
-                      [ngClass]="convo.senderType === 'PM' ? 'right' : 'left'"
-                    > -->
-                    <div
-                      class="message-row"
-                      *ngFor="let convo of pmSubConversationData"
-                      [class.reply-highlight]="replyingToMessageId === convo.conversationMessageID"
-                      [ngClass]="{
-                        right: convo.senderType === 'PM',
-                        left: convo.senderType !== 'PM',
-                        reply: convo.parentMessageID
-                      }"
-                    >
-                      <div class="message-header">
-                        <span class="draft" *ngIf="convo.status === 'Draft'">
-                          {{ 'CONVERSATION.DRAFT' | translate }}
-                        </span>
-                      </div>
-                      <!-- Subcontractor Meta -->
-                      <ng-container *ngIf="convo.senderType !== 'PM'">
-                        <div class="message-meta">
-                          <!-- Date/Time -->
-                          <span class="message-time">
-                            {{ getLocalTime(convo.messageDateTime) }}
-                          </span>
-
-                          <!-- Conversation Type Icon -->
-                          <ng-container [ngSwitch]="convo.conversationType?.toLowerCase()">
-                            <i
-                              *ngSwitchCase="'phone'"
-                              class="fa fa-phone convoType-icon"
-                              aria-hidden="true"
-                            ></i>
-                            <i
-                              *ngSwitchCase="'email'"
-                              class="fa fa-envelope convoType-icon"
-                              aria-hidden="true"
-                            ></i>
-                            <i
-                              *ngSwitchCase="'meeting'"
-                              class="fa-sharp fa-regular fa-handshake convoType-icon"
-                              aria-hidden="true"
-                            ></i>
-                            <ng-container *ngSwitchDefault></ng-container>
-                          </ng-container>
-
-                          <!-- Reply Button -->
-                          <!-- <button class="reply-btn">Reply</button> -->
-
-                          <!-- Reply Button -->
-                          <button
-                            class="reply-btn"
-                            *ngIf="convo.conversationMessageID"
-                            (click)="startReply(convo)"
-                          >
-                            {{ 'CONVERSATION.REPLY' | translate }}
-                          </button>
-                        </div>
-                      </ng-container>
-
-                      <!-- PM Meta -->
-                      <ng-container *ngIf="convo.senderType === 'PM'">
-                        <span class="message-time">
-                          {{ getLocalTime(convo.messageDateTime) }}
-                        </span>
-                      </ng-container>
-
-                      <!-- Message Bubble -->
-                      <!-- <div class="message" [ngClass]="convo.senderType === 'PM' ? 'user' : 'bot'">
-                        {{ convo.messageText || convo.message || convo.Message }}
-                      </div> -->
-
-                      <!-- 💬 ACTUAL MESSAGE BUBBLE -->
-                      <div class="message" [ngClass]="convo.senderType === 'PM' ? 'user' : 'bot'">
-                        <!-- ✅ Teams-style quoted parent message INSIDE bubble -->
-                        <div class="teams-reply" *ngIf="convo.parentMessageID">
-                          <div class="teams-reply-bar"></div>
-
-                          <div class="teams-reply-content">
-                            <div class="teams-reply-header">
-                              {{ getParentMessage(convo.parentMessageID)?.senderType || '—' }}
-                              ·
-                              {{
-                                getParentMessage(convo.parentMessageID)?.messageDateTime
-                                  ? (getParentMessage(convo.parentMessageID)?.messageDateTime
-                                    | date : 'dd-MM-yyyy HH:mm')
-                                  : '--'
-                              }}
-                            </div>
-
-                            <div class="teams-reply-text">
-                              {{ getParentMessage(convo.parentMessageID)?.messageText || '' }}
-                            </div>
-                          </div>
-                        </div>
-                        <!-- Actual message text -->
-                        {{ convo.messageText || convo.message || convo.Message }}
-                      </div>
-
-                      <div
-                        class="reply-box"
-                        *ngIf="replyingToMessageId === convo.conversationMessageID"
-                      >
-                        <!-- Text Input -->
-                        <textarea
-                          class="reply-textarea"
-                          rows="3"
-                          placeholder="Write a reply…"
-                          [(ngModel)]="replyTexts[convo.conversationMessageID]"
-                        ></textarea>
-
-                        <!-- Attachments -->
-                        <div class="attachment-row" *ngIf="replyAttachments.length">
-                          <div
-                            class="file-chip"
-                            *ngFor="let file of replyAttachments; let i = index"
-                          >
-                            <span class="file-name">{{ file.name }}</span>
-                            <span class="remove" (click)="removeReplyFile(i)">×</span>
-                          </div>
-                        </div>
-
-                        <input
-                          type="file"
-                          #replyFileInput
-                          hidden
-                          multiple
-                          (change)="onReplyFileSelected($event)"
-                        />
-
-                        <!-- Actions -->
-                        <div class="reply-actions">
-                          <button class="attach-btn" (click)="replyFileInput.click()">
-                            {{ 'CONVERSATION.ATTACH' | translate }}
-                          </button>
-
-                          <div class="action-right">
-                            <button class="cancel-btn" (click)="cancelReply()">
-                              {{ 'COMMON.CANCEL' | translate }}
-                            </button>
-                            <button class="send-btn" (click)="sendReply(convo)">
-                              {{ 'COMMON.SEND' | translate }}
-                            </button>
-                          </div>
-                        </div>
-
-                        <div class="error" *ngIf="replyError">
-                          {{ replyError }}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </ng-container>
-                <!-- INPUT AREA -->
-                <div class="chat-input" [ngClass]="{ invalid: showInvalid }">
-                  <!-- Row 1: Attachments -->
-                  <div class="attachment-row" *ngIf="attachments.length">
-                    <div class="file-chip" *ngFor="let file of attachments; let i = index">
-                      {{ file.name }}
-                      <span class="remove" (click)="removeFile(i)" title="Remove">✕</span>
-                    </div>
-                  </div>
-
-                  <!-- Row 2: Subject + Message + Actions -->
-                  <div class="input-row">
-                    <input
-                      type="text"
-                      class="subject-input"
-                      placeholder="Enter Subject"
-                      [(ngModel)]="subject"
-                      [class.invalid]="subject"
-                      (ngModelChange)="onInputChange()"
-                    />
-
-                    <input
-                      type="text"
-                      class="message-input"
-                      placeholder="Enter your message..."
-                      [(ngModel)]="messageText"
-                      [class.invalid]="messageText"
-                      (ngModelChange)="onInputChange()"
-                    />
-
-                     <div class="error-msg"  style="color: red;" *ngIf="(messageText ?? '').length > 5000">
-{{'CONVERSATION.MESSAGE_TOO_LONG'|translate}}
+      <button class="log-btn" (click)="openLogConvo()">
+        {{ 'CONVERSATION.LOG_CONVERSATION' | translate }}
+      </button>
     </div>
 
-                    <!-- Hidden file input -->
-                    <input
-                      type="file"
-                      #fileInput
-                      multiple
-                      hidden
-                      (change)="onFileSelected($event)"
-                    />
+    <!-- RIGHT CHAT AREA -->
+    <div class="chat-content">
 
-                    <!-- Attach icon -->
-                    <i
-                      class="fa fa-paperclip attach-icon"
-                      title="Attach"
-                      (click)="fileInput.click()"
-                    ></i>
+      <!-- LOADER -->
+      <div *ngIf="isSpinLoading" class="chat-loader">
+        <mat-spinner diameter="40"></mat-spinner>
+      </div>
 
-                    <!-- Send icon -->
-                    <i
-                      class="fa fa-paper-plane send-icon"
-                      title="Send"
-                      [class.disabled]="(messageText ?? '').length > 5000"
-                      (click)="sendMessage()"
-                    ></i>
-                  </div>
-                </div>
-                <span class="error-span" *ngIf="showInvalid"> Fields cannot be empty. </span>
+      <ng-container *ngIf="!isSpinLoading">
+
+        <!-- SEARCH -->
+        <div class="chat-search" style="padding-top: 6px">
+          <mat-form-field appearance="outline" class="chat-search-field" style="width: 99%">
+            <mat-icon matPrefix>search</mat-icon>
+
+            <input
+              matInput
+              placeholder="{{ 'CONVERSATION.SEARCH_CONVERSATION' | translate }}"
+              [(ngModel)]="conversationSearchText"
+              (input)="filterConversations()"
+            />
+
+            <button
+              matSuffix
+              mat-icon-button
+              *ngIf="conversationSearchText"
+              (click)="clearConversationSearch()"
+            >
+              <mat-icon>close</mat-icon>
+            </button>
+          </mat-form-field>
+        </div>
+
+        <!-- CHAT MESSAGES -->
+        <div class="chat-messages" #chatMessages>
+
+          <div
+            class="noData"
+            *ngIf="
+              !isSpinLoading &&
+              (!pmSubConversationData || pmSubConversationData.length === 0)
+            "
+          >
+            {{ 'EMPTY_STATES.NO_CONVERSATION' | translate }}
+          </div>
+
+          <!-- SINGLE MESSAGE LOOP -->
+          <div
+            class="message-row"
+            *ngFor="let convo of pmSubConversationData; trackBy: trackByMessageId"
+            [class.reply-highlight]="replyingToMessageId === convo.conversationMessageID"
+            [ngClass]="{
+              right: convo.senderType === 'PM',
+              left: convo.senderType !== 'PM',
+              reply: convo.parentMessageID
+            }"
+          >
+
+            <!-- MESSAGE META -->
+            <div class="message-header">
+              <span class="draft" *ngIf="convo.status === 'Draft'">
+                {{ 'CONVERSATION.DRAFT' | translate }}
+              </span>
+            </div>
+
+            <!-- SUB META -->
+            <ng-container *ngIf="convo.senderType !== 'PM'">
+              <div class="message-meta">
+                <span class="message-time">
+                  {{ getLocalTime(convo.messageDateTime) }}
+                </span>
+
+                <ng-container [ngSwitch]="convo.conversationType?.toLowerCase()">
+                  <i *ngSwitchCase="'phone'" class="fa fa-phone convoType-icon"></i>
+                  <i *ngSwitchCase="'email'" class="fa fa-envelope convoType-icon"></i>
+                  <i *ngSwitchCase="'meeting'" class="fa fa-handshake convoType-icon"></i>
+                </ng-container>
+
+                <button
+                  class="reply-btn"
+                  *ngIf="convo.conversationMessageID"
+                  (click)="startReply(convo)"
+                >
+                  {{ 'CONVERSATION.REPLY' | translate }}
+                </button>
+              </div>
+            </ng-container>
+
+            <!-- PM META -->
+            <ng-container *ngIf="convo.senderType === 'PM'">
+              <span class="message-time">
+                {{ getLocalTime(convo.messageDateTime) }}
+              </span>
+            </ng-container>
+
+            <!-- MESSAGE BUBBLE -->
+            <div
+              class="message"
+              [ngClass]="convo.senderType === 'PM' ? 'user' : 'bot'"
+            >
+              {{ convo.messageText || convo.message || convo.Message }}
+            </div>
+
+            <!-- ✅ ATTACHMENTS (FIXED) -->
+            <div
+              class="attachments-row"
+              *ngIf="convo.convoattachments && convo.convoattachments.length > 0"
+            >
+              <div
+                class="attachment-chip"
+                *ngFor="let att of convo.convoattachments"
+              >
+                <a
+                  [href]="getWebPath(att.filePath)"
+                  target="_blank"
+                >
+                  {{ att.fileName }}
+                </a>
               </div>
             </div>
+
+            <!-- REPLY BOX -->
+            <div
+              class="reply-box"
+              *ngIf="replyingToMessageId === convo.conversationMessageID"
+            >
+              <textarea
+                class="reply-textarea"
+                rows="3"
+                placeholder="Write a reply…"
+                [(ngModel)]="replyTexts[convo.conversationMessageID]"
+              ></textarea>
+
+              <div class="attachment-row" *ngIf="replyAttachments.length">
+                <div
+                  class="file-chip"
+                  *ngFor="let file of replyAttachments; let i = index"
+                >
+                  {{ file.name }}
+                  <span class="remove" (click)="removeReplyFile(i)">×</span>
+                </div>
+              </div>
+
+              <input
+                type="file"
+                #replyFileInput
+                hidden
+                multiple
+                (change)="onReplyFileSelected($event)"
+              />
+
+              <div class="reply-actions">
+                <button class="attach-btn" (click)="replyFileInput.click()">
+                  {{ 'CONVERSATION.ATTACH' | translate }}
+                </button>
+
+                <div class="action-right">
+                  <button class="cancel-btn" (click)="cancelReply()">
+                    {{ 'COMMON.CANCEL' | translate }}
+                  </button>
+                  <button class="send-btn" (click)="sendReply(convo)">
+                    {{ 'COMMON.SEND' | translate }}
+                  </button>
+                </div>
+              </div>
+
+              <div class="error" *ngIf="replyError">
+                {{ replyError }}
+              </div>
+            </div>
+
           </div>
+        </div>
+      </ng-container>
+
+      <!-- INPUT AREA -->
+      <div class="chat-input" [ngClass]="{ invalid: showInvalid }">
+
+        <div class="attachment-row" *ngIf="attachments.length">
+          <div
+            class="file-chip"
+            *ngFor="let file of attachments; let i = index"
+          >
+            {{ file.name }}
+            <span class="remove" (click)="removeFile(i)">✕</span>
+          </div>
+        </div>
+
+        <div class="input-row">
+          <input
+            type="text"
+            class="subject-input"
+            placeholder="Enter Subject"
+            [(ngModel)]="subject"
+            (ngModelChange)="onInputChange()"
+          />
+
+          <input
+            type="text"
+            class="message-input"
+            placeholder="Enter your message..."
+            [(ngModel)]="messageText"
+            (ngModelChange)="onInputChange()"
+          />
+
+          <input
+            type="file"
+            #fileInput
+            hidden
+            multiple
+            (change)="onFileSelected($event)"
+          />
+
+          <i class="fa fa-paperclip attach-icon" (click)="fileInput.click()"></i>
+          <i class="fa fa-paper-plane send-icon" (click)="sendMessage()"></i>
+        </div>
+      </div>
+
+      <span class="error-span" *ngIf="showInvalid">
+        Fields cannot be empty.
+      </span>
+
+    </div>
+  </div>
+</div>
         </div>
       </div>
     </div>
