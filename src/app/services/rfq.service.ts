@@ -27,6 +27,12 @@ export interface RfqSubcontractorDueDate {
   dueDate: string; // yyyy-MM-dd
 }
 
+export interface WorkItem {
+  workItemID: string;
+  name: string;
+  category?: string;
+}
+
 @Injectable({ providedIn: 'root' })
 export class RfqService {
   private apiURL: string = '';
@@ -117,6 +123,14 @@ export class RfqService {
     );
   }
 
+getRfqWorkItems(rfqId: string): Observable<WorkItem[]> {
+  return from(this.getHeaders()).pipe(
+    switchMap((headers) =>
+      this.http.get<{ data: WorkItem[] }>(`${this.rfqEndpoint}/${rfqId}/workitems`, { headers })
+    ),
+    map((res) => res.data || [])
+  );
+}
   getWorkItemInfo(rfqId: string): Observable<any> {
     return from(this.getHeaders()).pipe(
       switchMap((headers) =>

@@ -73,6 +73,18 @@ interface RFQConversationMessage {
   createdOn?: Date;
 }
 
+export interface RFQConversationMessageAttachment {
+  attachmentID: string;
+  conversationMessageID: string;
+  fileName: string;
+  fileExtension: string;
+  fileSize: number;
+  filePath: string;
+  uploadedBy?: string;
+  uploadedOn?: string;
+  isActive: boolean;
+}
+
 // log-conversation.model.ts
 interface LogConversation {
   projectID: string;
@@ -158,6 +170,7 @@ export class ViewProjects {
   notesError = '';
   dateTimeTouched = false;
   conversationSearchText = '';
+  // convoattachments?: RFQConversationMessageAttachment[];
 
   convoSubcontractors: { id: string; name: string }[] = [];
   replyingToMessageId: string | null = null;
@@ -1218,123 +1231,190 @@ export class ViewProjects {
     });
   }
 
-  filterConversations(): void {
-    const search = this.conversationSearchText.trim().toLowerCase();
+ filterConversations(): void {
+  const search = this.conversationSearchText.trim().toLowerCase();
 
-    if (!search) {
-      this.pmSubConversationData = [...this.allPmSubConversationData];
-      return;
-    }
-
-    this.pmSubConversationData = this.allPmSubConversationData.filter(
-      (convo) =>
-        convo.messageText?.toLowerCase().includes(search) ||
-        convo.subject?.toLowerCase().includes(search) ||
-        convo.senderType?.toLowerCase().includes(search)
-    );
+  if (!search) {
+    this.pmSubConversationData = [...this.allPmSubConversationData];
+    return;
   }
+
+  this.pmSubConversationData = this.allPmSubConversationData.filter((convo) => {
+    // Search in message text, subject, and sender type
+    const textMatch =
+      convo.messageText?.toLowerCase().includes(search) ||
+      convo.subject?.toLowerCase().includes(search) ||
+      convo.senderType?.toLowerCase().includes(search);
+
+    // Search in attachment filenames
+    const attachmentMatch = convo.convoattachments?.some((att: any) =>
+      att.fileName?.toLowerCase().includes(search)
+    );
+
+    return textMatch || attachmentMatch;
+  });
+}
   clearConversationSearch(): void {
     this.conversationSearchText = '';
     this.pmSubConversationData = [...this.allPmSubConversationData];
   }
 
-  loadConversationBySub(subId: string): void {
-    if (!subId) return;
+getWebPath(path: string): string {
+  return path ? path.replace(/\\/g, '/') : '';
+}
 
-    this.isSpinLoading = true;
+loadConversationBySub(subId: string): void {
+  if (!subId) return;
 
-    this.projectService
-      .getConversationByProjectAndSubcontractor(this.projectId, subId)
-      .pipe(
-        switchMap((res: any[]) => {
-          const initialConvos = res || [];
-          this.conversationsData = res;
-          if (initialConvos.length === 0) {
-            this.pmSubConversationData = [];
-            return of([]);
+  this.isSpinLoading = true;
+  console.log('[LOAD] Loading conversation for Sub:', subId);
+
+  this.projectService
+    .getConversationByProjectAndSubcontractor(this.projectId, subId)
+    .pipe(
+      switchMap((initialConvos: any[]) => {
+        console.log('[API-1] Initial Convos:', initialConvos);
+
+        this.conversationsData = initialConvos ?? [];
+
+        if (!initialConvos || initialConvos.length === 0) {
+          console.warn('[API-1] No initial conversations found');
+          this.pmSubConversationData = [];
+          return of([]);
+        }
+
+        // 🔐 Build attachment lookup map
+        const attachmentMap = new Map<string, any[]>();
+
+        initialConvos.forEach(ic => {
+          const id = ic.conversationMessageID ?? ic.messageID;
+
+          console.log('[MAP] IC ID:', id, 'Attachments:', ic.attachments);
+
+          if (id) {
+            attachmentMap.set(String(id), [...(ic.attachments ?? [])]);
           }
+        });
 
-          // Always fetch full conversation from backend
-          const draft = initialConvos[0];
-          return this.projectService
-            .getConversation(
-              draft.projectID,
-              draft.rfqID ?? '00000000-0000-0000-0000-000000000000',
-              draft.subcontractorID
-            )
-            .pipe(
-              map((fullConvos) => {
-                // Merge PM IDs from initialConvos into fullConvos
-                const merged = fullConvos.map((fc) => {
-                  const match = initialConvos.find(
-                    (ic) =>
-                      (ic.conversationMessageID ?? ic.messageID) ===
-                      (fc.conversationMessageID ?? fc.messageID)
-                  );
+        console.log(
+          '[MAP] Attachment Map Keys:',
+          Array.from(attachmentMap.keys())
+        );
 
-                  const pmID =
-                    match?.projectManagerID ?? match?.ProjectManagerID ?? fc?.projectManagerID;
+        const draft = initialConvos[0];
 
-                  const validPMID =
-                    pmID && pmID !== '00000000-0000-0000-0000-000000000000' ? pmID : undefined;
+        console.log('[API-2 CALL PARAMS]', {
+          projectID: draft.projectID,
+          rfqID: draft.rfqID,
+          subcontractorID: draft.subcontractorID,
+        });
 
-                  return {
-                    conversationMessageID:
-                      fc.conversationMessageID ?? fc.messageID ?? fc.messageID
-                        ? String(fc.conversationMessageID ?? fc.messageID ?? fc.messageID)
-                        : undefined,
+        return this.projectService
+          .getConversation(
+            draft.projectID,
+            draft.rfqID ?? '00000000-0000-0000-0000-000000000000',
+            draft.subcontractorID
+          )
+          .pipe(
+            map((fullConvos: any[]) => {
+              console.log('[API-2] Full Conversations:', fullConvos);
 
-                    parentMessageID:
-                      fc.parentMessageID ?? fc.parentID
-                        ? String(fc.parentMessageID ?? fc.parentID)
-                        : undefined,
+              console.log(
+                '[API-2] Full Convo IDs:',
+                fullConvos.map(fc => fc.conversationMessageID)
+              );
 
-                    projectID: this.projectId,
-                    rfqID: fc.rfqID ?? null,
-                    workItemID: null,
-                    subcontractorID: subId,
+              return (fullConvos ?? []).map(fc => {
+                const fcId = fc.conversationMessageID ?? fc.messageID;
+                const safeId = fcId ? String(fcId) : undefined;
 
-                    projectManagerID: validPMID,
-                    senderType: fc.senderType,
-                    conversationType: fc.conversationType,
-                    messageText: fc.messageText,
-                    subject: fc.subject ?? null,
+                const original = initialConvos.find(
+                  ic => ic.conversationMessageID === safeId
+                );
 
-                    // ✅ Fixed datetime handling
-                    messageDateTime: fc.messageDateTime
-                      ? new Date(fc.messageDateTime) // JS automatically converts UTC → local
-                      : undefined,
-
-                    status: 'Active',
-                    createdBy: null,
-                    createdOn: null,
-                  };
+                console.log('[MERGE]', {
+                  safeId,
+                  foundOriginal: !!original,
+                  attachmentCount: original?.attachments?.length ?? 0,
                 });
 
-                return merged;
-              })
-            );
-        }),
-        finalize(() => (this.isSpinLoading = false))
-      )
-      .subscribe({
-        next: (res: any[]) => {
-          this.allPmSubConversationData = res || [];
-          this.pmSubConversationData = [...this.allPmSubConversationData];
+                const pmID =
+                  fc.projectManagerID &&
+                  fc.projectManagerID !==
+                    '00000000-0000-0000-0000-000000000000'
+                    ? fc.projectManagerID
+                    : undefined;
 
-          setTimeout(() => this.scrollToBottom(), 0);
-          // 🔹 Debug PM IDs
-          console.log(
-            'Loaded projectManagerIDs:',
-            this.pmSubConversationData.map((c) => c.projectManagerID)
+                return {
+                  conversationMessageID: safeId,
+                  parentMessageID: fc.parentMessageID
+                    ? String(fc.parentMessageID)
+                    : undefined,
+
+                  projectID: this.projectId,
+                  rfqID: fc.rfqID ?? null,
+                  workItemID: null,
+                  subcontractorID: subId,
+
+                  projectManagerID: pmID,
+                  senderType: fc.senderType,
+                  conversationType: fc.conversationType,
+                  messageText: fc.messageText,
+                  subject: fc.subject ?? null,
+
+                  messageDateTime: fc.messageDateTime
+                    ? new Date(fc.messageDateTime)
+                    : undefined,
+
+                  status: 'Active',
+                  createdBy: null,
+                  createdOn: null,
+
+                  // ✅ FINAL attachment logic
+                  convoattachments: original?.attachments?.length
+                    ? [...original.attachments]
+                    : [],
+                };
+              });
+            })
           );
+      }),
+      finalize(() => {
+        console.log('[LOAD] Conversation loading completed');
+        this.isSpinLoading = false;
+      })
+    )
+    .subscribe({
+      next: (res: any[]) => {
+        this.allPmSubConversationData = res ?? [];
+        this.pmSubConversationData = [...this.allPmSubConversationData];
 
-          setTimeout(() => this.scrollToBottom(), 0);
-        },
-        error: (err) => console.error('Error loading conversation:', err),
-      });
-  }
+        console.log(
+          '[FINAL RESULT]',
+          this.pmSubConversationData.map(c => ({
+            id: c.conversationMessageID,
+            attachments: c.convoattachments?.length ?? 0,
+          }))
+        );
 
+        setTimeout(() => this.scrollToBottom(), 0);
+      },
+      error: err => {
+        this.isSpinLoading = false;
+        console.error('[ERROR] Loading conversation failed:', err);
+      },
+    });
+}
+cleanMessage(message: string): string {
+  if (!message) return '';
+
+  // Remove common attachment patterns
+  return message.replace(/image\s*\(\d+\)\.png/gi, '').trim();
+}
+
+trackByMessageId(index: number, convo: any): string {
+  return convo.id;
+}
   setDefaultValues() {
     const now = new Date();
     this.conversationDateTime = new Date();

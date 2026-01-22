@@ -4,6 +4,7 @@ import { map, switchMap, from, Observable, of, forkJoin } from 'rxjs';
 import { environment } from '../../environments/environment';
 import { MsalService } from '@azure/msal-angular';
 import { AppConfigService } from './app.config.service';
+import { RFQConversationMessageAttachment } from '../component/projects/view-projects/view-projects';
 
 export interface projectdetails {
   projectID: string;
@@ -62,6 +63,8 @@ interface UploadAttachmentResponse {
 export type SenderType = 'PM' | 'Subcontractor';
 
 export interface ConversationMessageDto {
+  Attachments: RFQConversationMessageAttachment[] | undefined;
+  attachments?: RFQConversationMessageAttachment[]; // <-- FIXED
   messageID: string;
   senderType: SenderType;
   messageText: string;

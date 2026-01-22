@@ -173,7 +173,7 @@
             <div style="display: flex; align-items: center; gap: 15px">
               <!-- Global Due Date -->
               <div style="display: flex; align-items: center; gap: 8px">
-                <span style="color: #6f42c1; font-weight: 500; font-size: 14px">{{'RFQ_PAGE.DUE_DATE'|translate}} </span>
+                <span style="color: #6f42c1; font-weight: 500; font-size: 14px">{{'RFQ_PAGE.DUE_DATE'|translate}}<span class="text-danger">*</span> </span>
                 <input
                   type="date"
                   [(ngModel)]="globalDueDate"
@@ -423,7 +423,7 @@
               </div>
             </div>
             <div
-              *ngIf="!selectedWorkItems.length"
+             *ngIf="!isLoader && !selectedWorkItems.length"
               style="padding: 20px; text-align: center; color: #999; font-style: italic"
             >
 {{'RFQ_PAGE.SELECT_WORKITEM_MESSAGE'|translate}}              </div>
