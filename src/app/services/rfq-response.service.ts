@@ -188,25 +188,27 @@ export class RfqResponseService {
     );
   }
 
-  sendReminder(
-  subId: string | null,
-  rfqId: string | null,
-  emailBody: string
-): Observable<any> {
-  const body = {
-    subcontractorId: subId,
-    rfqId: rfqId,
-    emailBody: emailBody,
-  };
+  sendReminder(subId: string | null, rfqId: string | null, emailBody: string): Observable<any> {
+    const body = {
+      subcontractorId: subId,
+      rfqId: rfqId,
+      emailBody: emailBody,
+    };
 
-  return from(this.getHeaders()).pipe(
-    switchMap((headers) =>
-      this.http.post<any>(
-        `${this.apiURL}/Email/send-reminder`,
-        body,
-        { headers }
+    return from(this.getHeaders()).pipe(
+      switchMap((headers) =>
+        this.http.post<any>(`${this.apiURL}/Email/send-reminder`, body, { headers })
       )
-    )
-  );
-}
+    );
+  }
+
+  rfqReminderSet(payload: any): Observable<any> {
+    return from(this.getHeaders()).pipe(
+      switchMap((headers) =>
+        this.http.post<any>(`${this.apiURL}/RfqReminderSet/CreateRfqReminderSet`, payload, {
+          headers,
+        })
+      )
+    );
+  }
 }
