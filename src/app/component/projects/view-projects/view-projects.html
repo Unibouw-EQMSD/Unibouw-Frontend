@@ -550,7 +550,7 @@
           >
           </mat-paginator>
           <!-- TAB 3: CONVERSATION -->
-         <div *ngIf="selectedTab === 'conversation'">
+       <div *ngIf="selectedTab === 'conversation'">
 
   <!-- NO DATA -->
   <div
@@ -681,15 +681,31 @@
               </span>
             </ng-container>
 
-            <!-- MESSAGE BUBBLE -->
+            <!-- ✅ MESSAGE BUBBLE (Teams-Style Reply Support) -->
             <div
               class="message"
               [ngClass]="convo.senderType === 'PM' ? 'user' : 'bot'"
             >
-              {{ convo.messageText || convo.message || convo.Message }}
+              <!-- ✅ QUOTED PARENT (Teams-style) -->
+              <div class="teams-reply" *ngIf="convo.parentMessageID">
+                <div class="teams-reply-bar"></div>
+                <div class="teams-reply-content">
+                  <div class="teams-reply-header">
+                    {{ convo.parentSenderName || 'Unknown' }} · {{ getLocalTime(convo.parentMessageDateTime) }}
+                  </div>
+                  <div class="teams-reply-text">
+                    {{ convo.parentMessageText || convo.parentMessage || '(No text)' }}
+                  </div>
+                </div>
+              </div>
+
+              <!-- ✅ ACTUAL MESSAGE TEXT -->
+              <div class="message-text">
+                {{ convo.messageText || convo.message || convo.Message }}
+              </div>
             </div>
 
-            <!-- ✅ ATTACHMENTS (FIXED) -->
+            <!-- ✅ ATTACHMENTS -->
             <div
               class="attachments-row"
               *ngIf="convo.convoattachments && convo.convoattachments.length > 0"
@@ -791,22 +807,22 @@
             (ngModelChange)="onInputChange()"
           />
 
-                    <div
-                      class="error-msg"
-                      style="color: red"
-                      *ngIf="(messageText ?? '').length > 5000"
-                    >
-                      {{ 'CONVERSATION.MESSAGE_TOO_LONG' | translate }}
-                    </div>
+          <div
+            class="error-msg"
+            style="color: red"
+            *ngIf="(messageText ?? '').length > 5000"
+          >
+            {{ 'CONVERSATION.MESSAGE_TOO_LONG' | translate }}
+          </div>
 
-                    <!-- Hidden file input -->
-                    <input
-                      type="file"
-                      #fileInput
-                      multiple
-                      hidden
-                      (change)="onFileSelected($event)"
-                    />
+          <!-- Hidden file input -->
+          <input
+            type="file"
+            #fileInput
+            multiple
+            hidden
+            (change)="onFileSelected($event)"
+          />
 
           <i class="fa fa-paperclip attach-icon" (click)="fileInput.click()"></i>
           <i class="fa fa-paper-plane send-icon" (click)="sendMessage()"></i>

@@ -1288,7 +1288,6 @@ loadConversationBySub(subId: string): void {
 
         initialConvos.forEach(ic => {
           const id = ic.conversationMessageID ?? ic.messageID;
-
           console.log('[MAP] IC ID:', id, 'Attachments:', ic.attachments);
 
           if (id) {
@@ -1296,10 +1295,7 @@ loadConversationBySub(subId: string): void {
           }
         });
 
-        console.log(
-          '[MAP] Attachment Map Keys:',
-          Array.from(attachmentMap.keys())
-        );
+        console.log('[MAP] Attachment Map Keys:', Array.from(attachmentMap.keys()));
 
         const draft = initialConvos[0];
 
@@ -1318,11 +1314,16 @@ loadConversationBySub(subId: string): void {
           .pipe(
             map((fullConvos: any[]) => {
               console.log('[API-2] Full Conversations:', fullConvos);
+              console.log('[API-2] Full Convo IDs:', fullConvos.map(fc => fc.conversationMessageID));
 
-              console.log(
-                '[API-2] Full Convo IDs:',
-                fullConvos.map(fc => fc.conversationMessageID)
-              );
+              // ✅ BUILD PARENT MESSAGE LOOKUP MAP
+              const parentMap = new Map<string, any>();
+              fullConvos.forEach(fc => {
+                const id = fc.conversationMessageID ?? fc.messageID;
+                if (id) {
+                  parentMap.set(String(id), fc);
+                }
+              });
 
               return (fullConvos ?? []).map(fc => {
                 const fcId = fc.conversationMessageID ?? fc.messageID;
@@ -1340,11 +1341,39 @@ loadConversationBySub(subId: string): void {
 
                 const pmID =
                   fc.projectManagerID &&
-                  fc.projectManagerID !==
-                    '00000000-0000-0000-0000-000000000000'
+                  fc.projectManagerID !== '00000000-0000-0000-0000-000000000000'
                     ? fc.projectManagerID
                     : undefined;
 
+                // ✅ MAP PARENT MESSAGE DATA
+                let parentData = {};
+if (fc.parentMessageID) {
+  const parent = parentMap.get(String(fc.parentMessageID));
+  
+  if (parent) {
+    console.log('[PARENT FOUND]', {
+      parentID: fc.parentMessageID,
+      parentSender: parent.senderType,
+      parentDateTime: parent.messageDateTime,
+      parentText: parent.messageText?.substring(0, 50)
+    });
+
+    parentData = {
+      parentSenderName: parent.senderType === 'PM' 
+        ? 'Project Manager' 
+        : parent.subcontractorName || 'Subcontractor',
+      
+      // ✅ ONLY CHANGE: Use parseParentDate for reply message times
+      parentMessageDateTime: parent.messageDateTime 
+        ? this.parseParentDate(parent.messageDateTime)
+        : undefined,
+        
+      parentMessageText: parent.messageText || parent.message || '(No text)',
+    };
+  } else {
+    console.warn('[PARENT NOT FOUND]', fc.parentMessageID);
+  }
+}
                 return {
                   conversationMessageID: safeId,
                   parentMessageID: fc.parentMessageID
@@ -1374,6 +1403,9 @@ loadConversationBySub(subId: string): void {
                   convoattachments: original?.attachments?.length
                     ? [...original.attachments]
                     : [],
+
+                  // ✅ ADD PARENT MESSAGE DATA
+                  ...parentData,
                 };
               });
             })
@@ -1389,13 +1421,13 @@ loadConversationBySub(subId: string): void {
         this.allPmSubConversationData = res ?? [];
         this.pmSubConversationData = [...this.allPmSubConversationData];
 
-        console.log(
-          '[FINAL RESULT]',
-          this.pmSubConversationData.map(c => ({
-            id: c.conversationMessageID,
-            attachments: c.convoattachments?.length ?? 0,
-          }))
-        );
+        console.log('[FINAL RESULT]', this.pmSubConversationData.map(c => ({
+          id: c.conversationMessageID,
+          parentID: c.parentMessageID,
+          parentSender: c.parentSenderName,
+          parentDateTime: c.parentMessageDateTime,
+          attachments: c.convoattachments?.length ?? 0,
+        })));
 
         setTimeout(() => this.scrollToBottom(), 0);
       },
@@ -1405,6 +1437,7 @@ loadConversationBySub(subId: string): void {
       },
     });
 }
+
 cleanMessage(message: string): string {
   if (!message) return '';
 
@@ -1447,17 +1480,43 @@ trackByMessageId(index: number, convo: any): string {
     this.conversationText = '';
   }
 
-  getLocalTime(dateUtc: string | Date) {
-    return new Date(dateUtc).toLocaleString('en-IN', {
-      timeZone: 'Asia/Kolkata',
+getLocalTime(dateUtc: string | Date | null | undefined): string {
+  if (!dateUtc) {
+    return '';
+  }
+
+  try {
+    let date: Date;
+
+    if (typeof dateUtc === 'string') {
+      // ✅ If no timezone info, assume UTC
+      if (!dateUtc.includes('Z') && !dateUtc.includes('+') && !dateUtc.includes('-', 10)) {
+        date = new Date(dateUtc + 'Z');
+      } else {
+        date = new Date(dateUtc);
+      }
+    } else {
+      date = new Date(dateUtc);
+    }
+    
+    if (isNaN(date.getTime())) {
+      console.warn('Invalid date:', dateUtc);
+      return '';
+    }
+
+    // ✅ No timeZone parameter = uses user's local timezone
+    return date.toLocaleString('en-GB', {
       year: 'numeric',
       month: 'short',
       day: 'numeric',
       hour: '2-digit',
       minute: '2-digit',
     });
+  } catch (error) {
+    console.error('Date parsing error:', dateUtc, error);
+    return '';
   }
-
+}
   saveLogConvo() {
     // 🔹 reset validation messages
     this.dateTimeError = '';
@@ -1550,6 +1609,36 @@ trackByMessageId(index: number, convo: any): string {
         },
       });
   }
+
+  private parseParentDate(dateInput: string | Date | null | undefined): Date | undefined {
+  if (!dateInput) {
+    return undefined;
+  }
+
+  try {
+    if (dateInput instanceof Date) {
+      return dateInput;
+    }
+
+    // Backend sends Amsterdam time as string (e.g., "2026-01-27T08:48:00")
+    // We need to parse it as UTC to avoid timezone shift
+    if (typeof dateInput === 'string') {
+      const dateStr = dateInput.trim();
+      
+      // If no timezone indicator, treat as UTC (like your saveLogConvo does)
+      if (!dateStr.includes('Z') && !dateStr.includes('+') && !dateStr.match(/-\d{2}:\d{2}$/)) {
+        return new Date(dateStr + 'Z');
+      }
+      
+      return new Date(dateStr);
+    }
+
+    return new Date(dateInput);
+  } catch (error) {
+    console.error('Error parsing parent date:', dateInput, error);
+    return undefined;
+  }
+}
 
   showInvalid = false;
   sendMessage() {
