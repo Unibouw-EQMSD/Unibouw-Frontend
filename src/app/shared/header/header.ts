@@ -271,7 +271,7 @@ export class Header implements OnInit {
       isEnable: formValue.isEnable,
     };
 
-    this.reminderService.saveGolbalReminderConfig(body).subscribe({
+    this.reminderService.saveGlobalReminderConfig(body).subscribe({
       next: () => {
         this.closeReminderConfig();
         this.snackBar.open('Reminder configuration updated successfully', 'Close', {

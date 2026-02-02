@@ -38,7 +38,7 @@ export class ReminderService {
   /* Update Global RFQ Reminder Configuration
    * (Your old code used GET incorrectly — API should be POST)
    */
-  saveGolbalReminderConfig(body: any): Observable<any> {
+  saveGlobalReminderConfig(body: any): Observable<any> {
     return from(this.getHeaders()).pipe(
       switchMap((headers) =>
         this.http.post<any>(`${this.apiURL}/Common/SaveRfqGlobalReminder`, body, { headers }),
