@@ -51,7 +51,9 @@
     "START_DATE": "Startdatum",
     "END_DATE": "Gecommitteerde datum",
     "SPECIFICATION": "Projectbestanden",
-    "VIEW_DETAILS": "Bekijk details"
+    "VIEW_DETAILS": "Bekijk details",
+    "PERSON_NAME": "Persoonsnaam",
+    "PERSON_ROLE": "Persoonsrol"
   },
    "PROJECT_DETAILS": {
     "DETAILS_TITLE": "Details",
@@ -63,7 +65,9 @@
     "COMMITTED_DATE": "Vastgelegde datum",
     "STATUS": "Status",
     "SPECIFICATION": "Specificatie",
-    "PROJECT_FILES": "Projectbestanden"
+    "PROJECT_FILES": "Projectbestanden",
+    "PERSON_NAME": "Persoonsnaam",
+    "PERSON_ROLE": "Persoonsrol"
   },
 
   "RESPONSE_VIEW": {
@@ -80,9 +84,6 @@
     "RFQ_ID": "RFQ-ID",
     "WORK_ITEM": "Werkonderdeel",
     "SUBCONTRACTOR": "Onderaannemer"
-
-
-
   },
 
 
@@ -166,6 +167,7 @@
     "WORK_ITEMS": "Werkonderdelen",
     "DUE_DATE": "Vervaldatum",
 
+    "REGARDS": "groeten,",
     "THANK_YOU": "Dank u voor uw snelle reactie.",
     "TEAM": "Unibouw-team",
 

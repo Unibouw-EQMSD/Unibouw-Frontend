@@ -49,7 +49,9 @@
     "START_DATE": "Start",
     "END_DATE": "Committed",
     "SPECIFICATION": "Project Files",
-    "VIEW_DETAILS": "View Details"
+    "VIEW_DETAILS": "View Details",
+    "PERSON_NAME": "Person Name",
+    "PERSON_ROLE": "Person Role"
   },
 
   "PROJECT_DETAILS": {
@@ -62,7 +64,9 @@
     "COMMITTED_DATE": "Committed Date",
     "STATUS": "Status",
     "SPECIFICATION": "Specification",
-    "PROJECT_FILES": "Project Files"
+    "PROJECT_FILES": "Project Files",
+    "PERSON_NAME": "Person Name",
+    "PERSON_ROLE": "Person Role"
   },
 
    "RESPONSE_VIEW": {
@@ -162,6 +166,7 @@
     "WORK_ITEMS": "Work Item(s)",
     "DUE_DATE": "Due Date",
 
+    "REGARDS": "Regards,",
     "THANK_YOU": "Thank you for your prompt response.",
     "TEAM": "Unibouw Team",
 

@@ -8,7 +8,7 @@ export interface Rfq {
   id?: string;
   rfqNumber?: string; // ✅ Add this
   projectName?: string; // optional
-  customerID: string;
+  customerID: number;
   projectID: string;
   customerName?: string;
   sentDate: string;
@@ -16,8 +16,7 @@ export interface Rfq {
   globalDueDate?: string;
   rfqSent: number;
   quoteReceived: number;
-  customerNote?: string;
-  deadLine?: string;
+  customNote?: string;
   createdOn?: string; // ✅ Add this
   createdBy?: string;
 }
@@ -41,7 +40,7 @@ export class RfqService {
   constructor(
     private http: HttpClient,
     private msalService: MsalService,
-    private appConfigService: AppConfigService
+    private appConfigService: AppConfigService,
   ) {
     this.apiURL = this.appConfigService.getConfig().apiURL;
     this.rfqEndpoint = `${this.apiURL}/Rfq`;
@@ -67,7 +66,7 @@ export class RfqService {
   getAllRfq(): Observable<Rfq[]> {
     return from(this.getHeaders()).pipe(
       switchMap((headers) =>
-        this.http.get<{ count: number; data: Rfq[] }>(`${this.rfqEndpoint}/byProject`, { headers })
+        this.http.get<{ count: number; data: Rfq[] }>(`${this.rfqEndpoint}/byProject`, { headers }),
       ),
       map((res) =>
         (res.data || []).map((it) => ({
@@ -78,17 +77,16 @@ export class RfqService {
           quoteReceived: it.quoteReceived,
           customerID: it.customerID,
           projectID: it.projectID,
-          customerNote: it.customerNote,
-          deadLine: it.deadLine,
+          customNote: it.customNote,
           customerName: it.customerName,
-        }))
-      )
+        })),
+      ),
     );
   }
   getRfqById(rfqId: string): Observable<Rfq> {
     return from(this.getHeaders()).pipe(
       switchMap((headers) =>
-        this.http.get<{ data: any }>(`${this.rfqEndpoint}/${rfqId}`, { headers })
+        this.http.get<{ data: any }>(`${this.rfqEndpoint}/${rfqId}`, { headers }),
       ),
       map((res) => {
         const d = res.data;
@@ -104,12 +102,11 @@ export class RfqService {
           projectName: d.projectName, // ✅ Add if needed
           rfqSent: d.rfqSent,
           quoteReceived: d.quoteReceived,
-          customerNote: d.customerNote,
-          deadLine: d.deadLine,
+          customNote: d.customNote,
           createdOn: d.createdOn, // ✅ Add this
           createdBy: d.createdBy,
         };
-      })
+      }),
     );
   }
 
@@ -117,25 +114,25 @@ export class RfqService {
   getRfqByProjectId(projectId: string): Observable<Rfq[]> {
     return from(this.getHeaders()).pipe(
       switchMap((headers) =>
-        this.http.get<{ data: Rfq[] }>(`${this.rfqEndpoint}/byProject/${projectId}`, { headers })
+        this.http.get<{ data: Rfq[] }>(`${this.rfqEndpoint}/byProject/${projectId}`, { headers }),
       ),
-      map((res) => res.data || [])
+      map((res) => res.data || []),
     );
   }
 
-getRfqWorkItems(rfqId: string): Observable<WorkItem[]> {
-  return from(this.getHeaders()).pipe(
-    switchMap((headers) =>
-      this.http.get<{ data: WorkItem[] }>(`${this.rfqEndpoint}/${rfqId}/workitems`, { headers })
-    ),
-    map((res) => res.data || [])
-  );
-}
+  getRfqWorkItems(rfqId: string): Observable<WorkItem[]> {
+    return from(this.getHeaders()).pipe(
+      switchMap((headers) =>
+        this.http.get<{ data: WorkItem[] }>(`${this.rfqEndpoint}/${rfqId}/workitems`, { headers }),
+      ),
+      map((res) => res.data || []),
+    );
+  }
   getWorkItemInfo(rfqId: string): Observable<any> {
     return from(this.getHeaders()).pipe(
       switchMap((headers) =>
-        this.http.get<any>(`${this.apiURL}/Rfq/${rfqId}/workitem-info`, { headers })
-      )
+        this.http.get<any>(`${this.apiURL}/Rfq/${rfqId}/workitem-info`, { headers }),
+      ),
     );
   }
 
@@ -144,8 +141,8 @@ getRfqWorkItems(rfqId: string): Observable<WorkItem[]> {
       switchMap((headers) =>
         this.http.get<any[]>(`${this.apiURL}/Common/subcontractorworkitemmapping/${workItemId}`, {
           headers,
-        })
-      )
+        }),
+      ),
     );
   }
 
@@ -154,7 +151,7 @@ getRfqWorkItems(rfqId: string): Observable<WorkItem[]> {
     rfqPayload: any,
     subcontractorIds: string[],
     workItemIds: string[],
-    sendEmail: boolean = true
+    sendEmail: boolean = true,
   ): Observable<any> {
     const params = new HttpParams({
       fromObject: {
@@ -166,8 +163,8 @@ getRfqWorkItems(rfqId: string): Observable<WorkItem[]> {
 
     return from(this.getHeaders()).pipe(
       switchMap((headers) =>
-        this.http.post(`${this.apiURL}/Rfq/create-simple`, rfqPayload, { headers, params })
-      )
+        this.http.post(`${this.apiURL}/Rfq/create-simple`, rfqPayload, { headers, params }),
+      ),
     );
   }
 
@@ -177,7 +174,7 @@ getRfqWorkItems(rfqId: string): Observable<WorkItem[]> {
     workItems: string[],
     emailBody: string,
     sendEmail: boolean = false,
-    subcontractorDueDates: RfqSubcontractorDueDate[]
+    subcontractorDueDates: RfqSubcontractorDueDate[],
   ): Observable<any> {
     let params = new HttpParams();
     subcontractorIds.forEach((id) => (params = params.append('subcontractorIds', id)));
@@ -193,8 +190,8 @@ getRfqWorkItems(rfqId: string): Observable<WorkItem[]> {
 
     return from(this.getHeaders()).pipe(
       switchMap((headers) =>
-        this.http.post(`${this.apiURL}/Rfq/create-simple`, body, { headers, params })
-      )
+        this.http.post(`${this.apiURL}/Rfq/create-simple`, body, { headers, params }),
+      ),
     );
   }
 
@@ -203,7 +200,7 @@ getRfqWorkItems(rfqId: string): Observable<WorkItem[]> {
     rfqPayload: any,
     subcontractorIds: string[],
     workItemIds: string[],
-    sendEmail: boolean = false
+    sendEmail: boolean = false,
   ): Observable<any> {
     // 🛑 Hard validation (fail fast)
     if (!rfqID) throw new Error('rfqID is required');
@@ -228,8 +225,8 @@ getRfqWorkItems(rfqId: string): Observable<WorkItem[]> {
 
     return from(this.getHeaders()).pipe(
       switchMap((headers) =>
-        this.http.post(`${this.apiURL}/Rfq/update`, rfqPayload, { headers, params })
-      )
+        this.http.post(`${this.apiURL}/Rfq/update`, rfqPayload, { headers, params }),
+      ),
     );
   }
 
@@ -237,8 +234,8 @@ getRfqWorkItems(rfqId: string): Observable<WorkItem[]> {
     return from(this.getHeaders()).pipe(
       switchMap((headers) =>
         // ⭐ This assumes the backend endpoint is implemented as /api/Rfq/{rfqId}/subcontractor-duedates
-        this.http.get<any[]>(`${this.rfqEndpoint}/${rfqId}/subcontractor-duedates`, { headers })
-      )
+        this.http.get<any[]>(`${this.rfqEndpoint}/${rfqId}/subcontractor-duedates`, { headers }),
+      ),
     );
   }
 
@@ -246,16 +243,16 @@ getRfqWorkItems(rfqId: string): Observable<WorkItem[]> {
     workItemId: string,
     subcontractorId: string,
     dueDate: string,
-    rfqId: string // NEW PARAM
+    rfqId: string, // NEW PARAM
   ): Observable<any> {
     return from(this.getHeaders()).pipe(
       switchMap((headers) =>
         this.http.post(
           `${this.apiURL}/Rfq/save-subcontractor-workitem-mapping?workItemId=${workItemId}&subcontractorId=${subcontractorId}&rfqId=${rfqId}&dueDate=${dueDate}`,
           {}, // empty body
-          { headers }
-        )
-      )
+          { headers },
+        ),
+      ),
     );
   }
 
@@ -263,22 +260,22 @@ getRfqWorkItems(rfqId: string): Observable<WorkItem[]> {
     rfqId: string,
     subcontractorId: string,
     workItemId: string,
-    dueDate: string
+    dueDate: string,
   ): Observable<any> {
     return from(this.getHeaders()).pipe(
       switchMap((headers) =>
         this.http.post(
           `${this.apiURL}/Rfq/save-or-update-rfq-subcontractor-mapping?rfqId=${rfqId}&subcontractorId=${subcontractorId}&workItemId=${workItemId}&dueDate=${dueDate}`,
           {}, // empty body
-          { headers }
-        )
-      )
+          { headers },
+        ),
+      ),
     );
   }
 
   deleteRfq(rfqId: string) {
     return from(this.getHeaders()).pipe(
-      switchMap((headers) => this.http.post(`${this.apiURL}/Rfq/delete/${rfqId}`, {}, { headers }))
+      switchMap((headers) => this.http.post(`${this.apiURL}/Rfq/delete/${rfqId}`, {}, { headers })),
     );
   }
 
@@ -287,9 +284,9 @@ getRfqWorkItems(rfqId: string): Observable<WorkItem[]> {
       switchMap((headers) =>
         this.http.post<{ data: any }>(`${this.apiURL}/RFQConversationMessage/reply`, payload, {
           headers,
-        })
+        }),
       ),
-      map((res) => res.data)
+      map((res) => res.data),
     );
   }
 }

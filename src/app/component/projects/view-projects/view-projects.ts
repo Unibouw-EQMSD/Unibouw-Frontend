@@ -58,12 +58,9 @@ interface WorkItem {
 
 interface RFQConversationMessage {
   conversationMessageID?: string;
-  parentMessageID?: string;
+  subcontractorMessageID?: string;
   projectID: string;
-  rfqID: string;
-  workItemID?: string | null;
   subcontractorID: string;
-  projectManagerID?: string;
   senderType: 'PM' | 'Subcontractor';
   messageText: string;
   subject?: string;
@@ -71,6 +68,7 @@ interface RFQConversationMessage {
   status?: string;
   createdBy: string;
   createdOn?: Date;
+  tags?: string[];
 }
 
 export interface RFQConversationMessageAttachment {
@@ -259,7 +257,7 @@ export class ViewProjects {
     private reminderService: ReminderService,
     private location: Location,
     private translate: TranslateService,
-    public userService: UserService
+    public userService: UserService,
   ) {
     registerLocaleData(localeNl);
   }
@@ -583,7 +581,7 @@ export class ViewProjects {
         rfq.rfqId,
         rfq.subcontractorId,
         work.workItemId,
-        'Maybe Later' // important: persist "Maybe Later" not only "Viewed"
+        'Maybe Later', // important: persist "Maybe Later" not only "Viewed"
       )
       .subscribe({
         next: (res: any) => {
@@ -734,7 +732,7 @@ export class ViewProjects {
     let list = work.rfqs;
     if (term) {
       list = list.filter((r) =>
-        `${r.name} ${r.rfqId} ${r.quote || ''}`.toLowerCase().includes(term)
+        `${r.name} ${r.rfqId} ${r.quote || ''}`.toLowerCase().includes(term),
       );
     }
 
@@ -1087,7 +1085,7 @@ export class ViewProjects {
     console.log('Reminder Payload:', payload);
 
     // Example API call
-    this.rfqResponseService.rfqReminderSet(payload).subscribe({
+    this.rfqResponseService.rfqReminder(payload).subscribe({
       next: () => {
         this.isLoading = false;
         this.closeReminderPopup();
@@ -1231,223 +1229,224 @@ export class ViewProjects {
     });
   }
 
- filterConversations(): void {
-  const search = this.conversationSearchText.trim().toLowerCase();
+  filterConversations(): void {
+    const search = this.conversationSearchText.trim().toLowerCase();
 
-  if (!search) {
-    this.pmSubConversationData = [...this.allPmSubConversationData];
-    return;
+    if (!search) {
+      this.pmSubConversationData = [...this.allPmSubConversationData];
+      return;
+    }
+
+    this.pmSubConversationData = this.allPmSubConversationData.filter((convo) => {
+      // Search in message text, subject, and sender type
+      const textMatch =
+        convo.messageText?.toLowerCase().includes(search) ||
+        convo.subject?.toLowerCase().includes(search) ||
+        convo.senderType?.toLowerCase().includes(search);
+
+      // Search in attachment filenames
+      const attachmentMatch = convo.convoattachments?.some((att: any) =>
+        att.fileName?.toLowerCase().includes(search),
+      );
+
+      return textMatch || attachmentMatch;
+    });
   }
-
-  this.pmSubConversationData = this.allPmSubConversationData.filter((convo) => {
-    // Search in message text, subject, and sender type
-    const textMatch =
-      convo.messageText?.toLowerCase().includes(search) ||
-      convo.subject?.toLowerCase().includes(search) ||
-      convo.senderType?.toLowerCase().includes(search);
-
-    // Search in attachment filenames
-    const attachmentMatch = convo.convoattachments?.some((att: any) =>
-      att.fileName?.toLowerCase().includes(search)
-    );
-
-    return textMatch || attachmentMatch;
-  });
-}
   clearConversationSearch(): void {
     this.conversationSearchText = '';
     this.pmSubConversationData = [...this.allPmSubConversationData];
   }
 
-getWebPath(path: string): string {
-  return path ? path.replace(/\\/g, '/') : '';
-}
+  getWebPath(path: string): string {
+    return path ? path.replace(/\\/g, '/') : '';
+  }
 
-loadConversationBySub(subId: string): void {
-  if (!subId) return;
+  loadConversationBySub(subId: string): void {
+    if (!subId) return;
 
-  this.isSpinLoading = true;
-  console.log('[LOAD] Loading conversation for Sub:', subId);
+    this.isSpinLoading = true;
+    console.log('[LOAD] Loading conversation for Sub:', subId);
 
-  this.projectService
-    .getConversationByProjectAndSubcontractor(this.projectId, subId)
-    .pipe(
-      switchMap((initialConvos: any[]) => {
-        console.log('[API-1] Initial Convos:', initialConvos);
+    this.projectService
+      .getConversationByProjectAndSubcontractor(this.projectId, subId)
+      .pipe(
+        switchMap((initialConvos: any[]) => {
+          console.log('[API-1] Initial Convos:', initialConvos);
 
-        this.conversationsData = initialConvos ?? [];
+          this.conversationsData = initialConvos ?? [];
 
-        if (!initialConvos || initialConvos.length === 0) {
-          console.warn('[API-1] No initial conversations found');
-          this.pmSubConversationData = [];
-          return of([]);
-        }
-
-        // 🔐 Build attachment lookup map
-        const attachmentMap = new Map<string, any[]>();
-
-        initialConvos.forEach(ic => {
-          const id = ic.conversationMessageID ?? ic.messageID;
-          console.log('[MAP] IC ID:', id, 'Attachments:', ic.attachments);
-
-          if (id) {
-            attachmentMap.set(String(id), [...(ic.attachments ?? [])]);
+          if (!initialConvos || initialConvos.length === 0) {
+            console.warn('[API-1] No initial conversations found');
+            this.pmSubConversationData = [];
+            return of([]);
           }
-        });
 
-        console.log('[MAP] Attachment Map Keys:', Array.from(attachmentMap.keys()));
+          // 🔐 Build attachment lookup map
+          const attachmentMap = new Map<string, any[]>();
 
-        const draft = initialConvos[0];
+          initialConvos.forEach((ic) => {
+            const id = ic.conversationMessageID ?? ic.messageID;
+            console.log('[MAP] IC ID:', id, 'Attachments:', ic.attachments);
 
-        console.log('[API-2 CALL PARAMS]', {
-          projectID: draft.projectID,
-          rfqID: draft.rfqID,
-          subcontractorID: draft.subcontractorID,
-        });
+            if (id) {
+              attachmentMap.set(String(id), [...(ic.attachments ?? [])]);
+            }
+          });
 
-        return this.projectService
-          .getConversation(
-            draft.projectID,
-            draft.rfqID ?? '00000000-0000-0000-0000-000000000000',
-            draft.subcontractorID
-          )
-          .pipe(
-            map((fullConvos: any[]) => {
-              console.log('[API-2] Full Conversations:', fullConvos);
-              console.log('[API-2] Full Convo IDs:', fullConvos.map(fc => fc.conversationMessageID));
+          console.log('[MAP] Attachment Map Keys:', Array.from(attachmentMap.keys()));
 
-              // ✅ BUILD PARENT MESSAGE LOOKUP MAP
-              const parentMap = new Map<string, any>();
-              fullConvos.forEach(fc => {
-                const id = fc.conversationMessageID ?? fc.messageID;
-                if (id) {
-                  parentMap.set(String(id), fc);
-                }
-              });
+          const draft = initialConvos[0];
 
-              return (fullConvos ?? []).map(fc => {
-                const fcId = fc.conversationMessageID ?? fc.messageID;
-                const safeId = fcId ? String(fcId) : undefined;
+          console.log('[API-2 CALL PARAMS]', {
+            projectID: draft.projectID,
+            rfqID: draft.rfqID,
+            subcontractorID: draft.subcontractorID,
+          });
 
-                const original = initialConvos.find(
-                  ic => ic.conversationMessageID === safeId
+          return this.projectService
+            .getConversation(
+              draft.projectID,
+              draft.rfqID ?? '00000000-0000-0000-0000-000000000000',
+              draft.subcontractorID,
+            )
+            .pipe(
+              map((fullConvos: any[]) => {
+                console.log('[API-2] Full Conversations:', fullConvos);
+                console.log(
+                  '[API-2] Full Convo IDs:',
+                  fullConvos.map((fc) => fc.conversationMessageID),
                 );
 
-                console.log('[MERGE]', {
-                  safeId,
-                  foundOriginal: !!original,
-                  attachmentCount: original?.attachments?.length ?? 0,
+                // ✅ BUILD PARENT MESSAGE LOOKUP MAP
+                const parentMap = new Map<string, any>();
+                fullConvos.forEach((fc) => {
+                  const id = fc.conversationMessageID ?? fc.messageID;
+                  if (id) {
+                    parentMap.set(String(id), fc);
+                  }
                 });
 
-                const pmID =
-                  fc.projectManagerID &&
-                  fc.projectManagerID !== '00000000-0000-0000-0000-000000000000'
-                    ? fc.projectManagerID
-                    : undefined;
+                return (fullConvos ?? []).map((fc) => {
+                  const fcId = fc.conversationMessageID ?? fc.messageID;
+                  const safeId = fcId ? String(fcId) : undefined;
 
-                // ✅ MAP PARENT MESSAGE DATA
-                let parentData = {};
-if (fc.parentMessageID) {
-  const parent = parentMap.get(String(fc.parentMessageID));
-  
-  if (parent) {
-    console.log('[PARENT FOUND]', {
-      parentID: fc.parentMessageID,
-      parentSender: parent.senderType,
-      parentDateTime: parent.messageDateTime,
-      parentText: parent.messageText?.substring(0, 50)
-    });
+                  const original = initialConvos.find((ic) => ic.conversationMessageID === safeId);
 
-    parentData = {
-      parentSenderName: parent.senderType === 'PM' 
-        ? 'Project Manager' 
-        : parent.subcontractorName || 'Subcontractor',
-      
-      // ✅ ONLY CHANGE: Use parseParentDate for reply message times
-      parentMessageDateTime: parent.messageDateTime 
-        ? this.parseParentDate(parent.messageDateTime)
-        : undefined,
-        
-      parentMessageText: parent.messageText || parent.message || '(No text)',
-    };
-  } else {
-    console.warn('[PARENT NOT FOUND]', fc.parentMessageID);
-  }
-}
-                return {
-                  conversationMessageID: safeId,
-                  parentMessageID: fc.parentMessageID
-                    ? String(fc.parentMessageID)
-                    : undefined,
+                  console.log('[MERGE]', {
+                    safeId,
+                    foundOriginal: !!original,
+                    attachmentCount: original?.attachments?.length ?? 0,
+                  });
 
-                  projectID: this.projectId,
-                  rfqID: fc.rfqID ?? null,
-                  workItemID: null,
-                  subcontractorID: subId,
+                  const pmID =
+                    fc.projectManagerID &&
+                    fc.projectManagerID !== '00000000-0000-0000-0000-000000000000'
+                      ? fc.projectManagerID
+                      : undefined;
 
-                  projectManagerID: pmID,
-                  senderType: fc.senderType,
-                  conversationType: fc.conversationType,
-                  messageText: fc.messageText,
-                  subject: fc.subject ?? null,
+                  // ✅ MAP PARENT MESSAGE DATA
+                  let parentData = {};
+                  if (fc.subcontractorMessageID) {
+                    const parent = parentMap.get(String(fc.subcontractorMessageID));
 
-                  messageDateTime: fc.messageDateTime
-                    ? new Date(fc.messageDateTime)
-                    : undefined,
+                    if (parent) {
+                      console.log('[PARENT FOUND]', {
+                        parentID: fc.subcontractorMessageID,
+                        parentSender: parent.senderType,
+                        parentDateTime: parent.messageDateTime,
+                        parentText: parent.messageText?.substring(0, 50),
+                      });
 
-                  status: 'Active',
-                  createdBy: null,
-                  createdOn: null,
+                      parentData = {
+                        parentSenderName:
+                          parent.senderType === 'PM'
+                            ? 'Project Manager'
+                            : parent.subcontractorName || 'Subcontractor',
 
-                  // ✅ FINAL attachment logic
-                  convoattachments: original?.attachments?.length
-                    ? [...original.attachments]
-                    : [],
+                        // ✅ ONLY CHANGE: Use parseParentDate for reply message times
+                        parentMessageDateTime: parent.messageDateTime
+                          ? this.parseParentDate(parent.messageDateTime)
+                          : undefined,
 
-                  // ✅ ADD PARENT MESSAGE DATA
-                  ...parentData,
-                };
-              });
-            })
+                        parentMessageText: parent.messageText || parent.message || '(No text)',
+                      };
+                    } else {
+                      console.warn('[PARENT NOT FOUND]', fc.subcontractorMessageID);
+                    }
+                  }
+                  return {
+                    conversationMessageID: safeId,
+                    subcontractorMessageID: fc.subcontractorMessageID ? String(fc.subcontractorMessageID) : undefined,
+
+                    projectID: this.projectId,
+                    rfqID: fc.rfqID ?? null,
+                    workItemID: null,
+                    subcontractorID: subId,
+
+                    projectManagerID: pmID,
+                    senderType: fc.senderType,
+                    conversationType: fc.conversationType,
+                    messageText: fc.messageText,
+                    subject: fc.subject ?? null,
+
+                    messageDateTime: fc.messageDateTime ? new Date(fc.messageDateTime) : undefined,
+
+                    status: 'Active',
+                    createdBy: null,
+                    createdOn: null,
+
+                    // ✅ FINAL attachment logic
+                    convoattachments: original?.attachments?.length
+                      ? [...original.attachments]
+                      : [],
+
+                    // ✅ ADD PARENT MESSAGE DATA
+                    ...parentData,
+                  };
+                });
+              }),
+            );
+        }),
+        finalize(() => {
+          console.log('[LOAD] Conversation loading completed');
+          this.isSpinLoading = false;
+        }),
+      )
+      .subscribe({
+        next: (res: any[]) => {
+          this.allPmSubConversationData = res ?? [];
+          this.pmSubConversationData = [...this.allPmSubConversationData];
+
+          console.log(
+            '[FINAL RESULT]',
+            this.pmSubConversationData.map((c) => ({
+              id: c.conversationMessageID,
+              parentID: c.subcontractorMessageID,
+              parentSender: c.parentSenderName,
+              parentDateTime: c.parentMessageDateTime,
+              attachments: c.convoattachments?.length ?? 0,
+            })),
           );
-      }),
-      finalize(() => {
-        console.log('[LOAD] Conversation loading completed');
-        this.isSpinLoading = false;
-      })
-    )
-    .subscribe({
-      next: (res: any[]) => {
-        this.allPmSubConversationData = res ?? [];
-        this.pmSubConversationData = [...this.allPmSubConversationData];
 
-        console.log('[FINAL RESULT]', this.pmSubConversationData.map(c => ({
-          id: c.conversationMessageID,
-          parentID: c.parentMessageID,
-          parentSender: c.parentSenderName,
-          parentDateTime: c.parentMessageDateTime,
-          attachments: c.convoattachments?.length ?? 0,
-        })));
+          setTimeout(() => this.scrollToBottom(), 0);
+        },
+        error: (err) => {
+          this.isSpinLoading = false;
+          console.error('[ERROR] Loading conversation failed:', err);
+        },
+      });
+  }
 
-        setTimeout(() => this.scrollToBottom(), 0);
-      },
-      error: err => {
-        this.isSpinLoading = false;
-        console.error('[ERROR] Loading conversation failed:', err);
-      },
-    });
-}
+  cleanMessage(message: string): string {
+    if (!message) return '';
 
-cleanMessage(message: string): string {
-  if (!message) return '';
+    // Remove common attachment patterns
+    return message.replace(/image\s*\(\d+\)\.png/gi, '').trim();
+  }
 
-  // Remove common attachment patterns
-  return message.replace(/image\s*\(\d+\)\.png/gi, '').trim();
-}
-
-trackByMessageId(index: number, convo: any): string {
-  return convo.id;
-}
+  trackByMessageId(index: number, convo: any): string {
+    return convo.id;
+  }
   setDefaultValues() {
     const now = new Date();
     this.conversationDateTime = new Date();
@@ -1480,43 +1479,43 @@ trackByMessageId(index: number, convo: any): string {
     this.conversationText = '';
   }
 
-getLocalTime(dateUtc: string | Date | null | undefined): string {
-  if (!dateUtc) {
-    return '';
-  }
-
-  try {
-    let date: Date;
-
-    if (typeof dateUtc === 'string') {
-      // ✅ If no timezone info, assume UTC
-      if (!dateUtc.includes('Z') && !dateUtc.includes('+') && !dateUtc.includes('-', 10)) {
-        date = new Date(dateUtc + 'Z');
-      } else {
-        date = new Date(dateUtc);
-      }
-    } else {
-      date = new Date(dateUtc);
-    }
-    
-    if (isNaN(date.getTime())) {
-      console.warn('Invalid date:', dateUtc);
+  getLocalTime(dateUtc: string | Date | null | undefined): string {
+    if (!dateUtc) {
       return '';
     }
 
-    // ✅ No timeZone parameter = uses user's local timezone
-    return date.toLocaleString('en-GB', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    });
-  } catch (error) {
-    console.error('Date parsing error:', dateUtc, error);
-    return '';
+    try {
+      let date: Date;
+
+      if (typeof dateUtc === 'string') {
+        // ✅ If no timezone info, assume UTC
+        if (!dateUtc.includes('Z') && !dateUtc.includes('+') && !dateUtc.includes('-', 10)) {
+          date = new Date(dateUtc + 'Z');
+        } else {
+          date = new Date(dateUtc);
+        }
+      } else {
+        date = new Date(dateUtc);
+      }
+
+      if (isNaN(date.getTime())) {
+        console.warn('Invalid date:', dateUtc);
+        return '';
+      }
+
+      // ✅ No timeZone parameter = uses user's local timezone
+      return date.toLocaleString('en-GB', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+      });
+    } catch (error) {
+      console.error('Date parsing error:', dateUtc, error);
+      return '';
+    }
   }
-}
   saveLogConvo() {
     // 🔹 reset validation messages
     this.dateTimeError = '';
@@ -1563,8 +1562,8 @@ getLocalTime(dateUtc: string | Date | null | undefined): string {
         selectedDate.getHours(),
         selectedDate.getMinutes(),
         selectedDate.getSeconds(),
-        selectedDate.getMilliseconds()
-      )
+        selectedDate.getMilliseconds(),
+      ),
     );
 
     const payload: LogConversation = {
@@ -1596,7 +1595,7 @@ getLocalTime(dateUtc: string | Date | null | undefined): string {
         }),
         finalize(() => {
           this.isLoading = false;
-        })
+        }),
       )
       .subscribe({
         next: () => {
@@ -1611,34 +1610,34 @@ getLocalTime(dateUtc: string | Date | null | undefined): string {
   }
 
   private parseParentDate(dateInput: string | Date | null | undefined): Date | undefined {
-  if (!dateInput) {
-    return undefined;
-  }
-
-  try {
-    if (dateInput instanceof Date) {
-      return dateInput;
+    if (!dateInput) {
+      return undefined;
     }
 
-    // Backend sends Amsterdam time as string (e.g., "2026-01-27T08:48:00")
-    // We need to parse it as UTC to avoid timezone shift
-    if (typeof dateInput === 'string') {
-      const dateStr = dateInput.trim();
-      
-      // If no timezone indicator, treat as UTC (like your saveLogConvo does)
-      if (!dateStr.includes('Z') && !dateStr.includes('+') && !dateStr.match(/-\d{2}:\d{2}$/)) {
-        return new Date(dateStr + 'Z');
+    try {
+      if (dateInput instanceof Date) {
+        return dateInput;
       }
-      
-      return new Date(dateStr);
-    }
 
-    return new Date(dateInput);
-  } catch (error) {
-    console.error('Error parsing parent date:', dateInput, error);
-    return undefined;
+      // Backend sends Amsterdam time as string (e.g., "2026-01-27T08:48:00")
+      // We need to parse it as UTC to avoid timezone shift
+      if (typeof dateInput === 'string') {
+        const dateStr = dateInput.trim();
+
+        // If no timezone indicator, treat as UTC (like your saveLogConvo does)
+        if (!dateStr.includes('Z') && !dateStr.includes('+') && !dateStr.match(/-\d{2}:\d{2}$/)) {
+          return new Date(dateStr + 'Z');
+        }
+
+        return new Date(dateStr);
+      }
+
+      return new Date(dateInput);
+    } catch (error) {
+      console.error('Error parsing parent date:', dateInput, error);
+      return undefined;
+    }
   }
-}
 
   showInvalid = false;
   sendMessage() {
@@ -1670,8 +1669,6 @@ getLocalTime(dateUtc: string | Date | null | undefined): string {
 
     const payload: RFQConversationMessage = {
       projectID: draftConvo.projectID,
-      rfqID: draftConvo.rfqID,
-      workItemID: null,
       subcontractorID: draftConvo.subcontractorID,
       senderType: 'PM',
       messageText: this.messageText,
@@ -1697,7 +1694,7 @@ getLocalTime(dateUtc: string | Date | null | undefined): string {
           });
 
           this.pmSubConversationData.sort(
-            (a, b) => new Date(a.messageDateTime).getTime() - new Date(b.messageDateTime).getTime()
+            (a, b) => new Date(a.messageDateTime).getTime() - new Date(b.messageDateTime).getTime(),
           );
 
           return this.projectService
@@ -1706,7 +1703,7 @@ getLocalTime(dateUtc: string | Date | null | undefined): string {
               map((paths: string[]) => ({
                 res,
                 paths,
-              }))
+              })),
             );
         }),
         switchMap(({ res, paths }) =>
@@ -1716,11 +1713,11 @@ getLocalTime(dateUtc: string | Date | null | undefined): string {
             subject: this.subject,
             body: this.messageText,
             attachmentFilePaths: paths,
-          })
+          }),
         ),
         finalize(() => {
           this.isLoading = false;
-        })
+        }),
       )
       .subscribe({
         next: () => {
@@ -1838,7 +1835,7 @@ getLocalTime(dateUtc: string | Date | null | undefined): string {
     this.replyError = '';
 
     const formData = new FormData();
-    formData.append('parentMessageId', String(parentId));
+    formData.append('subcontractorMessageID', String(parentId));
     formData.append('message', replyText);
     formData.append('subject', this.replySubject);
 
@@ -1850,7 +1847,7 @@ getLocalTime(dateUtc: string | Date | null | undefined): string {
         finalize(() => {
           // ONLY stop loader here
           this.isSendingReply = false;
-        })
+        }),
       )
       .subscribe({
         next: (reply: any) => {
@@ -1865,14 +1862,9 @@ getLocalTime(dateUtc: string | Date | null | undefined): string {
 
           const normalizedReply: RFQConversationMessage = {
             conversationMessageID: String(reply.conversationMessageID ?? reply.messageID),
-            parentMessageID: String(parentId),
-
+            subcontractorMessageID: String(parentId),
             projectID: reply.projectID,
-            rfqID: reply.rfqID,
-            workItemID: reply.workItemID,
             subcontractorID: reply.subcontractorID,
-            projectManagerID: reply.projectManagerID,
-
             senderType: reply.senderType,
             messageText: reply.messageText,
             subject: reply.subject,
@@ -1884,7 +1876,7 @@ getLocalTime(dateUtc: string | Date | null | undefined): string {
           };
 
           const index = this.pmSubConversationData.findIndex(
-            (m) => String(m.conversationMessageID) === String(parentId)
+            (m) => String(m.conversationMessageID) === String(parentId),
           );
 
           if (index === -1) {
@@ -1911,7 +1903,7 @@ getLocalTime(dateUtc: string | Date | null | undefined): string {
     const pid = String(parentId);
 
     return (this.pmSubConversationData || []).find(
-      (m: any) => String(m.conversationMessageID) === pid
+      (m: any) => String(m.conversationMessageID) === pid,
     );
   }
 }

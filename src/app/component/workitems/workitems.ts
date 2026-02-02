@@ -11,7 +11,7 @@ import { TranslateService } from '@ngx-translate/core';
   selector: 'app-workitems',
   standalone: false,
   templateUrl: './workitems.html',
-  styleUrls: ['./workitems.css']
+  styleUrls: ['./workitems.css'],
 })
 export class Workitems implements OnInit, AfterViewInit {
   displayedColumns: string[] = ['number', 'name'];
@@ -30,70 +30,79 @@ export class Workitems implements OnInit, AfterViewInit {
   popupMessage = '';
   popupError = false;
 
+  readonly CATEGORY_IDS = {
+    unibouw: '1',
+    standard: '2',
+  };
+
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
 
   constructor(
     private workitemService: WorkitemService,
     private msalService: MsalService,
-    private userService: UserService,  private translate: TranslateService 
-
+    private userService: UserService,
+    private translate: TranslateService,
   ) {}
 
   ngOnInit() {
-  
     const showWelcome = localStorage.getItem('show_welcome');
 
-  if (showWelcome === 'true') {
-    // Fetch user data if needed
-    const userData = localStorage.getItem('user_data');
-    const user = userData ? JSON.parse(userData) : null;
-    const userName = user?.name || user?.email?.split('@')[0] || 'User';
+    if (showWelcome === 'true') {
+      // Fetch user data if needed
+      const userData = localStorage.getItem('user_data');
+      const user = userData ? JSON.parse(userData) : null;
+      const userName = user?.name || user?.email?.split('@')[0] || 'User';
 
-    // Show your welcome message (any style you want)
-    //alert(`Welcome ${userName}! 👋`);
-    this.showPopupMessage(`Welcome, ${userName}! You have successfully signed in to Unibouw.`);
+      // Show your welcome message (any style you want)
+      //alert(`Welcome ${userName}! 👋`);
+      this.showPopupMessage(`Welcome, ${userName}! You have successfully signed in to Unibouw.`);
 
-    // Mark as shown so it doesn’t show again
-    localStorage.setItem('show_welcome', 'false');
+      // Mark as shown so it doesn’t show again
+      localStorage.setItem('show_welcome', 'false');
+    }
+
+    this.isAdmin = this.userService.isAdmin(); // Check role
+    this.updateDisplayedColumns();
+
+    this.dataSource.filterPredicate = (data: Workitem, filter: string) => {
+      const f = filter.trim().toLowerCase();
+      return (
+        data.number.toString().includes(f) ||
+        data.name.toLowerCase().includes(f) ||
+        (data.description || '').toLowerCase().includes(f)
+      );
+    };
+
+    this.dataSource.sortingDataAccessor = (item: Workitem, property: string) => {
+      switch (property) {
+        case 'number':
+          return typeof item.number === 'number'
+            ? item.number
+            : parseInt(item.number.toString()) || 0;
+        case 'name':
+          return item.name?.toLowerCase() || '';
+        case 'description':
+          return (item.description || '').toLowerCase();
+        default:
+          return (item as any)[property];
+      }
+    };
+
+    // first page load
+    // this.loadCategoriesAndWorkitems(true);
+    this.loadWorkitems(this.CATEGORY_IDS[this.activeTab]);
   }
 
- this.isAdmin = this.userService.isAdmin(); // Check role
-  this.updateDisplayedColumns();  
-
-     this.dataSource.filterPredicate = (data: Workitem, filter: string) => {
-    const f = filter.trim().toLowerCase();
-    return data.number.toString().includes(f)
-        || data.name.toLowerCase().includes(f)
-        || (data.description || '').toLowerCase().includes(f);
-  };
-
-  this.dataSource.sortingDataAccessor = (item: Workitem, property: string) => {
-    switch (property) {
-      case 'number':
-        return typeof item.number === 'number' ? item.number : parseInt(item.number.toString()) || 0;
-      case 'name':
-        return item.name?.toLowerCase() || '';
-      case 'description':
-        return (item.description || '').toLowerCase();
-      default:
-        return (item as any)[property];
+  updateDisplayedColumns() {
+    if (this.isAdmin) {
+      if (!this.displayedColumns.includes('action')) {
+        this.displayedColumns.push('action');
+      }
+    } else {
+      this.displayedColumns = this.displayedColumns.filter((c) => c !== 'action');
     }
-  };
-
-  // first page load
-  this.loadCategoriesAndWorkitems(true);
-}
-
-updateDisplayedColumns() {
-  if (this.isAdmin) {
-    if (!this.displayedColumns.includes('action')) {
-      this.displayedColumns.push('action');
-    }
-  } else {
-    this.displayedColumns = this.displayedColumns.filter(c => c !== 'action');
   }
-}
 
   ngAfterViewInit() {
     // Initialize paginator and sort
@@ -110,85 +119,84 @@ updateDisplayedColumns() {
     }
   }
 
-setTab(tab: 'standard' | 'unibouw') {
-  this.activeTab = tab;
-  this.searchText = '';
-  this.dataSource.filter = '';
+  setTab(tab: 'standard' | 'unibouw') {
+    this.activeTab = tab;
+    this.searchText = '';
+    this.dataSource.filter = '';
 
-  // Clear existing data immediately
-  this.dataSource.data = [];
-  if (this.paginator) this.paginator.firstPage();
+    // Clear existing data immediately
+    this.dataSource.data = [];
+    if (this.paginator) this.paginator.firstPage();
 
-  const categoryId = this.categoryMap[tab];
-  if (categoryId) {
-    this.loadWorkitems(categoryId);
-  } else {
-    console.warn(`Category ID not found for tab ${tab}.`);
+    const categoryId = this.CATEGORY_IDS[tab];
+    if (categoryId) {
+      this.loadWorkitems(categoryId);
+    } else {
+      console.warn(`Category ID not found for tab ${tab}.`);
+    }
   }
-}
 
-loadCategoriesAndWorkitems(isFirstLoad = false) {
-  if (isFirstLoad) {
-    this.isSkeletonLoading = true;
-  } else {
+  loadCategoriesAndWorkitems(isFirstLoad = false) {
+    if (isFirstLoad) {
+      this.isSkeletonLoading = true;
+    } else {
+      this.isLoading = true;
+    }
+
+    this.workitemService.getCategories().subscribe({
+      next: (categories) => {
+        this.isLoading = false;
+        if (isFirstLoad) this.isSkeletonLoading = false;
+
+        this.categories = categories || [];
+        categories.forEach((cat) => {
+          const name = cat.categoryName.toLowerCase();
+          if (name === 'standard') this.categoryMap['standard'] = cat.categoryID;
+          if (name === 'unibouw') this.categoryMap['unibouw'] = cat.categoryID;
+        });
+
+        const categoryId = this.categoryMap[this.activeTab];
+        if (categoryId) this.loadWorkitems(categoryId);
+      },
+      error: () => {
+        this.isLoading = false;
+        this.isSkeletonLoading = false;
+      },
+    });
+  }
+
+  loadWorkitems(categoryId: string) {
     this.isLoading = true;
+
+    this.workitemService.getWorkitems(categoryId).subscribe({
+      next: (workitems) => {
+        this.isLoading = false;
+        this.isSkeletonLoading = false;
+
+        let mapped = (workitems || []).map((it) => ({ ...it, isEditing: false }));
+        mapped = mapped.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+
+        this.dataSource.data = mapped;
+
+        setTimeout(() => {
+          if (this.paginator) {
+            this.dataSource.paginator = this.paginator;
+            this.paginator.firstPage();
+          }
+          if (this.sort) {
+            this.dataSource.sort = this.sort;
+            this.sort.active = 'name';
+            this.sort.direction = 'asc';
+            this.sort.sortChange.emit({ active: 'name', direction: 'asc' });
+          }
+        });
+      },
+      error: () => {
+        this.isLoading = false;
+        this.isSkeletonLoading = false;
+      },
+    });
   }
-
-  this.workitemService.getCategories().subscribe({
-    next: (categories) => {
-      this.isLoading = false;
-      if (isFirstLoad) this.isSkeletonLoading = false;
-
-      this.categories = categories || [];
-      categories.forEach(cat => {
-        const name = cat.categoryName.toLowerCase();
-        if (name === 'standard') this.categoryMap['standard'] = cat.categoryID;
-        if (name === 'unibouw') this.categoryMap['unibouw'] = cat.categoryID;
-      });
-
-      const categoryId = this.categoryMap[this.activeTab];
-      if (categoryId) this.loadWorkitems(categoryId);
-    },
-    error: () => {
-      this.isLoading = false;
-      this.isSkeletonLoading = false;
-    }
-  });
-}
-
-loadWorkitems(categoryId: string) {
-  this.isLoading = true;
-
-  this.workitemService.getWorkitems(categoryId).subscribe({
-    next: (workitems) => {
-      this.isLoading = false;
-      this.isSkeletonLoading = false;
-
-      let mapped = (workitems || []).map(it => ({ ...it, isEditing: false }));
-      mapped = mapped.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
-
-      this.dataSource.data = mapped;
-
-      setTimeout(() => {
-        if (this.paginator) {
-          this.dataSource.paginator = this.paginator;
-          this.paginator.firstPage();
-        }
-        if (this.sort) {
-          this.dataSource.sort = this.sort;
-          this.sort.active = 'name';
-          this.sort.direction = 'asc';
-          this.sort.sortChange.emit({ active: 'name', direction: 'asc' });
-        }
-      });
-    },
-    error: () => {
-      this.isLoading = false;
-      this.isSkeletonLoading = false;
-    }
-  });
-}
-
 
   saveDescription(item: Workitem) {
     item.isEditing = false;
@@ -197,9 +205,8 @@ loadWorkitems(categoryId: string) {
       error: () => {
         this.showPopupMessage('Failed to save description. Please try again.', true);
         item.isEditing = true;
-      }
+      },
     });
-    
   }
 
   toggleIsActive(item: Workitem) {
@@ -211,7 +218,7 @@ loadWorkitems(categoryId: string) {
       error: () => {
         item.isActive = !newStatus;
         this.showPopupMessage(this.translate.instant('MESSAGES.STATUS_UPDATED_FAILED'), true);
-      }
+      },
     });
   }
 
@@ -222,13 +229,13 @@ loadWorkitems(categoryId: string) {
     setTimeout(() => (this.showPopup = false), 3000);
   }
   getStartIndex(): number {
-  if (!this.paginator) return 0;
-  return this.paginator.pageIndex * this.paginator.pageSize + 1;
-}
+    if (!this.paginator) return 0;
+    return this.paginator.pageIndex * this.paginator.pageSize + 1;
+  }
 
-getEndIndex(): number {
-  if (!this.paginator) return 0;
-  const end = (this.paginator.pageIndex + 1) * this.paginator.pageSize;
-  return end > this.dataSource.data.length ? this.dataSource.data.length : end;
-}
+  getEndIndex(): number {
+    if (!this.paginator) return 0;
+    const end = (this.paginator.pageIndex + 1) * this.paginator.pageSize;
+    return end > this.dataSource.data.length ? this.dataSource.data.length : end;
+  }
 }

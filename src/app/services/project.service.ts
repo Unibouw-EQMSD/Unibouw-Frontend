@@ -8,25 +8,25 @@ import { RFQConversationMessageAttachment } from '../component/projects/view-pro
 
 export interface projectdetails {
   projectID: string;
+  company?: string;
   number: string;
   name: string;
-  customerName: string;
   customerID?: string;
-  projectManagerName: string;
+  customerName: string;
   startDate?: string;
   completionDate?: string;
   status: string;
   active?: boolean;
   editItem?: boolean;
+  personName?: string;
+  personRole?: string;
 }
 
 export interface RFQConversationMessage {
   conversationMessageID?: string;
+  subcontractorMessageID?: string;
   projectID: string;
-  rfqID: string;
-  workItemID?: string | null;
   subcontractorID: string;
-  projectManagerID?: string;
   senderType: 'PM' | 'Subcontractor';
   messageText: string;
   subject?: string;
@@ -34,14 +34,13 @@ export interface RFQConversationMessage {
   status?: string;
   createdBy: string;
   createdOn?: Date;
+  tags?: string[];
 }
 
 // log-conversation.model.ts
 export interface LogConversation {
   projectID: string;
-  rfqID?: string | null;
   subcontractorID: string;
-  projectManagerID: string;
   conversationType: string;
   subject: string;
   message: string;
@@ -73,7 +72,7 @@ export interface ConversationMessageDto {
 
   conversationMessageID?: string;
   projectManagerID?: string | null;
-  parentMessageID?: string;
+  subcontractorMessageID?: string;
   parentID: any;
   rfqID?: string | null;
 
@@ -88,7 +87,7 @@ export class projectService {
   constructor(
     private http: HttpClient,
     private msalService: MsalService,
-    private appConfigService: AppConfigService
+    private appConfigService: AppConfigService,
   ) {
     this.apiURL = this.appConfigService.getConfig().apiURL;
     this.getprojectsurl = this.apiURL + '/Projects';
@@ -118,9 +117,9 @@ export class projectService {
   getProjectById(id: string): Observable<projectdetails> {
     return from(this.getHeaders()).pipe(
       switchMap((headers) =>
-        this.http.get<{ data: projectdetails }>(`${this.getprojectsurl}/${id}`, { headers })
+        this.http.get<{ data: projectdetails }>(`${this.getprojectsurl}/${id}`, { headers }),
       ),
-      map((res) => res.data) // ✅ extract data before returning
+      map((res) => res.data), // ✅ extract data before returning
     );
   }
 
@@ -129,29 +128,32 @@ export class projectService {
       switchMap((headers) =>
         this.http.get<{ count: number; data: projectdetails[] }>(
           this.getprojectsurl, // ✅ only use getprojectsurl
-          { headers }
-        )
+          { headers },
+        ),
       ),
       map((res) =>
         (res.data || []).map((it) => ({
           projectID: it.projectID,
+          company: it.company || '',
           number: it.number || '',
           name: it.name || '',
           customerName: it.customerName || '',
           customerID: it.customerID || '',
-          projectManagerName: it.projectManagerName || '',
           startDate: it.startDate || '',
           completionDate: it.completionDate || '',
-          status: it.status,
+          status: it.status || '',
+          active: it.active ?? true,
           editItem: false,
-        }))
-      )
+          personName: it.personName || '',
+          personRole: it.personRole || '',
+        })),
+      ),
     );
   }
 
   getConversationByProjectAndSubcontractor(
     projectId: string,
-    subcontractorId: string
+    subcontractorId: string,
   ): Observable<projectdetails[]> {
     return from(this.getHeaders()).pipe(
       switchMap((headers) =>
@@ -163,10 +165,10 @@ export class projectService {
               projectId,
               subcontractorId,
             },
-          }
-        )
+          },
+        ),
       ),
-      map((res) => res.data) //extract messages list
+      map((res) => res.data), //extract messages list
     );
   }
 
@@ -176,17 +178,17 @@ export class projectService {
         this.http.post<{ message: string; data: LogConversation }>(
           `${this.apiURL}/RFQConversationMessage/AddLogConversation`,
           payload, // 👈 direct payload
-          { headers }
-        )
+          { headers },
+        ),
       ),
-      map((res) => res.data)
+      map((res) => res.data),
     );
   }
 
   getConversation(projectId: string, rfqId: string, subId: string) {
     return this.http.get<ConversationMessageDto[]>(
       `${this.apiURL}/RFQConversationMessage/conversation`,
-      { params: { projectId, rfqId, subcontractorId: subId } }
+      { params: { projectId, rfqId, subcontractorId: subId } },
     );
   }
 
@@ -196,19 +198,21 @@ export class projectService {
         this.http.post<{ message: string; data: RFQConversationMessage }>(
           `${this.apiURL}/RFQConversationMessage/AddRFQConversationMessage`,
           message,
-          { headers }
-        )
+          { headers },
+        ),
       ),
-      map((res) => res.data) // return the created message
+      map((res) => res.data), // return the created message
     );
   }
 
   sendMail(payload: SendMailRequest): Observable<boolean> {
     return from(this.getHeaders()).pipe(
       switchMap((headers) =>
-        this.http.post<{ success: boolean }>(`${this.apiURL}/Email/send-mail`, payload, { headers })
+        this.http.post<{ success: boolean }>(`${this.apiURL}/Email/send-mail`, payload, {
+          headers,
+        }),
       ),
-      map((res) => res.success)
+      map((res) => res.success),
     );
   }
 
@@ -227,16 +231,16 @@ export class projectService {
             .post<UploadAttachmentResponse>(
               `${this.apiURL}/RFQConversationMessage/AddAttachmentAsync/${conversationMessageId}`,
               formData,
-              { headers }
+              { headers },
             )
             .pipe(
-              map((res) => res.filePath) // ✅ return uploaded file path
+              map((res) => res.filePath), // ✅ return uploaded file path
             );
         });
 
         // ✅ wait for all uploads & return string[]
         return forkJoin(uploadRequests);
-      })
+      }),
     );
   }
 }

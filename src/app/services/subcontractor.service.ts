@@ -8,9 +8,9 @@ export interface Subcontractors {
   subcontractorID: string;
   name: string;
   category: string;
-  personName: string;
-  phoneNumber1: string;
-  emailID: string;
+  contactName: string;
+  contactPhone: string;
+  email: string;
   isActive?: boolean;
   editItem?: boolean;
 }
@@ -27,7 +27,7 @@ export class SubcontractorService {
   constructor(
     private http: HttpClient,
     private msalService: MsalService,
-    private appConfigService: AppConfigService
+    private appConfigService: AppConfigService,
   ) {
     this.apiURL = this.appConfigService.getConfig().apiURL;
     this.subcontractorUrl = `${this.apiURL}/Subcontractor/createSubcontractorWithMappings`;
@@ -57,63 +57,60 @@ export class SubcontractorService {
   getSubcontractors(): Observable<Subcontractors[]> {
     return from(this.getHeaders()).pipe(
       switchMap((headers) =>
-        this.http.get<{ count: number; data: Subcontractors[] }>(this.getsubcontractor, { headers })
+        this.http.get<{ count: number; data: Subcontractors[] }>(this.getsubcontractor, {
+          headers,
+        }),
       ),
       map((res) =>
         (res.data || []).map((it) => ({
           subcontractorID: it.subcontractorID,
           name: it.name || '',
           category: it.category || '',
-          personName: it.personName || '',
-          phoneNumber1: it.phoneNumber1 || '',
-          emailID: it.emailID || '',
+          contactName: it.contactName || '',
+          contactPhone: it.contactPhone || '',
+          email: it.email || '',
           isActive: it.isActive,
           editItem: false,
-        }))
-      )
+        })),
+      ),
     );
   }
 
-getSubcontractorById(id: string): Observable<Subcontractors> {
-  return from(this.getHeaders()).pipe(
-    switchMap((headers) =>
-      this.http.get<{ data: Subcontractors }>(
-        `${this.apiURL}/Subcontractor/${id}`,
-        { headers }
-      )
-    ),
-    map((res) => {
-      const it = res.data; // ✅ extract from 'data'
-      return {
-        subcontractorID: it.subcontractorID,
-        name: it.name || '',
-        category: it.category || '',
-        personName: it.personName || '',
-        phoneNumber1: it.phoneNumber1 || '',
-        emailID: it.emailID || '',
-        isActive: it.isActive,
-        editItem: false,
-      };
-    })
-  );
-}
-
-
+  getSubcontractorById(id: string): Observable<Subcontractors> {
+    return from(this.getHeaders()).pipe(
+      switchMap((headers) =>
+        this.http.get<{ data: Subcontractors }>(`${this.apiURL}/Subcontractor/${id}`, { headers }),
+      ),
+      map((res) => {
+        const it = res.data; // ✅ extract from 'data'
+        return {
+          subcontractorID: it.subcontractorID,
+          name: it.name || '',
+          category: it.category || '',
+          contactName: it.contactName || '',
+          contactPhone: it.contactPhone || '',
+          email: it.email || '',
+          isActive: it.isActive,
+          editItem: false,
+        };
+      }),
+    );
+  }
 
   /* Get Work Items mapped to Subcontractors */
   getSubcontractorWorkItemMappings(): Observable<any[]> {
     return from(this.getHeaders()).pipe(
       switchMap((headers) =>
-        this.http.get<{ count: number; data: any[] }>(this.subcontractorWorkitemUrl, { headers })
+        this.http.get<{ count: number; data: any[] }>(this.subcontractorWorkitemUrl, { headers }),
       ),
-      map((res) => res.data || [])
+      map((res) => res.data || []),
     );
   }
 
   /* Create a new subcontractor */
   createSubcontractor(payload: any): Observable<any> {
     return from(this.getHeaders()).pipe(
-      switchMap((headers) => this.http.post(this.subcontractorUrl, payload, { headers }))
+      switchMap((headers) => this.http.post(this.subcontractorUrl, payload, { headers })),
     );
   }
 
@@ -127,7 +124,7 @@ getSubcontractorById(id: string): Observable<Subcontractors> {
     }
 
     return from(this.getHeaders()).pipe(
-      switchMap((headers) => this.http.post(`${this.uploadAttachments}`, formData, { headers }))
+      switchMap((headers) => this.http.post(`${this.uploadAttachments}`, formData, { headers })),
     );
   }
 
@@ -135,8 +132,10 @@ getSubcontractorById(id: string): Observable<Subcontractors> {
   updateIsActive(subcontractorId: string, isActive: boolean): Observable<any> {
     return from(this.getHeaders()).pipe(
       switchMap((headers) =>
-        this.http.post(`${this.getsubcontractor}/${subcontractorId}/${isActive}`, null, { headers })
-      )
+        this.http.post(`${this.getsubcontractor}/${subcontractorId}/${isActive}`, null, {
+          headers,
+        }),
+      ),
     );
   }
 
@@ -145,7 +144,7 @@ getSubcontractorById(id: string): Observable<Subcontractors> {
 
     return from(this.getHeaders()).pipe(
       switchMap((headers) => this.http.get<{ count: number; data: any[] }>(personUrl, { headers })),
-      map((res) => res.data || [])
+      map((res) => res.data || []),
     );
   }
 }

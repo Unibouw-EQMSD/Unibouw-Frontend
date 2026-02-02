@@ -12,7 +12,10 @@ import { projectService, projectdetails } from '../../../services/project.servic
   styleUrl: './project-details.css',
 })
 export class ProjectDetails {
-  constructor(private router: Router, private projectService: projectService) {}
+  constructor(
+    private router: Router,
+    private projectService: projectService,
+  ) {}
 
   projectdetails: projectdetails[] = [];
   filteredItems: projectdetails[] = [];
@@ -30,7 +33,8 @@ export class ProjectDetails {
     'number',
     'name',
     'customerName',
-    'projectManagerName',
+    'personName',
+    'personRole',
     'startDate',
     'completionDate',
     'status',
@@ -128,6 +132,7 @@ export class ProjectDetails {
 
     return `Showing ${start} to ${end} of ${this.filteredItems.length} entries`;
   }
+  
   logProjectId(projectID: string): void {
     console.log('🧩 Project ID:', projectID);
   }

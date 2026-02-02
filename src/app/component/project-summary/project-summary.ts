@@ -28,9 +28,7 @@ interface NotInterestedData {
 
 interface LogConversation {
   projectID: string;
-  rfqID?: string | null;
   subcontractorID: string;
-  projectManagerID: string;
   conversationType: string;
   subject: string;
   message: string;
@@ -108,7 +106,7 @@ export class ProjectSummary implements OnInit {
     private rfqResponseService: RfqResponseService,
     private projectService: projectService,
     private fb: FormBuilder,
-    private http: HttpClient
+    private http: HttpClient,
   ) {
     registerLocaleData(localeNl);
 
@@ -150,7 +148,7 @@ export class ProjectSummary implements OnInit {
           this.isInterested = state.isInterested ?? false;
           this.isQuoteSubmitted = state.isQuoteSubmitted ?? false;
           if (state.selectedFileNames?.length > 0) {
-            this.selectedFiles = state.selectedFileNames.map((name: string) => ({ name } as File));
+            this.selectedFiles = state.selectedFileNames.map((name: string) => ({ name }) as File);
           }
         }
 
@@ -198,7 +196,7 @@ export class ProjectSummary implements OnInit {
 
         const now = new Date();
         this.today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(
-          now.getDate()
+          now.getDate(),
         ).padStart(2, '0')}`;
 
         const rawDueDate = this.rfq?.globalDueDate || this.rfq?.dueDate || this.rfq?.DueDate;
@@ -346,16 +344,14 @@ Follow-up Date : ${formattedDate}
 
     const payload: LogConversation = {
       projectID: this.project?.projectID,
-      rfqID: this.rfqId ?? null,
       subcontractorID: this.subId,
-      projectManagerID: this.project?.projectManagerID,
       conversationType: 'Email',
       subject: 'Marked as Maybe Later',
       message,
       messageDateTime: null as any,
     };
 
-    if (!payload.projectID || !payload.projectManagerID) {
+    if (!payload.projectID) {
       alert('Project data not loaded yet. Please try again.');
       return;
     }
@@ -366,7 +362,7 @@ Follow-up Date : ${formattedDate}
       .createLogConversation(payload)
       .pipe(
         tap((res) => console.log('Log conversation saved:', res)),
-        finalize(() => (this.isLoading = false))
+        finalize(() => (this.isLoading = false)),
       )
       .subscribe({
         next: () => {
@@ -399,10 +395,10 @@ Follow-up Date : ${formattedDate}
       alert('Please select a reason.');
       return;
     }
-if (reason !== 'Anders') {
-  wi.notInterested.comment = '';
-  comment = '';
-}
+    if (reason !== 'Anders') {
+      wi.notInterested.comment = '';
+      comment = '';
+    }
 
     if (reason === 'Anders' && !comment) {
       alert('Please enter a reason.');
@@ -420,16 +416,14 @@ ${reason === 'Anders' ? `Comment        : ${comment}` : ''}
 
     const payload: LogConversation = {
       projectID: this.project?.projectID,
-      rfqID: this.rfqId ?? null,
       subcontractorID: this.subId,
-      projectManagerID: this.project?.projectManagerID,
       conversationType: 'Email',
       subject: 'Marked as Not Interested',
       message,
       messageDateTime: null as any,
     };
 
-    if (!payload.projectID || !payload.projectManagerID) {
+    if (!payload.projectID) {
       alert('Project data not loaded yet. Please try again.');
       return;
     }
@@ -440,7 +434,7 @@ ${reason === 'Anders' ? `Comment        : ${comment}` : ''}
       .createLogConversation(payload)
       .pipe(
         tap((res) => console.log('Log conversation saved:', res)),
-        finalize(() => (this.isLoading = false))
+        finalize(() => (this.isLoading = false)),
       )
       .subscribe({
         next: () => {
@@ -603,7 +597,7 @@ ${reason === 'Anders' ? `Comment        : ${comment}` : ''}
         next: () => {
           if (status === 'Maybe Later') {
             alert(
-              'Your preference has been recorded. You may respond any time before the due date.'
+              'Your preference has been recorded. You may respond any time before the due date.',
             );
           } else {
             alert(`Your response "${status}" was recorded successfully!`);
@@ -617,7 +611,7 @@ ${reason === 'Anders' ? `Comment        : ${comment}` : ''}
               buttonsDisabled: target.buttonsDisabled,
               isInterested: target.isInterested,
               notInterested: reasonPayload,
-            })
+            }),
           );
         },
         error: () => {
@@ -689,16 +683,14 @@ Comment        : ${trimmedComment}
 
             const payload: LogConversation = {
               projectID: this.project?.projectID,
-              rfqID: this.rfqId ?? null,
               subcontractorID: this.subId,
-              projectManagerID: this.project?.projectManagerID,
               conversationType: 'Email',
               subject: 'Quote Submitted',
               message,
               messageDateTime: null as any,
             };
 
-            if (payload.projectID && payload.projectManagerID) {
+            if (payload.projectID) {
               this.projectService.createLogConversation(payload).subscribe({
                 next: (res) => console.log('Quote comment logged successfully:', res),
                 error: (err) => console.error('Failed to log quote comment:', err),

@@ -14,7 +14,7 @@ export class RfqResponseService {
   constructor(
     private http: HttpClient,
     private msalService: MsalService,
-    private appConfigService: AppConfigService
+    private appConfigService: AppConfigService,
   ) {
     this.apiURL = this.appConfigService.getConfig().apiURL;
   }
@@ -49,14 +49,16 @@ export class RfqResponseService {
   getResponsesByProjectId(projectId: string) {
     return from(this.getHeaders()).pipe(
       switchMap((headers) =>
-        this.http.get<any>(`${this.apiURL}/RfqResponse/responses/project/${projectId}`, { headers })
-      )
+        this.http.get<any>(`${this.apiURL}/RfqResponse/responses/project/${projectId}`, {
+          headers,
+        }),
+      ),
     );
   }
 
   deleteQuoteFile(rfqId: string, subId: string, workItemId: string) {
     return this.http.delete(
-      `${this.apiURL}/RfqResponse/DeleteQuoteFile?rfqId=${rfqId}&subcontractorId=${subId}&workItemId=${workItemId}`
+      `${this.apiURL}/RfqResponse/DeleteQuoteFile?rfqId=${rfqId}&subcontractorId=${subId}&workItemId=${workItemId}`,
     );
   }
 
@@ -65,7 +67,7 @@ export class RfqResponseService {
     subcontractorId: string,
     workItemId: string,
     status: string,
-    file?: File
+    file?: File,
   ): Observable<any> {
     const formData = new FormData();
     formData.append('rfqId', rfqId);
@@ -88,7 +90,7 @@ export class RfqResponseService {
     workItemId: string,
     status: string,
     reason?: any,
-    p0?: any
+    p0?: any,
   ): Observable<any> {
     const formData = new FormData();
     formData.append('rfqId', rfqId);
@@ -111,7 +113,7 @@ export class RfqResponseService {
     workItemId: string, // ✅ ADD THIS
     file: File,
     totalAmount: number,
-    comment: string
+    comment: string,
   ) {
     const formData = new FormData();
     formData.append('file', file);
@@ -121,13 +123,13 @@ export class RfqResponseService {
 
     return this.http.post(
       `${this.apiURL}/RfqResponse/UploadQuote?rfqId=${rfqId}&subcontractorId=${subId}&workItemId=${workItemId}`,
-      formData
+      formData,
     );
   }
 
   getPreviousSubmissions(rfqId: string, subId: string): Observable<any[]> {
     return this.http.get<any[]>(
-      `${this.apiURL}/RfqResponse/PreviousSubmissions?rfqId=${rfqId}&subcontractorId=${subId}`
+      `${this.apiURL}/RfqResponse/PreviousSubmissions?rfqId=${rfqId}&subcontractorId=${subId}`,
     );
   }
 
@@ -136,9 +138,9 @@ export class RfqResponseService {
       switchMap((headers) =>
         this.http.get<any>(
           `${this.apiURL}/RfqResponse/responses/project/${projectId}/subcontractors`,
-          { headers }
-        )
-      )
+          { headers },
+        ),
+      ),
     );
   }
 
@@ -147,8 +149,8 @@ export class RfqResponseService {
       switchMap((headers) =>
         this.http.get<any>(`${this.apiURL}/RfqResponse/subcontractors/latest/${projectId}`, {
           headers,
-        })
-      )
+        }),
+      ),
     );
   }
 
@@ -157,9 +159,9 @@ export class RfqResponseService {
       switchMap((headers) =>
         this.http.get<any>(
           `${this.apiURL}/RfqResponse/GetQuoteAmount?rfqId=${rfqId}&subcontractorId=${subId}&workItemId=${workItemId}`,
-          { headers }
-        )
-      )
+          { headers },
+        ),
+      ),
     );
   }
   markAsViewed(rfqId: string, subcontractorId: string, workItemId: string): Observable<any> {
@@ -172,7 +174,7 @@ export class RfqResponseService {
           subcontractorId: subcontractorId,
           workItemId: workItemId,
         },
-      }
+      },
     );
   }
 
@@ -183,8 +185,8 @@ export class RfqResponseService {
           params: { documentId },
           headers,
           responseType: 'blob',
-        })
-      )
+        }),
+      ),
     );
   }
 
@@ -197,18 +199,18 @@ export class RfqResponseService {
 
     return from(this.getHeaders()).pipe(
       switchMap((headers) =>
-        this.http.post<any>(`${this.apiURL}/Email/send-reminder`, body, { headers })
-      )
+        this.http.post<any>(`${this.apiURL}/Email/send-reminder`, body, { headers }),
+      ),
     );
   }
 
-  rfqReminderSet(payload: any): Observable<any> {
+  rfqReminder(payload: any): Observable<any> {
     return from(this.getHeaders()).pipe(
       switchMap((headers) =>
-        this.http.post<any>(`${this.apiURL}/RfqReminderSet/CreateRfqReminderSet`, payload, {
+        this.http.post<any>(`${this.apiURL}/RfqReminder/CreateRfqReminder`, payload, {
           headers,
-        })
-      )
+        }),
+      ),
     );
   }
 }

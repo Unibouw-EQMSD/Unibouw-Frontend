@@ -64,7 +64,7 @@ export class AddSubcontractor implements OnInit {
         const list = items
           .map(
             (item: any, i: number) =>
-              `  ${i + 1}. ${item.name}${item.code ? ` (Code: ${item.code})` : ''}`
+              `  ${i + 1}. ${item.name}${item.code ? ` (Code: ${item.code})` : ''}`,
           )
           .join('\n');
 
@@ -99,11 +99,11 @@ export class AddSubcontractor implements OnInit {
     }**
 \`\`\`
 Subcontractor Name : ${payload.name}
-Email              : ${payload.emailID}
+Email              : ${payload.email}
 Location           : ${payload.location}
 Country            : ${payload.country}
 Contact Name       : ${payload.contactName}
-Contact Email      : ${payload.contactEmailID}
+Contact Email      : ${payload.contactEmail}
 Contact Phone      : ${payload.phoneNumber1}
 Office Address     : ${officeAddressText}
 Billing Address    : ${billingAddressText}
@@ -126,7 +126,7 @@ ${workItemsText}
     private workItemService: WorkitemService,
     private subcontractorService: SubcontractorService,
     private userService: UserService,
-    private location: Location
+    private location: Location,
   ) {
     this.subcontractorForm = this.fb.group({
       name: [
@@ -150,7 +150,7 @@ ${workItemsText}
           Validators.required,
           Validators.maxLength(100),
           Validators.pattern(
-            /^[a-zA-Z0-9]+([._%+-]?[a-zA-Z0-9]+)*@[a-zA-Z0-9-]+(\.[a-zA-Z]{2,})+$/
+            /^[a-zA-Z0-9]+([._%+-]?[a-zA-Z0-9]+)*@[a-zA-Z0-9-]+(\.[a-zA-Z]{2,})+$/,
           ),
         ],
       ],
@@ -160,7 +160,7 @@ ${workItemsText}
           Validators.required,
           Validators.maxLength(100),
           Validators.pattern(
-            /^[a-zA-Z0-9]+([._%+-]?[a-zA-Z0-9]+)*@[a-zA-Z0-9-]+(\.[a-zA-Z]{2,})+$/
+            /^[a-zA-Z0-9]+([._%+-]?[a-zA-Z0-9]+)*@[a-zA-Z0-9-]+(\.[a-zA-Z]{2,})+$/,
           ),
         ],
       ],
@@ -207,7 +207,7 @@ ${workItemsText}
 
     this.loadPersons();
 
-   this.loadCategories();
+    this.loadCategories();
 
     const officeCtrl = this.subcontractorForm.get('officeAddress');
     const billingCtrl = this.subcontractorForm.get('billingAddress');
@@ -252,40 +252,40 @@ ${workItemsText}
   }
 
   /** Load workitems per category */
- async loadCategories() {
-  try {
-    const data = await this.workItemService.getCategoriesAsync();
-    
-    this.categories = data
-      .map(cat => ({
-        categoryID: cat.categoryID,
-        categoryName: this.getCategoryTranslationKey(cat.categoryName),
-        originalName: cat.categoryName // Keep original for sorting
-      }))
-      .sort((a, b) => {
-        // Define custom order
-        const order = ['Unibouw', 'Standard'];
-        return order.indexOf(a.originalName) - order.indexOf(b.originalName);
-      });
+  async loadCategories() {
+    try {
+      const data = await this.workItemService.getCategoriesAsync();
 
-    // Auto-select first category and load its workitems
-    if (this.categories.length > 0) {
-      this.selectedCategoryId = this.categories[0].categoryID;
-      this.loadWorkitems();
+      this.categories = data
+        .map((cat) => ({
+          categoryID: cat.categoryID,
+          categoryName: this.getCategoryTranslationKey(cat.categoryName),
+          originalName: cat.categoryName, // Keep original for sorting
+        }))
+        // .sort((a, b) => {
+        //   // Define custom order
+        //   const order = ['Unibouw', 'Standard'];
+        //   return order.indexOf(a.originalName) - order.indexOf(b.originalName);
+        // });
+        .sort((a, b) => Number(a.categoryID) - Number(b.categoryID)); // Convert to number
+
+      // Auto-select first category and load its workitems
+      if (this.categories.length > 0) {
+        this.selectedCategoryId = this.categories[0].categoryID;
+        this.loadWorkitems();
+      }
+    } catch (err) {
+      console.error('Failed to load categories', err);
     }
-  } catch (err) {
-    console.error('Failed to load categories', err);
   }
-}
-
 
   /**
    * Map backend category names to translation keys
    */
   getCategoryTranslationKey(categoryName: string): string {
     const keyMap: { [key: string]: string } = {
-      'Unibouw': 'WORKITEM.TAB_UNIBOUW',
-      'Standard': 'WORKITEM.TAB_STANDARD'
+      Unibouw: 'WORKITEM.TAB_UNIBOUW',
+      Standard: 'WORKITEM.TAB_STANDARD',
     };
     return keyMap[categoryName] || categoryName;
   }
@@ -307,7 +307,7 @@ ${workItemsText}
       },
       error: (err) => {
         console.error('Failed to load workitems', err);
-      }
+      },
     });
   }
 
@@ -317,7 +317,7 @@ ${workItemsText}
   selectCategory(id: string) {
     // Save current category selections
     this.selectionsByCategory.set(this.selectedCategoryId, this.selectedWorkitems);
-    
+
     // Switch to new category
     this.selectedCategoryId = id;
     this.loadWorkitems();
@@ -331,7 +331,7 @@ ${workItemsText}
       }
     } else {
       this.selectedWorkitems = this.selectedWorkitems.filter(
-        (w) => w.workItemID !== item.workItemID
+        (w) => w.workItemID !== item.workItemID,
       );
     }
     this.selectionsByCategory.set(this.selectedCategoryId, this.selectedWorkitems);
@@ -429,7 +429,7 @@ ${workItemsText}
       erp_ID: formValue.erpId?.trim() || '',
       name: formValue.name?.trim(),
       rating: formValue.rating || 0,
-      emailID: formValue.email, // main subcontractor email
+      email: formValue.email, // main subcontractor email
       phoneNumber1: this.selectedCountry.code + ' ' + formValue.contactNumber,
       phoneNumber2: '', // optional
       location: formValue.location,
@@ -443,11 +443,11 @@ ${workItemsText}
         new Set(
           Array.from(this.selectionsByCategory.values())
             .flat()
-            .map((w) => w.workItemID)
-        )
+            .map((w) => w.workItemID),
+        ),
       ),
       contactName: formValue.contactPerson,
-      contactEmailID: formValue.contactEmail,
+      contactEmail: formValue.contactEmail,
       contactPhone: this.selectedCountry.code + formValue.contactNumber,
     };
 

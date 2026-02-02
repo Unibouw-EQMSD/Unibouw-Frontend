@@ -14,7 +14,7 @@ export class ReminderService {
   constructor(
     private http: HttpClient,
     private msalService: MsalService,
-    private appConfigService: AppConfigService
+    private appConfigService: AppConfigService,
   ) {
     this.apiURL = this.appConfigService.getConfig().apiURL;
   }
@@ -38,19 +38,19 @@ export class ReminderService {
   /* Update Global RFQ Reminder Configuration
    * (Your old code used GET incorrectly — API should be POST)
    */
-  updateGolbalReminderConfigSet(body: any): Observable<any> {
+  saveGolbalReminderConfig(body: any): Observable<any> {
     return from(this.getHeaders()).pipe(
       switchMap((headers) =>
-        this.http.post<any>(`${this.apiURL}/Common/UpdateRfqGolbalReminderSet`, body, { headers })
-      )
+        this.http.post<any>(`${this.apiURL}/Common/SaveRfqGlobalReminder`, body, { headers }),
+      ),
     );
   }
 
   getGlobalReminderConfig(): Observable<any> {
     return from(this.getHeaders()).pipe(
       switchMap((headers) =>
-        this.http.get<any>(`${this.apiURL}/Common/GetRfqGolbalReminderSet`, { headers })
-      )
+        this.http.get<any>(`${this.apiURL}/Common/GetRfqGlobalReminder`, { headers }),
+      ),
     );
   }
 }
