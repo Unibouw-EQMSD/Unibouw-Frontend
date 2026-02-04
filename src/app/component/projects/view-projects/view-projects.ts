@@ -182,7 +182,13 @@ export class ViewProjects {
   replyError = '';
   readonly MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB
   readonly MAX_FILES = 3;
+replyCharError: { [id: string]: boolean } = {};
+conversationTextError = '';
 
+validateReply(id: string) {
+  const text = this.replyTexts[id] || '';
+  this.replyCharError[id] = text.length > 5000;
+}
   setMaxDueDate(due: Date | string) {
     if (typeof due === 'string') {
       // assume format is "DD-MM-YYYY"
@@ -1165,7 +1171,7 @@ private buildRequestsSentLookup(projectId: string) {
   //------------ Conversation -----------------
   showLogConvoPopup = false;
   conversationType: string = 'Email';
-  conversationDateTime: Date | null = null;
+conversationDateTime: string | null = null;
   conversationSubject: string = '';
   conversationText: string = '';
   selectedSubId: string | null = null;
@@ -1497,7 +1503,7 @@ private buildRequestsSentLookup(projectId: string) {
   }
   setDefaultValues() {
     const now = new Date();
-    this.conversationDateTime = new Date();
+this.conversationDateTime = this.getAmsterdamDateTimeLocalString();
     this.conversationSubject = '';
     this.conversationType = 'Email';
   }
@@ -1526,6 +1532,25 @@ private buildRequestsSentLookup(projectId: string) {
     this.conversationSubject = '';
     this.conversationText = '';
   }
+
+private getAmsterdamDateTimeLocalString(): string {
+  const now = new Date();
+
+  const parts = new Intl.DateTimeFormat('sv-SE', {
+    timeZone: 'Europe/Amsterdam',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false,
+  }).formatToParts(now);
+
+  const get = (type: string) => parts.find(p => p.type === type)?.value ?? '';
+
+  // sv-SE gives parts in 24h, perfect for datetime-local
+  return `${get('year')}-${get('month')}-${get('day')}T${get('hour')}:${get('minute')}`;
+}
 
   getLocalTime(dateUtc: string | Date | null | undefined): string {
     if (!dateUtc) {
@@ -1580,7 +1605,10 @@ private buildRequestsSentLookup(projectId: string) {
       this.dateTimeError = this.translate.instant('VALIDATION.DATE_TIME_REQUIRED');
       return;
     }
-
+if ((this.conversationText || '').length > 5000) {
+  this.notesError = this.translate.instant('VALIDATION.TEXT_LIMIT');
+  return;
+}
     const selectedDate = new Date(this.conversationDateTime!);
     const now = new Date();
 
@@ -1878,7 +1906,10 @@ private buildRequestsSentLookup(projectId: string) {
       this.replyError = this.translate.instant('VALIDATION.REPLY_ERROR');
       return;
     }
-
+if (replyText.length > 5000) {
+  this.replyCharError[String(parentId)] = true;
+  return;
+}
     this.isSendingReply = true;
     this.replyError = '';
 

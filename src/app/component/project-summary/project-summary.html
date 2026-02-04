@@ -368,13 +368,23 @@
                       rows="3"
                       formControlName="comments"
                       placeholder="Add Comments"
+                       maxlength="200"
                     ></textarea>
+                    <small>
+  {{ (quoteForm.get('comments')?.value?.length || 0) }}/200
+</small>
                     <div
                       class="error"
                       *ngIf="formSubmitted && quoteForm.get('comments')?.errors?.['required']"
                     >
                       Comments are required.
                     </div>
+                    <div
+  class="error"
+  *ngIf="formSubmitted && quoteForm.get('comments')?.errors?.['maxlength']"
+>
+  Comments cannot exceed 200 characters.
+</div>
                   </div>
 
                   <div style="text-align: right; margin-top: 10px">

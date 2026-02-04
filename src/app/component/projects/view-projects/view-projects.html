@@ -719,8 +719,10 @@
                           rows="3"
                           placeholder="Write a reply…"
                           [(ngModel)]="replyTexts[convo.conversationMessageID]"
+  (input)="validateReply(convo.conversationMessageID)"
                         ></textarea>
-
+<div class="error" *ngIf="replyCharError[convo.conversationMessageID]">
+{{'VALIDATION.REPLY_LIMIT'  | translate}}</div>
                         <div class="attachment-row" *ngIf="replyAttachments.length">
                           <div
                             class="file-chip"
@@ -1019,7 +1021,9 @@
         <label class="label block">{{
           'LOG_CONVERSATION_MODAL.ADD_CONVERSATION' | translate
         }}</label>
-        <textarea class="add-convo-textarea" rows="4" [(ngModel)]="conversationText"></textarea>
+        <textarea class="add-convo-textarea" rows="4" [(ngModel)]="conversationText"
+  (input)="conversationTextError = ''"
+></textarea>
         <small class="error-text" *ngIf="notesError">
           {{ notesError }}
         </small>
