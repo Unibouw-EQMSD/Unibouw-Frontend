@@ -1,5 +1,5 @@
 import { Component, HostListener, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators, FormControl } from '@angular/forms';
 import { WorkitemService, Workitem, WorkitemCategory } from '../../services/workitem.service';
 import { SubcontractorService } from '../../services/subcontractor.service';
 import { UserService } from '../../services/User.service.';
@@ -157,6 +157,8 @@ ${indent}${indent}${workItemsText
     private userService: UserService,
     private location: Location,
   ) {
+    this.workitemSearchControl = new FormControl('');
+
     this.subcontractorForm = this.fb.group({
       name: [
         '',
@@ -374,10 +376,12 @@ ${indent}${indent}${workItemsText
     return (this.selectionsByCategory.get(categoryId) || []).length;
   }
 
-  workitemSearch: string = '';
+  workitemSearchControl!: FormControl;
+
   filteredWorkitems() {
-    if (!this.workitemSearch) return this.workitems;
-    const term = this.workitemSearch.toLowerCase();
+    const term = (this.workitemSearchControl.value || '').toLowerCase().trim();
+    if (!term) return this.workitems;
+
     return this.workitems.filter((w) => w.name.toLowerCase().includes(term));
   }
 
@@ -432,8 +436,6 @@ ${indent}${indent}${workItemsText
 
   /** Form submission */
   onSubmit() {
-    const allSelectedWorkitems1 = Array.from(this.selectionsByCategory.values()).flat();
-    console.log('Selected Workitems:', allSelectedWorkitems1);
     if (this.submitAttempted) return;
     this.submitAttempted = true;
 

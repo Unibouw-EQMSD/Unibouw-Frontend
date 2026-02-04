@@ -509,7 +509,7 @@
                   type="text"
                   class="form-control mb-2"
                   [placeholder]="'SUBCONTRACTOR_FORM.SEARCH_WORKITEMS' | translate"
-                  [(ngModel)]="workitemSearch"
+                  [formControl]="workitemSearchControl"
                 />
 
                 <ng-container *ngIf="workitems.length > 0; else noWorkitems">
