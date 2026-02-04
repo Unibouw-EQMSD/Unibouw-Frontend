@@ -49,8 +49,9 @@
           mat-icon-button
           *ngIf="searchText"
           (click)="searchText = ''; applyFilter()"
+          title="Clear"
         >
-          <mat-icon>{{ 'MODAL.COMMENTS_CLOSE' | translate }}</mat-icon>
+          <span class="search-clear"> × </span>
         </button>
       </mat-form-field>
 

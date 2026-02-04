@@ -37,7 +37,7 @@
           (click)="setTab('unibouw')"
           class="unibouwLabel"
         >
-          {{'WORKITEM.TAB_UNIBOUW' | translate}}
+          {{ 'WORKITEM.TAB_UNIBOUW' | translate }}
         </button>
         <button
           mat-button
@@ -45,19 +45,26 @@
           (click)="setTab('standard')"
           class="standardLabel"
         >
-{{'WORKITEM.TAB_STANDARD' | translate}}        </button>
+          {{ 'WORKITEM.TAB_STANDARD' | translate }}
+        </button>
       </div>
 
       <!-- 🔍 Search -->
       <mat-form-field appearance="fill" class="search-box full-width">
-        <input matInput [(ngModel)]="searchText" (input)="applyFilter()" placeholder="{{'COMMON.SEARCH' | translate}}" />
+        <input
+          matInput
+          [(ngModel)]="searchText"
+          (input)="applyFilter()"
+          placeholder="{{ 'COMMON.SEARCH' | translate }}"
+        />
         <button
           matSuffix
           mat-icon-button
           *ngIf="searchText"
           (click)="searchText = ''; applyFilter()"
+          title="Clear"
         >
-          <mat-icon>{{'MODAL.COMMENTS_CLOSE' | translate}}</mat-icon>
+          <span class="search-clear"> × </span>
         </button>
       </mat-form-field>
 
@@ -73,13 +80,17 @@
         >
           <!-- ✅ Number Column -->
           <ng-container matColumnDef="number">
-            <th mat-header-cell *matHeaderCellDef mat-sort-header>{{ 'WORKITEM.CODE' | translate }}</th>
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>
+              {{ 'WORKITEM.CODE' | translate }}
+            </th>
             <td mat-cell *matCellDef="let item">{{ item.number }}</td>
           </ng-container>
 
           <!-- ✅ Workitem Name Column -->
           <ng-container matColumnDef="name">
-            <th mat-header-cell *matHeaderCellDef mat-sort-header>{{ 'WORKITEM.NAME' | translate }}</th>
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>
+              {{ 'WORKITEM.NAME' | translate }}
+            </th>
             <td mat-cell *matCellDef="let item">{{ item.name }}</td>
           </ng-container>
 
@@ -119,7 +130,7 @@
 
           <!-- ✅ Action Column (Admin Only) -->
           <ng-container *ngIf="isAdmin" matColumnDef="action">
-            <th mat-header-cell *matHeaderCellDef>{{'COMMON.ACTIONS' | translate}}</th>
+            <th mat-header-cell *matHeaderCellDef>{{ 'COMMON.ACTIONS' | translate }}</th>
             <td mat-cell *matCellDef="let item">
               <mat-slide-toggle
                 class="toggle"
