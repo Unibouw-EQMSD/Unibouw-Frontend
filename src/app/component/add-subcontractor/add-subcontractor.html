@@ -480,10 +480,7 @@
                 <span class="text-danger"> *</span>
               </div>
 
-              <div
-                *ngIf="submitAttempted && selectedWorkitems.length === 0"
-                class="text-danger text-sm p-1"
-              >
+              <div *ngIf="showWorkItemError" class="text-danger text-sm p-1">
                 {{ 'SUBCONTRACTOR_FORM.WORKITEM_REQUIRED' | translate }}
               </div>
               <!-- Category Tabs -->

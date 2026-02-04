@@ -434,6 +434,8 @@ ${indent}${indent}${workItemsText
     });
   }
 
+  showWorkItemError = false;
+
   /** Form submission */
   onSubmit() {
     if (this.submitAttempted) return;
@@ -446,13 +448,22 @@ ${indent}${indent}${workItemsText
     if (this.subcontractorForm.invalid) {
       this.submitAttempted = false;
       this.logFormValidationErrors(this.subcontractorForm);
+      if (allSelectedWorkitems.length === 0) {
+        this.showWorkItemError = true;
+      } else {
+        this.showWorkItemError = false;
+      }
       return;
     }
 
+    // Workitem validation
     if (allSelectedWorkitems.length === 0) {
       this.submitAttempted = false;
+      this.showWorkItemError = true;
       return;
     }
+
+    this.showWorkItemError = false;
 
     const formValue = this.subcontractorForm.value;
 
@@ -561,6 +572,7 @@ ${indent}${indent}${workItemsText
     this.selectedWorkitems = [];
     this.selectedCountry = countryList.find((c) => c.code === '+33') || countryList[0];
     this.uploadedFiles = [];
+    this.showWorkItemError = false;
 
     const fileInput = document.querySelector<HTMLInputElement>('#fileInput');
     if (fileInput) fileInput.value = '';
