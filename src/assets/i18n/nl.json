@@ -322,6 +322,8 @@
     "NOT_INTERESTED_COMMENT_REQUIRED": "Voer een reden in.",
     "DATE_TIME_REQUIRED": "Voer de datum en tijd in.",
     "NOTES_ERROR": "Vul de berichtgegevens in.",
+    "TEXT_LIMIT": "Notities mogen niet meer dan 5000 tekens bevatten.",
+    "REPLY_LIMIT": "Een antwoord mag niet langer zijn dan 5000 tekens.",
     "REPLY_ERROR": "Het antwoord mag niet leeg zijn.",
     "PROJECT_NOT_LOADED": "Projectgegevens zijn nog niet geladen. Probeer opnieuw.",
     "FILE_SIZE_EXCEEDED": "Bestandsgrootte mag niet groter zijn dan 10 MB.",
