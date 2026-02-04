@@ -44,12 +44,12 @@ export class AddSubcontractor implements OnInit {
 
   private buildTeamsMessage(payload: any, allSelectedWorkitems: Workitem[]): string {
     const CATEGORY_MAP: Record<string, string> = {
-      '213cf69b-627e-4962-83ec-53463c8664d2': 'Unibouw',
-      '60a1a614-05fd-402d-81b3-3ba05fdd2d8a': 'Standard',
+      '1': 'Unibouw',
+      '2': 'Standard',
     };
 
     const grouped = allSelectedWorkitems.reduce((acc: any, item: any) => {
-      const category = CATEGORY_MAP[item.categoryID] ?? 'Others';
+      const category = CATEGORY_MAP[item.categoryID] ?? '';
       if (!acc[category]) acc[category] = [];
 
       acc[category].push({
@@ -93,31 +93,60 @@ export class AddSubcontractor implements OnInit {
       '-' +
       today.getFullYear();
 
-    return `📩 **${
+    //     return `📩 **${
+    //       this.projectName && this.projectName !== 'null'
+    //         ? 'New Subcontractor Added to an RFQ'
+    //         : 'New Subcontractor Created'
+    //     }**
+    // \`\`\`
+    // Subcontractor Name : ${payload.name}
+    // Email              : ${payload.email}
+    // Location           : ${payload.location}
+    // Country            : ${payload.country}
+    // Contact Name       : ${payload.contactName}
+    // Contact Email      : ${payload.contactEmail}
+    // Contact Phone      : ${payload.phoneNumber1}
+    // Office Address     : ${officeAddressText}
+    // Billing Address    : ${billingAddressText}
+    // ${
+    //   this.projectName && this.projectName !== 'null'
+    //     ? `Project Name       : ${this.projectName} (Code: ${this.projectCode})
+    // Created Date        : ${currentDate}`
+    //     : ''
+    // }
+
+    // Work Items:
+    // ${workItemsText}
+    // \`\`\``;
+
+    const indent = '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'; // 6 non-breaking spaces
+
+    return `<b>${
       this.projectName && this.projectName !== 'null'
-        ? 'New Subcontractor Added to an RFQ'
-        : 'New Subcontractor Created'
-    }**
-\`\`\`
-Subcontractor Name : ${payload.name}
-Email              : ${payload.email}
-Location           : ${payload.location}
-Country            : ${payload.country}
-Contact Name       : ${payload.contactName}
-Contact Email      : ${payload.contactEmail}
-Contact Phone      : ${payload.phoneNumber1}
-Office Address     : ${officeAddressText}
-Billing Address    : ${billingAddressText}
+        ? '📩 New Subcontractor Added to an RFQ'
+        : '📩 New Subcontractor Created'
+    }</b><br>
+${indent}Subcontractor Name : ${payload.name}<br>
+${indent}Email              : ${payload.email}<br>
+${indent}Location           : ${payload.location}<br>
+${indent}Country            : ${payload.country}<br>
+${indent}Contact Name       : ${payload.contactName}<br>
+${indent}Contact Email      : ${payload.contactEmail}<br>
+${indent}Contact Phone      : ${payload.phoneNumber1}<br>
+${indent}Office Address     : ${officeAddressText}<br>
+${indent}Billing Address    : ${billingAddressText}<br>
 ${
   this.projectName && this.projectName !== 'null'
-    ? `Project Name       : ${this.projectName} (Code: ${this.projectCode})
-Created Date        : ${currentDate}`
+    ? `${indent}Project Name       : ${this.projectName} (Code: ${this.projectCode})<br>
+${indent}Created Date        : ${currentDate}<br>`
     : ''
 }
-
-Work Items:
-${workItemsText}
-\`\`\``;
+<br>
+<b>${indent}Work Items:</b><br>
+${indent}${indent}${workItemsText
+      .replace(/\n\n/g, '<br><br>' + indent + indent) // space between categories
+      .replace(/\n/g, '<br>' + indent)}
+`;
   }
 
   constructor(
