@@ -941,15 +941,25 @@ export class RfqAdd {
   }
 
   toggleSelectAll() {
-    // Just reload the subcontractors to refresh the list
-    if (!this.selectedWorkItems.length) return;
+  if (!this.selectedWorkItems.length) return;
 
-    const workItemID = this.selectedWorkItems[0].workItemID;
-    this.loadSubcontractors(
-      workItemID,
-      this.rfqIdForEdit ? this.subcontractors.filter((s) => s.selected) : undefined,
-    );
+  const workItemID = this.selectedWorkItems[0].workItemID;
+  const wid = this.normalizeId(workItemID);
+
+  if (this.showAll) {
+    // ✅ checked -> show all subs for this work item (reload full list)
+    this.loadSubcontractors(workItemID);
+    return;
   }
+
+  // ✅ unchecked -> show ONLY subs mapped to this work item
+  this.subcontractors = (this.subcontractors || []).filter(sub =>
+    (sub.linkedWorkItemIDs || []).includes(wid)
+  );
+
+  // optional: if none mapped, show message
+  this.noSubMessage = this.subcontractors.length ? '' : 'No subcontractors mapped to this work item.';
+}
   get selectedSubcontractors() {
     return (this.subcontractors || []).filter((s: any) => s.selected);
   }
@@ -1003,6 +1013,10 @@ export class RfqAdd {
     }
 
     // Navigate to add-subcontractor with projectID and projectName
-    this.router.navigate(['/add-subcontractor', projectID, projectName, projectCode]);
-  }
+ this.router.navigate(
+    ['/add-subcontractor', projectID, projectName, projectCode],
+    {
+      queryParams: { rfqId: this.rfqIdForEdit } // ✅ pass it only if edit mode
+    }
+  );  }
 }

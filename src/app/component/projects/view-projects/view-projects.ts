@@ -17,6 +17,8 @@ import { switchMap, finalize, map } from 'rxjs/operators';
 import { Observable, of } from 'rxjs';
 import { TranslateService } from '@ngx-translate/core';
 import { UserService } from '../../../services/User.service.';
+import { NavigationStart } from '@angular/router';
+import { filter, Subscription } from 'rxjs';
 
 interface RfqResponse {
   name: string;
@@ -245,6 +247,7 @@ export class ViewProjects {
   }
 
   workItems: WorkItem[] = [];
+    private navSub?: Subscription;
 
   constructor(
     private rfqService: RfqService,
@@ -261,7 +264,19 @@ export class ViewProjects {
   ) {
     registerLocaleData(localeNl);
   }
+private setupTabCleanupOnExit(tabKey: string): void {
+  this.navSub?.unsubscribe();
 
+  this.navSub = this.router.events
+    .pipe(filter((e): e is NavigationStart => e instanceof NavigationStart))
+    .subscribe((e) => {
+      // clear only when leaving this module
+      const leavingViewProjects = !e.url.startsWith('/view-projects/');
+      if (leavingViewProjects) {
+        sessionStorage.removeItem(tabKey);
+      }
+    });
+}
   ngDoCheck(): void {
     if (!this.conversationDateTime) return;
 
@@ -275,39 +290,61 @@ export class ViewProjects {
       this.dateTimeError = '';
     }
   }
-  ngOnInit(): void {
-    const now = new Date();
-    const yyyy = now.getFullYear();
-    const mm = String(now.getMonth() + 1).padStart(2, '0');
-    const dd = String(now.getDate()).padStart(2, '0');
-    const hh = String(now.getHours()).padStart(2, '0');
-    const min = String(now.getMinutes()).padStart(2, '0');
+ngOnInit(): void {
+  const now = new Date();
+  const yyyy = now.getFullYear();
+  const mm = String(now.getMonth() + 1).padStart(2, '0');
+  const dd = String(now.getDate()).padStart(2, '0');
+  const hh = String(now.getHours()).padStart(2, '0');
+  const min = String(now.getMinutes()).padStart(2, '0');
+  this.maxDateTime = `${yyyy}-${mm}-${dd}T${hh}:${min}`;
 
-    this.maxDateTime = `${yyyy}-${mm}-${dd}T${hh}:${min}`;
-    // 🔹 Restore tab from localStorage (default: 'response')
-    const savedTab = localStorage.getItem('activeTab');
+  this.projectId = this.route.snapshot.paramMap.get('id') || '';
+  const tabKey = `activeTab_viewProjects_${this.projectId}`;
+
+  // ✅ read tab from URL first (used when coming from cancel -> tab=rfq)
+  const tabFromUrl = this.route.snapshot.queryParamMap.get('tab');
+
+  if (tabFromUrl === 'rfq' || tabFromUrl === 'response' || tabFromUrl === 'conversation') {
+    this.selectedTab = tabFromUrl;
+  } else {
+    // ✅ fallback to session storage for refresh behavior
+    const savedTab = sessionStorage.getItem(tabKey);
     this.selectedTab = savedTab || 'response';
+  }
 
-    // 🔹 Capture the project ID from the route
-    this.projectId = this.route.snapshot.paramMap.get('id') || '';
+  if (this.projectId) {
+    this.loadProjectDetails(this.projectId);
+    this.loadRfqResponseSummary(this.projectId);
 
-    if (this.projectId) {
-      this.loadProjectDetails(this.projectId);
-      this.loadRfqResponseSummary(this.projectId);
-
-      // 🔹 Load data based on restored tab
-      if (this.selectedTab === 'rfq') {
-        this.loadRfqData();
-      } else if (this.selectedTab === 'conversation') {
-        this.loadConversationSubcontractors();
-      }
+    if (this.selectedTab === 'rfq') {
+      this.loadRfqData();
+    } else if (this.selectedTab === 'conversation') {
+      this.loadConversationSubcontractors();
     }
   }
-  setActiveTab(tab: string): void {
-    this.selectedTab = tab;
-    localStorage.setItem('activeTab', tab);
-  }
 
+  this.setupTabCleanupOnExit(tabKey);
+
+  // ✅ optional: remove tab param after using it (prevents it forcing RFQ tab on refresh)
+  if (tabFromUrl) {
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: { tab: null },
+      queryParamsHandling: 'merge',
+      replaceUrl: true,
+    });
+  }
+}
+ setActiveTab(tab: string): void {
+  this.selectedTab = tab;
+
+  const tabKey = `activeTab_viewProjects_${this.projectId}`;
+  sessionStorage.setItem(tabKey, tab);
+}
+ngOnDestroy(): void {
+  this.navSub?.unsubscribe();
+}
   ngAfterViewInit() {
     this.dataSource.sort = this.sort;
     this.dataSource.paginator = this.paginator;
@@ -360,6 +397,26 @@ export class ViewProjects {
       },
     });
   }
+
+  private requestsSentByRfqId = new Map<string, number>();
+
+private buildRequestsSentLookup(projectId: string) {
+  return this.rfqResponseService.getResponsesByProjectId(projectId).pipe(
+    map((res: any[]) => {
+      const mapByRfq = new Map<string, number>();
+
+      (res || []).forEach((w: any) => {
+        const rfqId = String(w.rfqId ?? w.rfqID ?? w.rfqId); // adjust if your API key differs
+        const count = (w.subcontractors || []).length;
+
+        if (rfqId) mapByRfq.set(rfqId, count);
+      });
+
+      this.requestsSentByRfqId = mapByRfq;
+      return mapByRfq;
+    })
+  );
+}
 
   loadRfqResponseSummary(projectId: string) {
     /* ===============================
@@ -616,65 +673,56 @@ export class ViewProjects {
   }
 
   loadRfqData(): void {
-    this.rfqService.getRfqByProjectId(this.projectId).subscribe({
-      next: (rfqs: any[]) => {
-        const infoRequests = rfqs.map((r) => this.rfqService.getWorkItemInfo(r.rfqID));
+  forkJoin({
+    rfqs: this.rfqService.getRfqByProjectId(this.projectId),
+    reqMap: this.buildRequestsSentLookup(this.projectId),
+  }).subscribe({
+    next: ({ rfqs, reqMap }: { rfqs: any[]; reqMap: Map<string, number> }) => {
+      const infoRequests = rfqs.map((r) => this.rfqService.getWorkItemInfo(r.rfqID));
 
-        forkJoin(infoRequests).subscribe((infoResults: any[]) => {
-          const tableData = rfqs.map((item, index) => {
-            const info = infoResults[index] || {};
+      forkJoin(infoRequests).subscribe((infoResults: any[]) => {
+        const tableData = rfqs.map((item, index) => {
+          const info = infoResults[index] || {};
+          const rfqId = String(item.rfqID);
 
-            return {
-              id: item.rfqID,
-              number: item.rfqNumber,
-              customer: item.customerName || '—',
-              rfqSentDate: item.sentDate ? this.formatDate(item.sentDate) : '-', // ensures display
-              dueDate: this.formatDate(item.dueDate),
-              rfqSent: item.rfqSent || 0,
-              quoteReceived: item.quoteReceived || 0,
-              quoteAmount: '-',
-              workItem: info.workItem || '-',
-              subcontractorCount: info.subcontractorCount ?? 0,
-              status: item.status || 'N/A',
-            };
-          });
+          return {
+            id: item.rfqID,
+            number: item.rfqNumber,
+            customer: item.customerName || '—',
+            rfqSentDate: item.sentDate ? this.formatDate(item.sentDate) : '-',
+            dueDate: this.formatDate(item.dueDate),
 
-          // Assign data
-          this.dataSource.data = tableData;
+            // ✅ this is the “requestsSent” computed like your summary
+            rfqSent: reqMap.get(rfqId) ?? 0,
 
-          // Assign paginator and sort immediately after data assignment
-          this.dataSource.paginator = this.paginator;
-          this.dataSource.sort = this.sort;
-
-          // Custom sorting for all columns
-          this.dataSource.sortingDataAccessor = (item, property) => {
-            switch (property) {
-              case 'workitem':
-                return item.workItem?.toLowerCase() || '';
-              case 'rfqSentDate':
-                return item.rfqSentDate ? new Date(item.rfqSentDate) : new Date(0);
-              case 'dueDate':
-                return item.dueDate ? new Date(item.dueDate) : new Date(0);
-              case 'totalSubcontractors':
-                return item.subcontractorCount || 0;
-              case 'quoteRecieved':
-                return item.quoteReceived || 0;
-              case 'status':
-                return item.status?.toLowerCase() || '';
-              default:
-                return '';
-            }
+            quoteReceived: item.quoteReceived || 0,
+            quoteAmount: '-',
+            workItem: info.workItem || '-',
+            status: item.status || 'N/A',
           };
-
-          // Optional: reset paginator
-          this.paginator.firstPage();
         });
-      },
-      error: () => {
-        this.dataSource.data = [];
-      },
-    });
-  }
+
+        this.dataSource.data = tableData;
+        this.dataSource.paginator = this.paginator;
+        this.dataSource.sort = this.sort;
+
+        this.dataSource.sortingDataAccessor = (row, property) => {
+          switch (property) {
+            case 'totalSubcontractors':
+              return row.requestsSent || 0; // ✅ sort by requestsSent
+            default:
+              return (row as any)[property];
+          }
+        };
+
+        this.paginator.firstPage();
+      });
+    },
+    error: () => {
+      this.dataSource.data = [];
+    },
+  });
+}
 
   deleteRfq(rfqId: string) {
     if (!confirm('Are you sure you want to delete this RFQ?')) return;
