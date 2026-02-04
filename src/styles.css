@@ -806,3 +806,11 @@ tbody tr:nth-of-type(odd) {
 .mat-mdc-paginator-page-size-label {
   cursor: default !important;
 }
+
+.search-clear {
+  font-size: 16px;
+  color: #9ca3af;
+}
+.search-clear:hover {
+  cursor: pointer;
+}

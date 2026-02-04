@@ -47,3 +47,9 @@
 .clickable-row:hover {
   background-color: #f0f4ff !important;
 }
+
+.nowrap-cell {
+  white-space: nowrap !important;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

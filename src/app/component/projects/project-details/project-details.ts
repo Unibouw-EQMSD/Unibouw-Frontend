@@ -34,7 +34,7 @@ export class ProjectDetails {
     'name',
     'customerName',
     'personName',
-    'personRole',
+    // 'personRole',
     'startDate',
     'completionDate',
     'status',
@@ -132,7 +132,7 @@ export class ProjectDetails {
 
     return `Showing ${start} to ${end} of ${this.filteredItems.length} entries`;
   }
-  
+
   logProjectId(projectID: string): void {
     console.log('🧩 Project ID:', projectID);
   }
