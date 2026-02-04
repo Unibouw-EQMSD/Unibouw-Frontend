@@ -1593,7 +1593,10 @@ private getAmsterdamDateTimeLocalString(): string {
     // 🔹 reset validation messages
     this.dateTimeError = '';
     this.notesError = '';
-
+ if ((this.conversationText || '').length > 5000) {
+    this.notesError = this.translate.instant('VALIDATION.TEXT_LIMIT'); // "Max 5000 characters"
+    return;
+  }
     // 🔹 Notes validation
     if (!this.conversationText?.trim()) {
       this.notesError = this.translate.instant('VALIDATION.NOTES_ERROR');
@@ -1605,10 +1608,7 @@ private getAmsterdamDateTimeLocalString(): string {
       this.dateTimeError = this.translate.instant('VALIDATION.DATE_TIME_REQUIRED');
       return;
     }
-if ((this.conversationText || '').length > 5000) {
-  this.notesError = this.translate.instant('VALIDATION.TEXT_LIMIT');
-  return;
-}
+
     const selectedDate = new Date(this.conversationDateTime!);
     const now = new Date();
 

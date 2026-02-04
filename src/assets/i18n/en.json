@@ -322,7 +322,7 @@
     "NOT_INTERESTED_COMMENT_REQUIRED": "Please enter a reason.",
     "DATE_TIME_REQUIRED": "Please enter the date and time.",
     "NOTES_ERROR": "Please enter the message details.",
-    "TEXT_LIMIT": "Notes cannot exceed 5000 characters.",
+    "TEXT_LIMIT": "Conversation cannot exceed 5000 characters.",
     "REPLY_LIMIT": "Reply cannot exceed 5000 characters.",
     "REPLY_ERROR": "Reply cannot be empty",
     "PROJECT_NOT_LOADED": "Project data not loaded yet. Please try again.",
