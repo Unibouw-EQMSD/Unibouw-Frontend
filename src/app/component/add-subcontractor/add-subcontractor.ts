@@ -40,6 +40,7 @@ export class AddSubcontractor implements OnInit {
   projectId: string | null = null;
   projectName: string | null = null;
   projectCode: string | null = null;
+  rfqIdForEdit: string | null = '';
 
   private buildTeamsMessage(payload: any, allSelectedWorkitems: Workitem[]): string {
     const CATEGORY_MAP: Record<string, string> = {
@@ -232,8 +233,13 @@ ${indent}${indent}${workItemsText
       this.projectName = params.get('projectName');
       this.projectId = params.get('projectID');
       this.projectCode = params.get('projectCode');
+          
     });
 
+    this.route.queryParamMap.subscribe((q) => {
+    this.rfqIdForEdit = q.get('rfqId'); // ✅ now you will get it
+    console.log(this.rfqIdForEdit, 'RFQ Edit ID');
+  });
     this.loadPersons();
 
     this.loadCategories();
@@ -542,15 +548,21 @@ ${indent}${indent}${workItemsText
     }
   }
 
-  private handleFormResetAndRedirect(): void {
-    this.onReset();
-    // ✅ Navigate to add RFQ if projectId exists and is not 'null'
-    if (this.projectId && this.projectId !== 'null') {
-      setTimeout(() => this.router.navigate(['/add-rfq', this.projectId]), 1000);
-    } else {
-      setTimeout(() => this.router.navigate(['/subcontractor']), 1000);
-    }
+private handleFormResetAndRedirect(): void {
+  this.onReset();
+
+  if (this.projectId && this.projectId !== 'null') {
+    setTimeout(() => {
+      if (this.rfqIdForEdit) {
+        this.router.navigate(['/add-rfq', this.projectId, { rfqId: this.rfqIdForEdit }]);
+      } else {
+        this.router.navigate(['/add-rfq', this.projectId]);
+      }
+    }, 1000);
+  } else {
+    setTimeout(() => this.router.navigate(['/subcontractor']), 1000);
   }
+}
 
   onReset() {
     this.subcontractorForm.reset();
