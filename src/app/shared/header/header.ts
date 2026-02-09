@@ -29,15 +29,15 @@ export function midnightNotAllowedValidator(control: AbstractControl): Validatio
 export class Header implements OnInit {
   private msalInstance: PublicClientApplication;
   reminderForm: FormGroup;
-currentLang: 'en' | 'nl' = 'en';
+  currentLang: 'en' | 'nl' = 'en';
 
   constructor(
     public router: Router,
     private userService: UserService,
     private snackBar: MatSnackBar,
     private reminderService: ReminderService,
-    private fb: FormBuilder,    private translate: TranslateService // ← Add this
-
+    private fb: FormBuilder,
+    private translate: TranslateService, // ← Add this
   ) {
     this.msalInstance = (window as any).msalInstance;
 
@@ -48,8 +48,8 @@ currentLang: 'en' | 'nl' = 'en';
       reminderEmailBody: ['', [Validators.required, this.noWhitespaceValidator]],
       isEnable: [true],
     });
-     this.translate.setDefaultLang('en');
-  this.translate.use('en');
+    this.translate.setDefaultLang('en');
+    this.translate.use('en');
   }
 
   @HostListener('document:click', ['$event'])
@@ -71,18 +71,18 @@ currentLang: 'en' | 'nl' = 'en';
       this.userDropdownOpen = false;
     }
   }
-toggleLanguage(event: Event) {
-  const checked = (event.target as HTMLInputElement).checked;
-  const lang: 'en' | 'nl' = checked ? 'nl' : 'en';
+  toggleLanguage(event: Event) {
+    const checked = (event.target as HTMLInputElement).checked;
+    const lang: 'en' | 'nl' = checked ? 'nl' : 'en';
 
-  this.switchLang(lang);
-}
+    this.switchLang(lang);
+  }
 
-switchLang(lang: 'en' | 'nl') {
-  this.currentLang = lang;
-  this.translate.use(lang);
-  localStorage.setItem('lang', lang);
-}
+  switchLang(lang: 'en' | 'nl') {
+    this.currentLang = lang;
+    this.translate.use(lang);
+    localStorage.setItem('lang', lang);
+  }
   isAdmin = false;
   // reminderTimeValue: string = '08:00';
   // reminderEmailBody: string = '';
@@ -95,18 +95,17 @@ switchLang(lang: 'en' | 'nl') {
   userDropdownOpen = false;
 
   ngOnInit() {
-
     const savedLang = localStorage.getItem('lang') as 'en' | 'nl' | null;
 
-  this.currentLang = savedLang ?? 'en';
-  this.translate.use(this.currentLang);
+    this.currentLang = savedLang ?? 'en';
+    this.translate.use(this.currentLang);
     this.isAdmin = this.userService.isAdmin(); // Check role
 
     this.reminderForm.get('isEnable')?.valueChanges.subscribe((enabled) => {
       const action = enabled ? 'enable' : 'disable';
 
       ['reminderTime', 'reminderEmailBody', 'maxReminderSequence', 'reminderSequence'].forEach(
-        (control) => this.reminderForm.get(control)?.[action]({ emitEvent: false })
+        (control) => this.reminderForm.get(control)?.[action]({ emitEvent: false }),
       );
     });
   }
@@ -187,7 +186,17 @@ switchLang(lang: 'en' | 'nl') {
       next: (res) => {
         const config = Array.isArray(res) && res.length > 0 ? res[0] : null;
         if (!config) {
-          this.snackBar.open('No reminder configuration found', 'Close', { duration: 3000 });
+          // this.snackBar.open('No reminder configuration found', 'Close', { duration: 3000 });
+          this.reminderForm.patchValue({
+            maxReminderSequence: 5,
+            reminderSequence: [],
+            reminderTime: '08:00',
+            reminderEmailBody:
+              'This is to inform you that the global reminder has been successfully configured in the system.',
+            isEnable: true,
+          });
+
+          this.showSetReminderPopup = true;
           return;
         }
 
@@ -199,10 +208,12 @@ switchLang(lang: 'en' | 'nl') {
 
         // ✅ PATCH FORM VALUES
         this.reminderForm.patchValue({
-          maxReminderSequence: sequenceArray.length || 1,
+          maxReminderSequence: sequenceArray.length || 5,
           reminderSequence: sequenceArray,
           reminderTime: config.reminderTime || '08:00',
-          reminderEmailBody: config.reminderEmailBody || '',
+          reminderEmailBody:
+            config.reminderEmailBody ||
+            'This is to inform you that the global reminder has been successfully configured in the system.',
           isEnable: config.isEnable ?? false,
         });
 
@@ -260,7 +271,7 @@ switchLang(lang: 'en' | 'nl') {
       isEnable: formValue.isEnable,
     };
 
-    this.reminderService.updateGolbalReminderConfigSet(body).subscribe({
+    this.reminderService.saveGlobalReminderConfig(body).subscribe({
       next: () => {
         this.closeReminderConfig();
         this.snackBar.open('Reminder configuration updated successfully', 'Close', {

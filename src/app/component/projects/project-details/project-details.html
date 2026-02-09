@@ -2,7 +2,7 @@
 <main id="main">
   <div class="container">
     <div class="pagetitle">
-      <h1>{{'PROJECT.TITLE' | translate}}</h1>
+      <h1>{{ 'PROJECT.TITLE' | translate }}</h1>
     </div>
 
     <!-- FULL PAGE SKELETON -->
@@ -30,14 +30,20 @@
     <div class="table-container" *ngIf="isSkeletonLoading">
       <!-- Search -->
       <mat-form-field appearance="fill" class="search-box full-width">
-        <input matInput [(ngModel)]="searchText" (input)="applyFilter()" placeholder="{{'COMMON.SEARCH' | translate}}" />
+        <input
+          matInput
+          [(ngModel)]="searchText"
+          (input)="applyFilter()"
+          placeholder="{{ 'COMMON.SEARCH' | translate }}"
+        />
         <button
           matSuffix
           mat-icon-button
           *ngIf="searchText"
           (click)="searchText = ''; applyFilter()"
+          title="Clear"
         >
-          <mat-icon>{{'MODAL.COMMENTS_CLOSE' | translate}}</mat-icon>
+          <span class="search-clear"> × </span>
         </button>
       </mat-form-field>
 
@@ -53,50 +59,90 @@
           <!-- Columns (same as yours) -->
           <!-- Code -->
           <ng-container matColumnDef="number">
-            <th mat-header-cell *matHeaderCellDef mat-sort-header>{{'PROJECT.PROJECT_CODE' | translate}}</th>
-            <td mat-cell *matCellDef="let item">{{ item.number }}</td>
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>
+              {{ 'PROJECT.PROJECT_CODE' | translate }}
+            </th>
+            <td mat-cell *matCellDef="let item" class="nowrap-cell">{{ item.number }}</td>
           </ng-container>
 
           <!-- Name -->
           <ng-container matColumnDef="name">
-            <th mat-header-cell *matHeaderCellDef mat-sort-header>{{'PROJECT.PROJECT_NAME' | translate}}</th>
-            <td mat-cell *matCellDef="let item">{{ item.name }}</td>
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>
+              {{ 'PROJECT.PROJECT_NAME' | translate }}
+            </th>
+            <td mat-cell *matCellDef="let item" class="nowrap-cell">{{ item.name }}</td>
           </ng-container>
 
           <!-- Customer -->
           <ng-container matColumnDef="customerName">
-            <th mat-header-cell *matHeaderCellDef mat-sort-header>{{'PROJECT.CLIENT_NAME' | translate}}</th>
-            <td mat-cell *matCellDef="let item">{{ item.customerName }}</td>
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>
+              {{ 'PROJECT.CLIENT_NAME' | translate }}
+            </th>
+            <td mat-cell *matCellDef="let item" class="nowrap-cell">{{ item.customerName }}</td>
           </ng-container>
 
           <!-- Project Manager -->
-          <ng-container matColumnDef="projectManagerName">
+          <!-- <ng-container matColumnDef="projectManagerName">
             <th mat-header-cell *matHeaderCellDef mat-sort-header>{{'PROJECT.PROJECT_MANAGER' | translate}}</th>
             <td mat-cell *matCellDef="let item">{{ item.projectManagerName }}</td>
+          </ng-container> -->
+
+          <ng-container matColumnDef="personName">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header style="white-space: nowrap">
+              {{ 'PROJECT.PROJECT_MANAGER' | translate }}
+            </th>
+            <td mat-cell *matCellDef="let item" class="nowrap-cell">
+              {{ item.personName || '—' }}
+            </td>
           </ng-container>
+
+          <!-- <ng-container matColumnDef="personRole">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header style="white-space: nowrap">
+              {{ 'PROJECT.PERSON_ROLE' | translate }}
+            </th>
+            <td
+              mat-cell
+              *matCellDef="let item"
+              class="nowrap-cell"
+              [ngClass]="{ 'centered-cell': !item.personName }"
+            >
+              {{ item.personRole || '—' }}
+            </td>
+          </ng-container> -->
 
           <!-- Start Date -->
           <ng-container matColumnDef="startDate">
-            <th mat-header-cell *matHeaderCellDef mat-sort-header>{{'PROJECT.START_DATE' | translate}}</th>
-            <td mat-cell *matCellDef="let item">{{ item.startDate | date : 'dd-MM-yyyy' }}</td>
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>
+              {{ 'PROJECT.START_DATE' | translate }}
+            </th>
+            <td mat-cell *matCellDef="let item" class="nowrap-cell">
+              {{ item.startDate | date: 'dd-MM-yyyy' }}
+            </td>
           </ng-container>
 
           <!-- Committed Date -->
           <ng-container matColumnDef="completionDate">
-            <th mat-header-cell *matHeaderCellDef mat-sort-header>{{'PROJECT.END_DATE' | translate}}</th>
-            <td mat-cell *matCellDef="let item">{{ item.completionDate | date : 'dd-MM-yyyy' }}</td>
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>
+              {{ 'PROJECT.END_DATE' | translate }}
+            </th>
+            <td mat-cell *matCellDef="let item" class="nowrap-cell">
+              {{ item.completionDate | date: 'dd-MM-yyyy' }}
+            </td>
           </ng-container>
 
           <!-- Status -->
           <ng-container matColumnDef="status">
-            <th mat-header-cell *matHeaderCellDef mat-sort-header>{{'PROJECT.STATUS' | translate}}</th>
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>
+              {{ 'PROJECT.STATUS' | translate }}
+            </th>
             <td mat-cell *matCellDef="let item">
               <span
                 [ngClass]="{
                   'status-started': item.status === 'Started',
                   'status-inprogress': item.status === 'In Progress',
-                  'status-completed': item.status === 'Completed'
+                  'status-completed': item.status === 'Completed',
                 }"
+                class="nowrap-cell"
               >
                 {{ item.status }}
               </span>
@@ -105,12 +151,13 @@
 
           <!-- Action -->
           <ng-container matColumnDef="action">
-            <th mat-header-cell *matHeaderCellDef>{{'COMMON.ACTIONS' | translate}}</th>
+            <th mat-header-cell *matHeaderCellDef>{{ 'COMMON.ACTIONS' | translate }}</th>
             <td mat-cell *matCellDef="let item">
               <a
                 [routerLink]="['/view-projects', item.projectID]"
                 matTooltip="View Details"
                 (click)="logProjectId(item.projectID)"
+                class="nowrap-cell"
               >
                 <mat-icon class="vis-icon" style="font-size: 20px !important">visibility</mat-icon>
               </a>
@@ -134,8 +181,8 @@
               </div>
 
               <!-- Show empty message only when there are no columns -->
-              <div *ngIf="!isLoading && displayedColumns.length === 0" class="no-data-message">
-               {{'MESSAGES.NO_PROJECTS' | translate}}
+              <div *ngIf="!isLoading && dataSource?.data?.length === 0" class="no-data-message">
+                {{ 'MESSAGES.NO_PROJECTS' | translate }}
               </div>
             </td>
           </tr>

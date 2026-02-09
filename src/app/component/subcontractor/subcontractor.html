@@ -2,7 +2,7 @@
 <main id="main">
   <div class="container">
     <div class="pagetitle">
-      <h1>{{'SUBCONTRACTOR.TITLE' | translate}}</h1>
+      <h1>{{ 'SUBCONTRACTOR.TITLE' | translate }}</h1>
 
       <div class="skeleton-add skeleton" *ngIf="isSkeletonLoading"></div>
       <button
@@ -11,7 +11,7 @@
         [routerLink]="['/add-subcontractor', projectID, projectName, projectCode]"
         *ngIf="!isSkeletonLoading"
       >
-        <b>{{'SUBCONTRACTOR.ADD' | translate}}</b>
+        <b>{{ 'SUBCONTRACTOR.ADD' | translate }}</b>
       </button>
     </div>
 
@@ -38,68 +38,92 @@
     <div class="table-container" *ngIf="!isSkeletonLoading">
       <!-- 🔍 Search -->
       <mat-form-field appearance="fill" class="search-box full-width">
-        <input matInput [(ngModel)]="searchText" (input)="applyFilter()" placeholder="{{'COMMON.SEARCH' | translate}}" />
+        <input
+          matInput
+          [(ngModel)]="searchText"
+          (input)="applyFilter()"
+          placeholder="{{ 'COMMON.SEARCH' | translate }}"
+        />
         <button
           matSuffix
           mat-icon-button
           *ngIf="searchText"
           (click)="searchText = ''; applyFilter()"
+          title="Clear"
         >
-          <mat-icon>{{'MODAL.COMMENTS_CLOSE' | translate}}</mat-icon>
+          <span class="search-clear"> × </span>
         </button>
       </mat-form-field>
 
       <!-- 🧾 Table -->
       <div class="table-scroll">
         <table
-         mat-table
-  [dataSource]="dataSource"
-  matSort
-  matSortActive="name"
-  matSortDirection="asc"
-  matSortDisableClear
-  class="mat-elevation-z2 full-width-table"
+          mat-table
+          [dataSource]="dataSource"
+          matSort
+          matSortActive="name"
+          matSortDirection="asc"
+          matSortDisableClear
+          class="mat-elevation-z2 full-width-table"
         >
           <!-- ✅ Actual Data Columns -->
           <ng-container matColumnDef="name">
-            <th mat-header-cell *matHeaderCellDef mat-sort-header>{{'SUBCONTRACTOR.NAME' | translate}}</th>
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>
+              {{ 'SUBCONTRACTOR.NAME' | translate }}
+            </th>
             <td mat-cell *matCellDef="let item">{{ item.name }}</td>
           </ng-container>
 
           <ng-container matColumnDef="category">
-            <th mat-header-cell *matHeaderCellDef mat-sort-header>{{'SUBCONTRACTOR.WORKITEMS' | translate}}</th>
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>
+              {{ 'SUBCONTRACTOR.WORKITEMS' | translate }}
+            </th>
             <td mat-cell *matCellDef="let item">
               <span class="truncate-text" [matTooltip]="item.category">{{ item.category }}</span>
             </td>
           </ng-container>
 
           <ng-container matColumnDef="contactNumber">
-            <th mat-header-cell *matHeaderCellDef mat-sort-header>{{'SUBCONTRACTOR.PHONE' | translate}}</th>
-            <td mat-cell *matCellDef="let item">{{ item.phoneNumber1 }}</td>
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>
+              {{ 'SUBCONTRACTOR.PHONE' | translate }}
+            </th>
+            <td mat-cell *matCellDef="let item">{{ item.contactPhone }}</td>
           </ng-container>
 
           <ng-container matColumnDef="contactPerson">
-            <th mat-header-cell *matHeaderCellDef mat-sort-header>{{'SUBCONTRACTOR.PERSON' | translate}}</th>
-            <td mat-cell *matCellDef="let item">{{ item.personName }}</td>
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>
+              {{ 'SUBCONTRACTOR.PERSON' | translate }}
+            </th>
+            <td mat-cell *matCellDef="let item">{{ item.contactName }}</td>
           </ng-container>
 
-          <ng-container matColumnDef="emailId">
-            <th mat-header-cell *matHeaderCellDef mat-sort-header>{{'SUBCONTRACTOR.EMAIL' | translate}}</th>
-            <td mat-cell *matCellDef="let item">{{ item.emailID }}</td>
+          <ng-container matColumnDef="email">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>
+              {{ 'SUBCONTRACTOR.EMAIL' | translate }}
+            </th>
+            <td mat-cell *matCellDef="let item">{{ item.email }}</td>
           </ng-container>
 
-          <ng-container *ngIf="isAdmin" matColumnDef="action">
-            <th mat-header-cell *matHeaderCellDef>{{'COMMON.ACTIONS' | translate}}</th>
-            <td mat-cell *matCellDef="let item">
-              <mat-slide-toggle
-                color="primary"
-                class="toggle"
-                [checked]="item.isActive"
-                (change)="toggleIsActive(item)"
-              >
-              </mat-slide-toggle>
-            </td>
-          </ng-container>
+         <ng-container *ngIf="isAdmin" matColumnDef="action">
+  <th mat-header-cell *matHeaderCellDef>{{ 'COMMON.ACTIONS' | translate }}</th>
+  <td mat-cell *matCellDef="let item">
+    <!-- Eye icon button for view -->
+    <button mat-icon-button  (click)="viewSubcontractorDetails(item.subcontractorID);" title="View">
+      <mat-icon class="vis-icon" style="font-size: 20px !important; padding-top: 7px;">visibility</mat-icon>
+    </button>
+    <!-- Slide toggle for isActive (stop event bubbling) -->
+    <mat-slide-toggle
+      color="primary"
+      class="toggle"
+      [checked]="item.isActive"
+      (click)="$event.stopPropagation()"  
+      (change)="toggleIsActive(item)"
+      style="margin-left: 10px;"
+    >
+    </mat-slide-toggle>
+  </td>
+</ng-container>
+          
 
           <!-- ✅ Header and Data Rows (Hide during load or no data) -->
           <tr
@@ -108,12 +132,15 @@
             [class.hidden]="isLoading"
             class="sticky-header"
           ></tr>
-          <tr
-            mat-row
-            *matRowDef="let row; columns: displayedColumns"
-            [class.hidden]="isLoading"
-            [class.inactive]="!row.isActive"
-          ></tr>
+         <tr
+  mat-row
+  *matRowDef="let row; columns: displayedColumns"
+  [class.hidden]="isLoading"
+  [class.inactive]="!row.isActive"
+  (click)="viewSubcontractorDetails(row.subcontractorID)"
+  style="cursor: pointer;"
+   class="clickable-row"
+></tr>
 
           <!-- ✅ Loading or No Data Row -->
           <tr *matNoDataRow>
@@ -122,7 +149,7 @@
                 <mat-spinner diameter="40"></mat-spinner>
               </ng-container>
               <ng-container *ngIf="!isLoading">
-                <div class="no-data-message">{{'MESSAGES.NO_SUBCONTRACTORS' | translate}}</div>
+                <div class="no-data-message">{{ 'MESSAGES.NO_SUBCONTRACTORS' | translate }}</div>
               </ng-container>
             </td>
           </tr>

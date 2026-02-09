@@ -45,13 +45,15 @@
     "ADD_PROJECT": "Project toevoegen",
     "PROJECT_NAME": "Projectnaam",
     "CLIENT_NAME": "Klant",
-    "PROJECT_MANAGER": "Projectmanager",
+    "PROJECT_MANAGER": "Project Manager",
     "PROJECT_CODE": "Projectcode",
     "STATUS": "Status",
     "START_DATE": "Startdatum",
     "END_DATE": "Gecommitteerde datum",
     "SPECIFICATION": "Projectbestanden",
-    "VIEW_DETAILS": "Bekijk details"
+    "VIEW_DETAILS": "Bekijk details",
+    "PERSON_NAME": "Persoonsnaam",
+    "PERSON_ROLE": "Persoonsrol"
   },
    "PROJECT_DETAILS": {
     "DETAILS_TITLE": "Details",
@@ -63,7 +65,9 @@
     "COMMITTED_DATE": "Vastgelegde datum",
     "STATUS": "Status",
     "SPECIFICATION": "Specificatie",
-    "PROJECT_FILES": "Projectbestanden"
+    "PROJECT_FILES": "Projectbestanden",
+    "PERSON_NAME": "Persoonsnaam",
+    "PERSON_ROLE": "Persoonsrol"
   },
 
   "RESPONSE_VIEW": {
@@ -80,9 +84,6 @@
     "RFQ_ID": "RFQ-ID",
     "WORK_ITEM": "Werkonderdeel",
     "SUBCONTRACTOR": "Onderaannemer"
-
-
-
   },
 
 
@@ -166,6 +167,7 @@
     "WORK_ITEMS": "Werkonderdelen",
     "DUE_DATE": "Vervaldatum",
 
+    "REGARDS": "groeten,",
     "THANK_YOU": "Dank u voor uw snelle reactie.",
     "TEAM": "Unibouw-team",
 
@@ -241,6 +243,8 @@
   },
   "SUBCONTRACTOR": {
     "TITLE": "Onderaannemers",
+    "TITLE2": "Gegevens onderaannemer",
+
     "ADD": "Onderaannemer toevoegen",
     "NAME": "Naam onderaannemer",
     "EMAIL": "E-mail",
@@ -252,7 +256,9 @@
     "ACTIVE": "Actief",
     "INACTIVE": "Inactief",
     "WORKITEMS": "Werkonderdelen",
-    "NO_WORKITEMS": "Geen toegewezen werkonderdelen"
+    "NO_WORKITEMS": "Geen toegewezen werkonderdelen",
+    "BACK_TO_LISTING": "Terug naar lijst"
+
   },
   "SUBCONTRACTOR_FORM": {
     "TITLE": "Onderaannemers toevoegen",
@@ -320,6 +326,8 @@
     "NOT_INTERESTED_COMMENT_REQUIRED": "Voer een reden in.",
     "DATE_TIME_REQUIRED": "Voer de datum en tijd in.",
     "NOTES_ERROR": "Vul de berichtgegevens in.",
+    "TEXT_LIMIT": "Notities mogen niet meer dan 5000 tekens bevatten.",
+    "REPLY_LIMIT": "Een antwoord mag niet langer zijn dan 5000 tekens.",
     "REPLY_ERROR": "Het antwoord mag niet leeg zijn.",
     "PROJECT_NOT_LOADED": "Projectgegevens zijn nog niet geladen. Probeer opnieuw.",
     "FILE_SIZE_EXCEEDED": "Bestandsgrootte mag niet groter zijn dan 10 MB.",

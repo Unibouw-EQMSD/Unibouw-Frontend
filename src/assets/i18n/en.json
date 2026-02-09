@@ -49,7 +49,9 @@
     "START_DATE": "Start",
     "END_DATE": "Committed",
     "SPECIFICATION": "Project Files",
-    "VIEW_DETAILS": "View Details"
+    "VIEW_DETAILS": "View Details",
+    "PERSON_NAME": "Person Name",
+    "PERSON_ROLE": "Person Role"
   },
 
   "PROJECT_DETAILS": {
@@ -62,7 +64,9 @@
     "COMMITTED_DATE": "Committed Date",
     "STATUS": "Status",
     "SPECIFICATION": "Specification",
-    "PROJECT_FILES": "Project Files"
+    "PROJECT_FILES": "Project Files",
+    "PERSON_NAME": "Person Name",
+    "PERSON_ROLE": "Person Role"
   },
 
    "RESPONSE_VIEW": {
@@ -162,6 +166,7 @@
     "WORK_ITEMS": "Work Item(s)",
     "DUE_DATE": "Due Date",
 
+    "REGARDS": "Regards,",
     "THANK_YOU": "Thank you for your prompt response.",
     "TEAM": "Unibouw Team",
 
@@ -237,6 +242,7 @@
   },
   "SUBCONTRACTOR": {
     "TITLE": "Subcontractors",
+    "TITLE2": "Subcontractor Details",
     "ADD": "Add Subcontractor",
     "NAME": "Name",
     "EMAIL": "Email",
@@ -248,7 +254,8 @@
     "ACTIVE": "Active",
     "INACTIVE": "Inactive",
     "WORKITEMS": "Workitems",
-    "NO_WORKITEMS": "No workitems assigned"
+    "NO_WORKITEMS": "No workitems assigned",
+    "BACK_TO_LISTING": "Back to Listing"
   },
 
   "SUBCONTRACTOR_FORM": {
@@ -317,6 +324,8 @@
     "NOT_INTERESTED_COMMENT_REQUIRED": "Please enter a reason.",
     "DATE_TIME_REQUIRED": "Please enter the date and time.",
     "NOTES_ERROR": "Please enter the message details.",
+    "TEXT_LIMIT": "Conversation cannot exceed 5000 characters.",
+    "REPLY_LIMIT": "Reply cannot exceed 5000 characters.",
     "REPLY_ERROR": "Reply cannot be empty",
     "PROJECT_NOT_LOADED": "Project data not loaded yet. Please try again.",
     "FILE_SIZE_EXCEEDED": "File size must not exceed 10 MB.",

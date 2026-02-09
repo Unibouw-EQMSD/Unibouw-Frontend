@@ -400,9 +400,21 @@
   border: 1px solid #dc3545;
 }
 
+.cancel-btn:disabled {
+   opacity: 0.55 !important;
+  cursor: not-allowed !important;
+  pointer-events: none !important;
+}
+
 .submit-btn {
   background: #f97316;
   color: white;
+}
+
+.submit-btn:disabled {
+  opacity: 0.55 !important;
+  cursor: not-allowed !important;
+  pointer-events: none !important;
 }
 
 .reset-btn {

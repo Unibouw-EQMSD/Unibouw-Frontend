@@ -1,5 +1,5 @@
 import { Component, HostListener, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators, FormControl } from '@angular/forms';
 import { WorkitemService, Workitem, WorkitemCategory } from '../../services/workitem.service';
 import { SubcontractorService } from '../../services/subcontractor.service';
 import { UserService } from '../../services/User.service.';
@@ -40,15 +40,16 @@ export class AddSubcontractor implements OnInit {
   projectId: string | null = null;
   projectName: string | null = null;
   projectCode: string | null = null;
+  rfqIdForEdit: string | null = '';
 
   private buildTeamsMessage(payload: any, allSelectedWorkitems: Workitem[]): string {
     const CATEGORY_MAP: Record<string, string> = {
-      '213cf69b-627e-4962-83ec-53463c8664d2': 'Unibouw',
-      '60a1a614-05fd-402d-81b3-3ba05fdd2d8a': 'Standard',
+      '1': 'Unibouw',
+      '2': 'Standard',
     };
 
     const grouped = allSelectedWorkitems.reduce((acc: any, item: any) => {
-      const category = CATEGORY_MAP[item.categoryID] ?? 'Others';
+      const category = CATEGORY_MAP[item.categoryID] ?? '';
       if (!acc[category]) acc[category] = [];
 
       acc[category].push({
@@ -64,7 +65,7 @@ export class AddSubcontractor implements OnInit {
         const list = items
           .map(
             (item: any, i: number) =>
-              `  ${i + 1}. ${item.name}${item.code ? ` (Code: ${item.code})` : ''}`
+              `  ${i + 1}. ${item.name}${item.code ? ` (Code: ${item.code})` : ''}`,
           )
           .join('\n');
 
@@ -92,31 +93,60 @@ export class AddSubcontractor implements OnInit {
       '-' +
       today.getFullYear();
 
-    return `📩 **${
+    //     return `📩 **${
+    //       this.projectName && this.projectName !== 'null'
+    //         ? 'New Subcontractor Added to an RFQ'
+    //         : 'New Subcontractor Created'
+    //     }**
+    // \`\`\`
+    // Subcontractor Name : ${payload.name}
+    // Email              : ${payload.email}
+    // Location           : ${payload.location}
+    // Country            : ${payload.country}
+    // Contact Name       : ${payload.contactName}
+    // Contact Email      : ${payload.contactEmail}
+    // Contact Phone      : ${payload.phoneNumber1}
+    // Office Address     : ${officeAddressText}
+    // Billing Address    : ${billingAddressText}
+    // ${
+    //   this.projectName && this.projectName !== 'null'
+    //     ? `Project Name       : ${this.projectName} (Code: ${this.projectCode})
+    // Created Date        : ${currentDate}`
+    //     : ''
+    // }
+
+    // Work Items:
+    // ${workItemsText}
+    // \`\`\``;
+
+    const indent = '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'; // 6 non-breaking spaces
+
+    return `<b>${
       this.projectName && this.projectName !== 'null'
-        ? 'New Subcontractor Added to an RFQ'
-        : 'New Subcontractor Created'
-    }**
-\`\`\`
-Subcontractor Name : ${payload.name}
-Email              : ${payload.emailID}
-Location           : ${payload.location}
-Country            : ${payload.country}
-Contact Name       : ${payload.contactName}
-Contact Email      : ${payload.contactEmailID}
-Contact Phone      : ${payload.phoneNumber1}
-Office Address     : ${officeAddressText}
-Billing Address    : ${billingAddressText}
+        ? '📩 New Subcontractor Added to an RFQ'
+        : '📩 New Subcontractor Created'
+    }</b><br>
+${indent}Subcontractor Name : ${payload.name}<br>
+${indent}Email              : ${payload.email}<br>
+${indent}Location           : ${payload.location}<br>
+${indent}Country            : ${payload.country}<br>
+${indent}Contact Name       : ${payload.contactName}<br>
+${indent}Contact Email      : ${payload.contactEmail}<br>
+${indent}Contact Phone      : ${payload.phoneNumber1}<br>
+${indent}Office Address     : ${officeAddressText}<br>
+${indent}Billing Address    : ${billingAddressText}<br>
 ${
   this.projectName && this.projectName !== 'null'
-    ? `Project Name       : ${this.projectName} (Code: ${this.projectCode})
-Created Date        : ${currentDate}`
+    ? `${indent}Project Name       : ${this.projectName} (Code: ${this.projectCode})<br>
+${indent}Created Date        : ${currentDate}<br>`
     : ''
 }
-
-Work Items:
-${workItemsText}
-\`\`\``;
+<br>
+<b>${indent}Work Items:</b><br>
+${indent}${indent}${workItemsText
+      .replace(/\n\n/g, '<br><br>' + indent + indent) // space between categories
+      .replace(/\n/g, '<br>' + indent)}
+`;
   }
 
   constructor(
@@ -126,8 +156,10 @@ ${workItemsText}
     private workItemService: WorkitemService,
     private subcontractorService: SubcontractorService,
     private userService: UserService,
-    private location: Location
+    private location: Location,
   ) {
+    this.workitemSearchControl = new FormControl('');
+
     this.subcontractorForm = this.fb.group({
       name: [
         '',
@@ -150,7 +182,7 @@ ${workItemsText}
           Validators.required,
           Validators.maxLength(100),
           Validators.pattern(
-            /^[a-zA-Z0-9]+([._%+-]?[a-zA-Z0-9]+)*@[a-zA-Z0-9-]+(\.[a-zA-Z]{2,})+$/
+            /^[a-zA-Z0-9]+([._%+-]?[a-zA-Z0-9]+)*@[a-zA-Z0-9-]+(\.[a-zA-Z]{2,})+$/,
           ),
         ],
       ],
@@ -160,7 +192,7 @@ ${workItemsText}
           Validators.required,
           Validators.maxLength(100),
           Validators.pattern(
-            /^[a-zA-Z0-9]+([._%+-]?[a-zA-Z0-9]+)*@[a-zA-Z0-9-]+(\.[a-zA-Z]{2,})+$/
+            /^[a-zA-Z0-9]+([._%+-]?[a-zA-Z0-9]+)*@[a-zA-Z0-9-]+(\.[a-zA-Z]{2,})+$/,
           ),
         ],
       ],
@@ -203,11 +235,16 @@ ${workItemsText}
       this.projectName = params.get('projectName');
       this.projectId = params.get('projectID');
       this.projectCode = params.get('projectCode');
+          
     });
 
+    this.route.queryParamMap.subscribe((q) => {
+    this.rfqIdForEdit = q.get('rfqId'); // ✅ now you will get it
+    console.log(this.rfqIdForEdit, 'RFQ Edit ID');
+  });
     this.loadPersons();
 
-   this.loadCategories();
+    this.loadCategories();
 
     const officeCtrl = this.subcontractorForm.get('officeAddress');
     const billingCtrl = this.subcontractorForm.get('billingAddress');
@@ -252,40 +289,40 @@ ${workItemsText}
   }
 
   /** Load workitems per category */
- async loadCategories() {
-  try {
-    const data = await this.workItemService.getCategoriesAsync();
-    
-    this.categories = data
-      .map(cat => ({
-        categoryID: cat.categoryID,
-        categoryName: this.getCategoryTranslationKey(cat.categoryName),
-        originalName: cat.categoryName // Keep original for sorting
-      }))
-      .sort((a, b) => {
-        // Define custom order
-        const order = ['Unibouw', 'Standard'];
-        return order.indexOf(a.originalName) - order.indexOf(b.originalName);
-      });
+  async loadCategories() {
+    try {
+      const data = await this.workItemService.getCategoriesAsync();
 
-    // Auto-select first category and load its workitems
-    if (this.categories.length > 0) {
-      this.selectedCategoryId = this.categories[0].categoryID;
-      this.loadWorkitems();
+      this.categories = data
+        .map((cat) => ({
+          categoryID: cat.categoryID,
+          categoryName: this.getCategoryTranslationKey(cat.categoryName),
+          originalName: cat.categoryName, // Keep original for sorting
+        }))
+        // .sort((a, b) => {
+        //   // Define custom order
+        //   const order = ['Unibouw', 'Standard'];
+        //   return order.indexOf(a.originalName) - order.indexOf(b.originalName);
+        // });
+        .sort((a, b) => Number(a.categoryID) - Number(b.categoryID)); // Convert to number
+
+      // Auto-select first category and load its workitems
+      if (this.categories.length > 0) {
+        this.selectedCategoryId = this.categories[0].categoryID;
+        this.loadWorkitems();
+      }
+    } catch (err) {
+      console.error('Failed to load categories', err);
     }
-  } catch (err) {
-    console.error('Failed to load categories', err);
   }
-}
-
 
   /**
    * Map backend category names to translation keys
    */
   getCategoryTranslationKey(categoryName: string): string {
     const keyMap: { [key: string]: string } = {
-      'Unibouw': 'WORKITEM.TAB_UNIBOUW',
-      'Standard': 'WORKITEM.TAB_STANDARD'
+      Unibouw: 'WORKITEM.TAB_UNIBOUW',
+      Standard: 'WORKITEM.TAB_STANDARD',
     };
     return keyMap[categoryName] || categoryName;
   }
@@ -307,7 +344,7 @@ ${workItemsText}
       },
       error: (err) => {
         console.error('Failed to load workitems', err);
-      }
+      },
     });
   }
 
@@ -317,7 +354,7 @@ ${workItemsText}
   selectCategory(id: string) {
     // Save current category selections
     this.selectionsByCategory.set(this.selectedCategoryId, this.selectedWorkitems);
-    
+
     // Switch to new category
     this.selectedCategoryId = id;
     this.loadWorkitems();
@@ -331,7 +368,7 @@ ${workItemsText}
       }
     } else {
       this.selectedWorkitems = this.selectedWorkitems.filter(
-        (w) => w.workItemID !== item.workItemID
+        (w) => w.workItemID !== item.workItemID,
       );
     }
     this.selectionsByCategory.set(this.selectedCategoryId, this.selectedWorkitems);
@@ -345,10 +382,12 @@ ${workItemsText}
     return (this.selectionsByCategory.get(categoryId) || []).length;
   }
 
-  workitemSearch: string = '';
+  workitemSearchControl!: FormControl;
+
   filteredWorkitems() {
-    if (!this.workitemSearch) return this.workitems;
-    const term = this.workitemSearch.toLowerCase();
+    const term = (this.workitemSearchControl.value || '').toLowerCase().trim();
+    if (!term) return this.workitems;
+
     return this.workitems.filter((w) => w.name.toLowerCase().includes(term));
   }
 
@@ -401,10 +440,10 @@ ${workItemsText}
     });
   }
 
+  showWorkItemError = false;
+
   /** Form submission */
   onSubmit() {
-    const allSelectedWorkitems1 = Array.from(this.selectionsByCategory.values()).flat();
-    console.log('Selected Workitems:', allSelectedWorkitems1);
     if (this.submitAttempted) return;
     this.submitAttempted = true;
 
@@ -415,13 +454,22 @@ ${workItemsText}
     if (this.subcontractorForm.invalid) {
       this.submitAttempted = false;
       this.logFormValidationErrors(this.subcontractorForm);
+      if (allSelectedWorkitems.length === 0) {
+        this.showWorkItemError = true;
+      } else {
+        this.showWorkItemError = false;
+      }
       return;
     }
 
+    // Workitem validation
     if (allSelectedWorkitems.length === 0) {
       this.submitAttempted = false;
+      this.showWorkItemError = true;
       return;
     }
+
+    this.showWorkItemError = false;
 
     const formValue = this.subcontractorForm.value;
 
@@ -429,7 +477,7 @@ ${workItemsText}
       erp_ID: formValue.erpId?.trim() || '',
       name: formValue.name?.trim(),
       rating: formValue.rating || 0,
-      emailID: formValue.email, // main subcontractor email
+      email: formValue.email, // main subcontractor email
       phoneNumber1: this.selectedCountry.code + ' ' + formValue.contactNumber,
       phoneNumber2: '', // optional
       location: formValue.location,
@@ -443,11 +491,11 @@ ${workItemsText}
         new Set(
           Array.from(this.selectionsByCategory.values())
             .flat()
-            .map((w) => w.workItemID)
-        )
+            .map((w) => w.workItemID),
+        ),
       ),
       contactName: formValue.contactPerson,
-      contactEmailID: formValue.contactEmail,
+      contactEmail: formValue.contactEmail,
       contactPhone: this.selectedCountry.code + formValue.contactNumber,
     };
 
@@ -513,15 +561,21 @@ ${workItemsText}
     }
   }
 
-  private handleFormResetAndRedirect(): void {
-    this.onReset();
-    // ✅ Navigate to add RFQ if projectId exists and is not 'null'
-    if (this.projectId && this.projectId !== 'null') {
-      setTimeout(() => this.router.navigate(['/add-rfq', this.projectId]), 1000);
-    } else {
-      setTimeout(() => this.router.navigate(['/subcontractor']), 1000);
-    }
+private handleFormResetAndRedirect(): void {
+  this.onReset();
+
+  if (this.projectId && this.projectId !== 'null') {
+    setTimeout(() => {
+      if (this.rfqIdForEdit) {
+        this.router.navigate(['/add-rfq', this.projectId, { rfqId: this.rfqIdForEdit }]);
+      } else {
+        this.router.navigate(['/add-rfq', this.projectId]);
+      }
+    }, 1000);
+  } else {
+    setTimeout(() => this.router.navigate(['/subcontractor']), 1000);
   }
+}
 
   onReset() {
     this.subcontractorForm.reset();
@@ -530,6 +584,7 @@ ${workItemsText}
     this.selectedWorkitems = [];
     this.selectedCountry = countryList.find((c) => c.code === '+33') || countryList[0];
     this.uploadedFiles = [];
+    this.showWorkItemError = false;
 
     const fileInput = document.querySelector<HTMLInputElement>('#fileInput');
     if (fileInput) fileInput.value = '';
