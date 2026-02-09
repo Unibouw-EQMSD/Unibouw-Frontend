@@ -243,6 +243,8 @@
   },
   "SUBCONTRACTOR": {
     "TITLE": "Onderaannemers",
+    "TITLE2": "Gegevens onderaannemer",
+
     "ADD": "Onderaannemer toevoegen",
     "NAME": "Naam onderaannemer",
     "EMAIL": "E-mail",
@@ -254,7 +256,9 @@
     "ACTIVE": "Actief",
     "INACTIVE": "Inactief",
     "WORKITEMS": "Werkonderdelen",
-    "NO_WORKITEMS": "Geen toegewezen werkonderdelen"
+    "NO_WORKITEMS": "Geen toegewezen werkonderdelen",
+    "BACK_TO_LISTING": "Terug naar lijst"
+
   },
   "SUBCONTRACTOR_FORM": {
     "TITLE": "Onderaannemers toevoegen",

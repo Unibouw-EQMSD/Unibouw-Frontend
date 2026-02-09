@@ -1002,7 +1002,8 @@
           <input
             type="datetime-local"
             class="date-time-input"
-            (change)="dateTimeTouched = true"
+             (change)="dateTimeTouched = true"
+  (input)="dateTimeTouched = true"
             [max]="maxDateTime"
             [(ngModel)]="conversationDateTime"
           />

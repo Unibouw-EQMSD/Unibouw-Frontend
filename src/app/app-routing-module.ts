@@ -12,6 +12,7 @@ import { ViewProjects } from './component/projects/view-projects/view-projects';
 import { SSOLogin } from './component/sso-login/sso-login';
 import { AuthGuard } from './auth.guard';
 import { AlreadyAuthGuard } from './already-auth.guard';
+import { SubcontractorDetails } from './component/subcontractor/subcontractor-details/subcontractor-details';
 
 const routes: Routes = [
   { path: 'login', component: SSOLogin, canActivate: [AlreadyAuthGuard] },
@@ -20,6 +21,8 @@ const routes: Routes = [
 
   { path: 'workitems', component: Workitems, canActivate: [AuthGuard] },
   { path: 'subcontractor', component: Subcontractor, canActivate: [AuthGuard] },
+    { path: 'subcontractor-details/:id', component: SubcontractorDetails, canActivate: [AuthGuard] },
+
   { path: 'projectdetails', component: ProjectDetails, canActivate: [AuthGuard] },
   { path: 'projectlist', component: ProjectList, canActivate: [AuthGuard] },
   { path: 'rfq', component: Rfq, canActivate: [AuthGuard] },

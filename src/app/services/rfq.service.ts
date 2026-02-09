@@ -3,6 +3,7 @@ import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { from, Observable, switchMap, map } from 'rxjs';
 import { MsalService } from '@azure/msal-angular';
 import { AppConfigService } from './app.config.service';
+import appConfig from '../../assets/app.config.json';
 
 export interface Rfq {
   id?: string;

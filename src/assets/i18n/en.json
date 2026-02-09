@@ -242,6 +242,7 @@
   },
   "SUBCONTRACTOR": {
     "TITLE": "Subcontractors",
+    "TITLE2": "Subcontractor Details",
     "ADD": "Add Subcontractor",
     "NAME": "Name",
     "EMAIL": "Email",
@@ -253,7 +254,8 @@
     "ACTIVE": "Active",
     "INACTIVE": "Inactive",
     "WORKITEMS": "Workitems",
-    "NO_WORKITEMS": "No workitems assigned"
+    "NO_WORKITEMS": "No workitems assigned",
+    "BACK_TO_LISTING": "Back to Listing"
   },
 
   "SUBCONTRACTOR_FORM": {

@@ -1503,7 +1503,8 @@ conversationDateTime: string | null = null;
   }
   setDefaultValues() {
     const now = new Date();
-this.conversationDateTime = this.getAmsterdamDateTimeLocalString();
+this.conversationDateTime = this.getAmsterdamDateTimeLocalString(new Date());
+this.dateTimeTouched = true;
     this.conversationSubject = '';
     this.conversationType = 'Email';
   }
@@ -1533,8 +1534,11 @@ this.conversationDateTime = this.getAmsterdamDateTimeLocalString();
     this.conversationText = '';
   }
 
-private getAmsterdamDateTimeLocalString(): string {
-  const now = new Date();
+public getAmsterdamDateTimeLocalString(dateInput: string | Date | null | undefined): string {
+  if (!dateInput) return '';
+
+  const date = dateInput instanceof Date ? dateInput : new Date(dateInput);
+  if (isNaN(date.getTime())) return '';
 
   const parts = new Intl.DateTimeFormat('sv-SE', {
     timeZone: 'Europe/Amsterdam',
@@ -1544,11 +1548,11 @@ private getAmsterdamDateTimeLocalString(): string {
     hour: '2-digit',
     minute: '2-digit',
     hour12: false,
-  }).formatToParts(now);
+  }).formatToParts(date);
 
   const get = (type: string) => parts.find(p => p.type === type)?.value ?? '';
 
-  // sv-SE gives parts in 24h, perfect for datetime-local
+  // Returns e.g. 2026-02-06T14:09
   return `${get('year')}-${get('month')}-${get('day')}T${get('hour')}:${get('minute')}`;
 }
 
@@ -1589,40 +1593,43 @@ private getAmsterdamDateTimeLocalString(): string {
       return '';
     }
   }
-  saveLogConvo() {
-    // 🔹 reset validation messages
+ saveLogConvo() {
+    console.log("started");
+
     this.dateTimeError = '';
     this.notesError = '';
- if ((this.conversationText || '').length > 5000) {
-    this.notesError = this.translate.instant('VALIDATION.TEXT_LIMIT'); // "Max 5000 characters"
-    return;
-  }
-    // 🔹 Notes validation
-    if (!this.conversationText?.trim()) {
-      this.notesError = this.translate.instant('VALIDATION.NOTES_ERROR');
-      return;
-    }
 
-    // 🔹 Date & Time validation
+    if ((this.conversationText || '').length > 5000) {
+        this.notesError = this.translate.instant('VALIDATION.TEXT_LIMIT');
+        console.log("Blocked: text too long");
+        return;
+    }
+    if (!this.conversationText?.trim()) {
+        this.notesError = this.translate.instant('VALIDATION.NOTES_ERROR');
+        console.log("Blocked: empty notes");
+        return;
+    }
     if (!this.dateTimeTouched) {
-      this.dateTimeError = this.translate.instant('VALIDATION.DATE_TIME_REQUIRED');
-      return;
+        this.dateTimeError = this.translate.instant('VALIDATION.DATE_TIME_REQUIRED');
+        console.log("Blocked: date not touched");
+        return;
     }
 
     const selectedDate = new Date(this.conversationDateTime!);
     const now = new Date();
-
     if (selectedDate > now) {
-      this.dateTimeError = 'Communication date cannot be in the future.';
-      return;
+        this.dateTimeError = 'Communication date cannot be in the future.';
+        console.log("Blocked: selected date in future");
+        return;
     }
-
-    // 🔹 Existing guards
-    if (this.isLoading) return;
-
+    if (this.isLoading) {
+        console.log("Blocked: already loading");
+        return;
+    }
     if (!this.conversationsData?.length) {
-      alert('No conversation data available.');
-      return;
+        alert('No conversation data available.');
+        console.log("Blocked: no conversation data");
+        return;
     }
 
     this.isLoading = true;

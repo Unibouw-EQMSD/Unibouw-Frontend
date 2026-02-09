@@ -48,6 +48,7 @@ import { ConfirmDialogComponent } from './confirm-dialog-component/confirm-dialo
 import { TranslateModule, TranslateLoader, TranslateService } from '@ngx-translate/core';
 import { TRANSLATE_HTTP_LOADER_CONFIG, TranslateHttpLoader, TranslateHttpLoaderConfig } from '@ngx-translate/http-loader';
 import { HttpClient } from '@angular/common/http';
+import { SubcontractorDetails } from './component/subcontractor/subcontractor-details/subcontractor-details';
 
 export function MSALInstanceFactory(): PublicClientApplication {
   return (window as any).msalInstance;
@@ -72,6 +73,7 @@ export function HttpLoaderFactory() {
     AddWorkitem,
     AddSubcontractor,
     ViewProjects,
+    SubcontractorDetails,
     // ConfirmDialogComponent,
     // ProjectSummary,
   ],

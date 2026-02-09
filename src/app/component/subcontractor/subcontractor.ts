@@ -6,6 +6,7 @@ import { MatPaginator, PageEvent } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
 import { forkJoin } from 'rxjs/internal/observable/forkJoin';
 import { TranslateService } from '@ngx-translate/core';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-subcontractor',
@@ -40,7 +41,7 @@ export class Subcontractor implements OnInit, AfterViewInit {
   constructor(
     private subcontractorService: SubcontractorService,
     private userService: UserService,
-    private translate: TranslateService,
+    private translate: TranslateService,    private router: Router
   ) {}
 
   ngOnInit() {
@@ -134,7 +135,9 @@ export class Subcontractor implements OnInit, AfterViewInit {
     this.dataSource.filter = this.searchText.trim().toLowerCase();
     if (this.dataSource.paginator) this.dataSource.paginator.firstPage();
   }
-
+ viewSubcontractorDetails(subcontractorID: string) {
+    this.router.navigate(['/subcontractor-details', subcontractorID]);
+  }
   onPageSizeChange(event: PageEvent) {
     this.pageSize = event.pageSize;
     this.paginator.pageSize = this.pageSize;
