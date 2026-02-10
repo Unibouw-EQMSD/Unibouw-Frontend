@@ -68,14 +68,14 @@
               <span class="label">{{ 'PROJECT_DETAILS.PROJECT_MANAGER' | translate }}</span
               ><span class="value">{{ projectDetails.projectManagerName }}</span>
             </div> -->
-            <div class="detail-row">
+            <!-- <div class="detail-row">
               <span class="label">{{ 'PROJECT_DETAILS.PERSON_NAME' | translate }}</span
               ><span class="value">{{ projectDetails.personName }}</span>
             </div>
             <div class="detail-row">
               <span class="label">{{ 'PROJECT_DETAILS.PERSON_ROLE' | translate }}</span
               ><span class="value">{{ projectDetails.personRole }}</span>
-            </div>
+            </div> -->
             <div class="detail-row">
               <span class="label">{{ 'PROJECT_DETAILS.START_DATE' | translate }}</span
               ><span class="value">{{ projectDetails.startDate | date: 'dd-MM-yyyy' }}</span>
@@ -237,8 +237,7 @@
                           <!-- Loop through RFQs -->
                           <tr *ngFor="let rfq of getFilteredRfqs(work)">
                             <!-- CHECK: Does this row have a Subcontractor? -->
-                            <ng-container *ngIf="rfq.viewed; else noResponseTemplate">
-                              <td (click)="markViewed(work, rfq)">
+<ng-container *ngIf="(getFilteredRfqs(work)?.length ?? 0) > 0; else noResponseTemplate">                              <td (click)="markViewed(work, rfq)">
                                 {{ rfq.name }}
                                 <div class="rating">★ {{ rfq.rating }}</div>
                               </td>
@@ -399,7 +398,7 @@
                           </tr>
                         </thead>
                         <tbody>
-                          <tr *ngFor="let w of sub.workItems" (click)="markViewed(sub, w)">
+                          <tr *ngFor="let w of getFilteredSubWorkItems(sub)" (click)="markViewed(sub, w)">
                             <td>{{ w.workItemName }}</td>
                             <td>{{ w.date }}</td>
                             <td>{{ w.rfqNumber }}</td>
@@ -425,7 +424,6 @@
                             <td style="text-align: center">
                               <i
                                 class="fa fa-file-pdf action-icon download-icon"
-                                *ngIf="w.actions?.includes('pdf')"
                                 [class.disabled-icon]="!isPdfEnabled(w)"
                                 (click)="w.documentId && downloadQuote($event, w.documentId)"
                                 [title]="w.responded ? 'Download Quote' : 'No Quote Uploaded'"

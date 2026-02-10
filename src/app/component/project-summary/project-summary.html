@@ -151,7 +151,7 @@
                           [(ngModel)]="wi.maybeLaterDate"
                           [ngModelOptions]="{ standalone: true }"
                           [min]="today"
-                          [max]="dueDate"
+  [max]="rfq?.dueDate ? (rfq.dueDate | date:'yyyy-MM-dd') : null"
                           [disabled]="isRfqExpired"
                         />
                       </div>

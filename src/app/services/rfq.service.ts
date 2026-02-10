@@ -280,14 +280,16 @@ export class RfqService {
     );
   }
 
-  replyToConversation(payload: any): Observable<any> {
-    return from(this.getHeaders()).pipe(
-      switchMap((headers) =>
-        this.http.post<{ data: any }>(`${this.apiURL}/RFQConversationMessage/reply`, payload, {
-          headers,
-        }),
-      ),
-      map((res) => res.data),
-    );
-  }
+replyToConversation(payload: FormData): Observable<any> {
+  return from(this.getHeaders()).pipe(
+    switchMap((headers) => {
+      const h = headers.delete('Content-Type');
+      return this.http.post<any>(
+        `${this.apiURL}/RFQConversationMessage/Reply`,
+        payload,
+        { headers: h }
+      );
+    })
+  );
+}
 }

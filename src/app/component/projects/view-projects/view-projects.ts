@@ -283,19 +283,25 @@ private setupTabCleanupOnExit(tabKey: string): void {
       }
     });
 }
-  ngDoCheck(): void {
-    if (!this.conversationDateTime) return;
+ ngDoCheck(): void {
+  if (!this.conversationDateTime) return;
 
-    const selected = new Date(this.conversationDateTime);
-    const now = new Date();
+  const selected = new Date(this.conversationDateTime);
 
-    if (selected.getTime() > now.getTime()) {
-      this.dateTimeError = 'Future time selection is not allowed';
-      this.conversationDateTime = null;
-    } else {
-      this.dateTimeError = '';
-    }
+  // "Now" in Europe/Amsterdam converted to an absolute Date
+  const amsterdamNow = new Date(
+    new Date().toLocaleString('en-US', { timeZone: 'Europe/Amsterdam' })
+  );
+
+  if (selected.getTime() > amsterdamNow.getTime()) {
+    this.dateTimeError = 'Future time selection is not allowed';
+    this.conversationDateTime = null;
+  } else {
+    this.dateTimeError = '';
   }
+
+  }
+
 ngOnInit(): void {
   const now = new Date();
   const yyyy = now.getFullYear();
@@ -569,6 +575,21 @@ private buildRequestsSentLookup(projectId: string) {
     });
   }
 
+  getFilteredSubWorkItems(sub: any) {
+  const term = (sub.searchText || '').trim().toLowerCase();
+  let list = sub.workItems || [];
+
+  if (term) {
+    list = list.filter((w: any) =>
+      `${w.workItemName || ''} ${w.rfqNumber || ''} ${w.quoteAmount || ''}`
+        .toLowerCase()
+        .includes(term),
+    );
+  }
+
+  return list;
+}
+
   isBellEnabled(rfq: any): boolean {
     const amt = rfq.quoteAmount;
 
@@ -592,7 +613,21 @@ private buildRequestsSentLookup(projectId: string) {
 
     return true;
   }
+hasAnyRfqResponses(): boolean {
+  // Work-item grouping: workItems -> rfqs (via getFilteredRfqs)
+  const hasInWorkItems =
+    (this.workItems || []).some(work =>
+      (this.getFilteredRfqs(work) || []).some(rfq => !!rfq?.responded || !!rfq?.documentId)
+    );
 
+  // Subcontractor grouping: subcontractorGroups -> workItems
+  const hasInSubcontractors =
+    (this.subcontractorGroups || []).some(sub =>
+      (sub.workItems || []).some((w: { responded: any; documentId: any; }) => !!w?.responded || !!w?.documentId)
+    );
+
+  return hasInWorkItems || hasInSubcontractors;
+}
   onDatepickerOpened() {
     document.body.style.overflow = 'hidden';
   }

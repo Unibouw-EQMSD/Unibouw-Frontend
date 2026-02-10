@@ -213,7 +213,7 @@ export class Header implements OnInit {
           reminderTime: config.reminderTime || '08:00',
           reminderEmailBody:
             config.reminderEmailBody ||
-            'This is to inform you that the global reminder has been successfully configured in the system.',
+            ' is to inform you that the global reminder has been successfully configured in the system.',
           isEnable: config.isEnable ?? false,
         });
 
