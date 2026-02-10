@@ -51,7 +51,7 @@
             <h3>{{ 'PROJECT_DETAILS.DETAILS_TITLE' | translate }}</h3>
           </div>
 
-          <div class="details-content">
+          <div class="details-content scroll">
             <div class="detail-row">
               <span class="label">{{ 'PROJECT_DETAILS.PROJECT_CODE' | translate }}</span
               ><span class="value">{{ projectDetails.number }}</span>
@@ -587,7 +587,7 @@
 
                 <ng-container *ngIf="!isSpinLoading">
                   <!-- SEARCH -->
-                  <div class="chat-search" style="padding-top: 6px">
+                  <div class="chat-search">
                     <mat-form-field
                       appearance="outline"
                       class="chat-search-field"
@@ -596,7 +596,7 @@
                       <mat-icon matPrefix>search</mat-icon>
 
                       <input
-                        matInput
+                        matInput class="form-control"
                         placeholder="{{ 'CONVERSATION.SEARCH_CONVERSATION' | translate }}"
                         [(ngModel)]="conversationSearchText"
                         (input)="filterConversations()"
@@ -614,6 +614,7 @@
                   </div>
 
                   <!-- CHAT MESSAGES -->
+                   <section class="msger">
                   <div class="chat-messages" #chatMessages>
                     <div
                       class="noData"
@@ -760,6 +761,7 @@
                       </div>
                     </div>
                   </div>
+                  </section>
                 </ng-container>
 
                 <!-- INPUT AREA -->

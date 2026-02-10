@@ -63,21 +63,21 @@
   </div>
 
   <!-- Navbar -->
-  <nav class="navbar">
-    <ul>
+  <nav class="navbar navbar-dark navbar-expand-lg">
+    <ul class="navbar-nav">
       <!-- <li><i class="fa-solid fa-gauge-simple-high" style="color: white;"></i></li> -->
       <li>
-        <a routerLink="/workitems" [class.active]="isWorkitemActive()">{{
+        <a class="nav-item" routerLink="/workitems" [class.active]="isWorkitemActive()">{{
           'HEADER.WORKITEMS' | translate
         }}</a>
       </li>
       <li>
-        <a routerLink="/subcontractor" [class.active]="isSubcontractorActive()">{{
+        <a class="nav-item" routerLink="/subcontractor" [class.active]="isSubcontractorActive()">{{
           'HEADER.SUBCONTRACTORS' | translate
         }}</a>
       </li>
       <li>
-        <a [routerLink]="'/projectdetails'" [class.active]="isProjectsActive()">{{
+        <a class="nav-item" [routerLink]="'/projectdetails'" [class.active]="isProjectsActive()">{{
           'HEADER.PROJECTS' | translate
         }}</a>
       </li>
