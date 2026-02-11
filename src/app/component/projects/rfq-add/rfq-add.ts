@@ -402,7 +402,7 @@ export class RfqAdd {
     try {
       const { mappings, subs } = await firstValueFrom(
         forkJoin({
-          mappings: this.subcontractorService.getSubcontractorWorkItemMappings(),
+          mappings: this.subcontractorService.getSubcontractorWorkItemMappings(true),
           subs: this.subcontractorService.getSubcontractors(),
         }),
       );
@@ -752,7 +752,9 @@ export class RfqAdd {
 
   onWorkitemToggle(item: Workitem, checked: boolean) {
     const normalizedWorkItemID = this.normalizeId(item.workItemID);
-
+  // if (!checked) {
+  //   this.showAll = false;   
+  // }
     if (checked) {
       this.saveDraft();
 

@@ -85,14 +85,17 @@ export class SubcontractorService {
   );
 }
   /* Get Work Items mapped to Subcontractors */
-  getSubcontractorWorkItemMappings(): Observable<any[]> {
-    return from(this.getHeaders()).pipe(
-      switchMap((headers) =>
-        this.http.get<{ count: number; data: any[] }>(this.subcontractorWorkitemUrl, { headers }),
-      ),
-      map((res) => res.data || []),
-    );
-  }
+ getSubcontractorWorkItemMappings(onlyActive: boolean = false): Observable<any[]> {
+  return from(this.getHeaders()).pipe(
+    switchMap((headers) =>
+      this.http.get<{ count: number; data: any[] }>(
+        `${this.subcontractorWorkitemUrl}?onlyActive=${onlyActive}`,
+        { headers }
+      )
+    ),
+    map((res) => res.data || []),
+  );
+}
 
   /* Create a new subcontractor */
   createSubcontractor(payload: any): Observable<any> {
