@@ -44,6 +44,21 @@
 .workitems-table {
   width: 100%;
   border-collapse: collapse;
+  table-layout: fixed;
+}
+
+.workitems-table th:first-child,
+.workitems-table td:first-child {
+  width: 60px;            /* adjust: 40/50/60 */
+  text-align: center;
+}
+.workitems-table th:nth-child(2),
+.workitems-table td:nth-child(2) {
+  padding-left: 45px; /* adjust as needed */
+}
+.workitems-table th:nth-child(2),
+.workitems-table td:nth-child(2) {
+  width: auto;
 }
 
 .workitems-table th,

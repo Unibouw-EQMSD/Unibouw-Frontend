@@ -731,8 +731,7 @@ hasAnyRfqResponses(): boolean {
             number: item.rfqNumber,
             customer: item.customerName || '—',
             rfqSentDate: item.sentDate ? this.formatDate(item.sentDate) : '-',
-            dueDate: this.formatDate(item.dueDate),
-
+globalDueDate: this.formatDate(item.globalDueDate),
             // ✅ this is the “requestsSent” computed like your summary
             rfqSent: reqMap.get(rfqId) ?? 0,
 

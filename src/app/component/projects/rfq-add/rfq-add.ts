@@ -523,12 +523,8 @@ export class RfqAdd {
     const emailBodyToUse = editedEmailBody || this.customNote || '';
 
     // ✅ RFQ main due date = earliest due date among selected subcontractors
-    const primaryDueDate = new Date(
-      Math.min(...selectedSubs.map((s) => new Date(s.dueDate!).getTime())),
-    )
-      .toISOString()
-      .split('T')[0]; // keep date only
-
+  
+      
     // ✅ Map subcontractors → dueDate
     const subcontractorDueDates = selectedSubs.map((s) => ({
       subcontractorID: s.subcontractorID,
@@ -580,7 +576,7 @@ export class RfqAdd {
     const rfqPayload = {
       rfqID,
       sentDate: sentDateToUse,
-      dueDate: primaryDueDate, // earliest subcontractor due date
+// dueDate: new Date(this.globalDueDate!).toISOString().split('T')[0],
       GlobalDueDate: new Date(this.globalDueDate!).toISOString().split('T')[0], // USE UI PICK
       rfqSent: sendEmail ? 1 : this.originalRfq?.rfqSent || 0,
       quoteReceived: this.originalRfq?.quoteReceived || 0,
@@ -940,25 +936,34 @@ export class RfqAdd {
     ).length;
   }
 
-  toggleSelectAll() {
+toggleSelectAll() {
   if (!this.selectedWorkItems.length) return;
 
-  const workItemID = this.selectedWorkItems[0].workItemID;
-  const wid = this.normalizeId(workItemID);
+  const selectedWorkItemIds = new Set(
+    this.selectedWorkItems.map(w => this.normalizeId(w.workItemID))
+  );
 
   if (this.showAll) {
-    // ✅ checked -> show all subs for this work item (reload full list)
-    this.loadSubcontractors(workItemID);
+    // ✅ checked -> show all subs for all selected work items
+    // Reload for each selected work item so list is correct
+    Promise.all(this.selectedWorkItems.map(w => this.loadSubcontractors(w.workItemID)))
+      .then(() => {
+        this.noSubMessage = this.subcontractors.length
+          ? ''
+          : 'No subcontractors found for selected work items.';
+      });
+
     return;
   }
 
-  // ✅ unchecked -> show ONLY subs mapped to this work item
+  // ✅ unchecked -> remove only "extra" subs; keep those mapped to ANY selected work item
   this.subcontractors = (this.subcontractors || []).filter(sub =>
-    (sub.linkedWorkItemIDs || []).includes(wid)
+    (sub.linkedWorkItemIDs || []).some(id => selectedWorkItemIds.has(this.normalizeId(id)))
   );
 
-  // optional: if none mapped, show message
-  this.noSubMessage = this.subcontractors.length ? '' : 'No subcontractors mapped to this work item.';
+  this.noSubMessage = this.subcontractors.length
+    ? ''
+    : 'No subcontractors mapped to the selected work items.';
 }
   get selectedSubcontractors() {
     return (this.subcontractors || []).filter((s: any) => s.selected);

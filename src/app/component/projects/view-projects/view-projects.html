@@ -499,7 +499,7 @@
                     {{ 'RFQ_TABLE.DUE_DATE' | translate }}
                   </th>
 
-                  <td mat-cell *matCellDef="let row">{{ row.dueDate }}</td>
+                  <td mat-cell *matCellDef="let row">{{ row.globalDueDate }}</td>
                 </ng-container>
 
                 <ng-container matColumnDef="totalSubcontractors">
@@ -702,7 +702,7 @@
                         *ngIf="convo.convoattachments && convo.convoattachments.length > 0"
                       >
                         <div class="attachment-chip" *ngFor="let att of convo.convoattachments">
-                          <a [href]="getWebPath(att.filePath)" target="_blank">
+                          <a target="_blank">
                             {{ att.fileName }}
                           </a>
                         </div>
