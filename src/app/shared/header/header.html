@@ -283,8 +283,15 @@
 
       <!-- Enable Reminder -->
       <div class="checkbox-row">
-        <input type="checkbox" id="enableGlobalReminders" formControlName="isEnable" />
-        <label for="enableGlobalReminders"> {{ 'HEADER.GLOBAL_REMINDER' | translate }} </label>
+        <input
+          type="checkbox"
+          id="enableGlobalReminders"
+          formControlName="isEnable"
+          style="cursor: pointer"
+        />
+        <label for="enableGlobalReminders" style="cursor: pointer">
+          {{ 'HEADER.GLOBAL_REMINDER' | translate }}
+        </label>
       </div>
 
       <!-- Footer -->

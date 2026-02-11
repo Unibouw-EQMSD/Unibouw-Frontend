@@ -84,9 +84,6 @@ export class Header implements OnInit {
     localStorage.setItem('lang', lang);
   }
   isAdmin = false;
-  // reminderTimeValue: string = '08:00';
-  // reminderEmailBody: string = '';
-  // enableGlobalReminders: boolean = false;
   dropdownOpen = false;
   values = Array.from({ length: 60 }, (_, i) => -1 - i); // [-1, -2, -3...]
   selectedReminderSequence: number[] = [];
@@ -210,7 +207,7 @@ export class Header implements OnInit {
         this.reminderForm.patchValue({
           maxReminderSequence: sequenceArray.length || 5,
           reminderSequence: sequenceArray,
-          reminderTime: config.reminderTime || '08:00',
+          reminderTime: config.reminderTime || '',
           reminderEmailBody:
             config.reminderEmailBody ||
             ' is to inform you that the global reminder has been successfully configured in the system.',
@@ -223,7 +220,8 @@ export class Header implements OnInit {
 
         this.showSetReminderPopup = true;
       },
-      error: () => {
+      error: (ex) => {
+        console.error('Error fetching reminder config:', ex);
         this.snackBar.open('Failed to load reminder configuration', 'Close', { duration: 4000 });
       },
     });
@@ -258,16 +256,21 @@ export class Header implements OnInit {
 
     const formValue = this.reminderForm.value;
 
-    if (this.reminderForm.invalid || !formValue.reminderEmailBody?.trim()) {
+    // Validate only when enabled
+    if (formValue.isEnable && (this.reminderForm.invalid || !formValue.reminderEmailBody?.trim())) {
       console.warn('🚫 Reminder form is invalid');
       return;
     }
 
+    const reminderSequence = Array.isArray(formValue.reminderSequence)
+      ? formValue.reminderSequence
+      : [];
+
     const body = {
       id: '00000000-0000-0000-0000-000000000001',
-      reminderSequence: formValue.reminderSequence.join(','),
-      reminderTime: formValue.reminderTime,
-      reminderEmailBody: formValue.reminderEmailBody.trim(),
+      reminderSequence: reminderSequence.join(','),
+      reminderTime: formValue.reminderTime || '',
+      reminderEmailBody: formValue.reminderEmailBody?.trim() || '',
       isEnable: formValue.isEnable,
     };
 
@@ -278,7 +281,8 @@ export class Header implements OnInit {
           duration: 5000,
         });
       },
-      error: () => {
+      error: (ex) => {
+        console.error('Failed to update reminder configuration:', ex);
         this.snackBar.open('Failed to update reminder configuration', 'Close', {
           duration: 5000,
         });
