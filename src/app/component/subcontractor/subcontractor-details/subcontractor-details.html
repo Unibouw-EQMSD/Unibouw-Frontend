@@ -1,59 +1,120 @@
 <app-header></app-header>
-<main  id="main">
-<div class="details-page-container">
+<main id="main">
+  <div class="container">
     <div class="pagetitle">
-      <h1>{{ 'SUBCONTRACTOR.TITLE2' | translate }}</h1>
+      <h1>
+        <h1>{{ 'SUBCONTRACTOR.TITLE2' | translate }}</h1>
+      </h1>
     </div>
-  <div class="details-flex">
-    <!-- Info columns -->
-    <div class="details-columns">
-      <div class="details-col">
-        <div class="details-label">   {{ 'SUBCONTRACTOR.NAME' | translate }}</div>
-        <div class="details-value">{{ subcontractor.name }}</div>
-        <div class="details-label">{{'SUBCONTRACTOR.LOCATION' | translate}}</div>
-        <div class="details-value">{{ subcontractor.location }}</div>
-        <div class="details-label">{{ 'SUBCONTRACTOR_FORM.CONTACT_NAME' | translate }}</div>
-        <div class="details-value">{{ subcontractor.contactName }}</div>
-        <div class="details-label">{{ 'SUBCONTRACTOR_FORM.CONTACT_EMAIL' | translate }}</div>
-        <div class="details-value">{{ subcontractor.contactEmail }}</div>
-        <div class="details-label">{{ 'SUBCONTRACTOR_FORM.OFFICE_ADDRESS' | translate }}</div>
-        <div class="details-value">{{ subcontractor.officeAddress }}</div>
-      </div>
-      <div class="details-col">
-        <div class="details-label">{{ 'SUBCONTRACTOR_FORM.EMAIL' | translate }}</div>
-        <div class="details-value">{{ subcontractor.email }}</div>
-        <div class="details-label">{{ 'SUBCONTRACTOR_FORM.COUNTRY' | translate }}</div>
-        <div class="details-value">{{ subcontractor.country }}</div>
-        <div class="details-label">{{ 'SUBCONTRACTOR_FORM.CONTACT_PHONE' | translate }}</div>
-        <div class="details-value">{{ subcontractor.contactPhone }}</div>
-        <div class="details-label">{{ 'SUBCONTRACTOR_FORM.STATUS' | translate }}</div>
-        <div class="details-value">{{ subcontractor.isActive ? 'Active' : 'Inactive' }}</div>
-        <div class="details-label">{{ 'SUBCONTRACTOR_FORM.BILLING_ADDRESS' | translate }}</div>
-        <div class="details-value">{{ subcontractor.billingAddress }}</div>
-      </div>
-    </div>
-    <!-- Workitems card -->
-    <div class="workitems-card">
-      <div class="workitems-title">{{'WORKITEM.TITLE' | translate}}</div>
-      <div class="workitems-tabs">
-        <button [class.active]="selectedTab==='unibouw'" (click)="selectedTab='unibouw'">
-          {{'WORKITEM.TAB_UNIBOUW' | translate}} <span class="tab-badge">{{ subcontractor.unibouwWorkItems?.length || 0 }}</span>
-        </button>
-        <button [class.active]="selectedTab==='standard'" (click)="selectedTab='standard'">
-           {{'WORKITEM.TAB_STANDARD' | translate}} <span class="tab-badge">{{ subcontractor.standardWorkItems?.length || 0 }}</span>
-        </button>
-      </div>
-      <div class="workitems-list">
-        <div *ngFor="let wi of (selectedTab === 'unibouw' ? subcontractor.unibouwWorkItems : subcontractor.standardWorkItems)">
-          {{ wi }}
+    <div class="card scroll">
+      <div class="card-body">
+        <div class="row">
+          <!-- Info columns -->
+          <div class="col-sm-8 formScroll">
+            <div class="row">
+              <div class="col-sm-6">
+                <div class="details-label">{{ 'SUBCONTRACTOR.NAME' | translate }}</div>
+                <div class="details-value">{{ subcontractor.name }}</div>
+              </div>
+              <div class="col-sm-6">
+                <div class="details-label">{{ 'SUBCONTRACTOR_FORM.EMAIL' | translate }}</div>
+                <div class="details-value">{{ subcontractor.email }}</div>
+              </div>
+              <div class="col-sm-6">
+                <div class="details-label">{{ 'SUBCONTRACTOR.LOCATION' | translate }}</div>
+                <div class="details-value">{{ subcontractor.location }}</div>
+              </div>
+              <div class="col-sm-6">
+                <div class="details-label">{{ 'SUBCONTRACTOR_FORM.COUNTRY' | translate }}</div>
+                <div class="details-value">{{ subcontractor.country }}</div>
+              </div>
+              <div class="col-sm-6">
+                <div class="details-label">{{ 'SUBCONTRACTOR_FORM.CONTACT_NAME' | translate }}</div>
+                <div class="details-value">{{ subcontractor.contactName }}</div>
+              </div>
+              <div class="col-sm-6">
+                <div class="details-label">
+                  {{ 'SUBCONTRACTOR_FORM.CONTACT_PHONE' | translate }}
+                </div>
+                <div class="details-value">{{ subcontractor.contactPhone }}</div>
+              </div>
+              <div class="col-sm-6">
+                <div class="details-label">
+                  {{ 'SUBCONTRACTOR_FORM.CONTACT_EMAIL' | translate }}
+                </div>
+                <div class="details-value">{{ subcontractor.contactEmail }}</div>
+              </div>
+              <div class="col-sm-6">
+                <div class="details-label">{{ 'SUBCONTRACTOR_FORM.STATUS' | translate }}</div>
+                <div class="details-value">
+                  {{ subcontractor.isActive ? 'Active' : 'Inactive' }}
+                </div>
+              </div>
+              <div class="col-sm-6">
+                <div class="details-label">
+                  {{ 'SUBCONTRACTOR_FORM.OFFICE_ADDRESS' | translate }}
+                </div>
+                <div class="details-value">{{ subcontractor.officeAddress }}</div>
+              </div>
+              <div class="col-sm-6">
+                <div class="details-label">
+                  {{ 'SUBCONTRACTOR_FORM.BILLING_ADDRESS' | translate }}
+                </div>
+                <div class="details-value">{{ subcontractor.billingAddress }}</div>
+              </div>
+            </div>
+          </div>
+          <!-- Workitems card -->
+          <div class="col-sm-4">
+            <div class="card">
+              <div class="card-header">
+                <h6 class="mb-0 pb-0 me-3">
+                  <label>{{ 'WORKITEM.TITLE' | translate }}</label>
+                  <span class="text-danger"> *</span>
+                </h6>
+              </div>
+              <div class="card-body">
+                <div class="workitems-tabs">
+                  <button
+                    [class.active]="selectedTab === 'unibouw'"
+                    (click)="selectedTab = 'unibouw'"
+                  >
+                    {{ 'WORKITEM.TAB_UNIBOUW' | translate }}
+                    <sup class="badge rounded-pill bg-primary">{{ subcontractor.unibouwWorkItems?.length || 0 }}</sup>
+                  </button>
+                  <button
+                    [class.active]="selectedTab === 'standard'"
+                    (click)="selectedTab = 'standard'"
+                  >
+                    {{ 'WORKITEM.TAB_STANDARD' | translate }}
+                    <sup class="badge rounded-pill bg-primary">{{
+                      subcontractor.standardWorkItems?.length || 0
+                    }}</sup>
+                  </button>
+                </div>
+            <div class="workitems-list">
+              <div
+                *ngFor="
+                  let wi of selectedTab === 'unibouw'
+                    ? subcontractor.unibouwWorkItems
+                    : subcontractor.standardWorkItems
+                "
+              >
+                {{ wi }}
+              </div>
+            </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
+      <div class="card-footer text-end">
+        <button class="btn btn-primary" (click)="backToListing()">
+          {{ 'SUBCONTRACTOR.BACK_TO_LISTING' | translate }}
+        </button>
+      </div>
     </div>
   </div>
-  <div class="details-footer">
-    <button class="back-btn" (click)="backToListing()">{{'SUBCONTRACTOR.BACK_TO_LISTING'|translate}}</button>
-  </div>
-</div>
 </main>
 
 <app-footer></app-footer>

@@ -549,25 +549,6 @@
   padding: 20px 0;
 }
 
-.btn {
-  padding: 8px 16px;
-  border-radius: 6px;
-  cursor: pointer;
-  border: none;
-  font-weight: 500;
-}
-
-.cancel-btn {
-  background: #4b5563;
-  color: white;
-}
-
-.submit-btn,
-.small-btn {
-  background: #f97316;
-  color: white;
-}
-
 .default-reminder-container {
   display: grid;
   grid-template-columns: repeat(3, 180px);
@@ -773,36 +754,6 @@
   color: #f95c0f;
 }
 
-.btn {
-  padding: 5px 15px;
-  border-radius: 6px;
-  cursor: pointer;
-  border: none;
-  font-weight: 500;
-}
-
-.cancel-btn {
-  color: #dc3545;
-  background-color: transparent;
-  box-shadow: none !important;
-}
-
-.cancel-btn:hover {
-  border: 1px solid #dc3545;
-}
-
-.submit-btn,
-.small-btn {
-  background: #f97316;
-  color: white;
-}
-
-.submit-btn:disabled {
-  opacity: 0.55;
-  cursor: not-allowed;
-  pointer-events: none;
-}
-
 .reset-btn {
   border: 1px solid #003042;
   background-color: #ffffff;
@@ -848,7 +799,10 @@
   padding-top: 8px;
   padding-left: 10px;
 }
-
+.card-body .scroll {
+  max-height: calc(100vh - 242px);
+  overflow-y: auto;
+}
 /* --------------Conversation ------------------ */
 .chat-container {
   display: flex;
@@ -1283,7 +1237,7 @@
 .message .teams-reply-text {
   font-size: 13px;
   color: #444;
-  white-space: nowrap;
+  /* white-space: nowrap; */
   overflow: hidden;
   text-overflow: ellipsis;
 }
@@ -1337,7 +1291,7 @@
 .message-row.reply .teams-reply-text {
   font-size: 13px;
   color: #444;
-  white-space: nowrap;
+  /* white-space: nowrap; */
   overflow: hidden;
   text-overflow: ellipsis;
 }
@@ -1466,7 +1420,4 @@
 .mat-mdc-form-field-icon-prefix, [dir=rtl] .mat-mdc-form-field-icon-suffix {
     padding: 9px 4px 0 0;
     align-items: center;
-}
-.mat-mdc-form-field-subscript-wrapper.mat-mdc-form-field-bottom-align {
-    display: none;
 }

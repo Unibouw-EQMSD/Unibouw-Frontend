@@ -46,46 +46,47 @@
 
       <div class="project-details-container">
         <!-- LEFT: Project Details -->
-        <div class="details-card" *ngIf="projectDetails">
-          <div class="details-header">
-            <h3>{{ 'PROJECT_DETAILS.DETAILS_TITLE' | translate }}</h3>
+        <div class="card" *ngIf="projectDetails">
+          <div class="card-header">
+            {{ 'PROJECT_DETAILS.DETAILS_TITLE' | translate }}
           </div>
 
-          <div class="details-content scroll">
+          <div class="card-body">
+          <div class="scroll">
             <div class="detail-row">
-              <span class="label">{{ 'PROJECT_DETAILS.PROJECT_CODE' | translate }}</span
+              <label class="col-form-label">{{ 'PROJECT_DETAILS.PROJECT_CODE' | translate }}</label
               ><span class="value">{{ projectDetails.number }}</span>
             </div>
             <div class="detail-row">
-              <span class="label">{{ 'PROJECT_DETAILS.PROJECT' | translate }}</span
+              <label class="col-form-label">{{ 'PROJECT_DETAILS.PROJECT' | translate }}</label
               ><span class="value">{{ projectDetails.name }}</span>
             </div>
             <div class="detail-row">
-              <span class="label">{{ 'PROJECT_DETAILS.CUSTOMER' | translate }}</span
+              <label class="col-form-label">{{ 'PROJECT_DETAILS.CUSTOMER' | translate }}</label
               ><span class="value">{{ projectDetails.customerName }}</span>
             </div>
             <!-- <div class="detail-row">
-              <span class="label">{{ 'PROJECT_DETAILS.PROJECT_MANAGER' | translate }}</span
+              <label class="col-form-label">{{ 'PROJECT_DETAILS.PROJECT_MANAGER' | translate }}</span
               ><span class="value">{{ projectDetails.projectManagerName }}</span>
             </div> -->
             <!-- <div class="detail-row">
-              <span class="label">{{ 'PROJECT_DETAILS.PERSON_NAME' | translate }}</span
+              <label class="col-form-label">{{ 'PROJECT_DETAILS.PERSON_NAME' | translate }}</span
               ><span class="value">{{ projectDetails.personName }}</span>
             </div>
             <div class="detail-row">
-              <span class="label">{{ 'PROJECT_DETAILS.PERSON_ROLE' | translate }}</span
+              <label class="col-form-label">{{ 'PROJECT_DETAILS.PERSON_ROLE' | translate }}</span
               ><span class="value">{{ projectDetails.personRole }}</span>
             </div> -->
             <div class="detail-row">
-              <span class="label">{{ 'PROJECT_DETAILS.START_DATE' | translate }}</span
-              ><span class="value">{{ projectDetails.startDate | date: 'dd-MM-yyyy' }}</span>
+              <label class="col-form-label">{{ 'PROJECT_DETAILS.START_DATE' | translate }}</label>
+              <span class="value">{{ projectDetails.startDate | date: 'dd-MM-yyyy' }}</span>
             </div>
             <div class="detail-row">
-              <span class="label">{{ 'PROJECT_DETAILS.COMMITTED_DATE' | translate }}</span
-              ><span class="value">{{ projectDetails.completionDate | date: 'dd-MM-yyyy' }}</span>
+              <label class="col-form-label">{{ 'PROJECT_DETAILS.COMMITTED_DATE' | translate }}</label>
+              <span class="value">{{ projectDetails.completionDate | date: 'dd-MM-yyyy' }}</span>
             </div>
             <div class="detail-row">
-              <span class="label">{{ 'PROJECT_DETAILS.STATUS' | translate }}</span>
+              <label class="col-form-label">{{ 'PROJECT_DETAILS.STATUS' | translate }}</label>
               <span
                 class="value status"
                 [ngClass]="{
@@ -98,16 +99,17 @@
               </span>
             </div>
             <div class="detail-row">
-              <span class="label">{{ 'PROJECT_DETAILS.SPECIFICATION' | translate }}</span>
+              <label class="col-form-label">{{ 'PROJECT_DETAILS.SPECIFICATION' | translate }}</label>
               <span class="value">
                 <a [href]="projectDetails.sharepointURL" target="_blank">Project Files</a>
               </span>
             </div>
           </div>
+          </div>
         </div>
 
         <!-- RIGHT: TAB CONTENT -->
-        <div class="rfq-card" *ngIf="!isLoading">
+        <div class="card rfq-card" *ngIf="!isLoading">
           <!-- 🔹 Tabs -->
           <div class="tabs">
             <button [class.active]="selectedTab === 'response'" (click)="setActiveTab('response')">
@@ -128,7 +130,7 @@
               {{ 'CONVERSATION.TITLE' | translate }}
             </button>
           </div>
-
+<div class="card-body">
           <!-- TAB 1: RFQ RESPONSE (Accordion Section) -->
           <div *ngIf="selectedTab === 'response'">
             <!-- GROUP OPTIONS -->
@@ -776,7 +778,7 @@
                   <div class="input-row">
                     <input
                       type="text"
-                      class="subject-input"
+                      class="form-control"
                       placeholder="Enter Subject"
                       [(ngModel)]="subject"
                       (ngModelChange)="onInputChange()"
@@ -784,7 +786,7 @@
 
                     <input
                       type="text"
-                      class="message-input"
+                      class="form-control"
                       placeholder="Enter your message..."
                       [(ngModel)]="messageText"
                       (ngModelChange)="onInputChange()"
@@ -815,6 +817,7 @@
                 <span class="error-span" *ngIf="showInvalid"> Fields cannot be empty. </span>
               </div>
             </div>
+          </div>
           </div>
         </div>
       </div>
@@ -1034,13 +1037,13 @@
 
     <!-- Footer -->
     <div class="modal-footer">
-      <button class="btn cancel-btn" (click)="closeLogConvo()">
+      <button class="btn btn-cancel" (click)="closeLogConvo()">
         {{ 'COMMON.CANCEL' | translate }}
       </button>
-      <button class="btn reset-btn" (click)="resetLogConvo()">
+      <button class="btn btn-secondary" (click)="resetLogConvo()">
         {{ 'COMMON.RESET' | translate }}
       </button>
-      <button class="btn submit-btn" [disabled]="dateTimeError" (click)="saveLogConvo()">
+      <button class="btn btn-primary" [disabled]="dateTimeError" (click)="saveLogConvo()">
         {{ 'COMMON.SAVE' | translate }}
       </button>
     </div>

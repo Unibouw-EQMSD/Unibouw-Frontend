@@ -1,6 +1,6 @@
-@tailwind base;
+/* @tailwind base;
 @tailwind components;
-@tailwind utilities;
+@tailwind utilities; */
 
 @import url('https://fonts.googleapis.com/css2?family=Mulish:wght@300;400;500;600;700&family=Rubik:wght@300;400;500;600;700&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Work+Sans:wght@300;400;500;700&display=swap');
@@ -15,9 +15,32 @@ body {
 
 html,
 body {
-  height: 100% !important;
   margin: 0;
   padding: 0;
+}
+
+/* Basic CSS styles */
+.card {
+  border: none;
+  border-radius: 5px;
+  box-shadow: 0px 2px 6px rgb(1 41 112 / 12%);
+}
+
+.card-body {
+  padding: 10px 10px;
+}
+.card-header {
+  margin-bottom: 0;
+  border-bottom: solid 1px rgb(217, 222, 227);
+}
+.card-footer {
+  margin-bottom: 0;
+  border-top: solid 1px rgb(217, 222, 227);
+}
+.card-header,
+.card-footer {
+  padding: 0.5rem 1rem;
+  background-color: rgba(33, 37, 41, 0.03);
 }
 
 app-root,
@@ -328,7 +351,7 @@ table.mat-row {
 }
 
 .table-scroll {
-  max-height: calc(100vh - 390px);
+  max-height: calc(100vh - 346px);
   /* adjust height */
   /* max-height: 400px;   adjust height */
   overflow-y: auto;
@@ -361,7 +384,7 @@ table.mat-table {
 }
 
 .full-width-table {
-  min-width: 600px;
+  /* min-width: 600px; */
   /* optional: horizontal scroll for wide tables */
 }
 
@@ -751,7 +774,12 @@ button.mat-raised-button {
   max-height: calc(100vh - 200px);
   overflow-y: auto;
 }
-
+.col-form-label {
+    padding: 0 !important;
+    color: #695bbb;
+    margin-right: .5rem;
+    white-space: nowrap;
+}
 .mat-mdc-header-row {
   padding: 0.5rem 0.5rem !important;
   height: 40px !important;
@@ -767,8 +795,12 @@ button.mat-raised-button {
   border-bottom: solid 1px #e8eef3 !important;
 }
 
-tbody tr:nth-of-type(odd) {
-  background-color: #fff !important;
+tbody tr:nth-of-type(odd), .table-striped>tbody>tr:nth-of-type(odd)>* {    
+    background-color: #fcfcfc;
+}
+
+tbody tr:nth-of-type(even), .table-striped>tbody>tr:nth-of-type(even)>* {    
+    background-color: #fff;
 }
 
 .mat-mdc-paginator-container {
@@ -815,4 +847,204 @@ tbody tr:nth-of-type(odd) {
   cursor: pointer;
 }
 
-.mdc-switch {width: 2em;}
+.mdc-switch {
+  width: 2em;
+}
+
+/* Container for the table */
+.table-container {
+  margin: 0 auto;
+  overflow: hidden;
+}
+
+/* Table wrapper to control scrolling */
+.table-Fixedheader-wrapper {
+  overflow-y: auto;
+  overflow-x: auto;
+}
+
+/* Table styles */
+.table-Fixedheader {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+/* Fixed header */
+.table-Fixedheader thead {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background-color: #fff;
+}
+
+/* thead th {
+            padding: 15px;
+            text-align: left;
+            color: white;
+            font-weight: 600;
+            border-bottom: 2px solid #45a049;
+        } */
+
+/* Table body */
+/* tbody tr {
+            border-bottom: 1px solid #e0e0e0;
+            transition: background-color 0.2s;
+        }
+
+        tbody tr:hover {
+            background-color: #f5f5f5;
+        }
+
+        tbody td {
+            padding: 12px 15px;
+            color: #333;
+        } */
+
+.table-Fixedheader tbody tr:last-child {
+  border-bottom: none;
+}
+
+/* Alternating row colors */
+.table-Fixedheader tbody tr:nth-child(even) {
+  background-color: #fafafa;
+}
+
+/* Custom scrollbar styling (optional) */
+.table-wrapper::-webkit-scrollbar {
+  width: 8px;
+}
+
+.table-wrapper::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+.table-wrapper::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 4px;
+}
+
+.table-wrapper::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+th.dueDate {width: 125px;}
+th.select {width: 25px;}
+
+/* Buttons CSS */
+.d-grid .btn+.btn {
+    margin-left: 0;
+} 
+.btn+.btn {
+    margin-left: 0.8rem;
+}
+
+.btn,
+.btn-flat,
+.btn-large,
+.btn-small {
+    line-height: 23.7px;
+    padding: .2rem 1rem;
+    border: none;
+    border-radius: 4px;
+    box-shadow: 0px 2px 20px rgb(1 41 112 / 10%);
+    /*box-shadow: 0 2px 2px 0 rgb(0 0 0 / 14%), 0 3px 1px -2px rgb(0 0 0 / 12%), 0 1px 5px 0 rgb(0 0 0 / 20%);*/
+}
+
+.btn:hover {
+    background-color: #003042;
+    border-color: #003042;
+    color: #ffffff;
+    /* transform: translateY(-2px); */
+    box-shadow: 0 4px 12px rgba(240, 126, 42, 0.3);
+}
+
+.btn,
+.btn-large,
+.btn-small {
+    cursor: pointer;
+    -webkit-transition: background-color .2s ease-out;
+    transition: background-color .2s ease-out;
+    text-align: center;
+    text-decoration: none;
+    letter-spacing: .5px;
+    color: #fff !important;
+    /*background-color: #003042;*/
+    ;
+}
+.btn-primary {
+    border: 1px solid #F07E2A;
+    background-color: #F07E2A;
+    color: #ffffff;
+    border-color: #F07E2A;
+}
+
+.btn-primary:hover {
+    background-color: #003042;
+    border-color: #003042;
+    box-shadow: 0 4px 12px rgba(0, 48, 66, 0.3);
+}
+
+.btn-secondary {
+    border: 1px solid #003042;
+    background-color: #ffffff;
+    color: #003042 !important;
+}
+
+.btn-secondary:hover,
+.btn-default:hover {
+    color: #ffffff !important;
+    background-color: #003042;
+    border-color: #003042;
+    box-shadow: 0 4px 12px rgba(0, 48, 66, 0.3);
+}
+
+.btn-blue {
+    background-color: #003042;
+    border-color: #003042;
+    box-shadow: 0 4px 12px rgba(0, 48, 66, 0.3);
+}
+
+.btn-blue:hover {
+    border: 1px solid #F07E2A;
+    background-color: #F07E2A;
+    color: #ffffff;
+    border-color: #F07E2A;
+}
+.btn-white {
+    color: #003042 !important;
+    background-color: #f4f8fb;
+    border: 0px solid #FFF;
+}
+
+.btn-white:hover {
+    background-color: rgba(255, 255, 255, .9) !important;
+}.btn.btn-add {
+    border-radius: 50% !important;
+    font-size: 8px !important;
+    padding: 2px !important;
+    line-height: 1;
+}.btn-add .material-symbols-outlined {
+    font-size: 22px;
+}
+.btn-cancel {
+    border: 1px solid transparent;
+    color: #dc3545 !important;
+    background-color: transparent;
+    box-shadow: none !important;
+}
+
+.btn-cancel:hover {
+    color: #dc3545 !important;
+    border: 1px solid transparent;
+    background-color: transparent;
+    box-shadow: none !important;
+}
+
+
+.mat-mdc-form-field-subscript-wrapper.mat-mdc-form-field-bottom-align {
+    display: none !important;
+}
+
+.bg-primary {
+    background-color: #F07E2A !important;
+}
