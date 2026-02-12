@@ -945,6 +945,9 @@
   align-items: center;
 }
 
+.btn{
+   color: #003042 !important;
+}
 .file-chip .remove {
   margin-left: 6px;
   cursor: pointer;
@@ -1371,6 +1374,7 @@
   padding: 6px 14px;
   border-radius: 6px;
   cursor: pointer;
+  color:#dc3545 !important;
 }
 
 .send-btn {

@@ -342,7 +342,7 @@ header {
 }
 
 .cancel-btn {
-  color: #dc3545;
+  color: #dc3545 !important;
   background-color: transparent;
   box-shadow: none !important;
 }
