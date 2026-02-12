@@ -3,7 +3,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { MsalService } from '@azure/msal-angular';
 import { AppConfigService } from './app.config.service';
-import { BehaviorSubject, switchMap, from, Observable } from 'rxjs';
+import { BehaviorSubject, switchMap, from, Observable, firstValueFrom } from 'rxjs';
 
 @Injectable({
   providedIn: 'root',
@@ -54,7 +54,12 @@ export class UserService {
     }
     return null;
   }
-
+async fetchMe(): Promise<any> {
+  const headers = await this.getHeaders();
+  return await firstValueFrom(
+    this.http.get<any>(`${this.apiURL}/Me/GetMe`, { headers })
+  );
+}
   getUserName(): string {
     const user = this.getUser();
     return user?.name || 'User';

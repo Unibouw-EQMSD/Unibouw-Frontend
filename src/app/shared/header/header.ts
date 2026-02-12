@@ -12,6 +12,8 @@ import {
   ValidationErrors,
 } from '@angular/forms';
 import { TranslateService } from '@ngx-translate/core';
+import { map } from 'rxjs/operators';
+import { Observable } from 'rxjs';
 
 export function midnightNotAllowedValidator(control: AbstractControl): ValidationErrors | null {
   if (control.value === '00:00') {
@@ -31,72 +33,56 @@ export class Header implements OnInit {
   reminderForm: FormGroup;
   currentLang: 'en' | 'nl' = 'en';
 
+  isAdmin = false;
+  dropdownOpen = false;
+  values = Array.from({ length: 60 }, (_, i) => -1 - i);
+  selectedReminderSequence: number[] = [];
+  InitialLoadedReminderConfig: any = null;
+  userDropdownOpen = false;
+
+  showSetReminderPopup = false;
+
+  numberList: number[] = Array.from({ length: 31 }, (_, i) => i);
+  open = false;
+
+  userName$!: Observable<string>;
+
   constructor(
     public router: Router,
     private userService: UserService,
     private snackBar: MatSnackBar,
     private reminderService: ReminderService,
     private fb: FormBuilder,
-    private translate: TranslateService, // ← Add this
+    private translate: TranslateService,
   ) {
     this.msalInstance = (window as any).msalInstance;
 
     this.reminderForm = this.fb.group({
-      maxReminderSequence: [1, [Validators.required, Validators.min(1)]], // must be > 0
+      maxReminderSequence: [1, [Validators.required, Validators.min(1)]],
       reminderSequence: [[], Validators.required],
       reminderTime: ['', [Validators.required, midnightNotAllowedValidator]],
       reminderEmailBody: ['', [Validators.required, this.noWhitespaceValidator]],
       isEnable: [true],
     });
+
     this.translate.setDefaultLang('en');
     this.translate.use('en');
+
+    this.userName$ = this.userService.user$.pipe(
+      map((u) => u?.name || u?.email || 'User'),
+    );
+
   }
-
-  @HostListener('document:click', ['$event'])
-  handleClickOutside(event: Event) {
-    const target = event.target as HTMLElement;
-
-    // Close Max Reminder Sequence dropdown
-    if (!target.closest('.custom-dropdown')) {
-      this.open = false;
-    }
-
-    // Close Reminder Sequence multi-select dropdown
-    if (!target.closest('.dropdown')) {
-      this.dropdownOpen = false;
-    }
-
-    // ✅ Close User Dropdown
-    if (!target.closest('.user-dropdown')) {
-      this.userDropdownOpen = false;
-    }
-  }
-  toggleLanguage(event: Event) {
-    const checked = (event.target as HTMLInputElement).checked;
-    const lang: 'en' | 'nl' = checked ? 'nl' : 'en';
-
-    this.switchLang(lang);
-  }
-
-  switchLang(lang: 'en' | 'nl') {
-    this.currentLang = lang;
-    this.translate.use(lang);
-    localStorage.setItem('lang', lang);
-  }
-  isAdmin = false;
-  dropdownOpen = false;
-  values = Array.from({ length: 60 }, (_, i) => -1 - i); // [-1, -2, -3...]
-  selectedReminderSequence: number[] = [];
-  // Add a property to your component
-  InitialLoadedReminderConfig: any = null;
-  userDropdownOpen = false;
 
   ngOnInit() {
-    const savedLang = localStorage.getItem('lang') as 'en' | 'nl' | null;
+    this.userService.getUser();
 
+this.userName$.subscribe(v => console.log('header userName$:', v));
+    const savedLang = localStorage.getItem('lang') as 'en' | 'nl' | null;
     this.currentLang = savedLang ?? 'en';
     this.translate.use(this.currentLang);
-    this.isAdmin = this.userService.isAdmin(); // Check role
+
+    this.isAdmin = this.userService.isAdmin();
 
     this.reminderForm.get('isEnable')?.valueChanges.subscribe((enabled) => {
       const action = enabled ? 'enable' : 'disable';
@@ -105,6 +91,35 @@ export class Header implements OnInit {
         (control) => this.reminderForm.get(control)?.[action]({ emitEvent: false }),
       );
     });
+  }
+
+  @HostListener('document:click', ['$event'])
+  handleClickOutside(event: Event) {
+    const target = event.target as HTMLElement;
+
+    if (!target.closest('.custom-dropdown')) {
+      this.open = false;
+    }
+
+    if (!target.closest('.dropdown')) {
+      this.dropdownOpen = false;
+    }
+
+    if (!target.closest('.user-dropdown')) {
+      this.userDropdownOpen = false;
+    }
+  }
+
+  toggleLanguage(event: Event) {
+    const checked = (event.target as HTMLInputElement).checked;
+    const lang: 'en' | 'nl' = checked ? 'nl' : 'en';
+    this.switchLang(lang);
+  }
+
+  switchLang(lang: 'en' | 'nl') {
+    this.currentLang = lang;
+    this.translate.use(lang);
+    localStorage.setItem('lang', lang);
   }
 
   noWhitespaceValidator(control: AbstractControl): ValidationErrors | null {
@@ -116,8 +131,6 @@ export class Header implements OnInit {
     event.stopPropagation();
     this.userDropdownOpen = !this.userDropdownOpen;
   }
-
-  // ------------------ Active Route Checks ------------------
 
   isProjectsActive(): boolean {
     return (
@@ -139,8 +152,6 @@ export class Header implements OnInit {
     );
   }
 
-  // ------------------ User Info ------------------
-
   getUserName(): string {
     return this.userService.getUserName();
   }
@@ -149,12 +160,12 @@ export class Header implements OnInit {
     return this.userService.getUserEmail();
   }
 
-  // ------------------ Logout ------------------
-
   async signOut() {
     try {
       localStorage.removeItem('access_token');
       localStorage.removeItem('user_data');
+      this.userService.clearUser();
+
       this.msalInstance.setActiveAccount(null);
 
       const accounts: AccountInfo[] = this.msalInstance.getAllAccounts();
@@ -174,16 +185,11 @@ export class Header implements OnInit {
     }
   }
 
-  // ------------------ Reminder Popup ------------------
-
-  showSetReminderPopup = false;
-
   openReminderConfig() {
     this.reminderService.getGlobalReminderConfig().subscribe({
       next: (res) => {
         const config = Array.isArray(res) && res.length > 0 ? res[0] : null;
         if (!config) {
-          // this.snackBar.open('No reminder configuration found', 'Close', { duration: 3000 });
           this.reminderForm.patchValue({
             maxReminderSequence: 5,
             reminderSequence: [],
@@ -203,7 +209,6 @@ export class Header implements OnInit {
           ? config.reminderSequence.split(',').map(Number)
           : [];
 
-        // ✅ PATCH FORM VALUES
         this.reminderForm.patchValue({
           maxReminderSequence: sequenceArray.length || 5,
           reminderSequence: sequenceArray,
@@ -214,10 +219,7 @@ export class Header implements OnInit {
           isEnable: config.isEnable ?? false,
         });
 
-        // UI helpers
         this.selectedReminderSequence = sequenceArray;
-        // this.maxSequenceLimit = sequenceArray.length || 5;
-
         this.showSetReminderPopup = true;
       },
       error: (ex) => {
@@ -250,13 +252,11 @@ export class Header implements OnInit {
     this.selectedReminderSequence = sequenceArray;
   }
 
-  // ------------------ Global Reminder Fields ------------------
   setReminderConfig() {
     this.reminderForm.markAllAsTouched();
 
     const formValue = this.reminderForm.value;
 
-    // Validate only when enabled
     if (formValue.isEnable && (this.reminderForm.invalid || !formValue.reminderEmailBody?.trim())) {
       console.warn('🚫 Reminder form is invalid');
       return;
@@ -276,43 +276,26 @@ export class Header implements OnInit {
 
     this.reminderService.saveGlobalReminderConfig(body).subscribe({
       next: () => {
+        this.reminderService.generateAutoSchedulesFromGlobalConfig().subscribe({
+      next: (res) => {
+        console.log('✅ Auto schedules generated:', res);
+        this.snackBar.open('Auto reminders scheduled successfully.', 'Close', { duration: 4000 });
+      },
+      error: (err) => {
+        console.error('❌ Auto schedule generation failed:', err);
+      },
+    });
         this.closeReminderConfig();
-        this.snackBar.open('Reminder configuration updated successfully', 'Close', {
-          duration: 5000,
-        });
+        this.snackBar.open('Reminder configuration updated successfully', 'Close', { duration: 5000 });
       },
       error: (ex) => {
         console.error('Failed to update reminder configuration:', ex);
-        this.snackBar.open('Failed to update reminder configuration', 'Close', {
-          duration: 5000,
-        });
+        this.snackBar.open('Failed to update reminder configuration', 'Close', { duration: 5000 });
       },
     });
   }
 
-  // ------------------ Sequence Dropdown (Max 5 values) ------------------
-
-  numberList: number[] = Array.from({ length: 31 }, (_, i) => i);
-
-  //maxSequenceLimit: number = 5;
-
-  open = false;
-
-  // selectLimit(limit: number) {
-  //   this.maxSequenceLimit = limit;
-
-  //   // 🔥 Reset selected values if they exceed the new limit
-  //   if (this.selectedReminderSequence.length > limit) {
-  //     this.selectedReminderSequence = [];
-  //   }
-
-  //   // Close this dropdown
-  //   this.open = false;
-  // }
-
   selectLimit(limit: number) {
-    // this.maxSequenceLimit = limit;
-
     this.reminderForm.get('maxReminderSequence')?.setValue(limit);
     this.reminderForm.get('maxReminderSequence')?.markAsTouched();
 
@@ -324,24 +307,21 @@ export class Header implements OnInit {
     this.open = false;
   }
 
-  // Toggle Max Reminder Sequence dropdown
   toggleMaxSequenceDropdown() {
     this.open = !this.open;
     if (this.open) {
-      this.dropdownOpen = false; // close other dropdown
+      this.dropdownOpen = false;
     }
   }
 
-  // Toggle Reminder Sequence dropdown
   toggleReminderDropdown() {
     this.dropdownOpen = !this.dropdownOpen;
     if (this.dropdownOpen) {
-      this.open = false; // close other dropdown
+      this.open = false;
     }
   }
 
   toggleDropdown() {
-    // Close other dropdown when opening this one
     this.open = false;
     this.dropdownOpen = !this.dropdownOpen;
   }
@@ -350,41 +330,19 @@ export class Header implements OnInit {
     return this.selectedReminderSequence.includes(value);
   }
 
-  // onCheck(value: number, checked: boolean) {
-  //   const max = this.reminderForm.get('maxReminderSequence')?.value || 1;
-  //   if (checked) {
-  //     if (this.selectedReminderSequence.length < max) {
-  //       this.selectedReminderSequence.push(value);
-  //     }
-  //   } else {
-  //     this.selectedReminderSequence = this.selectedReminderSequence.filter((v) => v !== value);
-  //   }
-
-  //   //SYNC WITH FORM
-  //   this.reminderForm.get('reminderSequence')?.setValue(this.selectedReminderSequence);
-  //   this.reminderForm.get('reminderSequence')?.markAsTouched();
-  // }
-
   onCheck(value: number, checked: boolean) {
     const max = this.reminderForm.get('maxReminderSequence')?.value || 1;
 
     if (checked) {
-      if (
-        this.selectedReminderSequence.length < max &&
-        !this.selectedReminderSequence.includes(value)
-      ) {
+      if (this.selectedReminderSequence.length < max && !this.selectedReminderSequence.includes(value)) {
         this.selectedReminderSequence.push(value);
       }
     } else {
       this.selectedReminderSequence = this.selectedReminderSequence.filter((v) => v !== value);
     }
 
-    // 🔽 Sort in descending order
     this.selectedReminderSequence.sort((a, b) => b - a);
-
-    // Sync with form
     this.reminderForm.get('reminderSequence')?.setValue(this.selectedReminderSequence);
-
     this.reminderForm.get('reminderSequence')?.markAsTouched();
   }
 
@@ -395,7 +353,6 @@ export class Header implements OnInit {
 
   onRowClick(value: number) {
     if (this.isDisabled(value)) return;
-
     this.isChecked(value) ? this.onCheck(value, false) : this.onCheck(value, true);
   }
 

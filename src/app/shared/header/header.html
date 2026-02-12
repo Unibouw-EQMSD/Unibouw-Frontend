@@ -47,7 +47,7 @@
         </button>
 
         <div class="dropdown-menu1" *ngIf="userDropdownOpen" (click)="$event.stopPropagation()">
-          <div class="dropdown-header">{{ getUserName() }}</div>
+          <div class="dropdown-header">{{ userName$ | async }}</div>
 
           <!-- FIX: remove href -->
           <a class="dropdown-item" (click)="$event.preventDefault()">

@@ -424,12 +424,12 @@
                               </ng-container>
                             </td>
                             <td style="text-align: center">
-                              <i
-                                class="fa fa-file-pdf action-icon download-icon"
-                                [class.disabled-icon]="!isPdfEnabled(w)"
-                                (click)="w.documentId && downloadQuote($event, w.documentId)"
-                                [title]="w.responded ? 'Download Quote' : 'No Quote Uploaded'"
-                              ></i>
+                           <i
+  class="fa fa-file-pdf action-icon download-icon"
+  [class.disabled-icon]="!isPdfEnabled(w)"
+  (click)="isPdfEnabled(w) && w.documentId && downloadQuote($event, w.documentId)"
+  [title]="w.responded ? 'Download Quote' : 'No Quote Uploaded'"
+></i>
                               <i
                                 class="fa fa-bell"
                                 [class.disabled-icon]="!isBellEnabled(w)"

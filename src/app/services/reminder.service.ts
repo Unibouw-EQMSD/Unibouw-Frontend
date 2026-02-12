@@ -53,4 +53,16 @@ export class ReminderService {
       ),
     );
   }
+
+  generateAutoSchedulesFromGlobalConfig(): Observable<any> {
+  return from(this.getHeaders()).pipe(
+    switchMap((headers) =>
+      this.http.post<any>(
+        `${this.apiURL}/RfqReminder/GenerateAutoSchedulesFromGlobalConfig`,
+        {},
+        { headers },
+      ),
+    ),
+  );
+}
 }
