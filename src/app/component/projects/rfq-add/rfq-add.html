@@ -409,80 +409,76 @@
   </div>
 
   <!-- Preview Modal -->
-  <div class="modal-overlay" *ngIf="showPreview" (click)="closePreview()"></div>
+  <div class="custom-modal-backdrop" *ngIf="showPreview" (click)="closePreview()"></div>
 
-  <div
-    class="modal preview-modal"
-    *ngIf="showPreview"
-    role="dialog"
-    aria-modal="true"
-    (click)="$event.stopPropagation()"
-  >
-    <!-- ================= HEADER ================= -->
-    <div class="modal-header">
-      <h2 id="previewTitle">{{ 'RFQ_PREVIEW.TITLE' | translate }}</h2>
-      <p class="subtitle">{{ 'RFQ_PREVIEW.SUBTITLE' | translate }}</p>
-    </div>
+  <div class="custom-modal modal-dialog-scrollable" *ngIf="showPreview" role="dialog" aria-modal="true" (click)="$event.stopPropagation()">
+    <div class="modal-content-box modal-content">
+      <!-- ================= HEADER ================= -->
+      <div class="modal-header">
+        <h4 class="modal-title" id="previewTitle">{{ 'RFQ_PREVIEW.TITLE' | translate }}</h4>
+        <small class="text-muted ms-3">{{ 'RFQ_PREVIEW.SUBTITLE' | translate }}</small>
+      </div>
 
-    <!-- ================= BODY ================= -->
-    <!-- Skeleton Body While Loading -->
-    <div *ngIf="isLoader" class="skeleton-wrapper">
-      <div class="skeleton skeleton-box mx-9 my-5" style="width: 90%; height: 110px"></div>
-      <div class="skeleton skeleton-box mx-9 my-5" style="width: 90%; height: 40px"></div>
-      <div class="skeleton skeleton-box mx-9 my-5" style="width: 90%; height: 40px"></div>
-    </div>
+      <!-- ================= BODY ================= -->
+      <!-- Skeleton Body While Loading -->
+      <div *ngIf="isLoader" class="skeleton-wrapper">
+        <div class="skeleton skeleton-box mx-9 my-5" style="width: 90%; height: 110px"></div>
+        <div class="skeleton skeleton-box mx-9 my-5" style="width: 90%; height: 40px"></div>
+        <div class="skeleton skeleton-box mx-9 my-5" style="width: 90%; height: 40px"></div>
+      </div>
 
-    <div class="modal-body" *ngIf="!isLoader">
-      <p>Dear [Subcontractor],</p>
-      <textarea class="email-body-editor" [(ngModel)]="editedEmailBody"></textarea>
+      <div class="modal-body" *ngIf="!isLoader">
+        <p>Dear [Subcontractor],</p>
+        <textarea class="email-body-editor" [(ngModel)]="editedEmailBody"></textarea>
 
-      <div class="details-box">
-        <div class="detail-item">
-          <div class="detail-label">{{ 'RFQ_PREVIEW.RFQ_ID' | translate }}</div>
-          <div class="detail-value" style="font-style: italic">{{ previewData?.rfqId }}</div>
-        </div>
-        <div class="detail-item">
-          <div class="detail-label">{{ 'RFQ_PREVIEW.PROJECT' | translate }}</div>
-          <div class="detail-value">{{ previewData?.projectName }}</div>
-        </div>
-        <div class="detail-item">
-          <div class="detail-label">{{ 'RFQ_PREVIEW.WORK_ITEMS' | translate }}</div>
-          <div class="detail-value">
-            <ul class="workitem-list">
-              <li *ngFor="let wi of previewData?.workItems">
-                {{ wi }}
-              </li>
-            </ul>
+        <div class="details-box">
+          <div class="detail-item">
+            <div class="detail-label">{{ 'RFQ_PREVIEW.RFQ_ID' | translate }}</div>
+            <div class="detail-value" style="font-style: italic">{{ previewData?.rfqId }}</div>
+          </div>
+          <div class="detail-item">
+            <div class="detail-label">{{ 'RFQ_PREVIEW.PROJECT' | translate }}</div>
+            <div class="detail-value">{{ previewData?.projectName }}</div>
+          </div>
+          <div class="detail-item">
+            <div class="detail-label">{{ 'RFQ_PREVIEW.WORK_ITEMS' | translate }}</div>
+            <div class="detail-value">
+              <ul class="workitem-list">
+                <li *ngFor="let wi of previewData?.workItems">
+                  {{ wi }}
+                </li>
+              </ul>
+            </div>
+          </div>
+          <div class="detail-item">
+            <div class="detail-label">{{ 'RFQ_PREVIEW.DUE_DATE' | translate }}</div>
+            <div class="detail-value">
+              {{ previewData?.dueDate | date: 'dd MMMM yyyy' }}
+            </div>
           </div>
         </div>
-        <div class="detail-item">
-          <div class="detail-label">{{ 'RFQ_PREVIEW.DUE_DATE' | translate }}</div>
-          <div class="detail-value">
-            {{ previewData?.dueDate | date: 'dd MMMM yyyy' }}
-          </div>
+
+        <div class="closing-remarks">
+          <p>{{ 'RFQ_PREVIEW.REGARDS' | translate }}</p>
+          <p>
+            <strong>{{ 'RFQ_PREVIEW.TEAM' | translate }}</strong>
+          </p>
         </div>
       </div>
 
-      <div class="closing-remarks">
-        <p>{{ 'RFQ_PREVIEW.REGARDS' | translate }}</p>
-        <p>
-          <strong>{{ 'RFQ_PREVIEW.TEAM' | translate }}</strong>
-        </p>
+      <!-- ================= FOOTER ================= -->
+      <div class="modal-footer">
+        <button class="btn btn-cancel" (click)="closePreview()" [disabled]="isLoader">
+          {{ 'RFQ_PREVIEW.CLOSE' | translate }}
+        </button>
+        <button
+          class="btn btn-primary"
+          (click)="onSubmit(true, editedEmailBody)"
+          [disabled]="isLoader"
+        >
+          {{ 'RFQ_PREVIEW.SEND' | translate }}
+        </button>
       </div>
-    </div>
-
-    <!-- ================= FOOTER ================= -->
-    <div class="modal-footer">
-      <button class="btn btn-cancel" (click)="closePreview()" [disabled]="isLoader">
-        {{ 'RFQ_PREVIEW.CLOSE' | translate }}
-      </button>
-      <button
-        class="btn btn-primary"
-        (click)="onSubmit(true, editedEmailBody)"
-        [disabled]="isLoader"
-      >
-        {{ 'RFQ_PREVIEW.SEND' | translate }}
-      </button>
     </div>
   </div>
 </main>

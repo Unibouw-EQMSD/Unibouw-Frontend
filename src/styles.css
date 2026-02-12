@@ -61,9 +61,9 @@ app-sso-login {
 
 #main {
   margin-top: 105px;
-  padding: 0 0 20px 0px;
+  padding: 0 0 0px 0px;
   transition: all 0.3s;
-  min-height: calc(100vh - 136px);
+  min-height: calc(100vh - 133px);
 }
 
 /* Container */
@@ -245,7 +245,7 @@ app-sso-login {
 
 .tabs button {
   flex: 1;
-  padding: 10px;
+  padding: 6px 10px;
   border: none;
   cursor: pointer;
   background: #e8eef3;
@@ -1047,4 +1047,102 @@ th.select {width: 25px;}
 
 .bg-primary {
     background-color: #F07E2A !important;
+}
+.modal-header {
+  border-bottom: 1px solid#dee2e6;
+    padding: 0 10px;
+}
+.modal-footer {
+  border-top: 1px solid#dee2e6;
+}
+.small, small {
+    font-size: 80%;
+}
+
+
+/* ----------------- Modal -------------------- */
+
+/* Backdrop */
+.custom-modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.3);
+  z-index: 1040;
+}
+
+.custom-modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1100;
+}
+
+.modal-content-box {
+  background: #fff;
+  width: 800px;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.2);
+  max-height: 80vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scroll-behavior: smooth;
+}
+
+.modal-content {
+    padding: 10px 0;
+    background: #fff;
+    border-radius: .5rem;
+    color: inherit;
+    border: solid 1px rgba(0, 0, 0, .175);
+}
+.modal-content form {display: contents;}
+.modal-footer {
+    padding: 0 10px;}
+
+
+    
+/* Body (Scrollable) */
+.modal-body {
+  padding: 20px 20px 20px 20px;
+  overflow-y: auto; /* Scroll only body */
+  flex: 1; /* Take remaining space */
+}
+
+/* Footer (Fixed) */
+.modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  /* gap: 16px; */
+  padding: 16px 20px 0px;
+  border-top: 1px solid #e5e7eb;
+  background: #fff;
+  flex-shrink: 0;
+}
+
+
+.modal-title {
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.modal-subtitle {
+  font-size: 14px;
+  color: #6b7280;
+}
+.modal-dialog-scrollable {
+    height: calc(100% - 1.75rem * 2);
+}
+.modal-dialog-scrollable .modal-body {
+    overflow-y: auto;
+}
+.modal-body {
+    position: relative;
+    flex: 1 1 auto;
+    padding: 1rem;
+    overflow-y: auto;
 }

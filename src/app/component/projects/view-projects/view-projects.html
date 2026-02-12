@@ -826,17 +826,17 @@
 
   <!-- Reminder Popup Modal -->
   <div class="custom-modal-backdrop" *ngIf="showReminderPopup"></div>
-  <div class="custom-modal" *ngIf="showReminderPopup">
-    <div class="modal-content-box max-w-[53vw] bg-white rounded-lg shadow-lg p-6">
+  <div class="custom-modal modal-dialog-scrollable" *ngIf="showReminderPopup">
+    <div class="modal-content-box modal-content">
       <!-- Modal Header -->
-      <div class="modal-header p-2 border-b border-gray-200">
-        <p class="text-xl font-semibold">Settings</p>
+      <div class="modal-header">
+        <h4 class="modal-title">Settings</h4>
       </div>
       <div class="loading-overlay" *ngIf="isLoading">
         <p>{{ 'REMINDER_MODAL.SENDING_REMINDER' | translate }}</p>
       </div>
       <!-- Modal Body -->
-      <div class="modal-body space-y-6 px-4 pt-6 pb-3" *ngIf="!isLoading">
+      <div class="modal-body" *ngIf="!isLoading">
         <div class="modal-section">
           <!-- Due Date Box -->
           <span *ngIf="isDueDatePast" style="color: #dc3545"> Due date is crossed. </span>
@@ -972,11 +972,11 @@
 <!-- Log Conversation Popup Modal -->
 <div class="custom-modal-backdrop" *ngIf="showLogConvoPopup"></div>
 
-<div class="custom-modal" *ngIf="showLogConvoPopup">
-  <div class="modal-content-box">
+<div class="custom-modal modal-dialog-scrollable" *ngIf="showLogConvoPopup">
+  <div class="modal-content-box modal-content">
     <!-- Modal Header -->
-    <div class="modal-header">
-      <p class="modal-title">{{ 'LOG_CONVERSATION_MODAL.TITLE' | translate }}</p>
+      <div class="modal-header">
+      <h4 class="modal-title">{{ 'LOG_CONVERSATION_MODAL.TITLE' | translate }}</h4>
       <!-- Close Icon -->
       <button class="modal-close" title="Close" (click)="closeLogConvo()" aria-label="Close">
         &times;
