@@ -1,19 +1,27 @@
 import { Injectable } from '@angular/core';
 import { CanActivate, Router, UrlTree } from '@angular/router';
+import { UserService } from './services/User.service.';
 
 @Injectable({ providedIn: 'root' })
 export class AlreadyAuthGuard implements CanActivate {
-  constructor(private router: Router) {}
+  constructor(private router: Router, private userService: UserService) {}
 
-canActivate(): boolean | UrlTree {
+
+  async canActivate(): Promise<boolean | UrlTree> {
     const msal = (window as any).msalInstance;
-    const hasAccount = !!msal && typeof msal.getAllAccounts === 'function' && msal.getAllAccounts().length > 0;
-    const hasUserData = !!localStorage.getItem('user_data'); // set after /getMe
+    if (!msal) return true;
 
-// If authenticated, redirect away from /login
-    if (hasAccount && hasUserData) {
-      return this.router.parseUrl('/workitems'); // target after login
-    }
-    return true;
+    try {
+      await msal.handleRedirectPromise();
+    } catch {}
+
+    const hasAccount = (msal.getAllAccounts?.().length ?? 0) > 0;
+
+    // ✅ Hydrate user service from localStorage so getUserName() works in UI
+    // (this reads localStorage and pushes into BehaviorSubject)
+    this.userService.getUser();
+
+    return hasAccount ? this.router.parseUrl('/workitems') : true;
   }
 }
+

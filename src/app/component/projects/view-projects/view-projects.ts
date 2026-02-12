@@ -141,6 +141,7 @@ export class ViewProjects {
   rfqList: any[] = [];
   selectedRfqId: string = '';
   subcontractorGroups: any[] = [];
+  rfqCreatedDate: string | Date | null = null;
   displayedColumns: string[] = [
     'number',
     'workitem',
@@ -515,6 +516,8 @@ private buildRequestsSentLookup(projectId: string) {
      =============================== */
     this.rfqResponseService.getResponsesByProjectSubcontractors(projectId).subscribe({
       next: (res: any[]) => {
+        console.log('Subcontractor grouping sample item:', res?.[0]);
+console.log('Keys:', res?.[0] ? Object.keys(res[0]) : []);
         const grouped = res.reduce((acc: any[], item: any) => {
           let group = acc.find((g) => g.subcontractorId === item.subcontractorId);
 
@@ -536,22 +539,22 @@ private buildRequestsSentLookup(projectId: string) {
           }
 
           group.workItems.push({
-            workItemId: item.workItemId,
-            workItemName: item.workItemName,
-            rfqId: item.rfqId,
-            documentId: item.documentId,
-            rfqNumber: item.rfqNumber,
-            date: item.date,
-            responded: item.responded,
-            interested: item.interested,
-            notInterested: item.notInterested,
-            viewed: item.viewed,
-            maybeLater: item.maybeLater,
-            subcontractorId: item.subcontractorId,
-            rating: 0,
-            quoteAmount: '-',
-            actions: item.documentId ? ['pdf'] : [],
-          });
+  workItemId: item.workItemId ? String(item.workItemId) : null,
+  workItemName: item.workItemName,
+  rfqId: item.rfqId ? String(item.rfqId) : null,
+  documentId: item.documentId ? String(item.documentId) : null,
+  rfqNumber: item.rfqNumber,
+  date: item.date,
+  responded: item.responded,
+  interested: item.interested,
+  notInterested: item.notInterested,
+  viewed: item.viewed,
+  maybeLater: item.maybeLater,
+  subcontractorId: item.subcontractorId ? String(item.subcontractorId) : null,
+  rating: 0,
+  quoteAmount: item.quoteAmount ?? item.quote ?? '-',
+  actions: item.documentId ? ['pdf'] : [],
+});
 
           group.requestsSent = group.workItems.length;
           group.notResponded = group.workItems.filter((w: any) => !w.responded).length;
@@ -565,9 +568,9 @@ private buildRequestsSentLookup(projectId: string) {
 
         this.subcontractorGroups = grouped;
 
-        this.subcontractorGroups.forEach((sub) => {
-          sub.workItems.forEach((w: any) => this.loadQuoteAmount(w));
-        });
+      this.subcontractorGroups.forEach((sub) => {
+  sub.workItems.forEach((w: any) => this.loadQuoteAmount(w));
+});
       },
       error: (err) => {
         console.error('Error loading subcontractor responses', err);
@@ -603,7 +606,7 @@ private buildRequestsSentLookup(projectId: string) {
     );
   }
 
-  isPdfEnabled(rfqs: any): boolean {
+ isPdfEnabled(rfqs: any): boolean {
     const amt = rfqs.quoteAmount;
 
     // Disable when "-", empty, null, undefined, or not a number
@@ -613,6 +616,7 @@ private buildRequestsSentLookup(projectId: string) {
 
     return true;
   }
+
 hasAnyRfqResponses(): boolean {
   // Work-item grouping: workItems -> rfqs (via getFilteredRfqs)
   const hasInWorkItems =
@@ -886,25 +890,29 @@ globalDueDate: this.formatDate(item.globalDueDate),
         },
       });
   }
+downloadQuote(event: Event, documentId: string | null | undefined) {
+  event.stopPropagation();
 
-  downloadQuote(event: Event, documentId: string) {
-    event.stopPropagation();
-
-    this.rfqResponseService.downloadQuote(documentId).subscribe({
-      next: (blob) => {
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = 'Quote.pdf';
-        a.click();
-        URL.revokeObjectURL(url);
-      },
-      error: (err) => {
-        console.error('Download error:', err);
-        alert('No file uploaded for this document.');
-      },
-    });
+  if (!documentId || documentId === 'null' || documentId === 'undefined') {
+    alert('No file uploaded for this document.');
+    return;
   }
+
+  this.rfqResponseService.downloadQuote(documentId).subscribe({
+    next: (blob) => {
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'Quote.pdf';
+      a.click();
+      URL.revokeObjectURL(url);
+    },
+    error: (err) => {
+      console.error('Download error:', err);
+      alert('No file uploaded for this document.');
+    },
+  });
+}
 
   formatDateForApi(date: any): string {
     if (!date) return '';
@@ -921,84 +929,45 @@ globalDueDate: this.formatDate(item.globalDueDate),
     this.router.navigate(['/add-rfq', this.projectId, { rfqId: rfqId }]);
   }
 
-  private applyReminderConfig(dueDate: any, config: any) {
-    // Helper normalize
-    const normalize = (d: Date) => new Date(d.getFullYear(), d.getMonth(), d.getDate());
+private applyReminderConfig(dueDate: any, createdDate: any, config: any) {
+  const normalize = (d: Date) => new Date(d.getFullYear(), d.getMonth(), d.getDate());
 
-    // Robust date parser
-    const parseDate = (input: any): Date | null => {
-      if (!input && input !== 0) return null;
+  const parseDate = (input: any): Date | null => {
+    if (!input && input !== 0) return null;
+    const d = input instanceof Date ? input : new Date(input);
+    return isNaN(d.getTime()) ? null : d;
+  };
 
-      if (input instanceof Date) return isNaN(input.getTime()) ? null : input;
+  const dueObj = parseDate(dueDate);
+  const createdObj = parseDate(createdDate);
+  if (!dueObj || !createdObj) return false;
 
-      if (typeof input === 'number') {
-        const d = new Date(input);
-        return isNaN(d.getTime()) ? null : d;
-      }
+  const due = normalize(dueObj);
+  const created = normalize(createdObj);
 
-      if (typeof input === 'string') {
-        const trimmed = input.trim();
+  const seqString = (config.reminderSequence ?? config.sequence ?? '').toString();
+  const sequenceArray = seqString
+    .split(',')
+    .map((x: any) => parseInt((x || '').toString().trim(), 10))
+    .filter((n: any) => !isNaN(n))
+    .sort((a: any, b: any) => b - a);
 
-        // ISO YYYY-MM-DD
-        const iso = trimmed.match(/^(\d{4})[-\/](\d{2})[-\/](\d{2})$/);
-        if (iso) {
-          const dt = new Date(trimmed);
-          if (!isNaN(dt.getTime())) return dt;
-        }
+  this.reminderDates = sequenceArray
+    .map((seq: any) => {
+      const d = new Date(due);
+      d.setDate(d.getDate() + seq);
+      return normalize(d);
+    })
+    .filter((d: any) => d >= created && d < due) // ✅ correct rule
+    .sort((a: any, b: any) => a.getTime() - b.getTime())
+    .map((d: any) => d.toLocaleDateString('en-CA'));
 
-        // dd-mm-yyyy
-        const dmy = trimmed.match(/^(\d{2})[-\/](\d{2})[-\/](\d{4})$/);
-        if (dmy) {
-          const day = +dmy[1];
-          const month = +dmy[2] - 1;
-          const year = +dmy[3];
-          const dt = new Date(year, month, day);
-          if (!isNaN(dt.getTime())) return dt;
-        }
+  this.customReminderDates = this.reminderDates.map((d) => new Date(d));
+  this.reminderTime = config.reminderTime || '08:00';
+  this.reminderEmailBody = config.reminderEmailBody || '';
 
-        const fallback = new Date(trimmed);
-        if (!isNaN(fallback.getTime())) return fallback;
-      }
-
-      return null;
-    };
-
-    // Parse due date
-    const dueObj = parseDate(dueDate);
-    if (!dueObj) return false;
-
-    const due = normalize(dueObj);
-    const today = normalize(new Date());
-
-    // Extract sequence
-    const seqString = (config.reminderSequence ?? config.sequence ?? '').toString();
-
-    const sequenceArray = seqString
-      .split(',')
-      .map((x: any) => parseInt((x || '').toString().trim(), 10))
-      .filter((n: any) => !isNaN(n))
-      .sort((a: any, b: any) => b - a);
-
-    // Build reminder dates
-    this.reminderDates = sequenceArray
-      .map((seq: any) => {
-        const d = new Date(due);
-        d.setDate(d.getDate() + seq);
-        return normalize(d);
-      })
-      .filter((d: any) => d >= today)
-      .sort((a: any, b: any) => a.getTime() - b.getTime())
-      .map((d: any) => d.toLocaleDateString('en-CA'));
-
-    // Custom dates start same as default
-    this.customReminderDates = this.reminderDates.map((d) => new Date(d));
-
-    // Restore time & email body
-    this.reminderTime = config.reminderTime || '08:00';
-    this.reminderEmailBody = config.reminderEmailBody || '';
-
-    return true;
-  }
+  return true;
+}
 
   // helper function
   formatDateForBackend(dateStr: string | Date): string | null {
@@ -1029,6 +998,8 @@ globalDueDate: this.formatDate(item.globalDueDate),
   isDueDatePast = false;
 
   openReminderPopup(rfq: any) {
+    this.rfqCreatedDate = rfq.createdOn ?? rfq.createdDate ?? null; // use your actual field name
+
     //Check for due date past
     this.isDueDatePast = false; // reset first
     if (rfq.dueDate) {
@@ -1059,8 +1030,8 @@ globalDueDate: this.formatDate(item.globalDueDate),
 
         this.dueDate = rfq.dueDate;
 
-        const ok = this.applyReminderConfig(this.dueDate, this.GlobalReminderConfig);
-        if (!ok) {
+const ok = this.applyReminderConfig(this.dueDate, this.rfqCreatedDate, this.GlobalReminderConfig);        
+if (!ok) {
           this.snackBar.open('Invalid due date', 'Close', { duration: 3000 });
           return;
         }
@@ -1072,19 +1043,18 @@ globalDueDate: this.formatDate(item.globalDueDate),
     });
   }
 
-  resetReminderPopup() {
-    if (!this.GlobalReminderConfig || !this.dueDate) return;
+resetReminderPopup() {
+  if (!this.GlobalReminderConfig || !this.dueDate || !this.rfqCreatedDate) return;
 
-    // this.reminderType = "default";
-    this.applyReminderConfig(this.dueDate, this.GlobalReminderConfig);
+  this.applyReminderConfig(this.dueDate, this.rfqCreatedDate, this.GlobalReminderConfig);
 
-    // If email body is empty, restore default email body (optional but recommended)
-    if (!this.reminderEmailBody || !this.reminderEmailBody.trim()) {
-      this.emailBodyError = true;
-    } else {
-      this.emailBodyError = false;
-    }
+  if (!this.reminderEmailBody || !this.reminderEmailBody.trim()) {
+    this.emailBodyError = true;
+  } else {
+    this.emailBodyError = false;
   }
+}
+
 
   closeReminderPopup() {
     this.showReminderPopup = false;

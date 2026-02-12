@@ -6,6 +6,7 @@ import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { PublicClientApplication, AuthenticationResult } from '@azure/msal-browser';
 import { AppConfigService } from '../../services/app.config.service';
+import { UserService } from '../../services/User.service.';
 
 interface MeResponse {
   name: string;
@@ -34,7 +35,8 @@ export class SSOLogin implements OnInit {
   constructor(
     private http: HttpClient,
     private router: Router,
-    private appConfigService: AppConfigService
+    private appConfigService: AppConfigService,  private userService: UserService
+
   ) {
     this.msalInstance = (window as any).msalInstance;
 
@@ -46,43 +48,43 @@ export class SSOLogin implements OnInit {
   }
 
   // single ngOnInit()
-  async ngOnInit() {
-    this.loading = true;
+async ngOnInit() {
+  this.loading = true;
+  console.log('[SSOLogin] ngOnInit fired');
 
-    // Small delay to ensure routing/guards settle
-    await new Promise((r) => setTimeout(r, 300));
+  try {
+    const result = await this.msalInstance.handleRedirectPromise();
 
-    try {
-      // Handle redirect result from Microsoft login
-      const result = await this.msalInstance.handleRedirectPromise();
-
-      if (result && result.account) {
-        this.msalInstance.setActiveAccount(result.account);
-        await this.continueLoginFlow(result.account);
-        localStorage.setItem('show_welcome', 'true'); // 👈 show later in home page
-        return;
-      }
-
-      // If already logged in, go to home directly
-      const activeAccount = this.msalInstance.getActiveAccount();
-      if (activeAccount) {
-        await this.router.navigate(['/workitems'], { replaceUrl: true });
-        return;
-      }
-
-      const accounts = this.msalInstance.getAllAccounts();
-      if (accounts.length === 1) {
-        this.msalInstance.setActiveAccount(accounts[0]);
-        await this.continueLoginFlow(accounts[0]);
-        return;
-      }
-    } catch (error) {
-      console.error('❌ Redirect handling failed:', error);
-    } finally {
-      this.loading = false;
+    if (result?.account) {
+      console.log('[SSOLogin] redirect result account found');
+      this.msalInstance.setActiveAccount(result.account);
+      await this.continueLoginFlow(result.account);
+      return;
     }
-  }
 
+    const activeAccount = this.msalInstance.getActiveAccount();
+    if (activeAccount) {
+      console.log('[SSOLogin] active account found');
+      await this.continueLoginFlow(activeAccount);
+      return;
+    }
+
+    const accounts = this.msalInstance.getAllAccounts();
+    console.log('[SSOLogin] accounts length:', accounts.length);
+
+    // ✅ ADD THIS: handle "accounts exist but no active account"
+    if (accounts.length > 0) {
+      console.log('[SSOLogin] setting first account as active');
+      this.msalInstance.setActiveAccount(accounts[0]);
+      await this.continueLoginFlow(accounts[0]);
+      return;
+    }
+  } catch (error) {
+    console.error('❌ Redirect handling failed:', error);
+  } finally {
+    this.loading = false;
+  }
+}
   // Login button click handler
   async onSubmit(emailRef: any) {
     if (emailRef.invalid) {
@@ -99,35 +101,41 @@ export class SSOLogin implements OnInit {
   }
 
   // Common function for silent token + API call
-  private async continueLoginFlow(account: any) {
-    try {
-      this.loading = true;
-      const result: AuthenticationResult = await this.msalInstance.acquireTokenSilent({
-        scopes: this.scopes,
-        account,
-      });
+private async continueLoginFlow(account: any) {
+  try {
+    this.loading = true;
 
-      const token = result.accessToken;
-      localStorage.setItem('access_token', token);
+    const result: AuthenticationResult = await this.msalInstance.acquireTokenSilent({
+      scopes: this.scopes,
+      account,
+    });
 
-      const me = await firstValueFrom(
-        this.http.get<MeResponse>(`${this.apiURL}${this.getMeEndpoint}`, {
-          headers: { Authorization: `Bearer ${token}` },
-        })
-      );
+    const token = result.accessToken;
+    localStorage.setItem('access_token', token);
 
-      localStorage.setItem('user_data', JSON.stringify(me));
+    const me = await firstValueFrom(
+      this.http.get<MeResponse>(`${this.apiURL}${this.getMeEndpoint}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+    );
 
-      //  Show welcome message only once per login
-      // const userName = me.name || me.email.split('@')[0];
-      // alert(`Welcome ${userName}! 👋`);
 
-      await this.router.navigate(['/workitems'], { replaceUrl: true });
-    } catch (error) {
-      console.error('❌ continueLoginFlow failed:', error);
-      alert('Login failed. Please try again.');
-    } finally {
-      this.loading = false;
-    }
+const normalizedMe: MeResponse = {
+  name: (me as any).name ?? (me as any).displayName ?? (me as any).userName ?? '',
+  email: (me as any).email ?? (me as any).mail ?? (me as any).upn ?? '',
+  roles: (me as any).roles ?? '',
+  scopes: (me as any).scopes,
+};
+
+localStorage.setItem('user_data', JSON.stringify(normalizedMe));
+this.userService.setUser(normalizedMe);
+
+    await this.router.navigate(['/workitems'], { replaceUrl: true });
+  } catch (error) {
+    console.error('❌ continueLoginFlow failed:', error);
+    alert('Login failed. Please try again.');
+  } finally {
+    this.loading = false;
   }
+}
 }

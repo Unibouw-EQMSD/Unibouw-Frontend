@@ -78,27 +78,26 @@ export class WorkitemService {
   }
 
   /* Get work items by category ID */
-  getWorkitems(categoryId: string): Observable<Workitem[]> {
-    return from(this.getHeaders()).pipe(
-      switchMap((headers) =>
-        this.http.get<{ count: number; data: Workitem[] }>(
-          `${this.workitemsByCategoryUrl}/${categoryId}`,
-          { headers }
-        )
-      ),
-      map((res) =>
-        (res.data || []).map((it) => ({
-          workItemID: it.workItemID || '',
-          number: it.number || '',
-          name: it.name || '',
-          description: it.description || '',
-          isActive: it.isActive,
-          editItem: false,
-        }))
+  getWorkitems(categoryId: string, onlyActive: boolean = false): Observable<Workitem[]> {
+  return from(this.getHeaders()).pipe(
+    switchMap((headers) =>
+      this.http.get<{ count: number; data: Workitem[] }>(
+        `${this.workitemsByCategoryUrl}/${categoryId}?onlyActive=${onlyActive}`,
+        { headers }
       )
-    );
-  }
-
+    ),
+    map((res) =>
+      (res.data || []).map((it) => ({
+        workItemID: it.workItemID || '',
+        number: it.number || '',
+        name: it.name || '',
+        description: it.description || '',
+        isActive: it.isActive,
+        editItem: false,
+      }))
+    )
+  );
+}
   /* Update isActive status */
   updateIsActive(workitemId: string, isActive: boolean): Observable<any> {
     return from(this.getHeaders()).pipe(

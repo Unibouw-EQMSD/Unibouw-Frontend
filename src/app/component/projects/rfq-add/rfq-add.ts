@@ -403,7 +403,7 @@ export class RfqAdd {
       const { mappings, subs } = await firstValueFrom(
         forkJoin({
           mappings: this.subcontractorService.getSubcontractorWorkItemMappings(true),
-          subs: this.subcontractorService.getSubcontractors(),
+          subs: this.subcontractorService.getSubcontractors(true),
         }),
       );
 
@@ -727,12 +727,12 @@ export class RfqAdd {
         return;
       }
 
-      const [standard, unibouw] = await lastValueFrom(
-        forkJoin([
-          this.workitemService.getWorkitems(standardCategory.categoryID),
-          this.workitemService.getWorkitems(unibouwCategory.categoryID),
-        ]),
-      );
+     const [standard, unibouw] = await lastValueFrom(
+  forkJoin([
+    this.workitemService.getWorkitems(standardCategory.categoryID, true),  // Pass true for onlyActive
+    this.workitemService.getWorkitems(unibouwCategory.categoryID, true),
+  ]),
+);
 
       this.standardWorkitems = this.sortWorkItemsAsc(standard ?? []);
       this.unibouwWorkitems = this.sortWorkItemsAsc(unibouw ?? []);

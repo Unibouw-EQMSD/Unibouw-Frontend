@@ -54,27 +54,28 @@ export class SubcontractorService {
   }
 
   /* Get all subcontractors */
-  getSubcontractors(): Observable<Subcontractors[]> {
-    return from(this.getHeaders()).pipe(
-      switchMap((headers) =>
-        this.http.get<{ count: number; data: Subcontractors[] }>(this.getsubcontractor, {
-          headers,
-        }),
-      ),
-      map((res) =>
-        (res.data || []).map((it) => ({
-          subcontractorID: it.subcontractorID,
-          name: it.name || '',
-          category: it.category || '',
-          contactName: it.contactName || '',
-          contactPhone: it.contactPhone || '',
-          email: it.email || '',
-          isActive: it.isActive,
-          editItem: false,
-        })),
-      ),
-    );
-  }
+ getSubcontractors(onlyActive: boolean = false): Observable<Subcontractors[]> {
+  return from(this.getHeaders()).pipe(
+    switchMap((headers) =>
+      this.http.get<{ count: number; data: Subcontractors[] }>(
+        `${this.getsubcontractor}?onlyActive=${onlyActive}`,
+        { headers }
+      )
+    ),
+    map((res) =>
+      (res.data || []).map((it) => ({
+        subcontractorID: it.subcontractorID,
+        name: it.name || '',
+        category: it.category || '',
+        contactName: it.contactName || '',
+        contactPhone: it.contactPhone || '',
+        email: it.email || '',
+        isActive: it.isActive,
+        editItem: false,
+      }))
+    ),
+  );
+}
 
   getSubcontractorById(id: string): Observable<Subcontractors> {
   return from(this.getHeaders()).pipe(
