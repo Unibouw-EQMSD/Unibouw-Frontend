@@ -959,7 +959,24 @@
   padding-top: 4px;
   padding-right: 6px;
 }
+.cdk-overlay-container,
+.cdk-overlay-pane {
+  z-index: 9999 !important;
+  position: fixed !important;
+}
+.custom-modal,
+.custom-modal.modal-dialog-scrollable,
+.modal-content-box,
+.modal-content {
+  z-index: 1100 !important;
+}
 
+.custom-modal-backdrop {
+  position: fixed;
+  top: 0; left: 0; width: 100%; height: 100%;
+  background: rgba(0, 0, 0, 0.3);
+  z-index: 1099 !important;
+}
 /* Existing styles preserved */
 .send-btn {
   padding: 10px 15px;

@@ -484,6 +484,7 @@ private buildRequestsSentLookup(projectId: string) {
               quote: s.quote || '—',
               quoteAmount: '-',
               dueDate: s.dueDate,
+                createdOn: s.createdOn, 
               actions: s.documentId ? ['pdf', 'chat'] : ['chat'], // ✅ FIX
             });
           });
@@ -550,6 +551,7 @@ console.log('Keys:', res?.[0] ? Object.keys(res[0]) : []);
   notInterested: item.notInterested,
   viewed: item.viewed,
   maybeLater: item.maybeLater,
+    createdOn: item.createdOn, 
   subcontractorId: item.subcontractorId ? String(item.subcontractorId) : null,
   rating: 0,
   quoteAmount: item.quoteAmount ?? item.quote ?? '-',
@@ -933,17 +935,30 @@ private applyReminderConfig(dueDate: any, createdDate: any, config: any) {
   const normalize = (d: Date) => new Date(d.getFullYear(), d.getMonth(), d.getDate());
 
   const parseDate = (input: any): Date | null => {
-    if (!input && input !== 0) return null;
-    const d = input instanceof Date ? input : new Date(input);
-    return isNaN(d.getTime()) ? null : d;
-  };
+  if (!input && input !== 0) return null;
+  if (typeof input === 'string' && /^\d{2}-\d{2}-\d{4}$/.test(input)) {
+    // "DD-MM-YYYY" → "YYYY-MM-DD"
+    const [day, month, year] = input.split('-').map(Number);
+    return new Date(year, month - 1, day);
+  }
+  const d = input instanceof Date ? input : new Date(input);
+  return isNaN(d.getTime()) ? null : d;
+};
 
   const dueObj = parseDate(dueDate);
   const createdObj = parseDate(createdDate);
-  if (!dueObj || !createdObj) return false;
+  console.log('[applyReminderConfig] raw input:', {
+    dueDate, createdDate, dueObj, createdObj
+  });
+
+  if (!dueObj || !createdObj) {
+    console.warn('[applyReminderConfig] Invalid due or created date:', { dueObj, createdObj });
+    return false;
+  }
 
   const due = normalize(dueObj);
   const created = normalize(createdObj);
+  console.log('[applyReminderConfig] Normalized:', { due, created });
 
   const seqString = (config.reminderSequence ?? config.sequence ?? '').toString();
   const sequenceArray = seqString
@@ -952,20 +967,31 @@ private applyReminderConfig(dueDate: any, createdDate: any, config: any) {
     .filter((n: any) => !isNaN(n))
     .sort((a: any, b: any) => b - a);
 
+  console.log('[applyReminderConfig] Sequence array:', sequenceArray);
+
   this.reminderDates = sequenceArray
     .map((seq: any) => {
       const d = new Date(due);
       d.setDate(d.getDate() + seq);
-      return normalize(d);
+      const norm = normalize(d);
+      console.log(`[applyReminderConfig] Offset ${seq}: ${norm.toISOString().slice(0, 10)}`);
+      return norm;
     })
-    .filter((d: any) => d >= created && d < due) // ✅ correct rule
+    .filter((d: any) => {
+      const keep = d >= created && d < due;
+      if (!keep) {
+        console.log(`[applyReminderConfig] Removing date ${d.toISOString().slice(0, 10)} (outside valid range)`);
+      }
+      return keep;
+    })
     .sort((a: any, b: any) => a.getTime() - b.getTime())
     .map((d: any) => d.toLocaleDateString('en-CA'));
+
+  console.log('[applyReminderConfig] Final reminderDates:', this.reminderDates);
 
   this.customReminderDates = this.reminderDates.map((d) => new Date(d));
   this.reminderTime = config.reminderTime || '08:00';
   this.reminderEmailBody = config.reminderEmailBody || '';
-
   return true;
 }
 
@@ -998,6 +1024,8 @@ private applyReminderConfig(dueDate: any, createdDate: any, config: any) {
   isDueDatePast = false;
 
   openReminderPopup(rfq: any) {
+      console.log('[openReminderPopup] called', rfq);
+
     this.rfqCreatedDate = rfq.createdOn ?? rfq.createdDate ?? null; // use your actual field name
 
     //Check for due date past
@@ -1038,6 +1066,8 @@ if (!ok) {
 
         this.setMaxDueDate(this.dueDate);
         this.reminderType = 'default';
+        console.log('About to show popup');
+
         this.showReminderPopup = true;
       },
     });
