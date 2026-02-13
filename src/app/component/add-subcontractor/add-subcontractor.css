@@ -60,6 +60,7 @@
   border-bottom: 1px solid #ddd;
   padding: 6px 8px;
   font-size: 14px;
+  border-radius: 0;
 }
 
 .form-control-textarea {
@@ -315,5 +316,6 @@ textarea {
   }
 } */
  .formScroll {
+    min-height: calc(100vh - 268px);
     max-height: calc(100vh - 268px);
     overflow-y: auto;}

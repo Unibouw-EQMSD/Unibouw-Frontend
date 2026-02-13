@@ -63,7 +63,7 @@ app-sso-login {
   margin-top: 105px;
   padding: 0 0 0px 0px;
   transition: all 0.3s;
-  min-height: calc(100vh - 133px);
+  min-height: calc(100vh - 144px);
 }
 
 /* Container */
@@ -1078,7 +1078,7 @@ th.select {width: 25px;}
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  z-index: 1100;
+  z-index: 1040;
 }
 
 .modal-content-box {
@@ -1145,4 +1145,18 @@ th.select {width: 25px;}
     flex: 1 1 auto;
     padding: 1rem;
     overflow-y: auto;
+}
+mat-datepicker-content.mat-datepicker-content.mat-datepicker-content-animations-enabled {
+    z-index: 1060 !important;
+}
+.cdk-overlay-container {
+    z-index: 1040 !important;
+}
+.w-70px {width: 70px;max-width: 70px;}
+
+.attachIcon::before {
+  content: "\f0c6";
+  font-family: "Font Awesome 6 Free";
+    font-weight: 900;
+    font-size: 14px;
 }

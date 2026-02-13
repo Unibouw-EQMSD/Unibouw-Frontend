@@ -44,34 +44,35 @@
         </h1>
       </div>
 
-      <div class="project-details-container">
+      <div class="row">
         <!-- LEFT: Project Details -->
-        <div class="card" *ngIf="projectDetails">
-          <div class="card-header">
-            {{ 'PROJECT_DETAILS.DETAILS_TITLE' | translate }}
-          </div>
+        <div class="col-sm-3 col-md-2">
+          <div class="card" *ngIf="projectDetails">
+            <div class="card-header">
+              {{ 'PROJECT_DETAILS.DETAILS_TITLE' | translate }}
+            </div>
 
-          <div class="card-body">
-            <div class="scroll">
-              <div class="detail-row">
-                <label class="col-form-label">{{
-                  'PROJECT_DETAILS.PROJECT_CODE' | translate
-                }}</label
-                ><span class="value">{{ projectDetails.number }}</span>
-              </div>
-              <div class="detail-row">
-                <label class="col-form-label">{{ 'PROJECT_DETAILS.PROJECT' | translate }}</label
-                ><span class="value">{{ projectDetails.name }}</span>
-              </div>
-              <div class="detail-row">
-                <label class="col-form-label">{{ 'PROJECT_DETAILS.CUSTOMER' | translate }}</label
-                ><span class="value">{{ projectDetails.customerName }}</span>
-              </div>
-              <!-- <div class="detail-row">
+            <div class="card-body">
+              <div class="scroll">
+                <div class="detail-row">
+                  <label class="col-form-label">{{
+                    'PROJECT_DETAILS.PROJECT_CODE' | translate
+                  }}</label
+                  ><span class="value">{{ projectDetails.number }}</span>
+                </div>
+                <div class="detail-row">
+                  <label class="col-form-label">{{ 'PROJECT_DETAILS.PROJECT' | translate }}</label
+                  ><span class="value">{{ projectDetails.name }}</span>
+                </div>
+                <div class="detail-row">
+                  <label class="col-form-label">{{ 'PROJECT_DETAILS.CUSTOMER' | translate }}</label
+                  ><span class="value">{{ projectDetails.customerName }}</span>
+                </div>
+                <!-- <div class="detail-row">
               <label class="col-form-label">{{ 'PROJECT_DETAILS.PROJECT_MANAGER' | translate }}</span
               ><span class="value">{{ projectDetails.projectManagerName }}</span>
             </div> -->
-              <!-- <div class="detail-row">
+                <!-- <div class="detail-row">
               <label class="col-form-label">{{ 'PROJECT_DETAILS.PERSON_NAME' | translate }}</span
               ><span class="value">{{ projectDetails.personName }}</span>
             </div>
@@ -79,232 +80,274 @@
               <label class="col-form-label">{{ 'PROJECT_DETAILS.PERSON_ROLE' | translate }}</span
               ><span class="value">{{ projectDetails.personRole }}</span>
             </div> -->
-              <div class="detail-row">
-                <label class="col-form-label">{{ 'PROJECT_DETAILS.START_DATE' | translate }}</label>
-                <span class="value">{{ projectDetails.startDate | date: 'dd-MM-yyyy' }}</span>
-              </div>
-              <div class="detail-row">
-                <label class="col-form-label">{{
-                  'PROJECT_DETAILS.COMMITTED_DATE' | translate
-                }}</label>
-                <span class="value">{{ projectDetails.completionDate | date: 'dd-MM-yyyy' }}</span>
-              </div>
-              <div class="detail-row">
-                <label class="col-form-label">{{ 'PROJECT_DETAILS.STATUS' | translate }}</label>
-                <span
-                  class="value status"
-                  [ngClass]="{
-                    'status-started': projectDetails.status === 'Started',
-                    'status-inprogress': projectDetails.status === 'In Progress',
-                    'status-completed': projectDetails.status === 'Completed',
-                  }"
-                >
-                  {{ projectDetails.status }}
-                </span>
-              </div>
-              <div class="detail-row">
-                <label class="col-form-label">{{
-                  'PROJECT_DETAILS.SPECIFICATION' | translate
-                }}</label>
-                <span class="value">
-                  <a [href]="projectDetails.sharepointURL" target="_blank">Project Files</a>
-                </span>
+                <div class="detail-row">
+                  <label class="col-form-label">{{
+                    'PROJECT_DETAILS.START_DATE' | translate
+                  }}</label>
+                  <span class="value">{{ projectDetails.startDate | date: 'dd-MM-yyyy' }}</span>
+                </div>
+                <div class="detail-row">
+                  <label class="col-form-label">{{
+                    'PROJECT_DETAILS.COMMITTED_DATE' | translate
+                  }}</label>
+                  <span class="value">{{
+                    projectDetails.completionDate | date: 'dd-MM-yyyy'
+                  }}</span>
+                </div>
+                <div class="detail-row">
+                  <label class="col-form-label">{{ 'PROJECT_DETAILS.STATUS' | translate }}</label>
+                  <span
+                    class="value status"
+                    [ngClass]="{
+                      'status-started': projectDetails.status === 'Started',
+                      'status-inprogress': projectDetails.status === 'In Progress',
+                      'status-completed': projectDetails.status === 'Completed',
+                    }"
+                  >
+                    {{ projectDetails.status }}
+                  </span>
+                </div>
+                <div class="detail-row">
+                  <label class="col-form-label">{{
+                    'PROJECT_DETAILS.SPECIFICATION' | translate
+                  }}</label>
+                  <span class="value">
+                    <a [href]="projectDetails.sharepointURL" target="_blank">Project Files</a>
+                  </span>
+                </div>
               </div>
             </div>
           </div>
         </div>
+        <div class="col-sm-9 col-md-10">
+          <!-- RIGHT: TAB CONTENT -->
+          <div class="card rfq-card" *ngIf="!isLoading">
+            <!-- 🔹 Tabs -->
+            <div class="tabs">
+              <button
+                [class.active]="selectedTab === 'response'"
+                (click)="setActiveTab('response')"
+              >
+                {{ 'RESPONSE_VIEW.RFQ Response' | translate }}
+              </button>
 
-        <!-- RIGHT: TAB CONTENT -->
-        <div class="card rfq-card" *ngIf="!isLoading">
-          <!-- 🔹 Tabs -->
-          <div class="tabs">
-            <button [class.active]="selectedTab === 'response'" (click)="setActiveTab('response')">
-              {{ 'RESPONSE_VIEW.RFQ Response' | translate }}
-            </button>
+              <button
+                [class.active]="selectedTab === 'rfq'"
+                (click)="setActiveTab('rfq'); loadRfqData()"
+              >
+                {{ 'RFQ_TABLE.TITLE' | translate }}
+              </button>
 
-            <button
-              [class.active]="selectedTab === 'rfq'"
-              (click)="setActiveTab('rfq'); loadRfqData()"
-            >
-              {{ 'RFQ_TABLE.TITLE' | translate }}
-            </button>
-
-            <button
-              [class.active]="selectedTab === 'conversation'"
-              (click)="setActiveTab('conversation'); loadConversationSubcontractors()"
-            >
-              {{ 'CONVERSATION.TITLE' | translate }}
-            </button>
-          </div>
-          <div class="card-body">
-            <!-- TAB 1: RFQ RESPONSE (Accordion Section) -->
-            <div *ngIf="selectedTab === 'response'">
-              <!-- GROUP OPTIONS -->
-              <div class="rfq-header">
-                <div class="group-options">
-                  <label class="cursor-pointer">
-                    <input type="radio" name="groupBy" [(ngModel)]="groupBy" value="workItem" />
-                    {{ 'GROUPING.GROUP_BY_WORK_ITEM' | translate }}
-                  </label>
-                  <label class="cursor-pointer">
-                    <input
-                      type="radio"
-                      name="groupBy"
-                      [(ngModel)]="groupBy"
-                      value="subcontractor"
-                      class="cursor-pointer"
-                    />
-                    {{ 'GROUPING.GROUP_BY_SUBCONTRACTOR' | translate }}
-                  </label>
-                </div>
-              </div>
-              <div class="text-center pt-20" *ngIf="isLoading">Loading...</div>
-
-              <div class="table-scroll1">
-                <!-- 1️⃣  WORK ITEM GROUPING -->
-                <div *ngIf="groupBy === 'workItem' && !isLoading" class="h-24">
-                  <!-- NO DATA (no work items) -->
-                  <div *ngIf="!workItems || workItems.length === 0" class="noData">
-                    {{ 'EMPTY_STATES.NO_RFQ_RESPONSES' | translate }}
+              <button
+                [class.active]="selectedTab === 'conversation'"
+                (click)="setActiveTab('conversation'); loadConversationSubcontractors()"
+              >
+                {{ 'CONVERSATION.TITLE' | translate }}
+              </button>
+            </div>
+            <div class="card-body">
+              <!-- TAB 1: RFQ RESPONSE (Accordion Section) -->
+              <div *ngIf="selectedTab === 'response'">
+                <!-- GROUP OPTIONS -->
+                <div class="rfq-header">
+                  <div class="group-options">
+                    <label class="cursor-pointer">
+                      <input type="radio" name="groupBy" [(ngModel)]="groupBy" value="workItem" />
+                      {{ 'GROUPING.GROUP_BY_WORK_ITEM' | translate }}
+                    </label>
+                    <label class="cursor-pointer">
+                      <input
+                        type="radio"
+                        name="groupBy"
+                        [(ngModel)]="groupBy"
+                        value="subcontractor"
+                        class="cursor-pointer"
+                      />
+                      {{ 'GROUPING.GROUP_BY_SUBCONTRACTOR' | translate }}
+                    </label>
                   </div>
-                  <div *ngFor="let work of workItems" class="work-item">
-                    <!-- Work Item Header -->
-                    <div class="work-item-header" (click)="work.open = !work.open">
-                      <div class="rfq-summary">
-                        <div style="width: 100px">
-                          <span class="label">{{ 'RFQ_TABLE.WORK_ITEM' | translate }}</span>
-                          <div class="highlight text-ellipsis" [title]="work.name">
-                            {{ work.name }}
+                </div>
+                <div class="text-center pt-20" *ngIf="isLoading">Loading...</div>
+
+                <div class="table-scroll1">
+                  <!-- 1️⃣  WORK ITEM GROUPING -->
+                  <div *ngIf="groupBy === 'workItem' && !isLoading" class="h-24">
+                    <!-- NO DATA (no work items) -->
+                    <div *ngIf="!workItems || workItems.length === 0" class="noData">
+                      {{ 'EMPTY_STATES.NO_RFQ_RESPONSES' | translate }}
+                    </div>
+                    <div *ngFor="let work of workItems" class="work-item">
+                      <!-- Work Item Header -->
+                      <div class="work-item-header" (click)="work.open = !work.open">
+                        <div class="rfq-summary">
+                          <div style="width: 100px">
+                            <span class="label">{{ 'RFQ_TABLE.WORK_ITEM' | translate }}</span>
+                            <div class="highlight text-ellipsis" [title]="work.name">
+                              {{ work.name }}
+                            </div>
+                          </div>
+                          <div>
+                            <span class="label">{{
+                              'RESPONSE_VIEW.REQUESTS_SENT' | translate
+                            }}</span>
+                            <div>{{ work.requestsSent }}</div>
+                          </div>
+                          <div>
+                            <span class="label">{{ 'RESPONSE_VIEW.VIEWED' | translate }}</span>
+                            <div>{{ work.viewed }}</div>
+                          </div>
+                          <div>
+                            <span class="label">{{ 'RFQ_SUMMARY.INTERESTED' | translate }}</span>
+                            <div>{{ work.interested }}</div>
+                          </div>
+                          <div>
+                            <span class="label">{{
+                              'RFQ_SUMMARY.NOT_INTERESTED' | translate
+                            }}</span>
+                            <div>{{ work.notInterested }}</div>
+                          </div>
+                          <div>
+                            <span class="label">{{ 'RFQ_SUMMARY.MAYBE_LATER' | translate }}</span>
+                            <div>{{ work.maybeLater }}</div>
+                          </div>
+                          <div>
+                            <span class="label">{{
+                              'RESPONSE_VIEW.NOT_RESPONDED' | translate
+                            }}</span>
+                            <div>{{ work.notResponded }}</div>
                           </div>
                         </div>
-                        <div>
-                          <span class="label">{{ 'RESPONSE_VIEW.REQUESTS_SENT' | translate }}</span>
-                          <div>{{ work.requestsSent }}</div>
-                        </div>
-                        <div>
-                          <span class="label">{{ 'RESPONSE_VIEW.VIEWED' | translate }}</span>
-                          <div>{{ work.viewed }}</div>
-                        </div>
-                        <div>
-                          <span class="label">{{ 'RFQ_SUMMARY.INTERESTED' | translate }}</span>
-                          <div>{{ work.interested }}</div>
-                        </div>
-                        <div>
-                          <span class="label">{{ 'RFQ_SUMMARY.NOT_INTERESTED' | translate }}</span>
-                          <div>{{ work.notInterested }}</div>
-                        </div>
-                        <div>
-                          <span class="label">{{ 'RFQ_SUMMARY.MAYBE_LATER' | translate }}</span>
-                          <div>{{ work.maybeLater }}</div>
-                        </div>
-                        <div>
-                          <span class="label">{{ 'RESPONSE_VIEW.NOT_RESPONDED' | translate }}</span>
-                          <div>{{ work.notResponded }}</div>
-                        </div>
+
+                        <i
+                          class="fa"
+                          [ngClass]="work.open ? 'fa-chevron-up' : 'fa-chevron-down'"
+                        ></i>
                       </div>
 
-                      <i class="fa" [ngClass]="work.open ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
-                    </div>
+                      <!-- Work Item Body -->
+                      <div class="work-item-body" *ngIf="work.open">
+                        <!-- Search -->
+                        <div class="search-box" style="margin-bottom: 12px">
+                          <input
+                            type="text"
+                            [(ngModel)]="work.searchText"
+                            placeholder="{{ 'COMMON.SEARCH' | translate }}"
+                          />
+                        </div>
 
-                    <!-- Work Item Body -->
-                    <div class="work-item-body" *ngIf="work.open">
-                      <!-- Search -->
-                      <div class="search-box" style="margin-bottom: 12px">
-                        <input
-                          type="text"
-                          [(ngModel)]="work.searchText"
-                          placeholder="{{ 'COMMON.SEARCH' | translate }}"
-                        />
-                      </div>
+                        <!-- Table -->
+                        <div class="rfq-table-wrapper">
+                          <table class="rfq-table">
+                            <thead>
+                              <tr>
+                                <th>{{ 'RESPONSE_VIEW.NAME' | translate }}</th>
+                                <th>{{ 'RESPONSE_VIEW.DATE' | translate }}</th>
+                                <th>{{ 'RESPONSE_VIEW.RFQ_ID' | translate }}</th>
+                                <th style="text-align: center">
+                                  {{ 'RESPONSE_VIEW.VIEWED' | translate }}
+                                </th>
+                                <th style="text-align: center">
+                                  {{ 'RFQ_SUMMARY.INTERESTED' | translate }}
+                                </th>
+                                <th style="text-align: center">
+                                  {{ 'RFQ_SUMMARY.MAYBE_LATER' | translate }}
+                                </th>
+                                <th style="text-align: center">
+                                  {{ 'RESPONSE_VIEW.QUOTE_AMOUNT' | translate }}
+                                </th>
+                                <th style="text-align: center">
+                                  {{ 'COMMON.ACTIONS' | translate }}
+                                </th>
+                              </tr>
+                            </thead>
 
-                      <!-- Table -->
-                      <div class="rfq-table-wrapper">
-                        <table class="rfq-table">
-                          <thead>
-                            <tr>
-                              <th>{{ 'RESPONSE_VIEW.NAME' | translate }}</th>
-                              <th>{{ 'RESPONSE_VIEW.DATE' | translate }}</th>
-                              <th>{{ 'RESPONSE_VIEW.RFQ_ID' | translate }}</th>
-                              <th style="text-align: center">
-                                {{ 'RESPONSE_VIEW.VIEWED' | translate }}
-                              </th>
-                              <th style="text-align: center">
-                                {{ 'RFQ_SUMMARY.INTERESTED' | translate }}
-                              </th>
-                              <th style="text-align: center">
-                                {{ 'RFQ_SUMMARY.MAYBE_LATER' | translate }}
-                              </th>
-                              <th style="text-align: center">
-                                {{ 'RESPONSE_VIEW.QUOTE_AMOUNT' | translate }}
-                              </th>
-                              <th style="text-align: center">{{ 'COMMON.ACTIONS' | translate }}</th>
-                            </tr>
-                          </thead>
-
-                          <tbody>
-                            <!-- Loop through RFQs -->
-                            <tr *ngFor="let rfq of getFilteredRfqs(work)">
-                              <!-- CHECK: Does this row have a Subcontractor? -->
-                              <ng-container
-                                *ngIf="
-                                  (getFilteredRfqs(work)?.length ?? 0) > 0;
-                                  else noResponseTemplate
-                                "
-                              >
-                                <td (click)="markViewed(work, rfq)">
-                                  {{ rfq.name }}
-                                  <div class="rating">★ {{ rfq.rating }}</div>
-                                </td>
-
-                                <td (click)="markViewed(work, rfq)">{{ rfq.date }}</td>
-                                <td (click)="markViewed(work, rfq)">{{ rfq.rfqNumber }}</td>
-
-                                <td style="text-align: center" (click)="markViewed(work, rfq)">
-                                  <i class="fa fa-check-circle success" *ngIf="rfq.viewed"></i>
-                                  <!-- <i class="fa fa-times fail" *ngIf="!rfq.viewed"></i> -->
-                                </td>
-
-                                <td style="text-align: center" (click)="markViewed(work, rfq)">
-                                  <i class="fa fa-check-circle success" *ngIf="rfq.interested"></i>
-                                  <i class="fa fa-times fail" *ngIf="rfq.notInterested"></i>
-                                </td>
-                                <td style="text-align: center" (click)="markMaybeLater(work, rfq)">
-                                  <i class="fa fa-check-circle success" *ngIf="rfq.maybeLater"></i>
-                                  <!-- <i class="fa fa-times fail" *ngIf="!rfq.maybeLater"></i> -->
-                                </td>
-                                <td
-                                  style="text-align: right; padding-right: 56px"
-                                  (click)="markViewed(work, rfq)"
+                            <tbody>
+                              <!-- Loop through RFQs -->
+                              <tr *ngFor="let rfq of getFilteredRfqs(work)">
+                                <!-- CHECK: Does this row have a Subcontractor? -->
+                                <ng-container
+                                  *ngIf="
+                                    (getFilteredRfqs(work)?.length ?? 0) > 0;
+                                    else noResponseTemplate
+                                  "
                                 >
-                                  <ng-container *ngIf="rfq.quoteAmount && rfq.quoteAmount !== '-'">
-                                    {{
-                                      rfq.quoteAmount
-                                        | currency: 'EUR' : 'symbol' : '1.2-2' : 'nl-NL'
-                                    }}
-                                  </ng-container>
-                                </td>
-                                <td style="text-align: center; padding-left: 20px">
-                                  <!-- PDF Icon with Disabled Logic -->
-                                  <i
-                                    class="fa fa-file-pdf action-icon download-icon"
-                                    [class.disabled-icon]="!isPdfEnabled(rfq)"
-                                    (click)="
-                                      isPdfEnabled(rfq) && downloadQuote($event, rfq.documentId)
-                                    "
-                                    title="Download Quote"
-                                  ></i>
+                                  <td (click)="markViewed(work, rfq)">
+                                    {{ rfq.name }}
+                                    <div class="rating">★ {{ rfq.rating }}</div>
+                                  </td>
 
-                                  <i
-                                    class="fa fa-bell"
-                                    [class.disabled-icon]="!isBellEnabled(rfq)"
-                                    (click)="isBellEnabled(rfq) && openReminderPopup(rfq)"
-                                    title="Set Reminder"
-                                  ></i>
-                                </td>
-                              </ng-container>
+                                  <td (click)="markViewed(work, rfq)">{{ rfq.date }}</td>
+                                  <td (click)="markViewed(work, rfq)">{{ rfq.rfqNumber }}</td>
 
-                              <!-- FALLBACK: If RFQ exists but no Subcontractor (e.g. RFQ59) -->
-                              <ng-template #noResponseTemplate>
+                                  <td style="text-align: center" (click)="markViewed(work, rfq)">
+                                    <i class="fa fa-check-circle success" *ngIf="rfq.viewed"></i>
+                                    <!-- <i class="fa fa-times fail" *ngIf="!rfq.viewed"></i> -->
+                                  </td>
+
+                                  <td style="text-align: center" (click)="markViewed(work, rfq)">
+                                    <i
+                                      class="fa fa-check-circle success"
+                                      *ngIf="rfq.interested"
+                                    ></i>
+                                    <i class="fa fa-times fail" *ngIf="rfq.notInterested"></i>
+                                  </td>
+                                  <td
+                                    style="text-align: center"
+                                    (click)="markMaybeLater(work, rfq)"
+                                  >
+                                    <i
+                                      class="fa fa-check-circle success"
+                                      *ngIf="rfq.maybeLater"
+                                    ></i>
+                                    <!-- <i class="fa fa-times fail" *ngIf="!rfq.maybeLater"></i> -->
+                                  </td>
+                                  <td
+                                    style="text-align: right; padding-right: 56px"
+                                    (click)="markViewed(work, rfq)"
+                                  >
+                                    <ng-container
+                                      *ngIf="rfq.quoteAmount && rfq.quoteAmount !== '-'"
+                                    >
+                                      {{
+                                        rfq.quoteAmount
+                                          | currency: 'EUR' : 'symbol' : '1.2-2' : 'nl-NL'
+                                      }}
+                                    </ng-container>
+                                  </td>
+                                  <td style="text-align: center; padding-left: 20px">
+                                    <!-- PDF Icon with Disabled Logic -->
+                                    <i
+                                      class="fa fa-file-pdf action-icon download-icon"
+                                      [class.disabled-icon]="!isPdfEnabled(rfq)"
+                                      (click)="
+                                        isPdfEnabled(rfq) && downloadQuote($event, rfq.documentId)
+                                      "
+                                      title="Download Quote"
+                                    ></i>
+
+                                    <i
+                                      class="fa fa-bell"
+                                      [class.disabled-icon]="!isBellEnabled(rfq)"
+                                      (click)="isBellEnabled(rfq) && openReminderPopup(rfq)"
+                                      title="Set Reminder"
+                                    ></i>
+                                  </td>
+                                </ng-container>
+
+                                <!-- FALLBACK: If RFQ exists but no Subcontractor (e.g. RFQ59) -->
+                                <ng-template #noResponseTemplate>
+                                  <td
+                                    colspan="9"
+                                    class="no-records-cell"
+                                    style="text-align: center; padding: 20px; color: #888"
+                                  >
+                                    {{ 'RESPONSE_VIEW.NO_RESPONSES_FOUND' | translate }}
+                                  </td>
+                                </ng-template>
+                              </tr>
+
+                              <!-- EDGE CASE: Filter returns 0 results completely -->
+                              <tr *ngIf="getFilteredRfqs(work)?.length === 0">
                                 <td
                                   colspan="9"
                                   class="no-records-cell"
@@ -312,542 +355,557 @@
                                 >
                                   {{ 'RESPONSE_VIEW.NO_RESPONSES_FOUND' | translate }}
                                 </td>
-                              </ng-template>
-                            </tr>
-
-                            <!-- EDGE CASE: Filter returns 0 results completely -->
-                            <tr *ngIf="getFilteredRfqs(work)?.length === 0">
-                              <td
-                                colspan="9"
-                                class="no-records-cell"
-                                style="text-align: center; padding: 20px; color: #888"
-                              >
-                                {{ 'RESPONSE_VIEW.NO_RESPONSES_FOUND' | translate }}
-                              </td>
-                            </tr>
-                          </tbody>
-                        </table>
+                              </tr>
+                            </tbody>
+                          </table>
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
 
-                <!-- 2️⃣ SUBCONTRACTOR GROUPING  -->
-                <div *ngIf="groupBy === 'subcontractor' && !isLoading">
-                  <!-- NO DATA (no work items) -->
-                  <div
-                    *ngIf="!subcontractorGroups || subcontractorGroups.length === 0"
-                    class="noData"
-                  >
-                    {{ 'RESPONSE_VIEW.NO_RFQ_RESPONSES' | translate }}
-                  </div>
-
-                  <div *ngFor="let sub of subcontractorGroups" class="work-item">
-                    <!-- Header -->
-                    <div class="work-item-header" (click)="sub.open = !sub.open">
-                      <div class="rfq-summary">
-                        <div>
-                          <span class="label">{{ 'RESPONSE_VIEW.SUBCONTRACTOR' | translate }}</span>
-                          <div class="highlight">{{ sub.subcontractorName }}</div>
-                        </div>
-                        <div>
-                          <span class="label">{{ 'RESPONSE_VIEW.REQUESTS_SENT' | translate }}</span>
-                          <div>{{ sub.requestsSent }}</div>
-                        </div>
-                        <div>
-                          <span class="label">{{ 'RESPONSE_VIEW.VIEWED' | translate }}</span>
-                          <div>{{ sub.viewed }}</div>
-                        </div>
-                        <div>
-                          <span class="label">{{ 'RFQ_SUMMARY.INTERESTED' | translate }}</span>
-                          <div>{{ sub.interested }}</div>
-                        </div>
-                        <div>
-                          <span class="label">{{ 'RFQ_SUMMARY.NOT_INTERESTED' | translate }}</span>
-                          <div>{{ sub.notInterested }}</div>
-                        </div>
-                        <div>
-                          <span class="label">{{ 'RFQ_SUMMARY.MAYBE_LATER' | translate }}</span>
-                          <div>{{ sub.maybeLater }}</div>
-                        </div>
-                        <div>
-                          <span class="label">{{ 'RESPONSE_VIEW.NOT_RESPONDED' | translate }}</span>
-                          <div>{{ sub.notResponded }}</div>
-                        </div>
-                      </div>
-
-                      <i class="fa" [ngClass]="sub.open ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
-                    </div>
-
-                    <!-- Body -->
-                    <div class="work-item-body" *ngIf="sub.open">
-                      <!-- Search -->
-                      <div class="search-box" style="margin-bottom: 12px">
-                        <input
-                          [(ngModel)]="sub.searchText"
-                          placeholder="{{ 'COMMON.SEARCH' | translate }}"
-                        />
-                      </div>
-
-                      <!-- Table -->
-                      <div class="rfq-table-wrapper">
-                        <table class="rfq-table">
-                          <thead>
-                            <tr>
-                              <th>{{ 'RESPONSE_VIEW.WORK_ITEM' | translate }}</th>
-                              <th>{{ 'RESPONSE_VIEW.DATE' | translate }}</th>
-                              <th>{{ 'RESPONSE_VIEW.RFQ_ID' | translate }}</th>
-                              <th style="text-align: center">
-                                {{ 'RESPONSE_VIEW.VIEWED' | translate }}
-                              </th>
-                              <th style="text-align: center">
-                                {{ 'RFQ_SUMMARY.INTERESTED' | translate }}
-                              </th>
-                              <th style="text-align: center">
-                                {{ 'RFQ_SUMMARY.MAYBE_LATER' | translate }}
-                              </th>
-                              <th style="text-align: center">
-                                {{ 'RESPONSE_VIEW.QUOTE_AMOUNT' | translate }}
-                              </th>
-                              <th style="text-align: center">{{ 'COMMON.ACTIONS' | translate }}</th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            <tr
-                              *ngFor="let w of getFilteredSubWorkItems(sub)"
-                              (click)="markViewed(sub, w)"
-                            >
-                              <td>{{ w.workItemName }}</td>
-                              <td>{{ w.date }}</td>
-                              <td>{{ w.rfqNumber }}</td>
-                              <td style="text-align: center">
-                                <i class="fa fa-check-circle success" *ngIf="w.viewed"></i>
-                                <!-- <i class="fa fa-times fail" *ngIf="!w.viewed"></i> -->
-                              </td>
-
-                              <td style="text-align: center">
-                                <i class="fa fa-check-circle success" *ngIf="w.interested"></i>
-                                <i class="fa fa-times fail" *ngIf="w.notInterested"></i>
-                              </td>
-                              <td style="text-align: center">
-                                <i class="fa fa-check-circle success" *ngIf="w.maybeLater"></i>
-                                <!-- <i class="fa fa-times fail" *ngIf="!w.maybeLater"></i> -->
-                              </td>
-                              <td style="text-align: right; padding-right: 50px">
-                                <!-- € {{ rfq.quoteAmount }} -->
-                                <ng-container *ngIf="w.quoteAmount && w.quoteAmount !== '-'">
-                                  {{
-                                    w.quoteAmount | currency: 'EUR' : 'symbol' : '1.2-2' : 'nl-NL'
-                                  }}
-                                </ng-container>
-                              </td>
-                              <td style="text-align: center">
-                                                       <i
-  class="fa fa-file-pdf action-icon download-icon"
-  [class.disabled-icon]="!isPdfEnabled(w)"
-  (click)="isPdfEnabled(w) && w.documentId && downloadQuote($event, w.documentId)"
-  [title]="w.responded ? 'Download Quote' : 'No Quote Uploaded'"
-></i>
-                                <i
-                                  class="fa fa-bell"
-                                  [class.disabled-icon]="!isBellEnabled(w)"
-                                  (click)="isBellEnabled(w) && openReminderPopup(w)"
-                                  title="Set Reminder"
-                                ></i>
-                              </td>
-                            </tr>
-                          </tbody>
-                        </table>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- TAB 2: RFQ (Mat Table Section) -->
-            <div *ngIf="selectedTab === 'rfq'">
-              <div class="button-container">
-                <button type="button" class="addbtn" (click)="addRfq()">
-                  <b>{{ 'RFQ_ACTIONS.ADD_RFQ' | translate }}</b>
-                </button>
-              </div>
-              <div class="table-scroll">
-                <table
-                  mat-table
-                  [dataSource]="dataSource"
-                  class="mat-elevation-z8"
-                  matSort
-                  matSortActive="workitem"
-                  matSortDirection="desc"
-                >
-                  <tr class="mat-row" *matNoDataRow>
-                    <td
-                      class="mat-cell noData"
-                      style="
-                        border-bottom: none !important;
-                        text-align: center;
-                        padding-top: 90px;
-                        font-size: 15px;
-                      "
-                      [attr.colspan]="displayedColumns.length"
-                    >
-                      {{ 'RFQ_SUMMARY.NO_RFQ' | translate }}
-                    </td>
-                  </tr>
-                  <ng-container matColumnDef="number">
-                    <th mat-header-cell *matHeaderCellDef mat-sort-header>
-                      {{ 'RFQ_TABLE.RFQ_ID' | translate }}
-                    </th>
-                    <td mat-cell *matCellDef="let row">{{ row.number }}</td>
-                  </ng-container>
-                  <ng-container matColumnDef="workitem">
-                    <th mat-header-cell *matHeaderCellDef mat-sort-header>
-                      {{ 'RFQ_TABLE.WORK_ITEM' | translate }}
-                    </th>
-                    <td mat-cell *matCellDef="let row">{{ row.workItem }}</td>
-                  </ng-container>
-
-                  <ng-container matColumnDef="rfqSentDate">
-                    <th mat-header-cell *matHeaderCellDef mat-sort-header>
-                      {{ 'RFQ_TABLE.SENT_DATE' | translate }}
-                    </th>
-                    <td mat-cell *matCellDef="let row">{{ row.rfqSentDate }}</td>
-                  </ng-container>
-                  <ng-container matColumnDef="dueDate">
-                    <th mat-header-cell *matHeaderCellDef mat-sort-header>
-                      {{ 'RFQ_TABLE.DUE_DATE' | translate }}
-                    </th>
-
-                    <td mat-cell *matCellDef="let row">{{ row.globalDueDate }}</td>
-                  </ng-container>
-
-                  <ng-container matColumnDef="totalSubcontractors">
-                    <th mat-header-cell *matHeaderCellDef mat-sort-header>
-                      {{ 'RFQ_TABLE.NO_OF_SUBCONTRACTORS' | translate }}
-                    </th>
-                    <td mat-cell *matCellDef="let row">{{ row.rfqSent }}</td>
-                  </ng-container>
-                  <ng-container matColumnDef="quoteRecieved">
-                    <th mat-header-cell *matHeaderCellDef mat-sort-header>
-                      {{ 'RFQ_TABLE.QUOTE_RECEIVED' | translate }}
-                    </th>
-                    <td mat-cell *matCellDef="let row">{{ row.quoteReceived }}</td>
-                  </ng-container>
-                  <ng-container matColumnDef="status">
-                    <th mat-header-cell *matHeaderCellDef mat-sort-header>
-                      {{ 'RFQ_TABLE.STATUS' | translate }}
-                    </th>
-                    <td mat-cell *matCellDef="let row">{{ row.status }}</td>
-                  </ng-container>
-
-                  <ng-container matColumnDef="actions">
-                    <th mat-header-cell *matHeaderCellDef>{{ 'COMMON.ACTIONS' | translate }}</th>
-                    <td mat-cell *matCellDef="let row">
-                      <i
-                        class="fa-regular fa-pen-to-square edit-icon"
-                        style="color: #f97316; cursor: pointer"
-                        (click)="editRfq(row.id)"
-                        title="Edit RFQ"
-                      ></i>
-                      <i
-                        *ngIf="userService.isAdmin()"
-                        class="fa-regular fa-trash-can delete-icon"
-                        (click)="deleteRfq(row.id)"
-                        style="color: #dc3545; cursor: pointer; margin-left: 12px"
-                        title="Delete RFQ"
-                      ></i>
-                    </td>
-                  </ng-container>
-
-                  <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-                  <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
-                </table>
-              </div>
-            </div>
-            <mat-paginator
-              *ngIf="selectedTab === 'rfq'"
-              [pageSize]="pageSize"
-              [pageSizeOptions]="pageSizeOptions"
-              showFirstLastButtons
-            >
-            </mat-paginator>
-            <!-- TAB 3: CONVERSATION -->
-            <div *ngIf="selectedTab === 'conversation'">
-              <!-- NO DATA -->
-              <div class="noData" *ngIf="!convoSubcontractors || convoSubcontractors.length === 0">
-                {{ 'EMPTY_STATES.NO_CONVERSATION' | translate }}
-              </div>
-
-              <div class="chat-container" *ngIf="(convoSubcontractors?.length ?? 0) > 0">
-                <!-- LEFT SIDEBAR -->
-                <div class="chat-sidebar">
-                  <div class="sidebar-list" *ngIf="(convoSubcontractors?.length ?? 0) > 0">
+                  <!-- 2️⃣ SUBCONTRACTOR GROUPING  -->
+                  <div *ngIf="groupBy === 'subcontractor' && !isLoading">
+                    <!-- NO DATA (no work items) -->
                     <div
-                      class="sidebar-item"
-                      *ngFor="let sub of convoSubcontractors; let i = index"
-                      [class.active]="selectedIndex === i"
-                      (click)="onSubClick(sub.id, i)"
+                      *ngIf="!subcontractorGroups || subcontractorGroups.length === 0"
+                      class="noData"
                     >
-                      {{ sub.name }}
+                      {{ 'RESPONSE_VIEW.NO_RFQ_RESPONSES' | translate }}
+                    </div>
+
+                    <div *ngFor="let sub of subcontractorGroups" class="work-item">
+                      <!-- Header -->
+                      <div class="work-item-header" (click)="sub.open = !sub.open">
+                        <div class="rfq-summary">
+                          <div>
+                            <span class="label">{{
+                              'RESPONSE_VIEW.SUBCONTRACTOR' | translate
+                            }}</span>
+                            <div class="highlight">{{ sub.subcontractorName }}</div>
+                          </div>
+                          <div>
+                            <span class="label">{{
+                              'RESPONSE_VIEW.REQUESTS_SENT' | translate
+                            }}</span>
+                            <div>{{ sub.requestsSent }}</div>
+                          </div>
+                          <div>
+                            <span class="label">{{ 'RESPONSE_VIEW.VIEWED' | translate }}</span>
+                            <div>{{ sub.viewed }}</div>
+                          </div>
+                          <div>
+                            <span class="label">{{ 'RFQ_SUMMARY.INTERESTED' | translate }}</span>
+                            <div>{{ sub.interested }}</div>
+                          </div>
+                          <div>
+                            <span class="label">{{
+                              'RFQ_SUMMARY.NOT_INTERESTED' | translate
+                            }}</span>
+                            <div>{{ sub.notInterested }}</div>
+                          </div>
+                          <div>
+                            <span class="label">{{ 'RFQ_SUMMARY.MAYBE_LATER' | translate }}</span>
+                            <div>{{ sub.maybeLater }}</div>
+                          </div>
+                          <div>
+                            <span class="label">{{
+                              'RESPONSE_VIEW.NOT_RESPONDED' | translate
+                            }}</span>
+                            <div>{{ sub.notResponded }}</div>
+                          </div>
+                        </div>
+
+                        <i
+                          class="fa"
+                          [ngClass]="sub.open ? 'fa-chevron-up' : 'fa-chevron-down'"
+                        ></i>
+                      </div>
+
+                      <!-- Body -->
+                      <div class="work-item-body" *ngIf="sub.open">
+                        <!-- Search -->
+                        <div class="search-box" style="margin-bottom: 12px">
+                          <input
+                            [(ngModel)]="sub.searchText"
+                            placeholder="{{ 'COMMON.SEARCH' | translate }}"
+                          />
+                        </div>
+
+                        <!-- Table -->
+                        <div class="rfq-table-wrapper">
+                          <table class="rfq-table">
+                            <thead>
+                              <tr>
+                                <th>{{ 'RESPONSE_VIEW.WORK_ITEM' | translate }}</th>
+                                <th>{{ 'RESPONSE_VIEW.DATE' | translate }}</th>
+                                <th>{{ 'RESPONSE_VIEW.RFQ_ID' | translate }}</th>
+                                <th style="text-align: center">
+                                  {{ 'RESPONSE_VIEW.VIEWED' | translate }}
+                                </th>
+                                <th style="text-align: center">
+                                  {{ 'RFQ_SUMMARY.INTERESTED' | translate }}
+                                </th>
+                                <th style="text-align: center">
+                                  {{ 'RFQ_SUMMARY.MAYBE_LATER' | translate }}
+                                </th>
+                                <th style="text-align: center">
+                                  {{ 'RESPONSE_VIEW.QUOTE_AMOUNT' | translate }}
+                                </th>
+                                <th style="text-align: center">
+                                  {{ 'COMMON.ACTIONS' | translate }}
+                                </th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              <tr
+                                *ngFor="let w of getFilteredSubWorkItems(sub)"
+                                (click)="markViewed(sub, w)"
+                              >
+                                <td>{{ w.workItemName }}</td>
+                                <td>{{ w.date }}</td>
+                                <td>{{ w.rfqNumber }}</td>
+                                <td style="text-align: center">
+                                  <i class="fa fa-check-circle success" *ngIf="w.viewed"></i>
+                                  <!-- <i class="fa fa-times fail" *ngIf="!w.viewed"></i> -->
+                                </td>
+
+                                <td style="text-align: center">
+                                  <i class="fa fa-check-circle success" *ngIf="w.interested"></i>
+                                  <i class="fa fa-times fail" *ngIf="w.notInterested"></i>
+                                </td>
+                                <td style="text-align: center">
+                                  <i class="fa fa-check-circle success" *ngIf="w.maybeLater"></i>
+                                  <!-- <i class="fa fa-times fail" *ngIf="!w.maybeLater"></i> -->
+                                </td>
+                                <td style="text-align: right; padding-right: 50px">
+                                  <!-- € {{ rfq.quoteAmount }} -->
+                                  <ng-container *ngIf="w.quoteAmount && w.quoteAmount !== '-'">
+                                    {{
+                                      w.quoteAmount | currency: 'EUR' : 'symbol' : '1.2-2' : 'nl-NL'
+                                    }}
+                                  </ng-container>
+                                </td>
+                                <td style="text-align: center">
+                                  <i
+                                    class="fa fa-file-pdf action-icon download-icon"
+                                    [class.disabled-icon]="!isPdfEnabled(w)"
+                                    (click)="
+                                      isPdfEnabled(w) &&
+                                        w.documentId &&
+                                        downloadQuote($event, w.documentId)
+                                    "
+                                    [title]="w.responded ? 'Download Quote' : 'No Quote Uploaded'"
+                                  ></i>
+                                  <i
+                                    class="fa fa-bell"
+                                    [class.disabled-icon]="!isBellEnabled(w)"
+                                    (click)="isBellEnabled(w) && openReminderPopup(w)"
+                                    title="Set Reminder"
+                                  ></i>
+                                </td>
+                              </tr>
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
                     </div>
                   </div>
+                </div>
+              </div>
 
-                  <button class="log-btn" (click)="openLogConvo()">
-                    {{ 'CONVERSATION.LOG_CONVERSATION' | translate }}
+              <!-- TAB 2: RFQ (Mat Table Section) -->
+              <div *ngIf="selectedTab === 'rfq'">
+                <div class="button-container">
+                  <button type="button" class="addbtn" (click)="addRfq()">
+                    <b>{{ 'RFQ_ACTIONS.ADD_RFQ' | translate }}</b>
                   </button>
                 </div>
-
-                <!-- RIGHT CHAT AREA -->
-                <div class="chat-content">
-                  <!-- LOADER -->
-                  <div *ngIf="isSpinLoading" class="chat-loader">
-                    <mat-spinner diameter="40"></mat-spinner>
-                  </div>
-
-                  <ng-container *ngIf="!isSpinLoading">
-                    <!-- SEARCH -->
-                    <div class="chat-search">
-                      <mat-form-field
-                        appearance="outline"
-                        class="chat-search-field"
-                        style="width: 99%"
+                <div class="table-scroll">
+                  <table
+                    mat-table
+                    [dataSource]="dataSource"
+                    class="mat-elevation-z8"
+                    matSort
+                    matSortActive="workitem"
+                    matSortDirection="desc"
+                  >
+                    <tr class="mat-row" *matNoDataRow>
+                      <td
+                        class="mat-cell noData"
+                        style="
+                          border-bottom: none !important;
+                          text-align: center;
+                          padding-top: 90px;
+                          font-size: 15px;
+                        "
+                        [attr.colspan]="displayedColumns.length"
                       >
-                        <mat-icon matPrefix>search</mat-icon>
+                        {{ 'RFQ_SUMMARY.NO_RFQ' | translate }}
+                      </td>
+                    </tr>
+                    <ng-container matColumnDef="number">
+                      <th mat-header-cell *matHeaderCellDef mat-sort-header>
+                        {{ 'RFQ_TABLE.RFQ_ID' | translate }}
+                      </th>
+                      <td mat-cell *matCellDef="let row">{{ row.number }}</td>
+                    </ng-container>
+                    <ng-container matColumnDef="workitem">
+                      <th mat-header-cell *matHeaderCellDef mat-sort-header>
+                        {{ 'RFQ_TABLE.WORK_ITEM' | translate }}
+                      </th>
+                      <td mat-cell *matCellDef="let row">{{ row.workItem }}</td>
+                    </ng-container>
 
-                        <input
-                          matInput
-                          class="form-control"
-                          placeholder="{{ 'CONVERSATION.SEARCH_CONVERSATION' | translate }}"
-                          [(ngModel)]="conversationSearchText"
-                          (input)="filterConversations()"
-                        />
+                    <ng-container matColumnDef="rfqSentDate">
+                      <th mat-header-cell *matHeaderCellDef mat-sort-header>
+                        {{ 'RFQ_TABLE.SENT_DATE' | translate }}
+                      </th>
+                      <td mat-cell *matCellDef="let row">{{ row.rfqSentDate }}</td>
+                    </ng-container>
+                    <ng-container matColumnDef="dueDate">
+                      <th mat-header-cell *matHeaderCellDef mat-sort-header>
+                        {{ 'RFQ_TABLE.DUE_DATE' | translate }}
+                      </th>
 
-                        <button
-                          matSuffix
-                          mat-icon-button
-                          *ngIf="conversationSearchText"
-                          (click)="clearConversationSearch()"
-                        >
-                          <mat-icon>close</mat-icon>
-                        </button>
-                      </mat-form-field>
+                      <td mat-cell *matCellDef="let row">{{ row.globalDueDate }}</td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="totalSubcontractors">
+                      <th mat-header-cell *matHeaderCellDef mat-sort-header>
+                        {{ 'RFQ_TABLE.NO_OF_SUBCONTRACTORS' | translate }}
+                      </th>
+                      <td mat-cell *matCellDef="let row">{{ row.rfqSent }}</td>
+                    </ng-container>
+                    <ng-container matColumnDef="quoteRecieved">
+                      <th mat-header-cell *matHeaderCellDef mat-sort-header>
+                        {{ 'RFQ_TABLE.QUOTE_RECEIVED' | translate }}
+                      </th>
+                      <td mat-cell *matCellDef="let row">{{ row.quoteReceived }}</td>
+                    </ng-container>
+                    <ng-container matColumnDef="status">
+                      <th mat-header-cell *matHeaderCellDef mat-sort-header>
+                        {{ 'RFQ_TABLE.STATUS' | translate }}
+                      </th>
+                      <td mat-cell *matCellDef="let row">{{ row.status }}</td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="actions">
+                      <th mat-header-cell *matHeaderCellDef>{{ 'COMMON.ACTIONS' | translate }}</th>
+                      <td mat-cell *matCellDef="let row">
+                        <i
+                          class="fa-regular fa-pen-to-square edit-icon"
+                          style="color: #f97316; cursor: pointer"
+                          (click)="editRfq(row.id)"
+                          title="Edit RFQ"
+                        ></i>
+                        <i
+                          *ngIf="userService.isAdmin()"
+                          class="fa-regular fa-trash-can delete-icon"
+                          (click)="deleteRfq(row.id)"
+                          style="color: #dc3545; cursor: pointer; margin-left: 12px"
+                          title="Delete RFQ"
+                        ></i>
+                      </td>
+                    </ng-container>
+
+                    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+                    <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+                  </table>
+                </div>
+              </div>
+              <mat-paginator
+                *ngIf="selectedTab === 'rfq'"
+                [pageSize]="pageSize"
+                [pageSizeOptions]="pageSizeOptions"
+                showFirstLastButtons
+              >
+              </mat-paginator>
+              <!-- TAB 3: CONVERSATION -->
+              <div *ngIf="selectedTab === 'conversation'">
+                <!-- NO DATA -->
+                <div
+                  class="noData"
+                  *ngIf="!convoSubcontractors || convoSubcontractors.length === 0"
+                >
+                  {{ 'EMPTY_STATES.NO_CONVERSATION' | translate }}
+                </div>
+
+                <div class="chat-container" *ngIf="(convoSubcontractors?.length ?? 0) > 0">
+                  <!-- LEFT SIDEBAR -->
+                  <div class="chat-sidebar">
+                    <div class="sidebar-list" *ngIf="(convoSubcontractors?.length ?? 0) > 0">
+                      <div
+                        class="sidebar-item"
+                        *ngFor="let sub of convoSubcontractors; let i = index"
+                        [class.active]="selectedIndex === i"
+                        (click)="onSubClick(sub.id, i)"
+                      >
+                        {{ sub.name }}
+                      </div>
                     </div>
 
-                    <!-- CHAT MESSAGES -->
-                    <section class="msger">
-                      <div class="chat-messages" #chatMessages>
-                        <div
-                          class="noData"
-                          *ngIf="
-                            !isSpinLoading &&
-                            (!pmSubConversationData || pmSubConversationData.length === 0)
-                          "
-                        >
-                          {{ 'EMPTY_STATES.NO_CONVERSATION' | translate }}
-                        </div>
+                    <button class="log-btn" (click)="openLogConvo()">
+                      {{ 'CONVERSATION.LOG_CONVERSATION' | translate }}
+                    </button>
+                  </div>
 
-                        <!-- SINGLE MESSAGE LOOP -->
-                        <div
-                          class="message-row"
-                          *ngFor="let convo of pmSubConversationData; trackBy: trackByMessageId"
-                          [class.reply-highlight]="
-                            replyingToMessageId === convo.conversationMessageID
-                          "
-                          [ngClass]="{
-                            right: convo.senderType === 'PM',
-                            left: convo.senderType !== 'PM',
-                            reply: convo.subcontractorMessageID,
-                          }"
+                  <!-- RIGHT CHAT AREA -->
+                  <div class="chat-content">
+                    <!-- LOADER -->
+                    <div *ngIf="isSpinLoading" class="chat-loader">
+                      <mat-spinner diameter="40"></mat-spinner>
+                    </div>
+
+                    <ng-container *ngIf="!isSpinLoading">
+                      <!-- SEARCH -->
+                      <div class="chat-search">
+                        <mat-form-field
+                          appearance="outline"
+                          class="chat-search-field"
+                          style="width: 99%"
                         >
-                          <!-- MESSAGE META -->
-                          <div class="message-header">
-                            <span class="draft" *ngIf="convo.status === 'Draft'">
-                              {{ 'CONVERSATION.DRAFT' | translate }}
-                            </span>
+                          <mat-icon matPrefix>search</mat-icon>
+
+                          <input
+                            matInput
+                            class="form-control"
+                            placeholder="{{ 'CONVERSATION.SEARCH_CONVERSATION' | translate }}"
+                            [(ngModel)]="conversationSearchText"
+                            (input)="filterConversations()"
+                          />
+
+                          <button
+                            matSuffix
+                            mat-icon-button
+                            *ngIf="conversationSearchText"
+                            (click)="clearConversationSearch()"
+                          >
+                            <mat-icon>close</mat-icon>
+                          </button>
+                        </mat-form-field>
+                      </div>
+
+                      <!-- CHAT MESSAGES -->
+                      <section class="msger">
+                        <div class="chat-messages" #chatMessages>
+                          <div
+                            class="noData"
+                            *ngIf="
+                              !isSpinLoading &&
+                              (!pmSubConversationData || pmSubConversationData.length === 0)
+                            "
+                          >
+                            {{ 'EMPTY_STATES.NO_CONVERSATION' | translate }}
                           </div>
 
-                          <!-- SUB META -->
-                          <ng-container *ngIf="convo.senderType !== 'PM'">
-                            <div class="message-meta">
+                          <!-- SINGLE MESSAGE LOOP -->
+                          <div
+                            class="message-row"
+                            *ngFor="let convo of pmSubConversationData; trackBy: trackByMessageId"
+                            [class.reply-highlight]="
+                              replyingToMessageId === convo.conversationMessageID
+                            "
+                            [ngClass]="{
+                              right: convo.senderType === 'PM',
+                              left: convo.senderType !== 'PM',
+                              reply: convo.subcontractorMessageID,
+                            }"
+                          >
+                            <!-- MESSAGE META -->
+                            <div class="message-header">
+                              <span class="draft" *ngIf="convo.status === 'Draft'">
+                                {{ 'CONVERSATION.DRAFT' | translate }}
+                              </span>
+                            </div>
+
+                            <!-- SUB META -->
+                            <ng-container *ngIf="convo.senderType !== 'PM'">
+                              <div class="message-meta">
+                                <span class="message-time">
+                                  {{ getLocalTime(convo.messageDateTime) }}
+                                </span>
+
+                                <ng-container [ngSwitch]="convo.conversationType?.toLowerCase()">
+                                  <i *ngSwitchCase="'phone'" class="fa fa-phone convoType-icon"></i>
+                                  <i
+                                    *ngSwitchCase="'email'"
+                                    class="fa fa-envelope convoType-icon"
+                                  ></i>
+                                  <i
+                                    *ngSwitchCase="'meeting'"
+                                    class="fa fa-handshake convoType-icon"
+                                  ></i>
+                                </ng-container>
+
+                                <button
+                                  class="reply-btn btn btn-sm btn-primary"
+                                  *ngIf="convo.conversationMessageID"
+                                  (click)="startReply(convo)"
+                                >
+                                  {{ 'CONVERSATION.REPLY' | translate }}
+                                </button>
+                              </div>
+                            </ng-container>
+
+                            <!-- PM META -->
+                            <ng-container *ngIf="convo.senderType === 'PM'">
                               <span class="message-time">
                                 {{ getLocalTime(convo.messageDateTime) }}
                               </span>
+                            </ng-container>
 
-                              <ng-container [ngSwitch]="convo.conversationType?.toLowerCase()">
-                                <i *ngSwitchCase="'phone'" class="fa fa-phone convoType-icon"></i>
-                                <i
-                                  *ngSwitchCase="'email'"
-                                  class="fa fa-envelope convoType-icon"
-                                ></i>
-                                <i
-                                  *ngSwitchCase="'meeting'"
-                                  class="fa fa-handshake convoType-icon"
-                                ></i>
-                              </ng-container>
-
-                              <button
-                                class="reply-btn"
-                                *ngIf="convo.conversationMessageID"
-                                (click)="startReply(convo)"
-                              >
-                                {{ 'CONVERSATION.REPLY' | translate }}
-                              </button>
-                            </div>
-                          </ng-container>
-
-                          <!-- PM META -->
-                          <ng-container *ngIf="convo.senderType === 'PM'">
-                            <span class="message-time">
-                              {{ getLocalTime(convo.messageDateTime) }}
-                            </span>
-                          </ng-container>
-
-                          <!-- ✅ MESSAGE BUBBLE (Teams-Style Reply Support) -->
-                          <div
-                            class="message"
-                            [ngClass]="convo.senderType === 'PM' ? 'user' : 'bot'"
-                          >
-                            <!-- ✅ QUOTED PARENT (Teams-style) -->
-                            <div class="teams-reply" *ngIf="convo.subcontractorMessageID">
-                              <div class="teams-reply-bar"></div>
-                              <div class="teams-reply-content">
-                                <div class="teams-reply-header">
-                                  {{ convo.parentSenderName || 'Unknown' }} ·
-                                  {{ getLocalTime(convo.parentMessageDateTime) }}
+                            <!-- ✅ MESSAGE BUBBLE (Teams-Style Reply Support) -->
+                            <div
+                              class="message"
+                              [ngClass]="convo.senderType === 'PM' ? 'user' : 'bot'"
+                            >
+                              <!-- ✅ QUOTED PARENT (Teams-style) -->
+                              <div class="teams-reply" *ngIf="convo.subcontractorMessageID">
+                                <div class="teams-reply-bar"></div>
+                                <div class="teams-reply-content">
+                                  <div class="teams-reply-header">
+                                    {{ convo.parentSenderName || 'Unknown' }} ·
+                                    {{ getLocalTime(convo.parentMessageDateTime) }}
+                                  </div>
+                                  <div class="teams-reply-text">
+                                    {{
+                                      convo.parentMessageText || convo.parentMessage || '(No text)'
+                                    }}
+                                  </div>
                                 </div>
-                                <div class="teams-reply-text">
-                                  {{
-                                    convo.parentMessageText || convo.parentMessage || '(No text)'
-                                  }}
-                                </div>
+                              </div>
+
+                              <!-- ✅ ACTUAL MESSAGE TEXT -->
+                              <div class="message-text">
+                                {{ convo.messageText || convo.message || convo.Message }}
                               </div>
                             </div>
 
-                            <!-- ✅ ACTUAL MESSAGE TEXT -->
-                            <div class="message-text">
-                              {{ convo.messageText || convo.message || convo.Message }}
-                            </div>
-                          </div>
-
-                          <!-- ✅ ATTACHMENTS -->
-                          <div
-                            class="attachments-row"
-                            *ngIf="convo.convoattachments && convo.convoattachments.length > 0"
-                          >
-                            <div class="attachment-chip" *ngFor="let att of convo.convoattachments">
-                              <a target="_blank">
-                                {{ att.fileName }}
-                              </a>
-                            </div>
-                          </div>
-
-                          <!-- REPLY BOX -->
-                          <div
-                            class="reply-box"
-                            *ngIf="replyingToMessageId === convo.conversationMessageID"
-                          >
-                            <textarea
-                              class="reply-textarea"
-                              rows="3"
-                              placeholder="Write a reply…"
-                              [(ngModel)]="replyTexts[convo.conversationMessageID]"
-                              (input)="validateReply(convo.conversationMessageID)"
-                            ></textarea>
-                            <div class="error" *ngIf="replyCharError[convo.conversationMessageID]">
-                              {{ 'VALIDATION.REPLY_LIMIT' | translate }}
-                            </div>
-                            <div class="attachment-row" *ngIf="replyAttachments.length">
+                            <!-- ✅ ATTACHMENTS -->
+                            <div
+                              class="attachments-row"
+                              *ngIf="convo.convoattachments && convo.convoattachments.length > 0"
+                            >
                               <div
-                                class="file-chip"
-                                *ngFor="let file of replyAttachments; let i = index"
+                                class="attachment-chip"
+                                *ngFor="let att of convo.convoattachments"
                               >
-                                {{ file.name }}
-                                <span class="remove" (click)="removeReplyFile(i)">×</span>
+                                <a target="_blank">
+                                  {{ att.fileName }}
+                                </a>
                               </div>
                             </div>
 
-                            <input
-                              type="file"
-                              #replyFileInput
-                              hidden
-                              multiple
-                              (change)="onReplyFileSelected($event)"
-                            />
-
-                            <div class="reply-actions">
-                              <button class="attach-btn" (click)="replyFileInput.click()">
-                                {{ 'CONVERSATION.ATTACH' | translate }}
-                              </button>
-
-                              <div class="action-right">
-                                <button class="cancel-btn" (click)="cancelReply()">
-                                  {{ 'COMMON.CANCEL' | translate }}
-                                </button>
-                                <button class="send-btn" (click)="sendReply(convo)">
-                                  {{ 'COMMON.SEND' | translate }}
-                                </button>
+                            <!-- REPLY BOX -->
+                            <div
+                              class="reply-box"
+                              *ngIf="replyingToMessageId === convo.conversationMessageID"
+                            >
+                              <textarea
+                                class="reply-textarea"
+                                rows="3"
+                                placeholder="Write a reply…"
+                                [(ngModel)]="replyTexts[convo.conversationMessageID]"
+                                (input)="validateReply(convo.conversationMessageID)"
+                              ></textarea>
+                              <div
+                                class="error"
+                                *ngIf="replyCharError[convo.conversationMessageID]"
+                              >
+                                {{ 'VALIDATION.REPLY_LIMIT' | translate }}
                               </div>
-                            </div>
+                              <div class="attachment-row" *ngIf="replyAttachments.length">
+                                <div
+                                  class="file-chip"
+                                  *ngFor="let file of replyAttachments; let i = index"
+                                >
+                                  {{ file.name }}
+                                  <span class="remove" (click)="removeReplyFile(i)">×</span>
+                                </div>
+                              </div>
 
-                            <div class="error" *ngIf="replyError">
-                              {{ replyError }}
+                              <input
+                                type="file"
+                                #replyFileInput
+                                hidden
+                                multiple
+                                (change)="onReplyFileSelected($event)"
+                              />
+
+                              <div class="reply-actions">
+
+                                <div class="action-right">
+                                <button class="attach-btn attachIcon" (click)="replyFileInput.click()">
+                                  <!-- {{ 'CONVERSATION.ATTACH' | translate }} -->
+                                </button>
+                                  <button class="btn btn-cancel" (click)="cancelReply()">
+                                    {{ 'COMMON.CANCEL' | translate }}
+                                  </button>
+                                  <button class="btn btn-primary" (click)="sendReply(convo)">
+                                    {{ 'COMMON.SEND' | translate }}
+                                  </button>
+                                </div>
+                              </div>
+
+                              <div class="error" *ngIf="replyError">
+                                {{ replyError }}
+                              </div>
                             </div>
                           </div>
                         </div>
-                      </div>
-                    </section>
-                  </ng-container>
+                      </section>
+                    </ng-container>
 
-                  <!-- INPUT AREA -->
-                  <div class="chat-input" [ngClass]="{ invalid: showInvalid }">
-                    <div class="attachment-row" *ngIf="attachments.length">
-                      <div class="file-chip" *ngFor="let file of attachments; let i = index">
-                        {{ file.name }}
-                        <span class="remove" (click)="removeFile(i)">✕</span>
+                    <!-- INPUT AREA -->
+                    <div class="chat-input" [ngClass]="{ invalid: showInvalid }">
+                      <div class="attachment-row" *ngIf="attachments.length">
+                        <div class="file-chip" *ngFor="let file of attachments; let i = index">
+                          {{ file.name }}
+                          <span class="remove" (click)="removeFile(i)">✕</span>
+                        </div>
+                      </div>
+
+                      <div class="input-row">
+                        <input
+                          type="text"
+                          class="form-control"
+                          placeholder="Enter Subject"
+                          [(ngModel)]="subject"
+                          (ngModelChange)="onInputChange()"
+                        />
+
+                        <input
+                          type="text"
+                          class="form-control"
+                          placeholder="Enter your message..."
+                          [(ngModel)]="messageText"
+                          (ngModelChange)="onInputChange()"
+                        />
+
+                        <div
+                          class="error-msg"
+                          style="color: red"
+                          *ngIf="(messageText ?? '').length > 5000"
+                        >
+                          {{ 'CONVERSATION.MESSAGE_TOO_LONG' | translate }}
+                        </div>
+
+                        <!-- Hidden file input -->
+                        <input
+                          type="file"
+                          #fileInput
+                          multiple
+                          hidden
+                          (change)="onFileSelected($event)"
+                        />
+
+                        <i class="fa fa-paperclip attach-icon" (click)="fileInput.click()"></i>
+                        <i class="fa fa-paper-plane send-icon" (click)="sendMessage()"></i>
                       </div>
                     </div>
 
-                    <div class="input-row">
-                      <input
-                        type="text"
-                        class="form-control"
-                        placeholder="Enter Subject"
-                        [(ngModel)]="subject"
-                        (ngModelChange)="onInputChange()"
-                      />
-
-                      <input
-                        type="text"
-                        class="form-control"
-                        placeholder="Enter your message..."
-                        [(ngModel)]="messageText"
-                        (ngModelChange)="onInputChange()"
-                      />
-
-                      <div
-                        class="error-msg"
-                        style="color: red"
-                        *ngIf="(messageText ?? '').length > 5000"
-                      >
-                        {{ 'CONVERSATION.MESSAGE_TOO_LONG' | translate }}
-                      </div>
-
-                      <!-- Hidden file input -->
-                      <input
-                        type="file"
-                        #fileInput
-                        multiple
-                        hidden
-                        (change)="onFileSelected($event)"
-                      />
-
-                      <i class="fa fa-paperclip attach-icon" (click)="fileInput.click()"></i>
-                      <i class="fa fa-paper-plane send-icon" (click)="sendMessage()"></i>
-                    </div>
+                    <span class="error-span" *ngIf="showInvalid"> Fields cannot be empty. </span>
                   </div>
-
-                  <span class="error-span" *ngIf="showInvalid"> Fields cannot be empty. </span>
                 </div>
               </div>
             </div>
@@ -981,16 +1039,16 @@
 
       <!-- Modal Footer -->
       <div class="modal-footer">
-        <button class="btn cancel-btn" (click)="closeReminderPopup()">Cancel</button>
+        <button class="btn btn-cancel" (click)="closeReminderPopup()">Cancel</button>
         <button
-          class="btn reset-btn"
+          class="btn btn-secondary"
           *ngIf="reminderType === 'custom'"
           (click)="resetReminderPopup()"
         >
           Reset
         </button>
         <button
-          class="btn submit-btn sendReminderBtn"
+          class="btn btn-primary sendReminderBtn"
           (click)="sendReminder()"
           [disabled]="isDueDatePast || isLoading"
         >
