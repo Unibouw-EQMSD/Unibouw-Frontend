@@ -276,7 +276,7 @@
                                     <div class="rating">★ {{ rfq.rating }}</div>
                                   </td>
 
-                                  <td (click)="markViewed(work, rfq)">{{ rfq.date }}</td>
+                                  <td (click)="markViewed(work, rfq)">{{ rfq.dueDate }}</td>
                                   <td (click)="markViewed(work, rfq)">{{ rfq.rfqNumber }}</td>
 
                                   <td style="text-align: center" (click)="markViewed(work, rfq)">
@@ -462,7 +462,7 @@
                                 (click)="markViewed(sub, w)"
                               >
                                 <td>{{ w.workItemName }}</td>
-                                <td>{{ w.date }}</td>
+                                <td>{{ w.dueDate }}</td>
                                 <td>{{ w.rfqNumber }}</td>
                                 <td style="text-align: center">
                                   <i class="fa fa-check-circle success" *ngIf="w.viewed"></i>
@@ -523,11 +523,12 @@
                 <div class="table-scroll">
                   <table
                     mat-table
-                    [dataSource]="dataSource"
-                    class="mat-elevation-z8"
-                    matSort
-                    matSortActive="workitem"
-                    matSortDirection="desc"
+  [dataSource]="dataSource"
+  class="mat-elevation-z8"
+  matSort
+  #rfqSort="matSort"
+  matSortActive="workitem"
+  matSortDirection="desc"
                   >
                     <tr class="mat-row" *matNoDataRow>
                       <td
@@ -1048,6 +1049,7 @@
           Reset
         </button>
         <button
+        *ngIf="reminderType === 'custom'"
           class="btn btn-primary sendReminderBtn"
           (click)="sendReminder()"
           [disabled]="isDueDatePast || isLoading"

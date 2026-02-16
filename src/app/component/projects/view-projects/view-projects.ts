@@ -226,32 +226,146 @@ validateReply(id: string) {
       p.firstPage();
     }
   }
-  @ViewChild(MatSort)
-  set sort(s: MatSort) {
-    if (s) {
-      this.dataSource.sort = s;
+ @ViewChild('rfqSort') rfqSort!: MatSort;
 
-      // Map displayed column names to actual properties
-      this.dataSource.sortingDataAccessor = (row, column) => {
-        switch (column) {
-          case 'workitem':
-            return row.workItem;
-          case 'rfqSentDate':
-            return row.rfqSentDate;
-          case 'dueDate':
-            return row.dueDate;
-          case 'totalSubcontractors':
-            return row.subcontractorCount;
-          case 'quoteRecieved':
-            return row.quoteReceived;
-          case 'status':
-            return row.status;
-          default:
-            return '';
-        }
-      };
+ngAfterViewInit() {
+  // In case the table is already visible at init
+  this.applyRfqSorting();
+}
+
+ngOnChanges() {
+  // optional, only if you use OnChanges
+  this.applyRfqSorting();
+}
+
+// Call this whenever selectedTab becomes 'rfq' or after dataSource is set/refreshed
+private applyRfqSorting(): void {
+  if (!this.dataSource || !this.rfqSort) return;
+
+  this.dataSource.sort = this.rfqSort;
+
+  // 1) Normalize values per column (ALWAYS same type)
+  this.dataSource.sortingDataAccessor = (row: any, column: string): string | number => {
+    switch (column) {
+      case 'number':
+        // If number can be like "RFQ-12", keep string compare. If it's pure numeric, convert to number.
+        return this.normalizeText(row.number);
+
+      case 'workitem':
+        return this.normalizeText(row.workItem);
+
+      case 'rfqSentDate':
+        return this.normalizeDate(row.rfqSentDate); // number (timestamp)
+
+      case 'dueDate':
+        return this.normalizeDate(row.globalDueDate); // number (timestamp)
+
+      case 'totalSubcontractors':
+        return this.normalizeNumber(row.rfqSent);
+
+      case 'quoteRecieved': // column id
+        return this.normalizeNumber(row.quoteReceived);
+
+      case 'status':
+        return this.normalizeText(row.status);
+
+      default:
+        return this.normalizeText(row?.[column]);
+    }
+  };
+
+  // 2) Force a consistent compare for ALL columns (prevents "mixed" results)
+  this.dataSource.sortData = (data: any[], sort: MatSort) => {
+    const { active, direction } = sort;
+    if (!active || direction === '') return data;
+
+    const dir = direction === 'asc' ? 1 : -1;
+
+    return [...data].sort((a, b) => {
+      const av = this.dataSource.sortingDataAccessor(a, active);
+      const bv = this.dataSource.sortingDataAccessor(b, active);
+
+      // numbers
+      if (typeof av === 'number' && typeof bv === 'number') {
+        return (av - bv) * dir;
+      }
+
+      // strings (locale compare is more consistent than < > for text)
+      const as = String(av ?? '').trim();
+      const bs = String(bv ?? '').trim();
+      return as.localeCompare(bs) * dir;
+    });
+  };
+}
+
+private normalizeText(v: any): string {
+  if (v === null || v === undefined || v === '-') return '';
+  return String(v).trim().toLowerCase();
+}
+
+private normalizeNumber(v: any): number {
+  if (v === null || v === undefined || v === '' || v === '-') return 0;
+  const n = Number(v);
+  return Number.isFinite(n) ? n : 0;
+}
+private normalizeDate(v: any): number {
+  if (!v || v === '-') return 0;
+
+  // If already Date
+  if (v instanceof Date) return v.getTime();
+
+  // Try normal parse first (ISO works)
+  const t1 = Date.parse(v);
+  if (!Number.isNaN(t1)) return t1;
+
+  // Try dd/MM/yyyy (common case) + also handle:
+  // d/M/yyyy, dd-MM-yyyy, and optional time (HH:mm / HH:mm AM|PM)
+  if (typeof v === 'string') {
+    const s = v.trim();
+
+    const m = s.match(
+      /^(\d{1,2})[\/-](\d{1,2})[\/-](\d{4})(?:\s+(\d{1,2}):(\d{2})(?:\s*(AM|PM))?)?$/i
+    );
+
+    if (m) {
+      const dd = +m[1];
+      const mm = +m[2] - 1;
+      const yy = +m[3];
+
+      let hh = m[4] ? +m[4] : 0;
+      const min = m[5] ? +m[5] : 0;
+      const ap = m[6]?.toUpperCase();
+
+      if (ap === 'PM' && hh < 12) hh += 12;
+      if (ap === 'AM' && hh === 12) hh = 0;
+
+      return new Date(yy, mm, dd, hh, min, 0, 0).getTime();
     }
   }
+
+  return 0;
+}
+
+private toTime(value: any): number {
+  if (!value || value === '-') return 0;
+
+  // If your backend sends dd/MM/yyyy, Date() may fail. Handle both safely.
+  if (typeof value === 'string') {
+    // Try ISO/Date-parsable first
+    const t1 = Date.parse(value);
+    if (!Number.isNaN(t1)) return t1;
+
+    // Try dd/MM/yyyy
+    const m = value.match(/^(\d{2})\/(\d{2})\/(\d{4})/);
+    if (m) {
+      const dd = +m[1], mm = +m[2] - 1, yy = +m[3];
+      return new Date(yy, mm, dd).getTime();
+    }
+  }
+
+  const t2 = new Date(value).getTime();
+  return Number.isNaN(t2) ? 0 : t2;
+}
 
   workItems: WorkItem[] = [];
     private navSub?: Subscription;
@@ -358,30 +472,44 @@ ngOnInit(): void {
 ngOnDestroy(): void {
   this.navSub?.unsubscribe();
 }
-  ngAfterViewInit() {
-    this.dataSource.sort = this.sort;
-    this.dataSource.paginator = this.paginator;
+//   ngAfterViewInit() {
+//   this.dataSource.sort = this.sort;
+//   this.dataSource.paginator = this.paginator;
 
-    // Full sorting for all columns
-    this.dataSource.sortingDataAccessor = (item, property) => {
-      switch (property) {
-        case 'workitem':
-          return item.workItem?.toLowerCase() || '';
-        case 'rfqSentDate':
-          return item.rfqSentDate ? new Date(item.rfqSentDate) : new Date(0);
-        case 'dueDate':
-          return item.dueDate ? new Date(item.dueDate) : new Date(0);
-        case 'totalSubcontractors':
-          return item.subcontractorCount || 0;
-        case 'quoteRecieved':
-          return item.quoteReceived || 0;
-        case 'status':
-          return item.status?.toLowerCase() || '';
-        default:
-          return '';
-      }
-    };
-  }
+//   this.dataSource.sortingDataAccessor = (row, property) => {
+//     switch (property) {
+
+//       case 'number':
+//         const match = row.number?.match(/\d+/);
+//         return match ? parseInt(match[0], 10) : 0;
+
+//       case 'rfqSentDate':
+//         return row.rfqSentDate && row.rfqSentDate !== '-'
+//           ? new Date(row.rfqSentDate).getTime()
+//           : 0;
+
+//       case 'dueDate':
+//         return row.globalDueDate
+//           ? new Date(row.globalDueDate).getTime()
+//           : 0;
+
+//       case 'totalSubcontractors':
+//         return row.rfqSent || 0;
+
+//       case 'quoteRecieved':
+//         return row.quoteReceived || 0;
+
+//       case 'status':
+//         return row.status?.toLowerCase() || '';
+
+//       case 'workitem':
+//         return row.workItem?.toLowerCase() || '';
+
+//       default:
+//         return (row as any)[property];
+//     }
+//   };
+// }
 
   goBack(): void {
     this.location.back();
@@ -431,154 +559,155 @@ private buildRequestsSentLookup(projectId: string) {
   );
 }
 
-  loadRfqResponseSummary(projectId: string) {
-    /* ===============================
-     1️⃣ WORK ITEM GROUPED (FIXED)
+ loadRfqResponseSummary(projectId: string) {
+  /* ===============================
+     1️⃣ WORK ITEM GROUPED (NO LOOKUP)
+     Uses backend-provided s.dueDate
      =============================== */
-    this.rfqResponseService.getResponsesByProjectId(projectId).subscribe({
-      next: (res: any[]) => {
-        const workItemMap = new Map<string, any>();
+this.rfqResponseService.getResponsesByProjectId(projectId).subscribe({
+  next: (res: any[]) => {
+    const workItemMap = new Map<string, any>();
 
-        res.forEach((w) => {
-          // 🔹 Create work item ONCE
-          if (!workItemMap.has(w.workItemId)) {
-            workItemMap.set(w.workItemId, {
-              workItemId: w.workItemId,
-              name: w.workItemName,
-              open: false,
-              searchText: '',
-              pageSize: 10,
-              currentPage: 1,
-              totalPages: 1,
-              currentStart: 1,
-              currentEnd: 10,
-              // counters
-              requestsSent: 0,
-              notResponded: 0,
-              interested: 0,
-              notInterested: 0,
-              viewed: 0,
-              maybeLater: 0,
-              rfqs: [],
-            });
-          }
-
-          const workItem = workItemMap.get(w.workItemId);
-
-          // 🔹 Push RFQs (flattened from API response)
-          w.subcontractors.forEach((s: any) => {
-            workItem.rfqs.push({
-              subcontractorId: s.subcontractorId,
-              rfqId: s.rfqId,
-              workItemId: w.workItemId,
-              documentId: s.documentId,
-              rfqNumber: w.rfqNumber,
-              name: s.name,
-              rating: s.rating || 0,
-              date: s.date || '—',
-              responded: s.responded,
-              interested: s.interested,
-              notInterested: s.notInterested,
-              viewed: s.viewed,
-              maybeLater: s.maybeLater,
-              quote: s.quote || '—',
-              quoteAmount: '-',
-              dueDate: s.dueDate,
-                createdOn: s.createdOn, 
-              actions: s.documentId ? ['pdf', 'chat'] : ['chat'], // ✅ FIX
-            });
-          });
-
-          // 🔹 Recalculate counters
-          workItem.requestsSent = workItem.rfqs.length;
-          workItem.notResponded = workItem.rfqs.filter((r: any) => !r.responded).length;
-          workItem.interested = workItem.rfqs.filter((r: any) => r.interested).length;
-          workItem.notInterested = workItem.rfqs.filter((r: any) => r.notInterested).length;
-          workItem.viewed = workItem.rfqs.filter((r: any) => r.viewed).length;
-          workItem.maybeLater = workItem.rfqs.filter((r: any) => r.maybeLater).length;
+    res.forEach((w) => {
+      if (!workItemMap.has(w.workItemId)) {
+        workItemMap.set(w.workItemId, {
+          workItemId: w.workItemId,
+          name: w.workItemName,
+          open: false,
+          searchText: '',
+          pageSize: 10,
+          currentPage: 1,
+          totalPages: 1,
+          currentStart: 1,
+          currentEnd: 10,
+          requestsSent: 0,
+          notResponded: 0,
+          interested: 0,
+          notInterested: 0,
+          viewed: 0,
+          maybeLater: 0,
+          rfqs: [],
         });
+      }
 
-        // 🔹 Final array (ONE accordion per work item)
-        this.workItems = Array.from(workItemMap.values());
+      const workItem = workItemMap.get(w.workItemId);
 
-        // 🔹 Load quote amounts
-        this.workItems.forEach((work) => {
-          work.rfqs.forEach((rfq: any) => this.loadQuoteAmount(rfq));
+      (w.subcontractors || []).forEach((s: any) => {
+        workItem.rfqs.push({
+          subcontractorId: s.subcontractorId,
+          rfqId: s.rfqId,
+          workItemId: w.workItemId,
+          documentId: s.documentId,
+          rfqNumber: w.rfqNumber,
+          name: s.name,
+          rating: s.rating || 0,
+          date: s.date || '—',
+          responded: s.responded,
+          interested: s.interested,
+          notInterested: s.notInterested,
+          viewed: s.viewed,
+          maybeLater: s.maybeLater,
+          quote: s.quote || '—',
+          quoteAmount: '-',
+          dueDate: s.dueDate || '—', // <- DIRECT MAPPING
+          createdOn: s.createdOn,
+          actions: s.documentId ? ['pdf', 'chat'] : ['chat'],
         });
-      },
+      });
 
-      error: (err) => {
-        console.error('Error loading work item responses', err);
-      },
+      workItem.requestsSent = workItem.rfqs.length;
+      workItem.notResponded = workItem.rfqs.filter((r: any) => !r.responded).length;
+      workItem.interested = workItem.rfqs.filter((r: any) => r.interested).length;
+      workItem.notInterested = workItem.rfqs.filter((r: any) => r.notInterested).length;
+      workItem.viewed = workItem.rfqs.filter((r: any) => r.viewed).length;
+      workItem.maybeLater = workItem.rfqs.filter((r: any) => r.maybeLater).length;
     });
 
-    /* ===============================
-     2️⃣ SUBCONTRACTOR GROUPED 
-     =============================== */
-    this.rfqResponseService.getResponsesByProjectSubcontractors(projectId).subscribe({
-      next: (res: any[]) => {
-        console.log('Subcontractor grouping sample item:', res?.[0]);
-console.log('Keys:', res?.[0] ? Object.keys(res[0]) : []);
-        const grouped = res.reduce((acc: any[], item: any) => {
-          let group = acc.find((g) => g.subcontractorId === item.subcontractorId);
+    this.workItems = Array.from(workItemMap.values());
+        console.log('Work rfqs sample:', this.workItems?.[0]?.rfqs?.[0]);
 
-          if (!group) {
-            group = {
-              subcontractorId: item.subcontractorId,
-              subcontractorName: item.subcontractorName,
-              open: false,
-              searchText: '',
-              workItems: [],
-              requestsSent: 0,
-              notResponded: 0,
-              interested: 0,
-              notInterested: 0,
-              viewed: 0,
-              maybeLater: 0,
-            };
-            acc.push(group);
-          }
 
-          group.workItems.push({
-  workItemId: item.workItemId ? String(item.workItemId) : null,
-  workItemName: item.workItemName,
-  rfqId: item.rfqId ? String(item.rfqId) : null,
-  documentId: item.documentId ? String(item.documentId) : null,
-  rfqNumber: item.rfqNumber,
-  date: item.date,
-  responded: item.responded,
-  interested: item.interested,
-  notInterested: item.notInterested,
-  viewed: item.viewed,
-  maybeLater: item.maybeLater,
-    createdOn: item.createdOn, 
-  subcontractorId: item.subcontractorId ? String(item.subcontractorId) : null,
-  rating: 0,
-  quoteAmount: item.quoteAmount ?? item.quote ?? '-',
-  actions: item.documentId ? ['pdf'] : [],
-});
-
-          group.requestsSent = group.workItems.length;
-          group.notResponded = group.workItems.filter((w: any) => !w.responded).length;
-          group.interested = group.workItems.filter((w: any) => w.interested).length;
-          group.notInterested = group.workItems.filter((w: any) => w.notInterested).length;
-          group.viewed = group.workItems.filter((w: any) => w.viewed).length;
-          group.maybeLater = group.workItems.filter((w: any) => w.maybeLater).length;
-
-          return acc;
-        }, []);
-
-        this.subcontractorGroups = grouped;
-
-      this.subcontractorGroups.forEach((sub) => {
-  sub.workItems.forEach((w: any) => this.loadQuoteAmount(w));
-});
-      },
-      error: (err) => {
-        console.error('Error loading subcontractor responses', err);
-      },
+    // Load quote amounts
+    this.workItems.forEach((work) => {
+      work.rfqs.forEach((rfq: any) => this.loadQuoteAmount(rfq));
     });
-  }
+  },
+  error: (err) => {
+    console.error('Error loading work item responses', err);
+  },
+});
+console.log('Work rfqs sample:', this.workItems?.[0]?.rfqs?.[0]);
+console.log('Subcontractor workItems sample:', this.subcontractorGroups?.[0]?.workItems?.[0]);
+  /* ===============================
+     2️⃣ SUBCONTRACTOR GROUPED (NO LOOKUP)
+     Uses backend-provided item.dueDate
+     NOTE: your backend method GetRfqResponsesByProjectSubcontractorAsync
+     must return dueDate; otherwise this will show '—'
+     =============================== */
+this.rfqResponseService.getResponsesByProjectSubcontractors(projectId).subscribe({
+  next: (res: any[]) => {
+    const grouped = (res || []).reduce((acc: any[], item: any) => {
+      let group = acc.find((g) => g.subcontractorId === item.subcontractorId);
+
+      if (!group) {
+        group = {
+          subcontractorId: item.subcontractorId,
+          subcontractorName: item.subcontractorName,
+          open: false,
+          searchText: '',
+          workItems: [],
+          requestsSent: 0,
+          notResponded: 0,
+          interested: 0,
+          notInterested: 0,
+          viewed: 0,
+          maybeLater: 0,
+        };
+        acc.push(group);
+      }
+
+      group.workItems.push({
+        workItemId: item.workItemId ? String(item.workItemId) : null,
+        workItemName: item.workItemName,
+        rfqId: item.rfqId ? String(item.rfqId) : null,
+        documentId: item.documentId ? String(item.documentId) : null,
+        rfqNumber: item.rfqNumber,
+        date: item.date,
+        responded: item.responded,
+        interested: item.interested,
+        notInterested: item.notInterested,
+        viewed: item.viewed,
+        maybeLater: item.maybeLater,
+        dueDate: item.dueDate || '—',    // <- DIRECT MAPPING
+        createdOn: item.createdOn,
+        subcontractorId: item.subcontractorId ? String(item.subcontractorId) : null,
+        rating: 0,
+        quoteAmount: item.quoteAmount ?? item.quote ?? '-',
+        actions: item.documentId ? ['pdf'] : [],
+      });
+
+      group.requestsSent = group.workItems.length;
+      group.notResponded = group.workItems.filter((w: any) => !w.responded).length;
+      group.interested = group.workItems.filter((w: any) => w.interested).length;
+      group.notInterested = group.workItems.filter((w: any) => w.notInterested).length;
+      group.viewed = group.workItems.filter((w: any) => w.viewed).length;
+      group.maybeLater = group.workItems.filter((w: any) => w.maybeLater).length;
+
+      return acc;
+    }, []);
+
+    this.subcontractorGroups = grouped;
+    console.log('Subcontractor workItems sample:', this.subcontractorGroups?.[0]?.workItems?.[0]);
+
+    this.subcontractorGroups.forEach((sub) => {
+      sub.workItems.forEach((w: any) => this.loadQuoteAmount(w));
+    });
+  },
+  error: (err) => {
+    console.error('Error loading subcontractor responses', err);
+  },
+});
+}
 
   getFilteredSubWorkItems(sub: any) {
   const term = (sub.searchText || '').trim().toLowerCase();
@@ -719,6 +848,15 @@ hasAnyRfqResponses(): boolean {
     });
   }
 
+onTabChange(tab: string) {
+  this.selectedTab = tab;
+
+  if (tab === 'rfq') {
+    setTimeout(() => this.applyRfqSorting()); // ensures ViewChild exists after *ngIf render
+  }
+}
+
+
   loadRfqData(): void {
   forkJoin({
     rfqs: this.rfqService.getRfqByProjectId(this.projectId),
@@ -750,16 +888,16 @@ globalDueDate: this.formatDate(item.globalDueDate),
 
         this.dataSource.data = tableData;
         this.dataSource.paginator = this.paginator;
-        this.dataSource.sort = this.sort;
+        // this.dataSource.sort = this.sort;
 
-        this.dataSource.sortingDataAccessor = (row, property) => {
-          switch (property) {
-            case 'totalSubcontractors':
-              return row.requestsSent || 0; // ✅ sort by requestsSent
-            default:
-              return (row as any)[property];
-          }
-        };
+        // this.dataSource.sortingDataAccessor = (row, property) => {
+        //   switch (property) {
+        //     case 'totalSubcontractors':
+        //       return row.requestsSent || 0; // ✅ sort by requestsSent
+        //     default:
+        //       return (row as any)[property];
+        //   }
+        // };
 
         this.paginator.firstPage();
       });
