@@ -1164,8 +1164,7 @@ private applyReminderConfig(dueDate: any, createdDate: any, config: any) {
   openReminderPopup(rfq: any) {
       console.log('[openReminderPopup] called', rfq);
 
-    this.rfqCreatedDate = rfq.createdOn ?? rfq.createdDate ?? null; // use your actual field name
-
+this.rfqCreatedDate = rfq.createdOn ?? rfq.createdDate ?? new Date();
     //Check for due date past
     this.isDueDatePast = false; // reset first
     if (rfq.dueDate) {
