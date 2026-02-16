@@ -1,10 +1,6 @@
 <app-header></app-header>
 <main id="main">
   <div class="container">
-    <div class="pagetitle">
-      <h1>{{ 'PROJECT.TITLE' | translate }}</h1>
-    </div>
-
     <!-- FULL PAGE SKELETON -->
     <div *ngIf="!isSkeletonLoading" class="full-page-skeleton">
       <!-- Search bar -->
@@ -25,178 +21,211 @@
       <!-- Table rows -->
       <div class="skeleton-box"></div>
     </div>
-
     <!-- Table Section -->
-    <div class="table-container" *ngIf="isSkeletonLoading">
-      <!-- Search -->
-      <mat-form-field appearance="fill" class="search-box full-width">
-        <input
-          matInput
-          [(ngModel)]="searchText"
-          (input)="applyFilter()"
-          placeholder="{{ 'COMMON.SEARCH' | translate }}"
-        />
-        <button
-          matSuffix
-          mat-icon-button
-          *ngIf="searchText"
-          (click)="searchText = ''; applyFilter()"
-          title="Clear"
-        >
-          <span class="search-clear"> × </span>
-        </button>
-      </mat-form-field>
+    <div class="" *ngIf="isSkeletonLoading">
+      <div class="pagetitle">
+        <div class="d-flex"><h1>{{ 'PROJECT.TITLE' | translate }}</h1>
+        <!-- Search -->
+        <mat-form-field appearance="fill" class="search-box full-width">
+          <input
+            matInput
+            [(ngModel)]="searchText"
+            (input)="applyFilter()"
+            placeholder="{{ 'COMMON.SEARCH' | translate }}"
+          />
+          <button
+            matSuffix
+            mat-icon-button
+            *ngIf="searchText"
+            (click)="searchText = ''; applyFilter()"
+            title="Clear"
+          >
+            <span class="search-clear"> × </span>
+          </button>
+        </mat-form-field>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-body p-0">
+          <div class="table-Fixedheader-wrapper">
+            <table
+              mat-table
+              [dataSource]="dataSource"
+              class="table table-Fixedheader table-striped"
+              matSort
+              matSortActive="name"
+              matSortDirection="asc"
+            >
+              <!-- Columns (same as yours) -->
+              <!-- Code -->
+              <ng-container matColumnDef="number">
+                <th
+                  mat-header-cell
+                  *matHeaderCellDef
+                  mat-sort-header
+                  [disableClear]="true"
+                  class="tddate"
+                >
+                  {{ 'PROJECT.PROJECT_CODE' | translate }}
+                </th>
+                <td mat-cell *matCellDef="let item" class="text-nowrap">{{ item.number }}</td>
+              </ng-container>
 
-      <div class="table-scroll">
-        <table
-          mat-table
-          [dataSource]="dataSource"
-          class="mat-elevation-z2 full-width-table"
-          matSort
-          matSortActive="name"
-          matSortDirection="asc"
-        >
-          <!-- Columns (same as yours) -->
-          <!-- Code -->
-          <ng-container matColumnDef="number">
-            <th mat-header-cell *matHeaderCellDef mat-sort-header [disableClear]="true">
-              {{ 'PROJECT.PROJECT_CODE' | translate }}
-            </th>
-            <td mat-cell *matCellDef="let item" class="nowrap-cell">{{ item.number }}</td>
-          </ng-container>
+              <!-- Name -->
+              <ng-container matColumnDef="name">
+                <th mat-header-cell *matHeaderCellDef mat-sort-header [disableClear]="true">
+                  {{ 'PROJECT.PROJECT_NAME' | translate }}
+                </th>
+                <td mat-cell *matCellDef="let item">
+                  <span class="truncate-text" [matTooltip]="item.name">{{ item.name }}</span>
+                </td>
+              </ng-container>
 
-          <!-- Name -->
-          <ng-container matColumnDef="name">
-            <th mat-header-cell *matHeaderCellDef mat-sort-header [disableClear]="true">
-              {{ 'PROJECT.PROJECT_NAME' | translate }}
-            </th>
-            <td mat-cell *matCellDef="let item" class="nowrap-cell">{{ item.name }}</td>
-          </ng-container>
+              <!-- Customer -->
+              <ng-container matColumnDef="customerName">
+                <th mat-header-cell *matHeaderCellDef mat-sort-header [disableClear]="true">
+                  {{ 'PROJECT.CLIENT_NAME' | translate }}
+                </th>
+                <td mat-cell *matCellDef="let item">
+                  <span class="truncate-text" [matTooltip]="item.customerName">{{
+                    item.customerName
+                  }}</span>
+                </td>
+              </ng-container>
 
-          <!-- Customer -->
-          <ng-container matColumnDef="customerName">
-            <th mat-header-cell *matHeaderCellDef mat-sort-header [disableClear]="true">
-              {{ 'PROJECT.CLIENT_NAME' | translate }}
-            </th>
-            <td mat-cell *matCellDef="let item" class="nowrap-cell">{{ item.customerName }}</td>
-          </ng-container>
-
-          <!-- Project Manager -->
-          <!-- <ng-container matColumnDef="projectManagerName">
+              <!-- Project Manager -->
+              <!-- <ng-container matColumnDef="projectManagerName">
             <th mat-header-cell *matHeaderCellDef mat-sort-header>{{'PROJECT.PROJECT_MANAGER' | translate}}</th>
             <td mat-cell *matCellDef="let item">{{ item.projectManagerName }}</td>
           </ng-container> -->
 
-          <ng-container matColumnDef="personName">
-            <th mat-header-cell *matHeaderCellDef mat-sort-header [disableClear]="true" style="white-space: nowrap">
-              {{ 'PROJECT.PROJECT_MANAGER' | translate }}
-            </th>
-            <td mat-cell *matCellDef="let item" class="nowrap-cell">
-              {{ item.personName || '—' }}
-            </td>
-          </ng-container>
+              <ng-container matColumnDef="personName">
+                <th mat-header-cell *matHeaderCellDef mat-sort-header [disableClear]="true">
+                  {{ 'PROJECT.PROJECT_MANAGER' | translate }}
+                </th>
+                <td mat-cell *matCellDef="let item">
+                  <span class="truncate-text" [matTooltip]="item.personName">
+                    {{ item.personName || '—' }}</span
+                  >
+                </td>
+              </ng-container>
 
-          <!-- <ng-container matColumnDef="personRole">
-            <th mat-header-cell *matHeaderCellDef mat-sort-header style="white-space: nowrap">
+              <!-- <ng-container matColumnDef="personRole">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>
               {{ 'PROJECT.PERSON_ROLE' | translate }}
             </th>
             <td
               mat-cell
               *matCellDef="let item"
-              class="nowrap-cell"
+             
               [ngClass]="{ 'centered-cell': !item.personName }"
             >
               {{ item.personRole || '—' }}
             </td>
           </ng-container> -->
 
-          <!-- Start Date -->
-          <ng-container matColumnDef="startDate">
-            <th mat-header-cell *matHeaderCellDef mat-sort-header [disableClear]="true">
-              {{ 'PROJECT.START_DATE' | translate }}
-            </th>
-            <td mat-cell *matCellDef="let item" class="nowrap-cell">
-              {{ item.startDate | date: 'dd-MM-yyyy' }}
-            </td>
-          </ng-container>
+              <!-- Start Date -->
+              <ng-container matColumnDef="startDate">
+                <th
+                  mat-header-cell
+                  *matHeaderCellDef
+                  mat-sort-header
+                  [disableClear]="true"
+                  class="tddate"
+                >
+                  {{ 'PROJECT.START_DATE' | translate }}
+                </th>
+                <td mat-cell *matCellDef="let item" class="text-nowrap">
+                  {{ item.startDate | date: 'dd-MM-yyyy' }}
+                </td>
+              </ng-container>
 
-          <!-- Committed Date -->
-          <ng-container matColumnDef="completionDate">
-            <th mat-header-cell *matHeaderCellDef mat-sort-header [disableClear]="true">
-              {{ 'PROJECT.END_DATE' | translate }}
-            </th>
-            <td mat-cell *matCellDef="let item" class="nowrap-cell">
-              {{ item.completionDate | date: 'dd-MM-yyyy' }}
-            </td>
-          </ng-container>
+              <!-- Committed Date -->
+              <ng-container matColumnDef="completionDate">
+                <th
+                  mat-header-cell
+                  *matHeaderCellDef
+                  mat-sort-header
+                  [disableClear]="true"
+                  class="tddate"
+                >
+                  {{ 'PROJECT.END_DATE' | translate }}
+                </th>
+                <td mat-cell *matCellDef="let item" class="text-nowrap">
+                  {{ item.completionDate | date: 'dd-MM-yyyy' }}
+                </td>
+              </ng-container>
 
-          <!-- Status -->
-          <ng-container matColumnDef="status">
-            <th mat-header-cell *matHeaderCellDef mat-sort-header [disableClear]="true">
-              {{ 'PROJECT.STATUS' | translate }}
-            </th>
-            <td mat-cell *matCellDef="let item">
-              <span
-                [ngClass]="{
-                  'status-started': item.status === 'Started',
-                  'status-inprogress': item.status === 'In Progress',
-                  'status-completed': item.status === 'Completed',
-                }"
-                class="nowrap-cell"
-              >
-                {{ item.status }}
-              </span>
-            </td>
-          </ng-container>
+              <!-- Status -->
+              <ng-container matColumnDef="status">
+                <th mat-header-cell *matHeaderCellDef mat-sort-header [disableClear]="true">
+                  {{ 'PROJECT.STATUS' | translate }}
+                </th>
+                <td mat-cell *matCellDef="let item">
+                  <span
+                    [ngClass]="{
+                      'status-started': item.status === 'Started',
+                      'status-inprogress': item.status === 'In Progress',
+                      'status-completed': item.status === 'Completed',
+                    }"
+                  >
+                    {{ item.status }}
+                  </span>
+                </td>
+              </ng-container>
 
-          <!-- Action -->
-          <ng-container matColumnDef="action">
-            <th mat-header-cell *matHeaderCellDef>{{ 'COMMON.ACTIONS' | translate }}</th>
-            <td mat-cell *matCellDef="let item">
-              <a
-                [routerLink]="['/view-projects', item.projectID]"
-                matTooltip="View Details"
-                (click)="logProjectId(item.projectID)"
-                class="nowrap-cell"
-              >
-                <mat-icon class="vis-icon" style="font-size: 20px !important">visibility</mat-icon>
-              </a>
-            </td>
-          </ng-container>
+              <!-- Action -->
+              <ng-container matColumnDef="action">
+                <th mat-header-cell *matHeaderCellDef class="tdactions">
+                  {{ 'COMMON.ACTIONS' | translate }}
+                </th>
+                <td mat-cell *matCellDef="let item" class="actions">
+                  <a
+                    [routerLink]="['/view-projects', item.projectID]"
+                    matTooltip="View Details"
+                    (click)="logProjectId(item.projectID)"
+                  >
+                    <mat-icon class="vis-icon">visibility</mat-icon
+                    >
+                  </a>
+                </td>
+              </ng-container>
 
-          <!-- Header + Rows -->
-          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-          <tr
-            mat-row
-            *matRowDef="let item; columns: displayedColumns"
-            (click)="navigateToProject(item)"
-            class="clickable-row"
-          ></tr>
+              <!-- Header + Rows -->
+              <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+              <tr
+                mat-row
+                *matRowDef="let item; columns: displayedColumns"
+                (click)="navigateToProject(item)"
+                class="clickable-row"
+              ></tr>
 
-          <tr *matNoDataRow>
-            <td [attr.colspan]="displayedColumns.length || 1" class="table-spinner-cell">
-              <!-- Show spinner only when loading -->
-              <div *ngIf="isLoading">
-                <mat-spinner diameter="40"></mat-spinner>
-              </div>
+              <tr *matNoDataRow>
+                <td [attr.colspan]="displayedColumns.length || 1" class="table-spinner-cell">
+                  <!-- Show spinner only when loading -->
+                  <div *ngIf="isLoading">
+                    <mat-spinner diameter="40"></mat-spinner>
+                  </div>
 
-              <!-- Show empty message only when there are no columns -->
-              <div *ngIf="!isLoading && dataSource?.data?.length === 0" class="no-data-message">
-                {{ 'MESSAGES.NO_PROJECTS' | translate }}
-              </div>
-            </td>
-          </tr>
-        </table>
+                  <!-- Show empty message only when there are no columns -->
+                  <div *ngIf="!isLoading && dataSource?.data?.length === 0" class="no-data-message">
+                    {{ 'MESSAGES.NO_PROJECTS' | translate }}
+                  </div>
+                </td>
+              </tr>
+            </table>
+          </div>
+
+          <!-- Paginator -->
+          <mat-paginator
+            [pageSize]="pageSize"
+            [pageSizeOptions]="pageSizeOptions"
+            (page)="onPageSizeChange($event)"
+            showFirstLastButtons
+          >
+          </mat-paginator>
+        </div>
       </div>
-
-      <!-- Paginator -->
-      <mat-paginator
-        [pageSize]="pageSize"
-        [pageSizeOptions]="pageSizeOptions"
-        (page)="onPageSizeChange($event)"
-        showFirstLastButtons
-      >
-      </mat-paginator>
     </div>
   </div>
 </main>

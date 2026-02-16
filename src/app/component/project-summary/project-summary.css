@@ -841,14 +841,14 @@ body,
   flex: 0 0 auto !important;
 }
 
-.truncate-text {
+/* .truncate-text {
   display: inline-block;
   max-width: 220px; /* adjust based on your RFQ header space */
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   vertical-align: middle;
-}
+} */
 .mat-mdc-tooltip {
   background: #0f172a !important;
   color: #fff !important;

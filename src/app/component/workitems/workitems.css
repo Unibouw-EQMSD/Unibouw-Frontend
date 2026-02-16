@@ -107,3 +107,11 @@
 .styled-table td:nth-child(4) {
   width: 50px; 
 }
+
+
+.table-Fixedheader-wrapper {
+    max-height: calc(100vh - 274px) !important;
+}
+
+th:first-child {width: 160px; max-width: 160px;}
+th:last-child {width: 160px; max-width: 160px;}

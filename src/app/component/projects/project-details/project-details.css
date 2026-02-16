@@ -48,8 +48,6 @@
   background-color: #f0f4ff !important;
 }
 
-.nowrap-cell {
-  white-space: nowrap !important;
-  overflow: hidden;
-  text-overflow: ellipsis;
+.table-Fixedheader-wrapper {
+    max-height: calc(100vh - 224px) !important;
 }

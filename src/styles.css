@@ -39,7 +39,7 @@ body {
 }
 .card-header,
 .card-footer {
-  padding: 0.5rem 1rem;
+  padding: 0.3rem .6rem;
   background-color: rgba(33, 37, 41, 0.03);
 }
 
@@ -79,6 +79,7 @@ app-sso-login {
 .pagetitle {
   margin-bottom: 10px;
   display: flex;
+  align-items: center;
   justify-content: space-between;
 }
 
@@ -88,6 +89,7 @@ app-sso-login {
   color: #003042;
   font-family: 'Work Sans', sans-serif !important;
   font-weight: 500 !important;
+  margin-right: 1rem;
 }
 
 /* ✅ Skeleton Loader Styles */
@@ -113,13 +115,6 @@ app-sso-login {
   display: none !important;
 }
 
-/* ✅ Optional: smoother visual transition */
-.table-scroll {
-  position: relative;
-  width: 100%;
-  overflow-x: auto;
-  transition: opacity 0.2s ease-in-out;
-}
 
 .skeleton-container {
   display: flex;
@@ -238,7 +233,7 @@ app-sso-login {
   display: flex;
   border-radius: 6px;
   overflow: hidden;
-  margin-bottom: 10px;
+  /* margin-bottom: 10px; */
   width: 100%;
   background-color: #e8eef3 !important;
 }
@@ -350,10 +345,15 @@ table.mat-row {
   display: table-row;
 }
 
+/* ✅ Optional: smoother visual transition */
 .table-scroll {
-  max-height: calc(100vh - 346px);
-  /* adjust height */
-  /* max-height: 400px;   adjust height */
+  position: relative;
+  width: 100%;
+  overflow-x: auto;
+  transition: opacity 0.2s ease-in-out;
+}
+.table-scroll {
+  max-height: calc(100vh - 263px);
   overflow-y: auto;
   /* enable vertical scrolling */
 }
@@ -425,6 +425,7 @@ th {
   font-family: 'Public Sans', sans-serif !important;
   font-size: 1rem;
   font-weight: 400 !important;
+  padding: .5rem !important;
 }
 
 th {
@@ -445,7 +446,8 @@ tr.inactive button {
 td.inactive {
   color: #888 !important;
 }
-
+.td-actions {width: 100px;}
+.td-date {width: 120px; white-space: nowrap;}
 /* Input wrapper - ensure proper stacking context */
 .input-wrapper {
   position: relative;
@@ -735,10 +737,11 @@ button.mat-raised-button {
   transform: scale(0.7);
   transform-origin: left center;
 }
-
+.text-primary {color: #F07E2A !important;}
 .text-danger {
   color: red;
 }
+
 
 .mat-mdc-paginator-page-size-label,
 .mat-mdc-paginator-range-label {
@@ -806,6 +809,7 @@ tbody tr:nth-of-type(even), .table-striped>tbody>tr:nth-of-type(even)>* {
 .mat-mdc-paginator-container {
   background-color: #fff !important;
   justify-content: space-between !important;
+  min-height: auto !important;
 }
 
 .mat-mdc-paginator-page-size-select {
@@ -905,9 +909,9 @@ tbody tr:nth-of-type(even), .table-striped>tbody>tr:nth-of-type(even)>* {
 }
 
 /* Alternating row colors */
-.table-Fixedheader tbody tr:nth-child(even) {
+/* .table-Fixedheader tbody tr:nth-child(even) {
   background-color: #fafafa;
-}
+} */
 
 /* Custom scrollbar styling (optional) */
 .table-wrapper::-webkit-scrollbar {
@@ -948,6 +952,8 @@ th.select {width: 25px;}
     border-radius: 4px;
     box-shadow: 0px 2px 20px rgb(1 41 112 / 10%);
     /*box-shadow: 0 2px 2px 0 rgb(0 0 0 / 14%), 0 3px 1px -2px rgb(0 0 0 / 12%), 0 1px 5px 0 rgb(0 0 0 / 20%);*/
+}.btn-sm {
+    padding: .1rem 1rem !important;
 }
 
 .btn:hover {
@@ -1160,3 +1166,45 @@ mat-datepicker-content.mat-datepicker-content.mat-datepicker-content-animations-
     font-weight: 900;
     font-size: 14px;
 }
+    /* ---- TRUNCATE + Table ---- */
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 820px;
+      table-layout: fixed;
+    }
+
+    .truncate-cell {
+      position: relative;
+    }
+
+    .truncate-text {
+      display: block;
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      max-width: 100%;
+      cursor: default;
+    }
+    
+.mat-mdc-table {table-layout: fixed !important;}
+
+
+/* Customer Search */
+.mat-mdc-icon-button .mat-mdc-button-persistent-ripple {border-radius: 0 !important;}
+.mat-mdc-icon-button {
+    height: 34px !important;
+    border-radius: 0 !important;
+}
+.mat-mdc-row, .mat-icon {height: auto !important;}
+.mat-mdc-cell {
+    line-height: 1;
+}
+.mat-mdc-paginator-container {
+    background-color: transparent !important;}
+    .mat-mdc-paginator-outer-container {
+    display: flex;
+    background-color: rgba(33, 37, 41, 0.03) !important;
+}
+.cursor {cursor: pointer;}

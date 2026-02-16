@@ -6,14 +6,14 @@
   margin-right: 10px;
 }
 
-.truncate-text {
+/* .truncate-text {
   display: inline-block;
-  max-width: 150px;       /* adjust width as per your table layout */
+  max-width: 150px;   
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   vertical-align: middle;
-}
+} */
 
 .vis-icon {
   color: #ff7f32 !important;
@@ -37,4 +37,8 @@
 .mat-row:hover {
   background-color: #f0f4ff !important; /* light blue or any color */
   cursor: pointer;
+}
+
+.table-Fixedheader-wrapper {
+    max-height: calc(100vh - 224px) !important;
 }
