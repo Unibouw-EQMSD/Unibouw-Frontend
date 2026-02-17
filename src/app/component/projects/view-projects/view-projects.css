@@ -259,7 +259,9 @@
     border-bottom: 1px solid #dedede;
     width: 100%;
 }
-
+.work-item-header i {
+    margin: 0 0.6rem;
+}
 .table-scroll {
   height: calc(100vh - 313px);
   overflow: auto;

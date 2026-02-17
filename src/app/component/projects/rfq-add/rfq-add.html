@@ -42,9 +42,9 @@
     <div class="card" *ngIf="!isLoader">
       <!-- Header Section -->
       <div class="card-header" *ngIf="!isLoader">
-        <div class="d-flex justify-content-start align-items-center gap-2">
+        <div class="row justify-content-start align-items-center gap-2">
           <!-- Project Name Section (Always visible) -->
-          <div class="d-flex justify-content-start align-items-center">
+          <div class="col-auto d-flex justify-content-start align-items-center">
             <label class="col-form-label">{{ 'PROJECT_DETAILS.PROJECT' | translate }}</label>
             <span>
               {{ projectDetails?.name || ('COMMON.LOADING' | translate) }}
@@ -52,17 +52,17 @@
           </div>
 
           <!-- ⭐ RFQ ID Section (Only in Edit Mode) -->
-          <div *ngIf="rfqIdForEdit" class="d-flex justify-content-start align-items-center ms-3">
+          <div *ngIf="rfqIdForEdit" class="col-auto d-flex justify-content-start align-items-center me-2">
             <label class="col-form-label">{{ 'RFQ_TABLE.RFQ_NUMBER' | translate }}</label>
             <span>{{ rfqNumber }}</span>
           </div>
 
           <!-- ⭐ Created Date Section (Only in Edit Mode) -->
-          <div *ngIf="rfqIdForEdit" class="d-flex justify-content-start align-items-center ms-3">
+          <div *ngIf="rfqIdForEdit" class="col-auto d-flex justify-content-start align-items-center me-2">
             <label class="col-form-label">{{ 'RFQ_PAGE.CREATED_DATE' | translate }}</label>
             <span>{{ createdDateDisplay }}</span>
           </div>
-          <div *ngIf="rfqIdForEdit" class="d-flex justify-content-start align-items-center ms-3">
+          <div *ngIf="rfqIdForEdit" class="col-auto d-flex justify-content-start align-items-center me-2">
             <label class="col-form-label">{{ 'RFQ_PAGE.WORK_ITEM' | translate }}</label>
             <span>{{ workItemName }}</span>
           </div>
@@ -187,9 +187,9 @@
                 <table class="table table-Fixedheader table-striped">
                   <thead>
                     <tr>
-                      <th class="select"></th>
+                      <th class="td_checkbox"></th>
                       <th>{{ 'RFQ_PAGE.NAME' | translate }}</th>
-                      <th class="dueDate">{{ 'RFQ_PAGE.DUE_DATE' | translate }}</th>
+                      <th class="td_intDate">{{ 'RFQ_PAGE.DUE_DATE' | translate }}</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -203,7 +203,7 @@
                           type="checkbox"
                           [(ngModel)]="sub.selected"
                           (change)="onSubcontractorToggle(sub)"
-                          style="cursor: pointer"
+                          class="form-check-input"
                         />
                       </td>
                       <td>{{ sub.name }}</td>
@@ -243,149 +243,102 @@
             >
               {{ 'RFQ_PAGE.SELECT_SUBCONTRACTOR_ERROR' | translate }}
             </div>
-            <div
-              class="card-header"
-              style="
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                padding-bottom: 10px;
-                border-bottom: 1px solid #eee;
-              "
-            >
-              <div style="display: flex; align-items: center; gap: 10px">
-                <h3 style="margin: 0; font-size: 16px">
-                  {{ 'RFQ_PAGE.SUBCONTRACTORS' | translate }}
-                </h3>
-                <button
-                  type="button"
-                  (click)="addSub()"
-                  class="add-btn"
-                  style="display: flex; justify-content: center; align-items: center"
+            <div class="card">
+              <div class="card-header d-flex justify-content-between align-items-center">
+                <div class="d-flex align-items-center">
+                  <h6 class="mb-0 pb-0 me-3">
+                    {{ 'RFQ_PAGE.SUBCONTRACTORS' | translate }}
+                  </h6>
+                  <button type="button" (click)="addSub()" class="btn btn-primary btn-add">
+                    <span class="material-symbols-outlined"> add </span>
+                  </button>
+                </div>
+
+                <div class="d-flex justify-content-between align-items-center">
+                  <div class="me-2">
+                    <label class="col-form-label"
+                      >{{ 'RFQ_PAGE.DUE_DATE' | translate
+                      }}<span class="text-danger">*</span></label
+                    >
+                  </div>
+                  <div class="me-4">
+                    <input
+                      type="date"
+                      class="form-control"
+                      [(ngModel)]="globalDueDate"
+                      (change)="applyGlobalDate()"
+                      [min]="minDate"
+                    />
+                  </div>
+                  <div class="form-check ms-2">
+                    <input
+                      type="checkbox"
+                      class="form-check-input"
+                      [(ngModel)]="showAll"
+                      (change)="toggleSelectAll()"
+                      class="form-check-input"
+                    /><label for="showall" class="form-check-label">{{
+                      'RFQ_PAGE.SHOW_ALL' | translate
+                    }}</label>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Start of Table -->
+
+              <!-- List -->
+              <div class="table-Fixedheader-wrapper">
+                <table class="table table-Fixedheader table-striped">
+                  <thead>
+                    <tr>
+                      <th class="td_checkbox"></th>
+                      <th>{{ 'RFQ_PAGE.NAME' | translate }}</th>
+                      <th class="td_intDate">{{ 'RFQ_PAGE.DUE_DATE' | translate }}</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr
+                      class="checkbox-listRow"
+                      *ngFor="let sub of subcontractors; let i = index"
+                      [style.background-color]="i % 2 === 0 ? '#fcfcfc' : '#f0f2f5'"
+                    >
+                      <td class="td_checkbox">
+                        <input
+                          type="checkbox"
+                          [(ngModel)]="sub.selected"
+                          (change)="onSubcontractorToggle(sub)"
+                          class="form-check-input"
+                        />
+                      </td>
+                      <td>{{ sub.name }}</td>
+                      <td class="td_intDate">
+                        <input
+                          type="date"
+                          [(ngModel)]="sub.dueDate"
+                          [disabled]="!sub.selected"
+                          [min]="minDate"
+                          class="form-control"
+                        />
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+                <div
+                  *ngIf="!isLoader && !selectedWorkItems.length"
+                  style="padding: 20px; text-align: center; color: #999; font-style: italic"
                 >
-                  +
-                </button>
-              </div>
-
-              <div style="display: flex; align-items: center; gap: 15px">
-                <!-- Global Due Date -->
-                <div style="display: flex; align-items: center; gap: 8px">
-                  <span style="color: #6f42c1; font-weight: 500; font-size: 14px">{{
-                    'RFQ_PAGE.DUE_DATE' | translate
-                  }}</span>
-                  <input
-                    type="date"
-                    [(ngModel)]="globalDueDate"
-                    (change)="applyGlobalDate()"
-                    [min]="minDate"
-                    style="
-                      border: none;
-                      border-bottom: 1px solid #ccc;
-                      background: transparent;
-                      padding: 2px 0;
-                      font-size: 13px;
-                      color: #333;
-                      outline: none;
-                      width: 110px;
-                    "
-                  />
+                  {{ 'RFQ_PAGE.SELECT_WORKITEM_MESSAGE' | translate }}
                 </div>
 
-                <!-- Show All Checkbox -->
-                <label
-                  class="show-all"
-                  style="
-                    margin: 0;
-                    font-size: 14px;
-                    display: flex;
-                    align-items: center;
-                    gap: 5px;
-                    cursor: pointer;
-                    color: #555;
-                  "
+                <div
+                  *ngIf="selectedWorkItems.length && noSubMessage"
+                  style="padding: 20px; text-align: center; color: #dc3545; font-weight: 500"
                 >
-                  <input
-                    type="checkbox"
-                    [(ngModel)]="showAll"
-                    (change)="toggleSelectAll()"
-                    class="cursor-pointer"
-                  />
-                  {{ 'RFQ_PAGE.SHOW_ALL' | translate }}
-                </label>
-              </div>
-            </div>
-
-            <!-- Column Labels -->
-            <div
-              style="
-                display: flex;
-                padding: 10px 5px;
-                font-weight: 700;
-                font-size: 13px;
-                color: #000;
-                border-bottom: 1px solid #eee;
-              "
-            >
-              <div style="width: 30px"></div>
-              <div style="flex: 1; padding-left: 10px">{{ 'RFQ_PAGE.NAME' | translate }}</div>
-              <div style="width: 125px">{{ 'RFQ_PAGE.DUE_DATE' | translate }}</div>
-            </div>
-
-            <!-- List -->
-            <div class="checkbox-list" style="max-height: 315px; overflow-y: auto">
-              <div
-                *ngFor="let sub of subcontractors; let i = index"
-                style="
-                  display: flex;
-                  justify-content: space-between;
-                  align-items: center;
-                  padding: 8px 5px;
-                  border-bottom: 1px solid #f5f5f5;
-                "
-                [style.background-color]="i % 2 === 0 ? '#fcfcfc' : '#f0f2f5'"
-              >
-                <div style="width: 30px; display: flex; justify-content: center">
-                  <input
-                    type="checkbox"
-                    [(ngModel)]="sub.selected"
-                    (change)="onSubcontractorToggle(sub)"
-                    style="cursor: pointer"
-                  />
-                </div>
-
-                <div style="flex: 1; padding-left: 10px; font-size: 14px; color: #333">
-                  {{ sub.name }}
-                </div>
-
-                <div style="width: 125px">
-                  <input
-                    type="date"
-                    [(ngModel)]="sub.dueDate"
-                    [disabled]="!sub.selected"
-                    [min]="minDate"
-                    style="
-                      width: 100%;
-                      border: none;
-                      background: transparent;
-                      font-size: 13px;
-                      color: #555;
-                    "
-                  />
+                  {{ noSubMessage }}
                 </div>
               </div>
-              <div
-                *ngIf="!isLoader && !selectedWorkItems.length"
-                style="padding: 20px; text-align: center; color: #999; font-style: italic"
-              >
-                {{ 'RFQ_PAGE.SELECT_WORKITEM_MESSAGE' | translate }}
-              </div>
-
-              <div
-                *ngIf="selectedWorkItems.length && noSubMessage"
-                style="padding: 20px; text-align: center; color: #dc3545; font-weight: 500"
-              >
-                {{ noSubMessage }}
-              </div>
+              <!-- List -->
+              <!-- End of Table -->
             </div>
           </div>
         </div>
@@ -398,7 +351,12 @@
         <button type="button" class="btn btn-secondary" (click)="openPreview()">
           {{ 'RFQ_FOOTER_ACTIONS.PREVIEW' | translate }}
         </button>
-        <button type="button" class="btn btn-primary" *ngIf="!rfqIdForEdit" (click)="onSubmit(false)">
+        <button
+          type="button"
+          class="btn btn-primary"
+          *ngIf="!rfqIdForEdit"
+          (click)="onSubmit(false)"
+        >
           {{ 'RFQ_FOOTER_ACTIONS.SAVE_DRAFT' | translate }}
         </button>
         <button type="button" class="btn btn-secondary" (click)="onSubmit(true)">
@@ -411,7 +369,13 @@
   <!-- Preview Modal -->
   <div class="custom-modal-backdrop" *ngIf="showPreview" (click)="closePreview()"></div>
 
-  <div class="custom-modal modal-dialog-scrollable" *ngIf="showPreview" role="dialog" aria-modal="true" (click)="$event.stopPropagation()">
+  <div
+    class="custom-modal modal-dialog-scrollable"
+    *ngIf="showPreview"
+    role="dialog"
+    aria-modal="true"
+    (click)="$event.stopPropagation()"
+  >
     <div class="modal-content-box modal-content">
       <!-- ================= HEADER ================= -->
       <div class="modal-header">

@@ -304,7 +304,7 @@ app-sso-login {
 }
 
 mat-icon.notranslate.material-icons.mat-ligature-font.mat-icon-no-color {
-  font-size: 16px !important;
+  font-size: 18px !important;
   /* Set your desired size */
 }
 
@@ -1167,11 +1167,13 @@ mat-datepicker-content.mat-datepicker-content.mat-datepicker-content-animations-
     font-size: 14px;
 }
     /* ---- TRUNCATE + Table ---- */
-
+.table>:not(caption)>*>* {
+    border-bottom: none;
+}
     table {
       width: 100%;
       border-collapse: collapse;
-      min-width: 820px;
+      /* min-width: 820px; */
       table-layout: fixed;
     }
 
@@ -1208,3 +1210,5 @@ mat-datepicker-content.mat-datepicker-content.mat-datepicker-content-animations-
     background-color: rgba(33, 37, 41, 0.03) !important;
 }
 .cursor {cursor: pointer;}
+.td_checkbox {width: 30px;}
+.td_intDate {width: 180px; min-width: 180px;}
