@@ -135,6 +135,16 @@ export class Subcontractor implements OnInit, AfterViewInit {
     this.dataSource.filter = this.searchText.trim().toLowerCase();
     if (this.dataSource.paginator) this.dataSource.paginator.firstPage();
   }
+
+  handleRowClick(row: any) {
+  if (!row.isActive) {
+    alert('This subcontractor is inactive. You cannot view details.');
+    return;
+  }
+
+  this.viewSubcontractorDetails(row.subcontractorID);
+}
+
  viewSubcontractorDetails(subcontractorID: string) {
     this.router.navigate(['/subcontractor-details', subcontractorID]);
   }
