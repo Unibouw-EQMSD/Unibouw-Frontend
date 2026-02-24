@@ -82,6 +82,11 @@ async fetchMe(): Promise<any> {
     return this.getUserRoles().some((r) => r.toLowerCase() === 'admin');
   }
 
+getCurrentUserId(): string | null {
+  const user = this.getUser();
+  return user?.id || user?.userId || null;
+}
+
   clearUser() {
     this.userSubject.next(null);
     localStorage.removeItem('user_data');

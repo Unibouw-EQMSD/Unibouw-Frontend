@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Observable, from } from 'rxjs';
-import { switchMap } from 'rxjs/operators';
+import { map, switchMap } from 'rxjs/operators';
 import { AppConfigService } from './app.config.service';
 import { MsalService } from '@azure/msal-angular';
 
@@ -153,6 +153,25 @@ export class RfqResponseService {
       ),
     );
   }
+
+  getAllSubcontractorsByProjectId(projectId: string): Observable<any[]> {
+  return this.getResponsesByProjectId(projectId).pipe(
+    map((rfqResponses: any[]) => {
+      const subcontractorMap = new Map<string, { subcontractorID: string, subcontractorName: string }>();
+      (rfqResponses || []).forEach(workItem => {
+        (workItem.subcontractors || []).forEach((sub: { subcontractorId: string; name: any; }) => {
+          if (sub.subcontractorId && sub.name) {
+            subcontractorMap.set(sub.subcontractorId, {
+              subcontractorID: sub.subcontractorId,
+              subcontractorName: sub.name,
+            });
+          }
+        });
+      });
+      return Array.from(subcontractorMap.values());
+    })
+  );
+}
 
   getQuoteAmount(rfqId: string, subId: string, workItemId: string): Observable<any> {
     return from(this.getHeaders()).pipe(

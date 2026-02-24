@@ -1406,53 +1406,37 @@ conversationDateTime: string | null = null;
 
     this.selectedIndex = index;
     this.selectedSubcontractorId = subId;
+     console.log('Subcontractor selected:', subId);
     this.isSpinLoading = true;
     this.pmSubConversationData = [];
     this.loadConversationBySub(subId);
   }
 
-  loadConversationSubcontractors(force = false) {
-    // Prevent reload unless forced
-    if (!force && this.convoSubcontractors.length > 0) {
-      return;
+ 
+loadConversationSubcontractors(force = false) {
+  this.isLoading = true;
+  forkJoin({
+    messagedSubs: this.rfqResponseService.getSubcontractorsByLatestMessage(this.projectId),
+    allSubs: this.rfqResponseService.getAllSubcontractorsByProjectId(this.projectId),
+  }).subscribe(({ messagedSubs, allSubs }) => {
+    const map = new Map<string, { id: string, name: string }>();
+    (allSubs || []).forEach(sub => map.set(sub.subcontractorID, { id: sub.subcontractorID, name: sub.subcontractorName }));
+    (messagedSubs || []).forEach((sub: { subcontractorID: string; subcontractorName: any; }) => map.set(sub.subcontractorID, { id: sub.subcontractorID, name: sub.subcontractorName }));
+    this.convoSubcontractors = Array.from(map.values());
+    this.isLoading = false;
+
+    // Auto-select first subcontractor if none is selected
+    if (
+      this.convoSubcontractors.length > 0 &&
+      !this.selectedSubcontractorId
+    ) {
+      this.onSubClick(this.convoSubcontractors[0].id, 0);
     }
-    this.isLoading = true;
-
-    this.rfqResponseService.getSubcontractorsByLatestMessage(this.projectId).subscribe({
-      next: (res: any[]) => {
-        this.convoSubcontractors = res.map((item) => ({
-          id: item.subcontractorID,
-          name: item.subcontractorName,
-        }));
-
-        if (this.convoSubcontractors.length === 0) {
-          this.isLoading = false;
-          return;
-        }
-
-        // Preserve selected subcontractor if possible
-        const existingIndex = this.selectedSubcontractorId
-          ? this.convoSubcontractors.findIndex((s) => s.id === this.selectedSubcontractorId)
-          : -1;
-
-        if (existingIndex >= 0) {
-          this.selectedIndex = existingIndex;
-        } else {
-          this.selectedIndex = 0;
-          this.selectedSubcontractorId = this.convoSubcontractors[0].id;
-        }
-
-        this.isSpinLoading = true;
-        this.loadConversationBySub(this.selectedSubcontractorId!);
-
-        this.isLoading = false;
-      },
-      error: (err) => {
-        console.error('Error loading conversation subcontractors', err);
-        this.isLoading = false;
-      },
-    });
-  }
+  }, err => {
+    this.isLoading = false;
+    console.error('Error loading conversation subcontractors', err);
+  });
+}
 
   filterConversations(): void {
     const search = this.conversationSearchText.trim().toLowerCase();
@@ -1894,99 +1878,113 @@ public getAmsterdamDateTimeLocalString(dateInput: string | Date | null | undefin
   }
 
   showInvalid = false;
-  sendMessage() {
-    // Trim inputs
-    const subjectTrimmed = this.subject?.trim();
-    const messageTrimmed = this.messageText?.trim();
+ sendMessage() {
+  // Trim inputs
+  const subjectTrimmed = this.subject?.trim();
+  const messageTrimmed = this.messageText?.trim();
 
-    // ✅ Validate empty inputs
-    if (!subjectTrimmed || !messageTrimmed) {
-      this.showInvalid = true; // keeps your current CSS logic
-      return;
-    } else {
-      this.showInvalid = false;
-    }
-
-    // ✅ Validate message length
-    if (messageTrimmed.length > 5000) {
-      alert('Message is too long. Please shorten your message.');
-      return;
-    }
-
-    if (!this.conversationsData?.length) {
-      alert('No conversation data available.');
-      return;
-    }
-
-    this.isLoading = true;
-    const draftConvo = this.conversationsData[0];
-
-    const payload: RFQConversationMessage = {
-      projectID: draftConvo.projectID,
-      subcontractorID: draftConvo.subcontractorID,
-      senderType: 'PM',
-      messageText: this.messageText,
-      subject: this.subject || '',
-      createdBy: draftConvo.createdBy,
-    };
-
-    this.projectService
-      .addRfqConversationMessage(payload)
-      .pipe(
-        switchMap((res: RFQConversationMessage): Observable<UploadResult> => {
-          if (!res.conversationMessageID) {
-            throw new Error('ConversationMessageID missing');
-          }
-
-          // Clone attachments
-          const filesToUpload = [...this.attachments];
-
-          this.pmSubConversationData.push({
-            ...res,
-            senderType: 'PM',
-            messageDateTime: new Date(res.messageDateTime || new Date()),
-          });
-
-          this.pmSubConversationData.sort(
-            (a, b) => new Date(a.messageDateTime).getTime() - new Date(b.messageDateTime).getTime(),
-          );
-
-          return this.projectService
-            .uploadAttachmentFiles(res.conversationMessageID, filesToUpload)
-            .pipe(
-              map((paths: string[]) => ({
-                res,
-                paths,
-              })),
-            );
-        }),
-        switchMap(({ res, paths }) =>
-          this.projectService.sendMail({
-            subcontractorID: draftConvo.subcontractorID,
-            projectID: draftConvo.projectID,
-            subject: this.subject,
-            body: this.messageText,
-            attachmentFilePaths: paths,
-          }),
-        ),
-        finalize(() => {
-          this.isLoading = false;
-        }),
-      )
-      .subscribe({
-        next: () => {
-          this.messageText = '';
-          this.subject = '';
-          this.attachments = [];
-          this.afterMessageSent();
-          alert('Conversation logged successfully!');
-        },
-        error: (err) => {
-          console.error('Error sending message:', err);
-          alert('Failed to save conversation. Please try again.');
-        },
-      });
+  // ✅ Validate empty inputs
+  if (!subjectTrimmed || !messageTrimmed) {
+    this.showInvalid = true; // keeps your current CSS logic
+    return;
+  } else {
+    this.showInvalid = false;
   }
+
+  // ✅ Validate message length
+  if (messageTrimmed.length > 5000) {
+    alert('Message is too long. Please shorten your message.');
+    return;
+  }
+
+  // --------- CHANGE: Allow sending even if conversationsData is empty ---------
+  let draftConvo: any = this.conversationsData?.[0];
+  if (!draftConvo) {
+    // Fallback context for draft: build minimal from selected project/subcontractor
+    draftConvo = {
+      projectID: this.projectId,
+      subcontractorID: this.selectedSubcontractorId, // Ensures subcontractor ID is available
+      createdBy:
+        (this.userService.getCurrentUserId && this.userService.getCurrentUserId())
+        || (this.projectDetails && this.projectDetails.projectManagerID)
+        || '',
+    };
+  }
+
+  // 🚨 Validation: Make sure subcontractorID is present
+  if (!draftConvo.subcontractorID) {
+    alert('No subcontractor selected. Please select a subcontractor first.');
+    return;
+  }
+
+  this.isLoading = true;
+
+  const payload: RFQConversationMessage = {
+    projectID: draftConvo.projectID,
+    subcontractorID: draftConvo.subcontractorID,
+    senderType: 'PM',
+    messageText: this.messageText,
+    subject: this.subject || '',
+    createdBy: draftConvo.createdBy,
+  };
+
+  this.projectService
+    .addRfqConversationMessage(payload)
+    .pipe(
+      switchMap((res: RFQConversationMessage): Observable<UploadResult> => {
+        if (!res.conversationMessageID) {
+          throw new Error('ConversationMessageID missing');
+        }
+
+        // Clone attachments
+        const filesToUpload = [...this.attachments];
+
+        this.pmSubConversationData.push({
+          ...res,
+          senderType: 'PM',
+          messageDateTime: new Date(res.messageDateTime || new Date()),
+        });
+
+        this.pmSubConversationData.sort(
+          (a, b) => new Date(a.messageDateTime).getTime() - new Date(b.messageDateTime).getTime(),
+        );
+
+        return this.projectService
+          .uploadAttachmentFiles(res.conversationMessageID, filesToUpload)
+          .pipe(
+            map((paths: string[]) => ({
+              res,
+              paths,
+            })),
+          );
+      }),
+      switchMap(({ res, paths }) =>
+        this.projectService.sendMail({
+          subcontractorID: draftConvo.subcontractorID,
+          projectID: draftConvo.projectID,
+          subject: this.subject,
+          body: this.messageText,
+          attachmentFilePaths: paths,
+        }),
+      ),
+      finalize(() => {
+        this.isLoading = false;
+      }),
+    )
+    .subscribe({
+      next: () => {
+        this.messageText = '';
+        this.subject = '';
+        this.attachments = [];
+        this.afterMessageSent();
+        alert('Conversation logged successfully!');
+      },
+      error: (err) => {
+        console.error('Error sending message:', err);
+        alert('Failed to save conversation. Please try again.');
+      },
+    });
+}
 
   onInputChange(): void {
     //this.showInvalid = !this.subject?.trim() || !this.messageText?.trim();
