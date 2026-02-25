@@ -777,20 +777,20 @@
                             </div>
 
                             <!-- ✅ ATTACHMENTS -->
-                            <div
-                              class="attachments-row"
-                              *ngIf="convo.convoattachments && convo.convoattachments.length > 0"
-                            >
-                              <div
-                                class="attachment-chip"
-                                *ngFor="let att of convo.convoattachments"
-                              >
-                                <a target="_blank">
-                                  {{ att.fileName }}
-                                </a>
-                              </div>
-                            </div>
-
+                         <div
+  class="attachments-row"
+  *ngIf="convo.convoattachments && convo.convoattachments.length > 0"
+>
+  <div
+    class="attachment-chip"
+    (click)="downloadReplyAttachment(att)"
+    *ngFor="let att of convo.convoattachments"
+  >
+    <a target="_blank">
+      {{ att.fileName }}
+    </a>
+  </div>
+</div>
                             <!-- REPLY BOX -->
                             <div
                               class="reply-box"

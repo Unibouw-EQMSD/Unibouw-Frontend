@@ -1469,182 +1469,206 @@ loadConversationSubcontractors(force = false) {
   getWebPath(path: string): string {
     return path ? path.replace(/\\/g, '/') : '';
   }
+loadConversationBySub(subId: string): void {
+  if (!subId) return;
 
-  loadConversationBySub(subId: string): void {
-    if (!subId) return;
+  this.isSpinLoading = true;
+  console.log('[LOAD] Loading conversation for Sub:', subId);
 
-    this.isSpinLoading = true;
-    console.log('[LOAD] Loading conversation for Sub:', subId);
+  this.projectService
+    .getConversationByProjectAndSubcontractor(this.projectId, subId)
+    .pipe(
+      switchMap((initialConvos: any[]) => {
+        console.log('[API-1] Initial Convos:', initialConvos);
 
-    this.projectService
-      .getConversationByProjectAndSubcontractor(this.projectId, subId)
-      .pipe(
-        switchMap((initialConvos: any[]) => {
-          console.log('[API-1] Initial Convos:', initialConvos);
+        this.conversationsData = initialConvos ?? [];
 
-          this.conversationsData = initialConvos ?? [];
+        if (!initialConvos || initialConvos.length === 0) {
+          console.warn('[API-1] No initial conversations found');
+          this.pmSubConversationData = [];
+          return of([]);
+        }
 
-          if (!initialConvos || initialConvos.length === 0) {
-            console.warn('[API-1] No initial conversations found');
-            this.pmSubConversationData = [];
-            return of([]);
-          }
+        // 🔐 Build attachment lookup map
+        const attachmentMap = new Map<string, any[]>();
 
-          // 🔐 Build attachment lookup map
-          const attachmentMap = new Map<string, any[]>();
+        initialConvos.forEach((ic) => {
+          const id = ic.conversationMessageID ?? ic.messageID;
+          console.log('[MAP] IC ID:', id, 'Attachments:', ic.attachments, 'AttachmentFilePaths:', ic.attachmentFilePaths);
 
-          initialConvos.forEach((ic) => {
-            const id = ic.conversationMessageID ?? ic.messageID;
-            console.log('[MAP] IC ID:', id, 'Attachments:', ic.attachments);
+          if (id) {
+            // store BOTH possible sources (attachments array or attachmentFilePaths array)
+            const merged: any[] = [];
 
-            if (id) {
-              attachmentMap.set(String(id), [...(ic.attachments ?? [])]);
+            // If backend already sends objects in ic.attachments, keep them
+            if (Array.isArray(ic.attachments) && ic.attachments.length) {
+              merged.push(...ic.attachments);
             }
-          });
 
-          console.log('[MAP] Attachment Map Keys:', Array.from(attachmentMap.keys()));
+            // If backend sends string paths in ic.attachmentFilePaths, convert to objects
+            const paths = (ic.attachmentFilePaths ?? ic.AttachmentFilePaths ?? []) as string[];
+            if (Array.isArray(paths) && paths.length) {
+              const fromPaths = paths.map((p: string) => {
+                const fileName = (p || '').split('\\').pop()?.split('/').pop() || p;
+                return {
+                  attachmentID: null,
+                  conversationMessageID: String(id),
+                  fileName,
+                  fileExtension: fileName.includes('.') ? '.' + fileName.split('.').pop() : '',
+                  fileSize: 0,
+                  filePath: p,
+                  isActive: true,
+                };
+              });
+              merged.push(...fromPaths);
+            }
 
-          const draft = initialConvos[0];
+            attachmentMap.set(String(id), merged);
+          }
+        });
 
-          console.log('[API-2 CALL PARAMS]', {
-            projectID: draft.projectID,
-            rfqID: draft.rfqID,
-            subcontractorID: draft.subcontractorID,
-          });
+        console.log('[MAP] Attachment Map Keys:', Array.from(attachmentMap.keys()));
 
-          return this.projectService
-            .getConversation(
-              draft.projectID,
-              draft.rfqID ?? '00000000-0000-0000-0000-000000000000',
-              draft.subcontractorID,
-            )
-            .pipe(
-              map((fullConvos: any[]) => {
-                console.log('[API-2] Full Conversations:', fullConvos);
-                console.log(
-                  '[API-2] Full Convo IDs:',
-                  fullConvos.map((fc) => fc.conversationMessageID),
-                );
+        const draft = initialConvos[0];
 
-                // ✅ BUILD PARENT MESSAGE LOOKUP MAP
-                const parentMap = new Map<string, any>();
-                fullConvos.forEach((fc) => {
-                  const id = fc.conversationMessageID ?? fc.messageID;
-                  if (id) {
-                    parentMap.set(String(id), fc);
-                  }
+        console.log('[API-2 CALL PARAMS]', {
+          projectID: draft.projectID,
+          rfqID: draft.rfqID,
+          subcontractorID: draft.subcontractorID,
+        });
+
+        return this.projectService
+          .getConversation(
+            draft.projectID,
+            draft.rfqID ?? '00000000-0000-0000-0000-000000000000',
+            draft.subcontractorID,
+          )
+          .pipe(
+            map((fullConvos: any[]) => {
+              console.log('[API-2] Full Conversations:', fullConvos);
+              console.log(
+                '[API-2] Full Convo IDs:',
+                (fullConvos || []).map((fc) => fc.conversationMessageID ?? fc.messageID),
+              );
+
+              // ✅ BUILD PARENT MESSAGE LOOKUP MAP
+              const parentMap = new Map<string, any>();
+              (fullConvos || []).forEach((fc) => {
+                const id = fc.conversationMessageID ?? fc.messageID;
+                if (id) {
+                  parentMap.set(String(id), fc);
+                }
+              });
+
+              return (fullConvos ?? []).map((fc) => {
+                const fcId = fc.conversationMessageID ?? fc.messageID;
+                const safeId = fcId ? String(fcId) : undefined;
+
+                // ✅ Find in API-1, if present
+               const original = initialConvos.find((ic) => String(ic.conversationMessageID ?? ic.messageID) === String(safeId));
+
+// ✅ attachments: prefer API-2 (fullConvos) because it includes reply attachments now
+const mappedAttachments =
+  (Array.isArray(fc.attachments) && fc.attachments.length)
+    ? fc.attachments
+    : (safeId ? (attachmentMap.get(String(safeId)) ?? []) : []);
+                console.log('[MERGE]', {
+                  safeId,
+                  foundOriginal: !!original,
+                  attachmentCount_api1_objects: original?.attachments?.length ?? 0,
+                  attachmentCount_api1_mapMerged: mappedAttachments.length,
+                  attachmentFilePathCount: original?.attachmentFilePaths?.length ?? 0,
                 });
 
-                return (fullConvos ?? []).map((fc) => {
-                  const fcId = fc.conversationMessageID ?? fc.messageID;
-                  const safeId = fcId ? String(fcId) : undefined;
+                const pmID =
+                  fc.projectManagerID &&
+                  fc.projectManagerID !== '00000000-0000-0000-0000-000000000000'
+                    ? fc.projectManagerID
+                    : undefined;
 
-                  const original = initialConvos.find((ic) => ic.conversationMessageID === safeId);
+                // ✅ MAP PARENT MESSAGE DATA (UNCHANGED)
+                let parentData = {};
+                if (fc.subcontractorMessageID) {
+                  const parent = parentMap.get(String(fc.subcontractorMessageID));
+                  if (parent) {
+                    parentData = {
+                      parentSenderName:
+                        parent.senderType === 'PM'
+                          ? 'Project Manager'
+                          : parent.subcontractorName || 'Subcontractor',
 
-                  console.log('[MERGE]', {
-                    safeId,
-                    foundOriginal: !!original,
-                    attachmentCount: original?.attachments?.length ?? 0,
-                  });
+                      parentMessageDateTime: parent.messageDateTime
+                        ? this.parseParentDate(parent.messageDateTime)
+                        : undefined,
 
-                  const pmID =
-                    fc.projectManagerID &&
-                    fc.projectManagerID !== '00000000-0000-0000-0000-000000000000'
-                      ? fc.projectManagerID
-                      : undefined;
-
-                  // ✅ MAP PARENT MESSAGE DATA
-                  let parentData = {};
-                  if (fc.subcontractorMessageID) {
-                    const parent = parentMap.get(String(fc.subcontractorMessageID));
-
-                    if (parent) {
-                      console.log('[PARENT FOUND]', {
-                        parentID: fc.subcontractorMessageID,
-                        parentSender: parent.senderType,
-                        parentDateTime: parent.messageDateTime,
-                        parentText: parent.messageText?.substring(0, 50),
-                      });
-
-                      parentData = {
-                        parentSenderName:
-                          parent.senderType === 'PM'
-                            ? 'Project Manager'
-                            : parent.subcontractorName || 'Subcontractor',
-
-                        // ✅ ONLY CHANGE: Use parseParentDate for reply message times
-                        parentMessageDateTime: parent.messageDateTime
-                          ? this.parseParentDate(parent.messageDateTime)
-                          : undefined,
-
-                        parentMessageText: parent.messageText || parent.message || '(No text)',
-                      };
-                    } else {
-                      console.warn('[PARENT NOT FOUND]', fc.subcontractorMessageID);
-                    }
+                      parentMessageText: parent.messageText || parent.message || '(No text)',
+                    };
                   }
-                  return {
-                    conversationMessageID: safeId,
-                    subcontractorMessageID: fc.subcontractorMessageID ? String(fc.subcontractorMessageID) : undefined,
+                }
 
-                    projectID: this.projectId,
-                    rfqID: fc.rfqID ?? null,
-                    workItemID: null,
-                    subcontractorID: subId,
+                return {
+                  conversationMessageID: safeId,
+                  subcontractorMessageID: fc.subcontractorMessageID
+                    ? String(fc.subcontractorMessageID)
+                    : undefined,
 
-                    projectManagerID: pmID,
-                    senderType: fc.senderType,
-                    conversationType: fc.conversationType,
-                    messageText: fc.messageText,
-                    subject: fc.subject ?? null,
+                  projectID: this.projectId,
+                  rfqID: fc.rfqID ?? null,
+                  workItemID: null,
+                  subcontractorID: subId,
 
-                    messageDateTime: fc.messageDateTime ? new Date(fc.messageDateTime) : undefined,
+                  projectManagerID: pmID,
+                  senderType: fc.senderType,
+                  conversationType: fc.conversationType,
+                  messageText: fc.messageText,
+                  subject: fc.subject ?? null,
 
-                    status: 'Active',
-                    createdBy: null,
-                    createdOn: null,
+                  messageDateTime: fc.messageDateTime ? new Date(fc.messageDateTime) : undefined,
 
-                    // ✅ FINAL attachment logic
-                    convoattachments: original?.attachments?.length
-                      ? [...original.attachments]
-                      : [],
+                  status: fc.status ?? 'Active',
+                  createdBy: null,
+                  createdOn: null,
 
-                    // ✅ ADD PARENT MESSAGE DATA
-                    ...parentData,
-                  };
-                });
-              }),
-            );
-        }),
-        finalize(() => {
-          console.log('[LOAD] Conversation loading completed');
-          this.isSpinLoading = false;
-        }),
-      )
-      .subscribe({
-        next: (res: any[]) => {
-          this.allPmSubConversationData = res ?? [];
-          this.pmSubConversationData = [...this.allPmSubConversationData];
+                  // ✅ FINAL attachment logic (same existing structure: convoattachments)
+                  convoattachments: mappedAttachments,
 
-          console.log(
-            '[FINAL RESULT]',
-            this.pmSubConversationData.map((c) => ({
-              id: c.conversationMessageID,
-              parentID: c.subcontractorMessageID,
-              parentSender: c.parentSenderName,
-              parentDateTime: c.parentMessageDateTime,
-              attachments: c.convoattachments?.length ?? 0,
-            })),
+                  // ✅ ADD PARENT MESSAGE DATA
+                  ...parentData,
+                };
+              });
+            }),
           );
+      }),
+      finalize(() => {
+        console.log('[LOAD] Conversation loading completed');
+        this.isSpinLoading = false;
+      }),
+    )
+    .subscribe({
+      next: (res: any[]) => {
+        this.allPmSubConversationData = res ?? [];
+        this.pmSubConversationData = [...this.allPmSubConversationData];
 
-          setTimeout(() => this.scrollToBottom(), 0);
-        },
-        error: (err) => {
-          this.isSpinLoading = false;
-          console.error('[ERROR] Loading conversation failed:', err);
-        },
-      });
-  }
+        console.log(
+          '[FINAL RESULT]',
+          this.pmSubConversationData.map((c) => ({
+            id: c.conversationMessageID,
+            parentID: c.subcontractorMessageID,
+            parentSender: c.parentSenderName,
+            parentDateTime: c.parentMessageDateTime,
+            attachments: c.convoattachments?.length ?? 0,
+            attachmentNames: (c.convoattachments || []).map((a: any) => a.fileName),
+          })),
+        );
+
+        setTimeout(() => this.scrollToBottom(), 0);
+      },
+      error: (err) => {
+        this.isSpinLoading = false;
+        console.error('[ERROR] Loading conversation failed:', err);
+      },
+    });
+}
 
   cleanMessage(message: string): string {
     if (!message) return '';
@@ -1978,6 +2002,7 @@ public getAmsterdamDateTimeLocalString(dateInput: string | Date | null | undefin
         this.attachments = [];
         this.afterMessageSent();
         alert('Conversation logged successfully!');
+         window.location.reload();
       },
       error: (err) => {
         console.error('Error sending message:', err);
@@ -2149,7 +2174,27 @@ if (replyText.length > 5000) {
         },
       });
   }
+downloadReplyAttachment(att: any) {
+  if (!att?.attachmentID) {
+    alert('No file available for download.');
+    return;
+  }
 
+  this.projectService.downloadConversationAttachment(att.attachmentID).subscribe({
+    next: (blob) => {
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = att.fileName || 'Attachment';
+      a.click();
+      URL.revokeObjectURL(url);
+    },
+    error: (err) => {
+      console.error('Download error:', err);
+      alert('File could not be downloaded.');
+    },
+  });
+}
   getParentMessage(parentId: any) {
     if (parentId === null || parentId === undefined || parentId === '') {
       return undefined;

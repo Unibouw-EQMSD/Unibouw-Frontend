@@ -205,6 +205,18 @@ export class projectService {
     );
   }
 
+  downloadConversationAttachment(attachmentId: string): Observable<Blob> {
+  return from(this.getHeaders()).pipe(
+    switchMap((headers) =>
+      this.http.get(`${this.apiURL}/RFQConversationMessage/DownloadAttachment`, {
+        params: { attachmentId },
+        headers,
+        responseType: 'blob',
+      }),
+    ),
+  );
+}
+
   sendMail(payload: SendMailRequest): Observable<boolean> {
     return from(this.getHeaders()).pipe(
       switchMap((headers) =>
