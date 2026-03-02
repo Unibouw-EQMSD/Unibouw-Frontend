@@ -397,7 +397,7 @@ export class RfqAdd {
   }
 
   async loadSubcontractors(workItemID: string, existingSubs: any[] = []): Promise<void> {
-    this.isLoader = true;
+    // this.isLoader = true;
 
     try {
       const { mappings, subs } = await firstValueFrom(

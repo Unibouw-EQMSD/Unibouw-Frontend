@@ -1761,17 +1761,37 @@ public getAmsterdamDateTimeLocalString(dateInput: string | Date | null | undefin
 
       // ✅ No timeZone parameter = uses user's local timezone
       return date.toLocaleString('en-GB', {
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
-      });
+  timeZone: 'Europe/Amsterdam',
+  day: '2-digit',
+  month: '2-digit',
+  year: 'numeric',
+  hour: '2-digit',
+  minute: '2-digit',
+  hour12: false,
+});
     } catch (error) {
       console.error('Date parsing error:', dateUtc, error);
       return '';
     }
   }
+
+
+  private convoRefreshTimer: any;
+
+startConversationAutoRefresh() {
+  this.stopConversationAutoRefresh();
+
+  this.convoRefreshTimer = setInterval(() => {
+    if (this.selectedTab === 'conversation' && this.selectedSubcontractorId) {
+      this.loadConversationBySub(this.selectedSubcontractorId);
+    }
+  }, 60000); // 60 sec
+}
+
+stopConversationAutoRefresh() {
+  if (this.convoRefreshTimer) clearInterval(this.convoRefreshTimer);
+  this.convoRefreshTimer = null;
+}
  saveLogConvo() {
     console.log("started");
 

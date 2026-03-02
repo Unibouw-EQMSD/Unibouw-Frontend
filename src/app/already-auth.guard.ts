@@ -21,7 +21,7 @@ export class AlreadyAuthGuard implements CanActivate {
     // (this reads localStorage and pushes into BehaviorSubject)
     this.userService.getUser();
 
-    return hasAccount ? this.router.parseUrl('/workitems') : true;
+    return hasAccount ? this.router.parseUrl('/projectdetails') : true;
   }
 }
 

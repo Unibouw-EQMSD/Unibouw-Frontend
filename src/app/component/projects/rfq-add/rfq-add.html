@@ -107,6 +107,7 @@
                 <thead>
                   <tr>
                     <th class="w-70px">{{ 'RFQ_PAGE.SELECT' | translate }}</th>
+                     <th>{{'WORKITEM.CODE' | translate }}</th>
                     <th>{{ 'RFQ_PAGE.WORK_ITEM' | translate }}</th>
                   </tr>
                 </thead>
@@ -126,6 +127,7 @@
                         class="cursor-pointer"
                       />
                     </td>
+                  <td>   <strong> {{ item.number }}</strong></td>
                     <td>{{ item.name }}</td>
                   </tr>
                 </tbody>

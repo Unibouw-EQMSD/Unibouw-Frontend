@@ -19,7 +19,7 @@ export class AddSubcontractor implements OnInit {
   countryList = countryList;
   countries = countryList.map((c) => c.name);
   isDropdownOpen = false;
-  selectedCountry = countryList.find((c) => c.code === '+33') || countryList[0]; // default
+  selectedCountry = countryList.find((c) => c.code === '+31') || countryList[0]; // default
   workitems: Workitem[] = [];
   selectedWorkitems: Workitem[] = [];
   selectionsByCategory = new Map<string, Workitem[]>(); // preserve selections per category
@@ -582,7 +582,7 @@ private handleFormResetAndRedirect(): void {
     this.subcontractorForm.patchValue({ status: 'Active', country: '' });
     this.submitAttempted = false;
     this.selectedWorkitems = [];
-    this.selectedCountry = countryList.find((c) => c.code === '+33') || countryList[0];
+    this.selectedCountry = countryList.find((c) => c.code === '+31') || countryList[0];
     this.uploadedFiles = [];
     this.showWorkItemError = false;
 

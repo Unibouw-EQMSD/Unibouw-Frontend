@@ -66,6 +66,11 @@
   <nav class="navbar navbar-dark navbar-expand-lg">
     <ul class="navbar-nav">
       <!-- <li><i class="fa-solid fa-gauge-simple-high" style="color: white;"></i></li> -->
+         <li>
+        <a class="nav-item" [routerLink]="'/projectdetails'" [class.active]="isProjectsActive()">{{
+          'HEADER.PROJECTS' | translate
+        }}</a>
+      </li>
       <li>
         <a class="nav-item" routerLink="/workitems" [class.active]="isWorkitemActive()">{{
           'HEADER.WORKITEMS' | translate
@@ -76,11 +81,7 @@
           'HEADER.SUBCONTRACTORS' | translate
         }}</a>
       </li>
-      <li>
-        <a class="nav-item" [routerLink]="'/projectdetails'" [class.active]="isProjectsActive()">{{
-          'HEADER.PROJECTS' | translate
-        }}</a>
-      </li>
+   
     </ul>
   </nav>
 </header>

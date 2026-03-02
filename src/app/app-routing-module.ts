@@ -17,7 +17,7 @@ import { SubcontractorDetails } from './component/subcontractor/subcontractor-de
 const routes: Routes = [
   { path: 'login', component: SSOLogin, canActivate: [AlreadyAuthGuard] },
 
-  { path: '', redirectTo: 'workitems', pathMatch: 'full' }, // no guard here
+  { path: '', redirectTo: 'projectdetails', pathMatch: 'full' }, // no guard here
 
   { path: 'workitems', component: Workitems, canActivate: [AuthGuard] },
   { path: 'subcontractor', component: Subcontractor, canActivate: [AuthGuard] },

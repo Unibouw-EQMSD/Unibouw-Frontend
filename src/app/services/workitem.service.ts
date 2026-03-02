@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { map, switchMap, from, Observable } from 'rxjs';
+import { HttpClient, HttpErrorResponse, HttpHeaders } from '@angular/common/http';
+import { map, switchMap, from, Observable, catchError, throwError, of } from 'rxjs';
 import { MsalService } from '@azure/msal-angular';
 import { AppConfigService } from './app.config.service';
 
@@ -78,7 +78,7 @@ export class WorkitemService {
   }
 
   /* Get work items by category ID */
-  getWorkitems(categoryId: string, onlyActive: boolean = false): Observable<Workitem[]> {
+getWorkitems(categoryId: string, onlyActive: boolean = false): Observable<Workitem[]> {
   return from(this.getHeaders()).pipe(
     switchMap((headers) =>
       this.http.get<{ count: number; data: Workitem[] }>(
@@ -87,7 +87,7 @@ export class WorkitemService {
       )
     ),
     map((res) =>
-      (res.data || []).map((it) => ({
+      (res?.data || []).map((it) => ({
         workItemID: it.workItemID || '',
         number: it.number || '',
         name: it.name || '',
@@ -95,7 +95,16 @@ export class WorkitemService {
         isActive: it.isActive,
         editItem: false,
       }))
-    )
+    ),
+    catchError((err: HttpErrorResponse) => {
+      // If backend uses 404/204 to mean "no records", treat as empty list
+      if (err.status === 404 || err.status === 204) {
+        return of([] as Workitem[]);
+      }
+
+      // For real errors, let it fail (so you can show an error message)
+      return throwError(() => err);
+    })
   );
 }
   /* Update isActive status */

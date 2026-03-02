@@ -130,7 +130,7 @@ const normalizedMe: MeResponse = {
 localStorage.setItem('user_data', JSON.stringify(normalizedMe));
 this.userService.setUser(normalizedMe);
 
-    await this.router.navigate(['/workitems'], { replaceUrl: true });
+    await this.router.navigate(['/projectdetails'], { replaceUrl: true });
   } catch (error) {
     console.error('❌ continueLoginFlow failed:', error);
     alert('Login failed. Please try again.');

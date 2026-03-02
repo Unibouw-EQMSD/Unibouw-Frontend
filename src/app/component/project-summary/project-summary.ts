@@ -682,7 +682,25 @@ Comment        : ${trimmedComment}
           this.rightSectionVisible = false;
           this.hideRightSummaryCard = true;
         },
-        error: () => alert('Failed to upload quote'),
+       error: (err) => {
+  console.error('Quote upload failed:', err);
+
+  let errorMessage = 'Quote upload failed. Please try again.';
+
+  if (err?.status === 0) {
+    errorMessage = 'Upload failed: Network error. Please check your internet connection.';
+  } else if (err?.status === 400) {
+    errorMessage = 'Upload failed: Invalid data. Please review your quote details.';
+  } else if (err?.status === 413) {
+    errorMessage = 'Upload failed: File size is too large.';
+  } else if (err?.status === 500) {
+    errorMessage = 'Upload failed: Server error. Please try again later.';
+  }
+
+  alert(errorMessage);
+
+  this.formSubmitted = false;
+}
       });
   }
 
