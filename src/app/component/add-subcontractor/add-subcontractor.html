@@ -1,6 +1,6 @@
 <app-header></app-header>
 <main id="main">
-  <div class="container">
+  <div class="container-fluid">
     <div class="pagetitle">
       <h1>
         {{ 'SUBCONTRACTOR_FORM.TITLE' | translate }}
@@ -15,8 +15,8 @@
             <!-- Left -->
             <div class="col-sm-8 formScroll">
               <!-- First Row, SubcontractorName & Email -->
-              <div class="form-row">
-                <div class="form-group">
+              <div class="row">
+                <div class="col-sm-6 mb-3">
                   <label
                     >{{ 'SUBCONTRACTOR_FORM.SUBCONTRACTOR_NAME' | translate }}
                     <span class="text-danger">*</span></label
@@ -72,7 +72,7 @@
                   </div>
                 </div>
 
-                <div class="form-group">
+                <div class="col-sm-6 mb-3">
                   <label
                     >{{ 'SUBCONTRACTOR_FORM.EMAIL' | translate }}
                     <span class="text-danger">*</span></label
@@ -118,11 +118,9 @@
                     </span>
                   </div>
                 </div>
-              </div>
 
               <!-- Second Row, Location & Country -->
-              <div class="form-row">
-                <div class="form-group">
+                <div class="col-sm-6 mb-3">
                   <label
                     >{{ 'SUBCONTRACTOR_FORM.LOCATION' | translate }}
                     <span class="text-danger">*</span></label
@@ -162,15 +160,14 @@
                   </div>
                 </div>
 
-                <div class="form-group">
+                <div class="col-sm-6 mb-3">
                   <label
                     >{{ 'SUBCONTRACTOR_FORM.COUNTRY' | translate }}
                     <span class="text-danger">*</span></label
                   >
                   <select
                     formControlName="country"
-                    class="form-control"
-                    style="cursor: pointer !important"
+                    class="form-select"
                     [ngClass]="{
                       'is-invalid':
                         subcontractorForm.get('country')?.touched &&
@@ -192,11 +189,9 @@
                     </span>
                   </div>
                 </div>
-              </div>
 
               <!-- Third Row, ContactName & ContactPerson -->
-              <div class="form-row">
-                <div class="form-group">
+                <div class="col-sm-6 mb-3">
                   <label
                     >{{ 'SUBCONTRACTOR_FORM.CONTACT_NAME' | translate }}
                     <span class="text-danger">*</span></label
@@ -245,7 +240,7 @@
                   </div>
                 </div>
 
-                <div class="form-group">
+                <div class="col-sm-6 mb-3">
                   <label
                     >{{ 'SUBCONTRACTOR_FORM.CONTACT_PHONE' | translate }}
                     <span class="text-danger">*</span></label
@@ -305,11 +300,9 @@
                     </span>
                   </div>
                 </div>
-              </div>
 
               <!-- Fourth Row, ContactEmailID & Status -->
-              <div class="form-row">
-                <div class="form-group">
+                <div class="col-sm-6 mb-3">
                   <label
                     >{{ 'SUBCONTRACTOR_FORM.CONTACT_EMAIL' | translate }}
                     <span class="text-danger">*</span></label
@@ -350,15 +343,14 @@
                   </div>
                 </div>
 
-                <div class="form-group">
+                <div class="col-sm-6 mb-3">
                   <label
                     >{{ 'SUBCONTRACTOR_FORM.STATUS' | translate }}
                     <span class="text-danger">*</span></label
                   >
                   <select
                     formControlName="status"
-                    class="form-control"
-                    style="cursor: pointer !important"
+                    class="form-select"
                   >
                     <option value="Active">{{ 'SUBCONTRACTOR_FORM.ACTIVE' | translate }}</option>
                     <option value="Inactive">
@@ -367,11 +359,9 @@
                   </select>
                   <div class="form-error-space"></div>
                 </div>
-              </div>
 
               <!-- Fifth Row, OfficeAddress & BillingAddress -->
-              <div class="form-row">
-                <div class="form-group">
+                <div class="col-sm-6 mb-3">
                   <label
                     >{{ 'SUBCONTRACTOR_FORM.OFFICE_ADDRESS' | translate }}
                     <span class="text-danger">*</span></label
@@ -421,17 +411,16 @@
                     </span>
                   </div>
                 </div>
-                <div class="form-group">
+                <div class="col-sm-6 mb-3">
                   <div class="form-billing-row">
                     <label>{{ 'SUBCONTRACTOR_FORM.BILLING_ADDRESS' | translate }}</label>
-                    <div class="checkbox-inline">
+                    <div class="form-check">
                       <input
-                        type="checkbox"
+                        type="checkbox" class="form-check-input"
                         formControlName="sameAsOffice"
                         id="sameAsOffice"
-                        style="cursor: pointer !important"
                       />
-                      <label for="sameAsOffice" class="form-checkbox-label">{{
+                      <label for="sameAsOffice" class="form-check-label">{{
                         'SUBCONTRACTOR_FORM.SAME_AS_OFFICE' | translate
                       }}</label>
                     </div>
@@ -442,7 +431,7 @@
                     class="form-control-textarea"
                     [placeholder]="'SUBCONTRACTOR_FORM.ADDRESS_PLACEHOLDER_2' | translate"
                   ></textarea>
-                  <div class="form-error-space" style="margin-bottom: 20px">
+                  <div class="form-error-space">
                     <span
                       *ngIf="
                         subcontractorForm.get('billingAddress')?.touched &&
@@ -512,7 +501,6 @@
                     <ng-container *ngIf="workitems.length > 0; else noWorkitems">
                       <label
                         *ngFor="let w of filteredWorkitems()"
-                        style="font-size: 15px; cursor: pointer"
                       >
                         <input
                           type="checkbox"

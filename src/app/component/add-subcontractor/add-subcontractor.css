@@ -158,15 +158,17 @@ input::placeholder {
   opacity: 0.6 !important; /* adjust between 0 (transparent) to 1 (opaque) */
 }
 
-label {
+/* label {
   font-size: 16px;
   font-weight: 400;
   color: #444;
-}
+} */
 
 textarea {
   resize: vertical;
   min-height: 60px;
+  display: block;
+  width: 100%;
 }
 
 .file-upload {
@@ -199,7 +201,7 @@ textarea {
   display: flex;
   flex-direction: column;
   gap: 5px;
-  max-height: calc(100vh - 373px);
+  max-height: calc(100vh - 347px);
   overflow-y: auto;
 }
 .checkbox-listRow div {
@@ -316,6 +318,6 @@ textarea {
   }
 } */
  .formScroll {
-    min-height: calc(100vh - 268px);
-    max-height: calc(100vh - 268px);
+    min-height: calc(100vh - 247px);
+    max-height: calc(100vh - 247px);
     overflow-y: auto;}

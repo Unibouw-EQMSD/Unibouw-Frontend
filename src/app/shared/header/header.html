@@ -1,88 +1,123 @@
-<header>
+<header class="header header-nav fixed-top align-items-center">
   <!-- Header Container -->
-  <div class="container">
-    <!-- Left side -->
-    <div class="navbar-brand">
-      <img src="assets/images/logo-unibouw.svg" alt="logo" />
-    </div>
 
-    <!-- Right side -->
-    <div class="header-right">
-      <!-- Translator -->
-      <label class="lang-toggle" title="Translate">
-        <input type="checkbox" [checked]="currentLang === 'nl'" (change)="toggleLanguage($event)" />
-        <span class="slider">
-          <span class="lang en">EN</span>
-          <span class="lang nl">NL</span>
-        </span>
-      </label>
-
-      <!-- Notification -->
-      <div class="notification" *ngIf="isAdmin">
-        <i class="fa fa-gear" title="Set RFQ Reminder" (click)="openReminderConfig()"></i>
-      </div>
-
-      <!-- User Dropdown -->
-      <div class="user-dropdown">
-        <button
-          type="button"
-          class="dropdown-btn"
-          (click)="toggleUserDropdown($event)"
-          style="border: none; background: transparent"
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            height="22"
-            width="22"
-            viewBox="0 0 48 48"
-            fill="#03303E"
-          >
-            <circle cx="24" cy="18" r="8" />
-            <path d="M24 28c-8 0-14 4-14 8v4h28v-4c0-4-6-8-14-8z" />
-            <circle cx="24" cy="24" r="22" fill="none" stroke="#03303E" stroke-width="3" />
-          </svg>
-
-          {{ getUserName() }}
-          <i class="fa-solid fa-caret-down"></i>
-        </button>
-
-        <div class="dropdown-menu1" *ngIf="userDropdownOpen" (click)="$event.stopPropagation()">
-          <div class="dropdown-header">{{ userName$ | async }}</div>
-
-          <!-- FIX: remove href -->
-          <a class="dropdown-item" (click)="$event.preventDefault()">
-            <i class="fa-regular fa-user"></i> {{ 'HEADER.MY_PROFILE' | translate }}
-          </a>
-
-          <a class="dropdown-item" (click)="signOut()">
-            <i class="fa-solid fa-right-from-bracket"></i> {{ 'HEADER.SIGN_OUT' | translate }}
-          </a>
+    <div class="container-fluid">
+  <nav class="navbar-main">
+      <div class="d-flex align-items-center justify-content-between">
+        <!-- Left side -->
+        <div class="navbar-brand">
+          <img src="assets/images/logo-unibouw.svg" alt="logo" />
         </div>
-      </div>
-    </div>
-  </div>
+        <!-- Right side -->
+        <ul class="d-flex align-items-center header-nav">
+          <li class="nav-item">
+            <!-- Translator -->
+            <label class="lang-toggle" title="Translate">
+              <input
+                type="checkbox"
+                [checked]="currentLang === 'nl'"
+                (change)="toggleLanguage($event)"
+              />
+              <span class="slider">
+                <span class="lang en">EN</span>
+                <span class="lang nl">NL</span>
+              </span>
+            </label>
+          </li>
+          <li class="nav-item">
+            <!-- Notification -->
+            <div class="notification" *ngIf="isAdmin">
+              <i class="fa fa-gear" title="Set RFQ Reminder" (click)="openReminderConfig()"></i>
+            </div>
+          </li>
+          <li class="nav-item">
+            <!-- User Dropdown -->
+            <div class="user-dropdown">
+              <button
+                type="button"
+                class="dropdown-btn"
+                (click)="toggleUserDropdown($event)"
+                style="border: none; background: transparent"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  height="22"
+                  width="22"
+                  viewBox="0 0 48 48"
+                  fill="#03303E"
+                >
+                  <circle cx="24" cy="18" r="8" />
+                  <path d="M24 28c-8 0-14 4-14 8v4h28v-4c0-4-6-8-14-8z" />
+                  <circle cx="24" cy="24" r="22" fill="none" stroke="#03303E" stroke-width="3" />
+                </svg>
 
+                <span>{{ getUserName() }}</span>
+                <i class="fa-solid fa-caret-down"></i>
+              </button>
+
+              <div
+                class="dropdown-menu1"
+                *ngIf="userDropdownOpen"
+                (click)="$event.stopPropagation()"
+              >
+                <div class="dropdown-header">{{ userName$ | async }}</div>
+
+                <!-- FIX: remove href -->
+                <a class="dropdown-item" (click)="$event.preventDefault()">
+                  <i class="fa-regular fa-user"></i> {{ 'HEADER.MY_PROFILE' | translate }}
+                </a>
+
+                <a class="dropdown-item" (click)="signOut()">
+                  <i class="fa-solid fa-right-from-bracket"></i> {{ 'HEADER.SIGN_OUT' | translate }}
+                </a>
+              </div>
+            </div>
+          </li>
+        </ul>
+      </div>
+  </nav>
   <!-- Navbar -->
   <nav class="navbar navbar-dark navbar-expand-lg">
-    <ul class="navbar-nav">
-      <!-- <li><i class="fa-solid fa-gauge-simple-high" style="color: white;"></i></li> -->
-      <li>
-        <a class="nav-item" routerLink="/workitems" [class.active]="isWorkitemActive()">{{
-          'HEADER.WORKITEMS' | translate
-        }}</a>
-      </li>
-      <li>
-        <a class="nav-item" routerLink="/subcontractor" [class.active]="isSubcontractorActive()">{{
-          'HEADER.SUBCONTRACTORS' | translate
-        }}</a>
-      </li>
-      <li>
-        <a class="nav-item" [routerLink]="'/projectdetails'" [class.active]="isProjectsActive()">{{
-          'HEADER.PROJECTS' | translate
-        }}</a>
-      </li>
-    </ul>
+    <div class="container-fluid">
+      <button
+        class="navbar-toggler"
+        type="button"
+        data-bs-toggle="collapse"
+        data-bs-target="#navbarNavDropdown"
+        aria-controls="navbarNavDropdown"
+        aria-expanded="false"
+        aria-label="Toggle navigation"
+      >
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNavDropdown">
+        <ul class="navbar-nav">
+          <li class="nav-item">
+            <a class="nav-link" routerLink="/workitems" [class.active]="isWorkitemActive()">{{
+              'HEADER.WORKITEMS' | translate
+            }}</a>
+          </li>
+          <li class="nav-item">
+            <a
+              class="nav-link"
+              routerLink="/subcontractor"
+              [class.active]="isSubcontractorActive()"
+              >{{ 'HEADER.SUBCONTRACTORS' | translate }}</a
+            >
+          </li>
+          <li class="nav-item">
+            <a
+              class="nav-link"
+              [routerLink]="'/projectdetails'"
+              [class.active]="isProjectsActive()"
+              >{{ 'HEADER.PROJECTS' | translate }}</a
+            >
+          </li>
+        </ul>
+      </div>
+    </div>
   </nav>
+    </div>
 </header>
 
 <!-- Reminder Popup Modal -->
@@ -113,7 +148,8 @@
                 (clickOutside)="open = false"
               >
                 <div
-                  class="dropdown-btn" style="padding-left: 12px"
+                  class="dropdown-btn"
+                  style="padding-left: 12px"
                   (click)="reminderForm.get('isEnable')?.value && toggleMaxSequenceDropdown()"
                   [class.is-invalid]="
                     reminderForm.get('maxReminderSequence')?.touched &&

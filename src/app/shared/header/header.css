@@ -131,15 +131,32 @@ header {
   align-items: center !important;
 }
 
+.navbar-dark {
+    background-color: transparent !important;
+    margin-top: 4px;
+    background-color: #152147;
+    padding: 0px 0px;
+    /*box-shadow: 0px 2px 20px rgb(1 41 112 / 10%);*/
+    margin-bottom: -25px;
+}
+
+.navbar-dark .container-fluid {
+    /*background: linear-gradient(45deg,#7b1fa2,#7c4dff) !important;*/
+    /*background: linear-gradient(to right,#8971ea,#7f72ea,#7574ea,#6a75e9,#5f76e8) !important;*/
+    /*background: linear-gradient(to right,#496096,#4a609d) !important;*/
+    /*background: linear-gradient(to right,#466497,#495f9e) !important;*/
+    border-radius: 4px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+}
 .navbar {
-  background: #003042;
+  background: #003042 !important;
   border-radius: 4px;
-  padding: 0.91rem 1.3rem !important;
+  padding: 0 !important;
   display: flex;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
   position: relative;
   z-index: 5;
-  width: 96%;
+  /* width: 96%; */
   margin: 0 auto;
 }
 
@@ -151,18 +168,23 @@ header {
   padding: 0;
 }
 
-.navbar li a {
+/* .navbar li a {
   text-decoration: none;
   color: white;
   font-size: 16px;
-  font-weight: 400;
+  font-weight: 400; 
   transition: color 0.3s ease;
   padding: 1.1rem 1.3rem !important;
+} */
+nav.navbar-dark .nav-link {
+    color: #fff !important;
+    padding: .91rem 1.3rem !important;
+}.header-nav ul li {
+    margin: 0 0.6rem;
 }
-
 .navbar li a.active,
 .navbar li a:hover {
-  background-color: #905f33 !important;
+  background-color: rgba(240, 126, 42, .6) !important;
   color: white;
 }
 
@@ -487,19 +509,19 @@ select option {
 }
 
 .slider::before {
-  content: '';
-  position: absolute;
-  height: 20px;
-  width: 20px;
-  left: 5px;
-  top: 3px;
-  background-color: white;
-  border-radius: 50%;
-  transition: 0.3s;
+      content: "";
+    position: absolute;
+    height: 20px;
+    width: 26px;
+    left: 3px;
+    top: 2.8px;
+    background-color: white;
+    border-radius: 13px;
+    transition: 0.3s;
 }
 
 .lang-toggle input:checked + .slider::before {
-  transform: translateX(32px);
+  transform: translateX(30px);
 }
 
 .lang {
@@ -508,3 +530,8 @@ select option {
 }
 
 /* ----------------- Model End ---------------- */
+@media only screen and (max-width: 767.98px) {
+    .header .dropdown-btn > span {
+        display: none;
+    
+}

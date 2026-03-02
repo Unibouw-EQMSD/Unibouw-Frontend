@@ -1,4 +1,4 @@
-<div class="container" *ngIf="!isLoading; else loading">
+<div class="container-fluid" *ngIf="!isLoading; else loading">
   <!-- Page Title only (NO due date here) -->
   <div class="page-header">
     <h1>Quote Request (RFQ)</h1>
@@ -336,7 +336,7 @@
 
                   <div class="rfq-field">
                     <label>Attachments</label>
-                    <div class="attachments-container">
+                    <div class="attachments-container-fluid">
                       <input
                         #fileInput
                         type="file"

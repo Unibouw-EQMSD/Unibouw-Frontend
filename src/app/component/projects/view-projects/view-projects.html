@@ -1,6 +1,6 @@
 <app-header></app-header>
 <main id="main">
-  <div class="container">
+  <div class="container-fluid">
     <!-- SKELETON LOADING -->
     <!-- FULL PAGE SKELETON -->
     <div class="full-page-skeleton" *ngIf="isLoading">
@@ -267,7 +267,7 @@
                                 <!-- CHECK: Does this row have a Subcontractor? -->
                                 <ng-container
                                   *ngIf="
-                                    (getFilteredRfqs(work)?.length ?? 0) > 0;
+                                    getFilteredRfqs(work).length > 0;
                                     else noResponseTemplate
                                   "
                                 >
@@ -344,7 +344,7 @@
                               </tr>
 
                               <!-- EDGE CASE: Filter returns 0 results completely -->
-                              <tr *ngIf="getFilteredRfqs(work)?.length === 0">
+                              <tr *ngIf="getFilteredRfqs(work).length === 0">
                                 <td
                                   colspan="9"
                                   class="no-records-cell"
@@ -512,7 +512,7 @@
 
               <!-- TAB 2: RFQ (Mat Table Section) -->
               <div *ngIf="selectedTab === 'rfq'">
-                <div class="button-container">
+                <div class="button-container-fluid">
                   <button type="button" class="btn btn-sm btn-primary" (click)="addRfq()">
                     {{ 'RFQ_ACTIONS.ADD_RFQ' | translate }}
                   </button>
@@ -625,10 +625,10 @@
                   {{ 'EMPTY_STATES.NO_CONVERSATION' | translate }}
                 </div>
 
-                <div class="chat-container" *ngIf="(convoSubcontractors?.length ?? 0) > 0">
+                <div class="chat-container-fluid" *ngIf="convoSubcontractors.length > 0">
                   <!-- LEFT SIDEBAR -->
                   <div class="chat-sidebar">
-                    <div class="sidebar-list" *ngIf="(convoSubcontractors?.length ?? 0) > 0">
+                    <div class="sidebar-list" *ngIf="convoSubcontractors.length > 0">
                       <div
                         class="sidebar-item"
                         *ngFor="let sub of convoSubcontractors; let i = index"
@@ -880,7 +880,7 @@
                         <div
                           class="error-msg"
                           style="color: red"
-                          *ngIf="(messageText ?? '').length > 5000"
+                          *ngIf="messageText.length > 5000"
                         >
                           {{ 'CONVERSATION.MESSAGE_TOO_LONG' | translate }}
                         </div>
@@ -963,7 +963,7 @@
           </div>
 
           <!-- Default Reminder -->
-          <div class="default-reminder-container" *ngIf="reminderType === 'default'">
+          <div class="default-reminder-container-fluid" *ngIf="reminderType === 'default'">
             <div class="date-row" *ngFor="let d of reminderDates; let i = index">
               <span class="circle">{{ i + 1 }}</span>
               <!-- <span class="date-input">{{ d }}</span> -->
@@ -974,7 +974,7 @@
           </div>
 
           <!-- Custom Reminder -->
-          <div class="reminder-container" *ngIf="reminderType === 'custom'">
+          <div class="reminder-container-fluid" *ngIf="reminderType === 'custom'">
             <div class="date-row" *ngFor="let date of customReminderDates; let i = index">
               <span class="circle">{{ i + 1 }}</span>
               <input

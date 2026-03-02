@@ -49,5 +49,6 @@
 }
 
 .table-Fixedheader-wrapper {
-    max-height: calc(100vh - 224px) !important;
+    min-height: calc(100vh - 226px) !important;
+    max-height: calc(100vh - 226px) !important;
 }

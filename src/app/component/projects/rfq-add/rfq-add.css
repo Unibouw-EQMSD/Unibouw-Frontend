@@ -5,8 +5,12 @@
     white-space: nowrap;
 }
 
+.table-Fixedheader-wrapper.lefttab {
+    max-height: calc(100vh - 321px);
+}
 .table-Fixedheader-wrapper {
-  max-height: calc(100vh - 370px);}
+    max-height: calc(100vh - 327px);
+}
 .form-card {
   display: grid;
   grid-template-columns: 2fr 1fr; /* left = form, right = workitems */

@@ -1,11 +1,11 @@
 <app-header></app-header>
 <main id="main">
-  <div class="container">
+  <div class="container-fluid">
     <div class="pagetitle">
       <h1>Projects</h1>
     </div>
 
-    <div class="table-container">
+    <div class="table-container-fluid">
       <!-- Tabs -->
       <div class="tabs">
         <button type="button" [routerLink]="['/projectdetails']">Project List</button>
@@ -16,7 +16,7 @@
 
         <button type="button" class="btn btn-sm btn-primary" [routerLink]="['/add-rfq']">Add RFQ</button>
       </div>
-      <div class="table-scroll-container">
+      <div class="table-scroll-container-fluid">
         <table class="styled-table">
           <thead>
             <tr>
@@ -58,7 +58,7 @@
           </div>
         </div>
         <!-- Right: Pagination -->
-        <div class="pagination-container">
+        <div class="pagination-container-fluid">
           <button class="page-btn" [disabled]="currentPage === 1" (click)="prevPage()">
             Previous
           </button>

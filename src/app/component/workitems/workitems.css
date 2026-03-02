@@ -110,8 +110,9 @@
 
 
 .table-Fixedheader-wrapper {
-    max-height: calc(100vh - 274px) !important;
+    min-height: calc(100vh - 265px) !important;
+    max-height: calc(100vh - 265px) !important;
 }
 
-th:first-child {width: 160px; max-width: 160px;}
-th:last-child {width: 160px; max-width: 160px;}
+th:first-child {width: 192px; white-space: nowrap;}
+th:last-child {width: 100px; max-width: 100px;}

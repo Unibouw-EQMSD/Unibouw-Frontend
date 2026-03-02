@@ -263,12 +263,12 @@
     margin: 0 0.6rem;
 }
 .table-scroll {
-  height: calc(100vh - 313px);
+  height: calc(100vh - 305px);
   overflow: auto;
 }
 
 .table-scroll1 {
-  height: calc(57vh - 11px);
+  height: calc(100vh - 291px);
   overflow: auto;
 }
 
@@ -528,7 +528,7 @@
 .default-reminder-container {
   display: grid;
   grid-template-columns: repeat(3, 180px);
-  gap: 25px 0px;
+  gap: 10px 0px;
   margin-top: 20px;
 }
 
@@ -540,37 +540,35 @@
 }
 
 .modal-section {
-  margin-bottom: 30px;
+  margin-bottom: 20px;
 }
 
 /* Due Date Box */
 .due-date-box {
   background: #f2f7fd;
   border-radius: 8px;
-  padding: 16px 24px;
-  margin-bottom: 25px;
+  padding: 8px 20px;
+  margin-bottom: 1rem;
   border: 1px solid #e4eeff;
   display: flex;
   align-items: flex-start;
   gap: 12px;
+  font-weight: 600;
 }
 
 .due-date-icon {
   color: #1d6fe8;
-  font-size: 20px;
-  margin-top: 10px;
+  font-size: 18px;
 }
 
 .due-date-content {
   display: flex;
-  flex-direction: column;
-  gap: 4px;
+  /* flex-direction: column; */
+  gap: 6px;
 }
 
 .due-date-label {
   color: #1d6fe8;
-  font-size: 16px;
-  font-weight: 500;
 }
 
 .due-date-value {
@@ -776,8 +774,8 @@
   padding-left: 10px;
 }
 .card-body .scroll {
-  min-height: calc(100vh - 216px);
-  max-height: calc(100vh - 216px);
+  min-height: calc(100vh - 219px);
+  max-height: calc(100vh - 219px);
   overflow-y: auto;
   padding: .6rem;
 }
@@ -1283,24 +1281,24 @@
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
-  margin-top: 8px;
+  margin-top: -11px;
 }
 
 .file-chip {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  background: #eef2ff;
-  border: 1px solid #c7d2fe;
-  border-radius: 16px;
-  padding: 4px 10px;
-  font-size: 12px;
+      display: flex;
+    align-items: center;
+    gap: 6px;
+    background: #eef2ff;
+    border: 1px solid #c7d2fe;
+    border-radius: 4px;
+    padding: 0px 6px;
+    font-size: 12px;
 }
 
 .file-chip .remove {
   cursor: pointer;
   font-weight: bold;
-  color: #4f46e5;
+  color: #dc2626;
 }
 
 /* Actions */
@@ -1360,7 +1358,8 @@
 }
 .sidebar-list {
     overflow: auto;
-    max-height: calc(100vh - 299px);
+    max-height: calc(100vh - 301px);
+    min-height: calc(100vh - 301px);
 }
 .msger {
     display: flex;
@@ -1369,7 +1368,7 @@
     width: 100%;
     /* max-width: 867px; */
     margin: 0px 0px 0px 0px;
-    height: calc(100vh - 384px);
+    height: calc(100vh - 359px);
     padding: .5rem 1rem;
 }
 .chat-search {
