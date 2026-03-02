@@ -2,854 +2,876 @@
    COMPLETE CSS (Screenshot-matching)
    Paste as a single file
    ========================= */
+   @import url('https://fonts.googleapis.com/css2?family=Mulish:wght@300;400;500;600;700&family=Rubik:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Work+Sans:wght@300;400;500;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Public+Sans:wght@300;400;500;700&family=Work+Sans:wght@300;400;500;700&display=swap');
 
-body,
-.container {
-  font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
-  background: #f7f8fc;
-  color: #22223b;
+body {
+    /*font-family: Rubik,sans-serif !important;*/
+    font-family: 'Public Sans', sans-serif !important;
+    font-size: 1rem;
+    background-color: #f5f5f9;
+    /*background-color: #f9fbfd;*/
 }
 
-/* Layout wrapper */
-.container {
-  padding: 24px 12px;
-}
-
-/* Page title */
-.page-header {
-  margin-bottom: 14px;
-}
-
-.page-header h1 {
-  font-size: 34px;
-  font-weight: 600;
-  color: #0f172a;
-  margin: 0 0 14px 0;
-  letter-spacing: 0.2px;
-}
-
-/* Expired banner */
-.expired-banner {
-  margin: 10px 0 14px 0;
-  padding: 12px;
-  background: #ffe6e6;
-  color: #b30000;
-  font-weight: 600;
-  border-radius: 6px;
-  text-align: center;
-}
-
-/* Main 2-column layout */
-.rfq-layout {
-  display: flex;
-  gap: 18px;
-  align-items: flex-start;
-}
-
-.left-card {
-  width: 200px;
-  /* flex: 0 0 300px; */
-}
-
-.right-card {
-  flex: 1 1 auto;
-  min-width: 0;
-}
-
-/* Left + right cards */
-.left-card .details-card,
-.right-card .panel {
-  background: #fff;
-  border-radius: 6px;
-  border: 1px solid #dbe3f3;
-  box-shadow: 0 2px 10px rgba(54, 63, 98, 0.08);
-}
-
-/* Left card content */
-.left-card .details-card {
-  padding: 0;
-  overflow: hidden;
-}
-
-.left-card .details-card h3 {
-  margin: 0;
-  padding: 14px 16px;
-  font-size: 18px;
-  font-weight: 500;
-  color: #111827;
-  border-bottom: 1px solid #e5e7eb;
-  background: #fff;
-}
-
-.detail-row {
-  padding: 12px 16px;
-}
-
-.detail-row + .detail-row {
-  border-top: 1px solid #eef2f7;
-}
-
-.detail-row .label {
-  display: block;
-  font-weight: 500;
-  color: #6a5acd;
-  font-size: 16px;
-  margin-bottom: 8px;
-}
-
-.detail-row .value {
-  color: #111827;
-  font-size: 17px;
-  font-weight: 500;
-}
-
-.detail-row .value.status {
-  font-weight: 600;
-}
-
-.value.status.in-progress {
-  color: #1a7f37;
-}
-.value.status.delayed {
-  color: #b54708;
-}
-.value.status.cancelled {
-  color: #b42318;
-}
-
-.detail-row .value a {
-  color: #f97316;
-  font-weight: 500;
-  text-decoration: underline dotted;
-}
-
-.detail-row .value a:hover {
-  color: #d97706;
-}
-
-/* Right panel */
-.right-card .panel {
-  padding: 0;
-  overflow: hidden;
-}
-
-/* RFQ header INSIDE white box */
-.panel-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 14px 16px;
-  border-bottom: 1px solid #e5e7eb;
-  background: #fff;
-}
-
-.panel-title {
-  margin: 0;
-  font-size: 18px;
-  font-weight: 500;
-  color: #111827;
-}
-
-.panel-due {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  color: #2563eb;
-  font-weight: 600;
-}
-
-.panel-due i {
-  color: #2563eb;
-}
-
-.panel-due-label {
-  color: #2563eb;
-  font-weight: 500;
-  font-size: 16px;
-}
-
-.panel-due-date {
-  color: #111827;
-  font-weight: 700;
-  font-size: 18px;
-}
-
-/* RFQ list spacing */
-.rfq-list {
-  padding: 12px 14px 14px 14px;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-/* RFQ row card */
-.rfq-row {
-  background: #fff;
-  border: 1px solid #dbe3f3;
-  border-radius: 6px;
-  box-shadow: none;
-  overflow: hidden;
-}
-
-/* RFQ row head (3 zones like screenshot) */
-.rfq-row-head--match {
-  display: grid;
-  grid-template-columns: 520px 1fr 260px;
-  gap: 28px;
-  align-items: center;
-  padding: 18px 18px;
-  border-bottom: 1px solid #e5e7eb;
-  background: #fff;
-}
-
-/* LEFT: Work item mini columns */
-.rfq-mini {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 54px;
-}
-
-.mini-label {
-  color: #6a5acd;
-  font-size: 16px;
-  font-weight: 500;
-  margin-bottom: 8px;
-}
-
-.mini-value {
-  color: #111827;
-  font-size: 18px;
-  font-weight: 500;
-}
-
-.mini-value--bold {
-  font-weight: 700;
-}
-
-/* CENTER: Interest label + buttons */
-.rfq-center .interest-label {
-  color: #6a5acd;
-  font-weight: 500;
-  font-size: 16px;
-  margin-bottom: 12px;
-}
-
-
-
-.interest-btns {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  flex-wrap: nowrap;
-}
-
-/* Buttons (match screenshot size) */
-.btn-pill {
-  height: 38px;
-  padding: 0 18px;
-  border-radius: 4px;
-  font-size: 17px;
-  font-weight: 500;
-  line-height: 38px;
-  min-width: 150px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  box-sizing: border-box;
-  border: 1px solid #0f172a;
-  background: #fff;
-  color: #0f172a;
-}
-
-.btn-pill i {
-  margin-left: 10px;
-  font-size: 14px;
-}
-
-.btn-pill--primary {
-   background: #fff;
-  border-color: #0f172a;
-  color: #0f172a;
-}
-
-.btn-pill--outline {
-  background: #fff;
-  border-color: #0f172a;
-  color: #0f172a;
-}
-
-.btn-pill--dark {
-  background: #0b3a4a;
-  border-color: #0b3a4a;
-  color: #fff;
-  min-width: 190px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.12);
-}
-
-/* RIGHT: Resubmit + caret on far right */
-.rfq-right {
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
-  gap: 14px;
-  margin-top: 34px;
-}
-
-.caret-only {
-  width: 40px;
-  height: 40px;
-  border: none;
-  background: transparent;
-  color: #111827;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-}
-
-.caret-only i {
-  font-size: 20px;
-}
-
-/* Disabled */
-.btn-pill:disabled,
-.caret-only:disabled,
-.btn-primary:disabled,
-.btn-ghost:disabled {
-  opacity: 0.55;
-  cursor: not-allowed;
-  pointer-events: none;
-}
-
-/* Dropdown */
-.dropdown {
-  position: relative;
-  display: inline-block;
-}
-
-.dropdown-panel {
-  position: absolute;
-  top: calc(100% + 10px);
+.fixed-top {
+  position: fixed;
+  top: 0;
+  right: 0;
   left: 0;
-  width: 340px;
-  background: #fff;
-  border: 1px solid #e5e7eb;
-  border-radius: 6px;
-  padding: 12px 14px;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.12);
-  z-index: 50;
+  z-index: 1030;
 }
 
-/* Form fields */
-.rfq-field {
-  margin-bottom: 14px;
+header {
+  background: #f9fbfd;
+  box-shadow: 0px 2px 20px rgb(1 41 112 / 10%);
+}
+.logo {
+  max-width: 180px;
+  height: auto;
+  margin: 0 auto;
+}
+.align-items-center {
+  align-items: center !important;
+}
+.header {
+  background-color: #003042;
+  padding: 20px 20px;
+  text-align: center;
+  border-bottom: 4px solid #f07e2a;
+}
+#main {
+  margin-top: 85px;
 }
 
-.rfq-field label {
-  display: block;
-  font-weight: 500;
-  color: #6a5acd;
-  font-size: 15px;
-  margin-bottom: 8px;
-}
+  /* Expired banner */
+  /* .expired-banner {
+    margin: 10px 0 14px 0;
+    padding: 12px;
+    background: #ffe6e6;
+    color: #b30000;
+    font-weight: 600;
+    border-radius: 6px;
+    text-align: center;
+  } */
 
-.text-input,
-.rfq-field input[type="text"],
-.rfq-field select,
-.rfq-field textarea {
-  width: 100%;
-  border: 1px solid #e6e6ef;
-  border-radius: 6px;
-  padding: 9px 10px;
-  background: #fff;
-  font-size: 15px;
-  color: #111827;
-  box-sizing: border-box;
-}
-
-.rfq-field textarea {
-  resize: vertical;
-  min-height: 120px;
-}
-
-.hint {
-  color: #64748b;
-  font-size: 13px;
-}
-
-/* Orange primary (used inside dropdown + submit quote panel) */
-.btn-primary {
-  background: #f58220;
-  border: 1px solid #f58220;
-  color: #fff;
-  height: 38px;
-  padding: 0 18px;
-  border-radius: 6px;
-  font-size: 16px;
-  font-weight: 500;
-  cursor: pointer;
-}
-
-.btn-pill:hover {
-  background: #e37517;
-  border-color: #e37517;
-  color: #fff;
-}
-
-/* Ghost (fallback if still used somewhere) */
-.btn-ghost {
-  background: #fff;
-  border: 1px solid #0f172a;
-  color: #0f172a;
-  height: 38px;
-  padding: 0 18px;
-  border-radius: 6px;
-  font-size: 16px;
-  font-weight: 500;
-  cursor: pointer;
-}
-
-/* Quote details expand area */
-.quote-details-panel {
-  background: #fff;
-  padding: 16px 18px 18px 18px;
-}
-
-/* "Quote Details" heading strip like screenshot */
-.quote-details-panel::before {
-  content: "Quote Details";
-  display: block;
-  font-size: 16px;
-  font-weight: 500;
-  color: #111827;
-  padding: 10px 12px;
-  margin: 0 0 14px 0;
-  border: 1px solid #e5e7eb;
-  border-radius: 6px;
-  background: #fff;
-}
-
-/* Grid: previous submissions vs submit quote */
-.quote-grid {
-  display: grid;
-  grid-template-columns: 1.6fr 1fr;
-  gap: 26px;
-}
-
-.section-title {
-  display: block;
-  font-size: 18px;
-  font-weight: 600;
-  color: #111827;
-  margin-bottom: 12px;
-}
-
-.previous-submission-row {
-  display: flex;
-  align-items: center;
-  gap: 46px;
-  background: #fff;
-  border-radius: 6px;
-  padding: 16px 16px;
-  margin-bottom: 12px;
-  border: 1px solid #dbe3f3;
-  box-shadow: none;
-}
-
-.submission-label {
-  color: #6a5acd;
-  font-weight: 500;
-  font-size: 15px;
-  margin-bottom: 6px;
-}
-
-.submission-value {
-  color: #111827;
-  font-weight: 500;
-  font-size: 16px;
-}
-
-.attachment-icon,
-.comment-icon {
-  color: #f58220;
-  font-size: 18px;
-  vertical-align: middle;
-}
-
-.attachments-container {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  flex-wrap: nowrap;
-}
-
-.delete-btn {
-  border: 1px solid #dbe3f3;
-  background: #fff;
-  color: #0f172a;
-  width: 38px;
-  height: 38px;
-  border-radius: 6px;
-  cursor: pointer;
-}
-
-.delete-btn:hover {
-  border-color: #0f172a;
-}
-
-/* Error text */
-.error {
-  color: #b42318;
-  font-size: 14px;
-  margin-top: 6px;
-}
-
-/* Comment modal */
-.comment-modal-backdrop {
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.5);
-  z-index: 999;
-}
-
-.comment-modal-content {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 350px;
-  background: #fff;
-  padding: 20px;
-  border-radius: 10px;
-  z-index: 1000;
-  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
-}
-
-.comment-modal-content h3 {
-  margin: 0 0 12px 0;
-  font-size: 20px;
-  font-weight: 700;
-  color: #111827;
-}
-
-.comment-text {
-  padding: 10px;
-  background: #f7f7f7;
-  border-radius: 6px;
-  min-height: 60px;
-  margin-bottom: 16px;
-  white-space: pre-wrap;
-}
-
-.close-btn {
-  width: 100%;
-  padding: 10px;
-  background: #f58220;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-}
-
-.close-btn:hover {
-  background: #e37517;
-}
-
-/* Responsive */
-@media (max-width: 1200px) {
+  /* Main 2-column layout */
   .rfq-layout {
-    flex-direction: column;
+    display: flex;
+    gap: 18px;
+    align-items: flex-start;
   }
 
   .left-card {
-    width: 100%;
-    flex: 0 0 auto;
+    width: 200px;
+    /* flex: 0 0 300px; */
   }
 
+  .right-card {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  /* Left + right cards */
+  .left-card .details-card,
+  .right-card .panel {
+    background: #fff;
+    border-radius: 6px;
+    border: 1px solid #dbe3f3;
+    box-shadow: 0 2px 10px rgba(54, 63, 98, 0.08);
+  }
+
+  /* Left card content */
+  .left-card .details-card {
+    padding: 0;
+    overflow: hidden;
+  }
+
+  .left-card .details-card h3 {
+    margin: 0;
+    padding: 14px 16px;
+    font-size: 18px;
+    font-weight: 500;
+    color: #111827;
+    border-bottom: 1px solid #e5e7eb;
+    background: #fff;
+  }
+
+  .detail-row {
+    padding: 12px 16px;
+  }
+
+  .detail-row + .detail-row {
+    border-top: 1px solid #eef2f7;
+  }
+
+  .detail-row .label {
+    display: block;
+    font-weight: 500;
+    color: #6a5acd;
+    font-size: 16px;
+    margin-bottom: 8px;
+  }
+
+  .detail-row .value {
+    color: #111827;
+    font-size: 17px;
+    font-weight: 500;
+  }
+
+  .detail-row .value.status {
+    font-weight: 600;
+  }
+
+  .value.status.in-progress {
+    color: #1a7f37;
+  }
+  .value.status.delayed {
+    color: #b54708;
+  }
+  .value.status.cancelled {
+    color: #b42318;
+  }
+
+  .detail-row .value a {
+    color: #f97316;
+    font-weight: 500;
+    text-decoration: underline dotted;
+  }
+
+  .detail-row .value a:hover {
+    color: #d97706;
+  }
+
+  /* Right panel */
+  .right-card .panel {
+    padding: 0;
+    overflow: hidden;
+  }
+
+  /* RFQ header INSIDE white box */
+  .panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 16px;
+    border-bottom: 1px solid #e5e7eb;
+    background: #fff;
+  }
+
+  .panel-title {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 500;
+    color: #111827;
+  }
+
+  .panel-due {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #2563eb;
+    font-weight: 600;
+  }
+
+  .panel-due i {
+    color: #2563eb;
+  }
+
+  .panel-due-label {
+    color: #2563eb;
+    font-weight: 500;
+    font-size: 16px;
+  }
+
+  .panel-due-date {
+    color: #111827;
+    font-weight: 700;
+    font-size: 18px;
+  }
+
+  /* RFQ list spacing */
+  .rfq-list {
+    padding: 12px 14px 14px 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  /* RFQ row card */
+  .rfq-row {
+    background: #fff;
+    border: 1px solid #dbe3f3;
+    border-radius: 6px;
+    box-shadow: none;
+    overflow: hidden;
+  }
+
+  /* RFQ row head (3 zones like screenshot) */
   .rfq-row-head--match {
-    grid-template-columns: 1fr;
-    gap: 14px;
+    display: grid;
+    grid-template-columns: 520px 1fr 260px;
+    gap: 28px;
+    align-items: center;
+    padding: 18px 18px;
+    border-bottom: 1px solid #e5e7eb;
+    background: #fff;
   }
 
-  .rfq-right {
-    justify-content: flex-start;
+  /* LEFT: Work item mini columns */
+  .rfq-mini {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 54px;
+  }
+
+  .mini-label {
+    color: #6a5acd;
+    font-size: 16px;
+    font-weight: 500;
+    margin-bottom: 8px;
+  }
+
+  .mini-value {
+    color: #111827;
+    font-size: 18px;
+    font-weight: 500;
+  }
+
+  .mini-value--bold {
+    font-weight: 700;
+  }
+
+  /* CENTER: Interest label + buttons */
+  .rfq-center .interest-label {
+    color: #6a5acd;
+    font-weight: 500;
+    font-size: 16px;
+    margin-bottom: 12px;
   }
 
   .interest-btns {
-    flex-wrap: wrap;
-  }
-
-  .quote-grid {
-    grid-template-columns: 1fr;
-  }
-}
-
-@media (max-width: 600px) {
-  .panel-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 10px;
-  }
-
-  .rfq-mini {
-    grid-template-columns: 1fr;
+    display: flex;
+    align-items: center;
     gap: 14px;
+    flex-wrap: nowrap;
   }
 
-  .btn-pill,
+  /* Buttons (match screenshot size) */
+  .btn-pill {
+    height: 38px;
+    padding: 0 18px;
+    border-radius: 4px;
+    font-size: 17px;
+    font-weight: 500;
+    line-height: 38px;
+    min-width: 150px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    border: 1px solid #0f172a;
+    background: #fff;
+    color: #0f172a;
+  }
+
+  .btn-pill i {
+    margin-left: 10px;
+    font-size: 14px;
+  }
+
+  .btn-pill--primary {
+    background: #fff;
+    border-color: #0f172a;
+    color: #0f172a;
+  }
+
+  .btn-pill--outline {
+    background: #fff;
+    border-color: #0f172a;
+    color: #0f172a;
+  }
+
   .btn-pill--dark {
-    min-width: 170px;
+    background: #0b3a4a;
+    border-color: #0b3a4a;
+    color: #fff;
+    min-width: 190px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.12);
+  }
+
+  /* RIGHT: Resubmit + caret on far right */
+  .rfq-right {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 14px;
+    margin-top: 34px;
+  }
+
+  .caret-only {
+    width: 40px;
+    height: 40px;
+    border: none;
+    background: transparent;
+    color: #111827;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+  }
+
+  .caret-only i {
+    font-size: 20px;
+  }
+
+  /* Disabled */
+  .btn-pill:disabled,
+  .caret-only:disabled,
+  .btn-primary:disabled,
+  .btn-ghost:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+    pointer-events: none;
+  }
+
+  /* Dropdown */
+  .dropdown {
+    position: relative;
+    display: inline-block;
   }
 
   .dropdown-panel {
-    width: 320px;
+    position: absolute;
+    top: calc(100% + 10px);
+    left: 0;
+    width: 340px;
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 6px;
+    padding: 12px 14px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.12);
+    z-index: 50;
   }
-}
 
-/* =========================
+  /* Form fields */
+  .rfq-field {
+    margin-bottom: 14px;
+  }
+
+  .rfq-field label {
+    display: block;
+    font-weight: 500;
+    color: #6a5acd;
+    font-size: 15px;
+    margin-bottom: 8px;
+  }
+
+  .text-input,
+  .rfq-field input[type='text'],
+  .rfq-field select,
+  .rfq-field textarea {
+    width: 100%;
+    border: 1px solid #e6e6ef;
+    border-radius: 6px;
+    padding: 9px 10px;
+    background: #fff;
+    font-size: 15px;
+    color: #111827;
+    box-sizing: border-box;
+  }
+
+  .rfq-field textarea {
+    resize: vertical;
+    min-height: 120px;
+  }
+
+  .hint {
+    color: #64748b;
+    font-size: 13px;
+  }
+
+  /* Orange primary (used inside dropdown + submit quote panel) */
+  .btn-primary {
+    background: #f58220;
+    border: 1px solid #f58220;
+    color: #fff;
+    height: 38px;
+    padding: 0 18px;
+    border-radius: 6px;
+    font-size: 16px;
+    font-weight: 500;
+    cursor: pointer;
+  }
+
+  .btn-pill:hover {
+    background: #e37517;
+    border-color: #e37517;
+    color: #fff;
+  }
+
+  /* Ghost (fallback if still used somewhere) */
+  .btn-ghost {
+    background: #fff;
+    border: 1px solid #0f172a;
+    color: #0f172a;
+    height: 38px;
+    padding: 0 18px;
+    border-radius: 6px;
+    font-size: 16px;
+    font-weight: 500;
+    cursor: pointer;
+  }
+
+  /* Quote details expand area */
+  .quote-details-panel {
+    background: #fff;
+    padding: 16px 18px 18px 18px;
+  }
+
+  /* "Quote Details" heading strip like screenshot */
+  .quote-details-panel::before {
+    content: 'Quote Details';
+    display: block;
+    font-size: 16px;
+    font-weight: 500;
+    color: #111827;
+    padding: 10px 12px;
+    margin: 0 0 14px 0;
+    border: 1px solid #e5e7eb;
+    border-radius: 6px;
+    background: #fff;
+  }
+
+  /* Grid: previous submissions vs submit quote */
+  .quote-grid {
+    display: grid;
+    grid-template-columns: 1.6fr 1fr;
+    gap: 26px;
+  }
+
+  .section-title {
+    display: block;
+    font-size: 18px;
+    font-weight: 600;
+    color: #111827;
+    margin-bottom: 12px;
+  }
+
+  .previous-submission-row {
+    display: flex;
+    align-items: center;
+    gap: 46px;
+    background: #fff;
+    border-radius: 6px;
+    padding: 16px 16px;
+    margin-bottom: 12px;
+    border: 1px solid #dbe3f3;
+    box-shadow: none;
+  }
+
+  .previous-submission-row div:first-child{
+    width: 150px;
+  }
+
+  .previous-submission-row div.attach_comment {
+    width: 100px;
+  }
+  .submission-label {
+    color: #6a5acd;
+    font-weight: 500;
+    font-size: 15px;
+    margin-bottom: 6px;
+  }
+
+  .submission-value {
+    color: #111827;
+    font-weight: 500;
+    font-size: 16px;
+  }
+
+  .attachment-icon,
+  .comment-icon {
+    color: #f58220;
+    font-size: 18px;
+    vertical-align: middle;
+  }
+
+  .attachments-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: nowrap;
+  }
+
+  .delete-btn {
+    border: 1px solid #dbe3f3;
+    background: #fff;
+    color: #0f172a;
+    width: 38px;
+    height: 38px;
+    border-radius: 6px;
+    cursor: pointer;
+  }
+
+  .delete-btn:hover {
+    border-color: #0f172a;
+  }
+
+  /* Error text */
+  .error {
+    color: #b42318;
+    font-size: 14px;
+    margin-top: 6px;
+  }
+
+  /* Comment modal */
+  .comment-modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 999;
+  }
+
+  .comment-modal-content {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 350px;
+    background: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    z-index: 1000;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+  }
+
+  .comment-modal-content h3 {
+    margin: 0 0 12px 0;
+    font-size: 20px;
+    font-weight: 700;
+    color: #111827;
+  }
+
+  .comment-text {
+    padding: 10px;
+    background: #f7f7f7;
+    border-radius: 6px;
+    min-height: 60px;
+    margin-bottom: 16px;
+    white-space: pre-wrap;
+  }
+
+  .close-btn {
+    width: 100%;
+    padding: 10px;
+    background: #f58220;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+  }
+
+  .close-btn:hover {
+    background: #e37517;
+  }
+
+  /* Responsive */
+  @media (max-width: 1200px) {
+    .rfq-layout {
+      flex-direction: column;
+    }
+
+    .left-card {
+      width: 100%;
+      flex: 0 0 auto;
+    }
+
+    .rfq-row-head--match {
+      grid-template-columns: 1fr;
+      gap: 14px;
+    }
+
+    .rfq-right {
+      justify-content: flex-start;
+    }
+
+    .interest-btns {
+      flex-wrap: wrap;
+    }
+
+    .quote-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (max-width: 600px) {
+    .panel-header {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 10px;
+    }
+
+    .rfq-mini {
+      grid-template-columns: 1fr;
+      gap: 14px;
+    }
+
+    .btn-pill,
+    .btn-pill--dark {
+      min-width: 170px;
+    }
+
+    .dropdown-panel {
+      width: 320px;
+    }
+  }
+
+  /* =========================
    ONE-LINE PERFECT RFQ HEADER (match screenshot)
    Paste at END of your CSS
    ========================= */
 
-/* 1) Force the 3 zones to fit in one line */
-.rfq-row-head--match {
-  display: grid !important;
-  grid-template-columns: 420px 420px 240px !important; /* LEFT | CENTER | RIGHT */
-  gap: 18px !important;
-  align-items: center !important;
-}
+  /* 1) Force the 3 zones to fit in one line */
+  .rfq-row-head--match {
+    display: grid !important;
+    grid-template-columns: 420px 420px 240px !important; /* LEFT | CENTER | RIGHT */
+    gap: 18px !important;
+    align-items: center !important;
+  }
 
-/* Ensure middle can shrink without pushing right side out */
-.rfq-row-head--match > .rfq-center,
-.rfq-row-head--match > .rfq-left {
-  min-width: 0 !important;
-}
+  /* Ensure middle can shrink without pushing right side out */
+  .rfq-row-head--match > .rfq-center,
+  .rfq-row-head--match > .rfq-left {
+    min-width: 0 !important;
+  }
 
-/* 2) Left side: Workitem code + Work item. Keep compact and truncate long text */
-.rfq-mini {
-  grid-template-columns: 150px 1fr !important; /* code fixed, workitem flexible */
-  gap: 28px !important;
-}
+  /* 2) Left side: Workitem code + Work item. Keep compact and truncate long text */
+  .rfq-mini {
+    grid-template-columns: 150px 1fr !important; /* code fixed, workitem flexible */
+    gap: 28px !important;
+  }
 
-.rfq-mini-col {
-  min-width: 0 !important; /* allows ellipsis */
-}
+  .rfq-mini-col {
+    min-width: 0 !important; /* allows ellipsis */
+  }
 
-.mini-label {
-  font-size: 15px !important;
-  margin-bottom: 6px !important;
-}
+  .mini-label {
+    font-size: 15px !important;
+    margin-bottom: 6px !important;
+  }
 
-.mini-value {
-  font-size: 17px !important;
-}
+  .mini-value {
+    font-size: 17px !important;
+  }
 
-/* Truncate the Work Item name so it doesn't eat space */
-.rfq-mini-col:nth-child(2) .mini-value {
-  display: block !important;
-  max-width: 100% !important;
-  white-space: nowrap !important;
-  overflow: hidden !important;
-  text-overflow: ellipsis !important;
-}
+  /* Truncate the Work Item name so it doesn't eat space */
+  .rfq-mini-col:nth-child(2) .mini-value {
+    display: block !important;
+    max-width: 100% !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
 
-/* 3) Center: buttons in one line, no wrapping */
-.interest-btns {
-  display: flex !important;
-  align-items: center !important;
-  gap: 10px !important;
-  flex-wrap: nowrap !important; /* IMPORTANT */
-  white-space: nowrap !important;
-}
+  /* 3) Center: buttons in one line, no wrapping */
+  .interest-btns {
+    display: flex !important;
+    align-items: center !important;
+    gap: 10px !important;
+    flex-wrap: nowrap !important; /* IMPORTANT */
+    white-space: nowrap !important;
+  }
 
-/* Fixed button sizes to match screenshot and fit */
-.interest-btns .btn-pill {
-  height: 34px !important;
-  line-height: 34px !important;
-  padding: 0 14px !important;
-  font-size: 16px !important;
-  border-radius: 4px !important;
-  min-width: 0 !important;
-}
+  /* Fixed button sizes to match screenshot and fit */
+  .interest-btns .btn-pill {
+    height: 34px !important;
+    line-height: 34px !important;
+    padding: 0 14px !important;
+    font-size: 16px !important;
+    border-radius: 4px !important;
+    min-width: 0 !important;
+  }
 
-/* Exact widths (fits like screenshot) */
-.interest-btns .btn-pill--primary {
-  width: 120px !important; /* Interested */
-}
+  /* Exact widths (fits like screenshot) */
+  .interest-btns .btn-pill--primary {
+    width: 120px !important; /* Interested */
+  }
 
-.interest-btns .btn-pill--outline {
-  width: 150px !important; /* Maybe Later + Not Interested */
-}
+  .interest-btns .btn-pill--outline {
+    width: 150px !important; /* Maybe Later + Not Interested */
+  }
 
-/* Caret sizing like screenshot */
-.interest-btns .btn-pill i {
-  margin-left: 10px !important;
-  font-size: 12px !important;
-}
+  /* Caret sizing like screenshot */
+  .interest-btns .btn-pill i {
+    margin-left: 10px !important;
+    font-size: 12px !important;
+  }
 
-/* Right: keep resubmit + caret aligned */
-.rfq-right {
-  justify-content: flex-end !important;
-  gap: 12px !important;
-}
+  /* Right: keep resubmit + caret aligned */
+  .rfq-right {
+    justify-content: flex-end !important;
+    gap: 12px !important;
+  }
 
-.btn-pill--dark {
-  height: 34px !important;
-  line-height: 34px !important;
-  width: 180px !important; /* Resubmit Quote */
-  padding: 0 16px !important;
-  border-radius: 4px !important;
-}
+  .btn-pill--dark {
+    height: 34px !important;
+    line-height: 34px !important;
+    width: 180px !important; /* Resubmit Quote */
+    padding: 0 16px !important;
+    border-radius: 4px !important;
+  }
 
-.caret-only {
-  width: 34px !important;
-  height: 34px !important;
-}
+  .caret-only {
+    width: 34px !important;
+    height: 34px !important;
+  }
 
-.rfq-row-head--match {
-  grid-template-columns: 380px 400px 220px !important; /* was 420/420/240 */
-  gap: 14px !important;
-  padding: 16px 14px !important; /* slightly less padding = more room */
-}
+  .rfq-row-head--match {
+    grid-template-columns: 380px 400px 220px !important; /* was 420/420/240 */
+    gap: 14px !important;
+    padding: 16px 14px !important; /* slightly less padding = more room */
+  }
 
-/* Make left part tighter */
-.rfq-mini {
-  grid-template-columns: 140px 1fr !important;
-  gap: 22px !important;
-}
+  /* Make left part tighter */
+  .rfq-mini {
+    grid-template-columns: 140px 1fr !important;
+    gap: 22px !important;
+  }
 
-/* Slightly reduce center button widths */
-.interest-btns .btn-pill--primary {
-  width: 112px !important; /* Interested */
-}
+  /* Slightly reduce center button widths */
+  .interest-btns .btn-pill--primary {
+    width: 112px !important; /* Interested */
+  }
 
-.interest-btns .btn-pill--outline {
-  width: 140px !important; /* Maybe Later / Not Interested */
-}
+  .interest-btns .btn-pill--outline {
+    width: 140px !important; /* Maybe Later / Not Interested */
+  }
 
-/* Reduce the CTA button width slightly */
-.btn-pill--dark {
-  width: 165px !important; /* Submit/Resubmit Quote */
-}
+  /* Reduce the CTA button width slightly */
+  .btn-pill--dark {
+    width: 165px !important; /* Submit/Resubmit Quote */
+  }
 
-/* Keep caret compact */
-.caret-only {
-  width: 32px !important;
-  height: 32px !important;
-}
-/* =========================
+  /* Keep caret compact */
+  .caret-only {
+    width: 32px !important;
+    height: 32px !important;
+  }
+  /* =========================
    FIX: CTA hidden (clipping) + keep one line
    Paste at END of CSS
    ========================= */
 
-/* 1) Do NOT clip the RFQ row horizontally */
-.right-card .panel {
-  overflow: visible !important;
-}
+  /* 1) Do NOT clip the RFQ row horizontally */
+  .right-card .panel {
+    overflow: visible !important;
+  }
 
-.rfq-row {
-  overflow: visible !important;
-}
+  .rfq-row {
+    overflow: visible !important;
+  }
 
-/* If you still want rounded corners, keep them but don't hide overflow */
-.rfq-row {
-  border-radius: 6px;
-}
+  /* If you still want rounded corners, keep them but don't hide overflow */
+  .rfq-row {
+    border-radius: 6px;
+  }
 
-/* 2) One-line flex header that fits */
-.rfq-row-head--flex {
-  display: flex !important;
-  align-items: center !important;
-  gap: 14px !important;
-  padding: 16px 12px !important;
-  overflow: visible !important;
-}
+  /* 2) One-line flex header that fits */
+  .rfq-row-head--flex {
+    display: flex !important;
+    align-items: center !important;
+    gap: 14px !important;
+    padding: 16px 12px !important;
+    overflow: visible !important;
+  }
 
-/* Left: allow shrink, but truncate work item */
-.rfq-row-head--flex .rfq-left {
-  flex: 1 1 380px !important; /* can shrink */
-  min-width: 240px !important;
-}
+  /* Left: allow shrink, but truncate work item */
+  .rfq-row-head--flex .rfq-left {
+    flex: 1 1 380px !important; /* can shrink */
+    min-width: 240px !important;
+  }
 
-.rfq-row-head--flex .rfq-mini-col {
-  min-width: 0 !important;
-}
+  .rfq-row-head--flex .rfq-mini-col {
+    min-width: 0 !important;
+  }
 
-.rfq-row-head--flex .rfq-mini-col:last-child .mini-value {
-  white-space: nowrap !important;
-  overflow: hidden !important;
-  text-overflow: ellipsis !important;
-}
+  .rfq-row-head--flex .rfq-mini-col:last-child .mini-value {
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
 
-/* Center: keep buttons on one line but allow the whole center block to shrink */
-.rfq-row-head--flex .rfq-center {
-  flex: 0 1 520px !important; /* can shrink */
-  min-width: 420px !important; /* ensures buttons don't collapse */
-}
+  /* Center: keep buttons on one line but allow the whole center block to shrink */
+  .rfq-row-head--flex .rfq-center {
+    flex: 0 1 520px !important; /* can shrink */
+    min-width: 420px !important; /* ensures buttons don't collapse */
+  }
 
-.rfq-row-head--flex .interest-btns {
-  display: flex !important;
-  gap: 10px !important;
-  flex-wrap: nowrap !important;
-  white-space: nowrap !important;
-}
+  .rfq-row-head--flex .interest-btns {
+    display: flex !important;
+    gap: 10px !important;
+    flex-wrap: nowrap !important;
+    white-space: nowrap !important;
+  }
 
-/* Button sizes: slightly smaller font so all fit */
-.rfq-row-head--flex .interest-btns .btn-pill {
-  height: 34px !important;
-  line-height: 34px !important;
-  padding: 0 12px !important;
-  font-size: 14px !important;
-  border-radius: 4px !important;
-  flex: 0 0 auto !important; /* don't shrink */
-}
+  /* Button sizes: slightly smaller font so all fit */
+  .rfq-row-head--flex .interest-btns .btn-pill {
+    height: 34px !important;
+    line-height: 34px !important;
+    padding: 0 12px !important;
+    font-size: 14px !important;
+    border-radius: 4px !important;
+    flex: 0 0 auto !important; /* don't shrink */
+  }
 
-.rfq-row-head--flex .interest-btns .btn-pill--primary {
-  width: 112px !important;
-}
+  .rfq-row-head--flex .interest-btns .btn-pill--primary {
+    width: 112px !important;
+  }
 
-.rfq-row-head--flex .interest-btns .btn-pill--outline {
-  width: 142px !important;
-}
+  .rfq-row-head--flex .interest-btns .btn-pill--outline {
+    width: 142px !important;
+  }
 
-.rfq-row-head--flex .interest-btns .btn-pill i {
-  font-size: 11px !important;
-  margin-left: 8px !important;
-}
+  .rfq-row-head--flex .interest-btns .btn-pill i {
+    font-size: 11px !important;
+    margin-left: 8px !important;
+  }
 
-/* Right: CTA must ALWAYS show */
-.rfq-row-head--flex .rfq-right {
-  flex: 0 0 auto !important;
-  margin-left: auto !important;
-  display: flex !important;
-  align-items: center !important;
-  gap: 10px !important;
-}
+  /* Right: CTA must ALWAYS show */
+  .rfq-row-head--flex .rfq-right {
+    flex: 0 0 auto !important;
+    margin-left: auto !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 10px !important;
+  }
 
-.rfq-row-head--flex .btn-pill--dark {
-  height: 34px !important;
-  line-height: 34px !important;
-  width: 150px !important;   /* was 170/180 */
-  min-width: 150px !important;
-  padding: 0 10px !important;  font-size: 14px !important;
-  flex: 0 0 auto !important;
-}
+  .rfq-row-head--flex .btn-pill--dark {
+    height: 34px !important;
+    line-height: 34px !important;
+    width: 150px !important; /* was 170/180 */
+    min-width: 150px !important;
+    padding: 0 10px !important;
+    font-size: 14px !important;
+    flex: 0 0 auto !important;
+  }
 
-.rfq-row-head--flex .caret-only {
-  width: 34px !important;
-  height: 34px !important;
-  flex: 0 0 auto !important;
-}
+  .rfq-row-head--flex .caret-only {
+    width: 34px !important;
+    height: 34px !important;
+    flex: 0 0 auto !important;
+  }
 
-/* .truncate-text {
+  /* .truncate-text {
   display: inline-block;
   max-width: 220px; /* adjust based on your RFQ header space */
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   vertical-align: middle;
-} */
-.mat-mdc-tooltip {
+}
+*/ .mat-mdc-tooltip {
   background: #0f172a !important;
   color: #fff !important;
   font-size: 13px !important;
@@ -880,8 +902,6 @@ body,
   background: #f8d7da;
   color: #721c24;
 }
-
-
 
 .btn-pill.active-interest {
   background: #f58220 !important;

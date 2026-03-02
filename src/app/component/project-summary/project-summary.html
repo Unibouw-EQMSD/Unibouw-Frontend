@@ -1,35 +1,78 @@
-<div class="container" *ngIf="!isLoading; else loading">
+<header id="header" class="header-dark header-nav fixed-top align-items-center">
+  <div class="header">
+    <svg class="logo" version="1.1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 283.2 49.1">
+      <style>
+        .unibouw-dark {
+          fill: #ffffff;
+        }
+
+        .unibouw-orange {
+          fill: #f07e2a;
+        }
+      </style>
+      <g>
+        <path
+          class="unibouw-dark"
+          d="M3.5,45.6C1.2,43.2,0,39.7,0,35.2V13.1h10.1V35c0,2.3,0.6,4,1.7,5.1c1.1,1.1,2.8,1.6,5.2,1.6c1.7,0,3.3-0.3,4.7-1c1.5-0.7,2.7-1.5,3.8-2.6v-25h10.1v35.3h-9.3l-0.4-3.4c-3.4,2.7-7.6,4.1-12.4,4.1C9.1,49.1,5.8,48,3.5,45.6"
+        ></path>
+        <path
+          class="unibouw-dark"
+          d="M44.1,13.1h9.3l0.4,3.4c1.6-1.2,3.5-2.2,5.7-2.9c2.2-0.8,4.4-1.2,6.8-1.2c4.6,0,8,1.1,10.2,3.2c2.2,2.2,3.2,5.5,3.2,10.2v22.6H69.6V26.3c0-2.4-0.5-4.1-1.5-5.1c-1-1-2.8-1.5-5.4-1.5c-1.5,0-3.1,0.3-4.6,1c-1.5,0.7-2.9,1.6-3.9,2.6v25H44.1V13.1z"
+        ></path>
+        <rect x="88.8" y="0" class="unibouw-orange" width="10.1" height="9.8"></rect>
+        <path
+          class="unibouw-dark"
+          d="M132.1,39c1.4-1.8,2-4.7,2-8.6c0-3.9-0.7-6.6-2.1-8.3c-1.4-1.6-3.6-2.5-6.8-2.5c-1.6,0-3.1,0.2-4.4,0.7c-1.3,0.4-2.5,1.1-3.4,1.9v16.2c0.9,1,2.1,1.8,3.5,2.4c1.4,0.5,2.9,0.8,4.4,0.8C128.5,41.8,130.7,40.9,132.1,39 M121.8,48.2c-1.9-0.6-3.6-1.7-5.1-3.1l-0.5,3.3h-8.7V0l10.1,0v15c2.9-1.8,6.4-2.7,10.4-2.7c5.3,0,9.3,1.5,12.2,4.4c2.9,3,4.3,7.5,4.3,13.7c0,6.2-1.4,10.9-4.2,14c-2.8,3.1-6.8,4.7-11.9,4.7C125.8,49.1,123.6,48.8,121.8,48.2"
+        ></path>
+        <path
+          class="unibouw-dark"
+          d="M174.1,38.4c1.4-1.5,2-4,2-7.6c0-3.6-0.7-6.1-2-7.6c-1.4-1.5-3.7-2.2-7-2.2c-3.2,0-5.5,0.7-6.9,2.2c-1.4,1.5-2,4-2,7.6c0,3.6,0.7,6.1,2,7.6c1.4,1.5,3.7,2.2,6.9,2.2C170.4,40.6,172.7,39.8,174.1,38.4 M148,30.8c0-6,1.6-10.5,4.7-13.7c3.2-3.2,8-4.7,14.4-4.7c6.5,0,11.3,1.6,14.4,4.7c3.2,3.2,4.8,7.7,4.8,13.7c0,12.3-6.4,18.4-19.2,18.4C154.4,49.1,148,43,148,30.8"
+        ></path>
+        <path
+          class="unibouw-dark"
+          d="M195.1,45.6c-2.3-2.4-3.5-5.8-3.5-10.4V13.1h10.1V35c0,2.3,0.6,4,1.7,5.1c1.1,1.1,2.8,1.6,5.2,1.6c1.7,0,3.3-0.3,4.7-1c1.5-0.7,2.7-1.5,3.8-2.6v-25h10.1v35.3h-9.3l-0.4-3.4c-3.4,2.7-7.6,4.1-12.4,4.1C200.7,49.1,197.4,48,195.1,45.6"
+        ></path>
+        <polygon
+          class="unibouw-dark"
+          points="232.3,13.1 242.4,13.1 247.7,36 253.6,17.6 253.6,13.1 261.3,13.1 268,36 273.2,13.1 283.2,13.1 273.9,48.4 264.7,48.4 257.9,27.8 251,48.4 241.6,48.4"
+        ></polygon>
+        <rect x="88.8" y="13.1" class="unibouw-dark" width="10.1" height="35.3"></rect>
+      </g>
+    </svg>
+  </div>
+</header>
+<main id="main" *ngIf="!isLoading; else loading">
   <!-- Page Title only (NO due date here) -->
-  <div class="page-header">
-    <h1>Quote Request (RFQ)</h1>
-  </div>
+  <div class="container">
+    <div class="pagetitle">
+      <h1>Quote Request (RFQ)</h1>
+    </div>
+    <div class="expired-banner" *ngIf="isRfqExpired">
+      This RFQ link has expired. You can no longer respond.
+    </div>
 
-  <div class="expired-banner" *ngIf="isRfqExpired">
-    This RFQ link has expired. You can no longer respond.
-  </div>
+    <div class="rfq-layout" *ngIf="project; else errorBlock">
+      <!-- LEFT: Project Details -->
+      <aside class="left-card">
+        <div class="details-card">
+          <h3>Project Details</h3>
 
-  <div class="rfq-layout" *ngIf="project; else errorBlock">
-    <!-- LEFT: Project Details -->
-    <aside class="left-card">
-      <div class="details-card">
-        <h3>Project Details</h3>
+          <div class="detail-row">
+            <span class="label">Project Code</span>
+            <span class="value">{{ project.number || '—' }}</span>
+          </div>
 
-        <div class="detail-row">
-          <span class="label">Project Code</span>
-          <span class="value">{{ project.number || '—' }}</span>
-        </div>
+          <div class="detail-row">
+            <span class="label">Project</span>
+            <span class="value">{{ project.name || '—' }}</span>
+          </div>
 
-        <div class="detail-row">
-          <span class="label">Project</span>
-          <span class="value">{{ project.name || '—' }}</span>
-        </div>
+          <div class="detail-row">
+            <span class="label">Customer</span>
+            <span class="value">{{ project.customerName || '—' }}</span>
+          </div>
 
-        <div class="detail-row">
-          <span class="label">Customer</span>
-          <span class="value">{{ project.customerName || '—' }}</span>
-        </div>
-
-        <!-- <div class="detail-row">
+          <!-- <div class="detail-row">
           <span class="label">Person Name</span>
           <span class="value">{{ project.personName || '—' }}</span>
         </div>
@@ -39,374 +82,375 @@
           <span class="value">{{ project.personRole || '—' }}</span>
         </div> -->
 
-        <div class="detail-row">
-          <span class="label">Start Date</span>
-          <span class="value">{{ project.startDate | date: 'dd-MM-yyyy' }}</span>
-        </div>
+          <div class="detail-row">
+            <span class="label">Start Date</span>
+            <span class="value">{{ project.startDate | date: 'dd-MM-yyyy' }}</span>
+          </div>
 
-        <div class="detail-row">
-          <span class="label">Committed Date</span>
-          <span class="value">{{ project.completionDate | date: 'dd-MM-yyyy' }}</span>
-        </div>
+          <div class="detail-row">
+            <span class="label">Committed Date</span>
+            <span class="value">{{ project.completionDate | date: 'dd-MM-yyyy' }}</span>
+          </div>
 
-        <div class="detail-row">
-          <span class="label">Status</span>
-          <span class="value status {{ statusClass(project.status) }}">
-            {{ project.status || 'In Progress' }}
-          </span>
-        </div>
+          <div class="detail-row">
+            <span class="label">Status</span>
+            <span class="value status {{ statusClass(project.status) }}">
+              {{ project.status || 'In Progress' }}
+            </span>
+          </div>
 
-        <div class="detail-row">
-          <span class="label">Specification</span>
-          <span class="value">
-            <a [href]="project.sharepointURL" target="_blank">Project Files</a>
-          </span>
-        </div>
-      </div>
-    </aside>
-
-    <!-- RIGHT: RFQ Details -->
-    <section class="right-card">
-      <div class="panel">
-        <!-- RFQ header row INSIDE white box (like screenshot) -->
-        <div class="panel-header">
-          <h3 class="panel-title">RFQ Details</h3>
-
-          <div class="panel-due">
-            <i class="fa fa-clock"></i>
-            <span class="panel-due-label">Due Date:</span>
-            <strong class="panel-due-date">
-              {{ rfq?.dueDate | date: 'dd-MM-yyyy' }}
-            </strong>
+          <div class="detail-row">
+            <span class="label">Specification</span>
+            <span class="value">
+              <a [href]="project.sharepointURL" target="_blank">Project Files</a>
+            </span>
           </div>
         </div>
+      </aside>
 
-        <div class="rfq-list">
-          <div class="rfq-row" *ngFor="let wi of workItems">
-            <div class="rfq-row-head rfq-row-head--flex">
-              <!-- Left: Workitem Code + Work Item + Status badge -->
-              <div class="rfq-left">
-                <!-- Status badge (restored) -->
-                <div class="status-badge" *ngIf="wi.status">
-                  <span class="badge" [ngClass]="wi.status.toLowerCase().replace(' ', '-')">
-                    {{ wi.status }}
-                  </span>
-                </div>
+      <!-- RIGHT: RFQ Details -->
+      <section class="right-card">
+        <div class="panel">
+          <!-- RFQ header row INSIDE white box (like screenshot) -->
+          <div class="panel-header">
+            <h3 class="panel-title">RFQ Details</h3>
 
-                <div class="rfq-mini">
-                  <div class="rfq-mini-col">
-                    <div class="mini-label">Workitem Code</div>
-                    <div class="mini-value">{{ wi.number || '—' }}</div>
-                  </div>
+            <div class="panel-due">
+              <i class="fa fa-clock"></i>
+              <span class="panel-due-label">Due Date:</span>
+              <strong class="panel-due-date">
+                {{ rfq?.dueDate | date: 'dd-MM-yyyy' }}
+              </strong>
+            </div>
+          </div>
 
-                  <div class="rfq-mini-col">
-                    <div class="mini-label">Work Item</div>
-
-                    <span
-                      class="truncate-text mini-value mini-value--bold"
-                      [matTooltip]="wi.name || ''"
-                      matTooltipPosition="above"
-                      matTooltipShowDelay="200"
-                      matTooltipHideDelay="0"
-                    >
-                      {{ wi.name || '—' }}
+          <div class="rfq-list">
+            <div class="rfq-row" *ngFor="let wi of workItems">
+              <div class="rfq-row-head rfq-row-head--flex">
+                <!-- Left: Workitem Code + Work Item + Status badge -->
+                <div class="rfq-left">
+                  <!-- Status badge (restored) -->
+                  <div class="status-badge" *ngIf="wi.status">
+                    <span class="badge" [ngClass]="wi.status.toLowerCase().replace(' ', '-')">
+                      {{ wi.status }}
                     </span>
                   </div>
-                </div>
-              </div>
 
-              <!-- Middle: Interest buttons -->
-              <div class="rfq-center">
-                <div class="interest-label">Share your Interest</div>
-                <div class="interest-btns">
+                  <div class="rfq-mini">
+                    <div class="rfq-mini-col">
+                      <div class="mini-label">Workitem Code</div>
+                      <div class="mini-value">{{ wi.number || '—' }}</div>
+                    </div>
+
+                    <div class="rfq-mini-col">
+                      <div class="mini-label">Work Item</div>
+
+                      <span
+                        class="truncate-text mini-value mini-value--bold"
+                        [matTooltip]="wi.name || ''"
+                        matTooltipPosition="above"
+                        matTooltipShowDelay="200"
+                        matTooltipHideDelay="0"
+                      >
+                        {{ wi.name || '—' }}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Middle: Interest buttons -->
+                <div class="rfq-center">
+                  <div class="interest-label">Share your Interest</div>
+                  <div class="interest-btns">
+                    <button
+                      [class]="'btn-pill ' + getButtonClass(wi, 'interested')"
+                      type="button"
+                      (click)="submitInterest('Interested', wi)"
+                      [disabled]="wi.buttonsDisabled || isRfqExpired"
+                    >
+                      Interested
+                    </button>
+
+                    <div class="dropdown">
+                      <button
+                        [class]="'btn-pill ' + getButtonClass(wi, 'maybe')"
+                        type="button"
+                        (click)="toggleInterestDropdown(wi, 'maybe', $event)"
+                        [disabled]="wi.buttonsDisabled || isRfqExpired"
+                      >
+                        Maybe Later <i class="fa fa-caret-down"></i>
+                      </button>
+
+                      <div
+                        class="dropdown-panel"
+                        *ngIf="isOpen(wi, 'maybe')"
+                        (click)="$event.stopPropagation()"
+                      >
+                        <div class="rfq-field">
+                          <label>When would you like to revisit this RFQ?</label>
+                          <input
+                            type="date"
+                            class="text-input"
+                            [(ngModel)]="wi.maybeLaterDate"
+                            [ngModelOptions]="{ standalone: true }"
+                            [min]="today"
+                            [max]="rfq?.dueDate ? (rfq.dueDate | date: 'yyyy-MM-dd') : null"
+                            [disabled]="isRfqExpired"
+                          />
+                        </div>
+
+                        <div class="error" *ngIf="maybeLaterError">{{ maybeLaterError }}</div>
+
+                        <div style="text-align: right">
+                          <button
+                            class="btn-primary"
+                            type="button"
+                            (click)="confirmMaybeLater(wi)"
+                            [disabled]="isRfqExpired"
+                          >
+                            Confirm
+                          </button>
+                        </div>
+
+                        <div class="expired-msg" *ngIf="isRfqExpired">
+                          This RFQ link has expired.
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="dropdown">
+                      <button
+                        [class]="'btn-pill ' + getButtonClass(wi, 'not')"
+                        type="button"
+                        (click)="toggleInterestDropdown(wi, 'not', $event)"
+                        [disabled]="wi.buttonsDisabled || isRfqExpired"
+                      >
+                        Not Interested <i class="fa fa-caret-down"></i>
+                      </button>
+
+                      <div
+                        class="dropdown-panel"
+                        *ngIf="isOpen(wi, 'not')"
+                        (click)="$event.stopPropagation()"
+                      >
+                        <div class="rfq-field">
+                          <label>Reason for Not Interested *</label>
+                          <select
+                            class="text-input"
+                            [(ngModel)]="wi.notInterested.reason"
+                            [ngModelOptions]="{ standalone: true }"
+                            [disabled]="wi.notInterested?.submitted"
+                          >
+                            <option value="">-- Select reason --</option>
+                            <option *ngFor="let r of notInterestedReasons" [value]="r">
+                              {{ r }}
+                            </option>
+                          </select>
+                        </div>
+
+                        <div class="rfq-field" *ngIf="wi.notInterested.reason === 'Anders'">
+                          <label>Please provide your reason *</label>
+                          <textarea
+                            rows="3"
+                            maxlength="300"
+                            [(ngModel)]="wi.notInterested.comment"
+                            [ngModelOptions]="{ standalone: true }"
+                            [readonly]="wi.notInterested?.submitted"
+                            placeholder="Max 300 characters"
+                          ></textarea>
+                        </div>
+
+                        <div class="error" *ngIf="wi.notInterestedError">
+                          {{ wi.notInterestedError }}
+                        </div>
+
+                        <div style="text-align: right">
+                          <button
+                            class="btn-primary"
+                            type="button"
+                            (click)="confirmNotInterested(wi)"
+                            [disabled]="isRfqExpired || wi.notInterested?.submitted"
+                          >
+                            Submit
+                          </button>
+                        </div>
+
+                        <div class="expired-msg" *ngIf="isRfqExpired">
+                          This RFQ link has expired. You can no longer change your response.
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Right: CTA (restored condition like first HTML)
+         If you want chevron always visible, tell me and I’ll adjust. -->
+                <div class="rfq-right" *ngIf="wi.status === 'Interested'">
                   <button
-                    [class]="'btn-pill ' + getButtonClass(wi, 'interested')"
+                    class="btn-pill btn-pill--dark"
                     type="button"
-                    (click)="submitInterest('Interested', wi)"
-                    [disabled]="wi.buttonsDisabled || isRfqExpired"
+                    (click)="toggleRow(wi)"
+                    [disabled]="isRfqExpired"
                   >
-                    Interested
+                    {{ wi.isQuoteSubmitted ? 'Resubmit Quote' : 'Submit Quote' }}
                   </button>
 
-                  <div class="dropdown">
-                    <button
-                      [class]="'btn-pill ' + getButtonClass(wi, 'maybe')"
-                      type="button"
-                      (click)="toggleInterestDropdown(wi, 'maybe', $event)"
-                      [disabled]="wi.buttonsDisabled || isRfqExpired"
-                    >
-                      Maybe Later <i class="fa fa-caret-down"></i>
-                    </button>
+                  <button
+                    class="caret-only"
+                    type="button"
+                    (click)="toggleRow(wi)"
+                    [disabled]="isRfqExpired"
+                    aria-label="Expand/Collapse"
+                  >
+                    <i
+                      class="fa"
+                      [ngClass]="expandedId === wi.workItemID ? 'fa-chevron-up' : 'fa-chevron-down'"
+                    ></i>
+                  </button>
+                </div>
+              </div>
 
-                    <div
-                      class="dropdown-panel"
-                      *ngIf="isOpen(wi, 'maybe')"
-                      (click)="$event.stopPropagation()"
-                    >
-                      <div class="rfq-field">
-                        <label>When would you like to revisit this RFQ?</label>
+              <!-- Expanded quote panel (unchanged) -->
+              <div
+                class="quote-details-panel"
+                *ngIf="expandedId === wi.workItemID && wi.status === 'Interested'"
+              >
+                <div class="quote-grid">
+                  <div class="prev-col" *ngIf="wi.previousSubmissions?.length">
+                    <span class="section-title">Previous Submissions</span>
+
+                    <div class="previous-submission-row" *ngFor="let s of wi.previousSubmissions">
+                      <div>
+                        <div class="submission-label">Submitted on</div>
+                        <div class="submission-value">{{ s.date | date: 'dd-MM-yyyy, HH:mm' }}</div>
+                      </div>
+
+                      <div class="flex-grow-1">
+                        <div class="submission-label">Total Quote Amount</div>
+                        <div class="submission-value">
+                          {{ s.amount | currency: 'EUR' : 'symbol' : '1.2-2' : 'nl-NL' }}
+                        </div>
+                      </div>
+
+                      <div class="attach_comment">
+                        <div class="submission-label">Attachment</div>
+                        <div class="submission-value">
+                          <a style="cursor: pointer" (click)="downloadSubmission(s)">
+                            <i class="fas fa-file attachment-icon"></i>
+                          </a>
+                        </div>
+                      </div>
+
+                      <div class="attach_comment">
+                        <div class="submission-label">Comment</div>
+                        <div class="submission-value">
+                          <i
+                            class="fa fa-comment-dots comment-icon"
+                            (click)="openCommentModal(s.comment)"
+                          ></i>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <form class="submit-col" [formGroup]="quoteForm">
+                    <span class="section-title">{{
+                      wi.isQuoteSubmitted ? 'Resubmit Quote' : 'Submit Quote'
+                    }}</span>
+
+                    <div class="rfq-field">
+                      <label>Total Quote Amount (€)</label>
+                      <input type="text" formControlName="quoteAmount" placeholder="Enter amount" />
+
+                      <!-- Required -->
+                      <div
+                        class="error"
+                        *ngIf="formSubmitted && quoteForm.get('quoteAmount')?.errors?.['required']"
+                      >
+                        Quote amount is required.
+                      </div>
+
+                      <!-- Pattern validation -->
+                      <div
+                        class="error"
+                        *ngIf="formSubmitted && quoteForm.get('quoteAmount')?.errors?.['pattern']"
+                      >
+                        Accepted only numbers, dot (.) and comma (,).
+                      </div>
+                    </div>
+
+                    <div class="rfq-field">
+                      <label>Attachments</label>
+                      <div class="attachments-container">
                         <input
-                          type="date"
-                          class="text-input"
-                          [(ngModel)]="wi.maybeLaterDate"
-                          [ngModelOptions]="{ standalone: true }"
-                          [min]="today"
-  [max]="rfq?.dueDate ? (rfq.dueDate | date:'yyyy-MM-dd') : null"
+                          #fileInput
+                          type="file"
+                          (change)="onFileSelected($event)"
                           [disabled]="isRfqExpired"
                         />
-                      </div>
-
-                      <div class="error" *ngIf="maybeLaterError">{{ maybeLaterError }}</div>
-
-                      <div style="text-align: right">
                         <button
-                          class="btn-primary"
                           type="button"
-                          (click)="confirmMaybeLater(wi)"
-                          [disabled]="isRfqExpired"
+                          *ngIf="selectedFiles.length > 0"
+                          class="delete-btn"
+                          (click)="removeFile(fileInput)"
                         >
-                          Confirm
+                          <i class="fa fa-trash"></i>
                         </button>
                       </div>
 
-                      <div class="expired-msg" *ngIf="isRfqExpired">This RFQ link has expired.</div>
-                    </div>
-                  </div>
+                      <small class="hint">Maximum file size: 10 MB</small>
 
-                  <div class="dropdown">
-                    <button
-                      [class]="'btn-pill ' + getButtonClass(wi, 'not')"
-                      type="button"
-                      (click)="toggleInterestDropdown(wi, 'not', $event)"
-                      [disabled]="wi.buttonsDisabled || isRfqExpired"
-                    >
-                      Not Interested <i class="fa fa-caret-down"></i>
-                    </button>
+                      <div class="error" *ngIf="fileSizeError">{{ fileSizeError }}</div>
 
-                    <div
-                      class="dropdown-panel"
-                      *ngIf="isOpen(wi, 'not')"
-                      (click)="$event.stopPropagation()"
-                    >
-                      <div class="rfq-field">
-                        <label>Reason for Not Interested *</label>
-                        <select
-                          class="text-input"
-                          [(ngModel)]="wi.notInterested.reason"
-                          [ngModelOptions]="{ standalone: true }"
-                          [disabled]="wi.notInterested?.submitted"
-                        >
-                          <option value="">-- Select reason --</option>
-                          <option *ngFor="let r of notInterestedReasons" [value]="r">
-                            {{ r }}
-                          </option>
-                        </select>
-                      </div>
-
-                      <div class="rfq-field" *ngIf="wi.notInterested.reason === 'Anders'">
-                        <label>Please provide your reason *</label>
-                        <textarea
-                          rows="3"
-                          maxlength="300"
-                          [(ngModel)]="wi.notInterested.comment"
-                          [ngModelOptions]="{ standalone: true }"
-                          [readonly]="wi.notInterested?.submitted"
-                          placeholder="Max 300 characters"
-                        ></textarea>
-                      </div>
-
-                      <div class="error" *ngIf="wi.notInterestedError">
-                        {{ wi.notInterestedError }}
-                      </div>
-
-                      <div style="text-align: right">
-                        <button
-                          class="btn-primary"
-                          type="button"
-                          (click)="confirmNotInterested(wi)"
-                          [disabled]="isRfqExpired || wi.notInterested?.submitted"
-                        >
-                          Submit
-                        </button>
-                      </div>
-
-                      <div class="expired-msg" *ngIf="isRfqExpired">
-                        This RFQ link has expired. You can no longer change your response.
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Right: CTA (restored condition like first HTML)
-         If you want chevron always visible, tell me and I’ll adjust. -->
-              <div class="rfq-right" *ngIf="wi.status === 'Interested'">
-                <button
-                  class="btn-pill btn-pill--dark"
-                  type="button"
-                  (click)="toggleRow(wi)"
-                  [disabled]="isRfqExpired"
-                >
-                  {{ wi.isQuoteSubmitted ? 'Resubmit Quote' : 'Submit Quote' }}
-                </button>
-
-                <button
-                  class="caret-only"
-                  type="button"
-                  (click)="toggleRow(wi)"
-                  [disabled]="isRfqExpired"
-                  aria-label="Expand/Collapse"
-                >
-                  <i
-                    class="fa"
-                    [ngClass]="expandedId === wi.workItemID ? 'fa-chevron-up' : 'fa-chevron-down'"
-                  ></i>
-                </button>
-              </div>
-            </div>
-
-            <!-- Expanded quote panel (unchanged) -->
-            <div
-              class="quote-details-panel"
-              *ngIf="expandedId === wi.workItemID && wi.status === 'Interested'"
-            >
-              <div class="quote-grid">
-                <div class="prev-col" *ngIf="wi.previousSubmissions?.length">
-                  <span class="section-title">Previous Submissions</span>
-
-                  <div class="previous-submission-row" *ngFor="let s of wi.previousSubmissions">
-                    <div>
-                      <div class="submission-label">Submitted on</div>
-                      <div class="submission-value">{{ s.date |  date: 'dd-MM-yyyy, HH:mm' }}</div>
-                    </div>
-
-                    <div>
-                      <div class="submission-label">Total Quote Amount</div>
-                      <div class="submission-value" style="text-align: right">
-                        {{ s.amount | currency: 'EUR' : 'symbol' : '1.2-2' : 'nl-NL' }}
+                      <div class="error" *ngIf="formSubmitted && selectedFiles.length === 0">
+                        Please upload at least one file.
                       </div>
                     </div>
 
-                    <div>
-                      <div class="submission-label">Attachment</div>
-                      <div class="submission-value">
-                        <a style="cursor: pointer" (click)="downloadSubmission(s)">
-                          <i class="fas fa-file attachment-icon"></i>
-                        </a>
-                      </div>
-                    </div>
-
-                    <div>
-                      <div class="submission-label">Comment</div>
-                      <div class="submission-value">
-                        <i
-                          class="fa fa-comment-dots comment-icon"
-                          (click)="openCommentModal(s.comment)"
-                        ></i>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <form class="submit-col" [formGroup]="quoteForm">
-                  <span class="section-title">{{
-                    wi.isQuoteSubmitted ? 'Resubmit Quote' : 'Submit Quote'
-                  }}</span>
-
-                  <div class="rfq-field">
-                    <label>Total Quote Amount (€)</label>
-                    <input type="text" formControlName="quoteAmount" placeholder="Enter amount" />
-
-                    <!-- Required -->
-                    <div
-                      class="error"
-                      *ngIf="formSubmitted && quoteForm.get('quoteAmount')?.errors?.['required']"
-                    >
-                      Quote amount is required.
-                    </div>
-
-                    <!-- Pattern validation -->
-                    <div
-                      class="error"
-                      *ngIf="formSubmitted && quoteForm.get('quoteAmount')?.errors?.['pattern']"
-                    >
-                      Accepted only numbers, dot (.) and comma (,).
-                    </div>
-                  </div>
-
-                  <div class="rfq-field">
-                    <label>Attachments</label>
-                    <div class="attachments-container">
-                      <input
-                        #fileInput
-                        type="file"
-                        (change)="onFileSelected($event)"
-                        [disabled]="isRfqExpired"
-                      />
-                      <button
-                        type="button"
-                        *ngIf="selectedFiles.length > 0"
-                        class="delete-btn"
-                        (click)="removeFile(fileInput)"
+                    <div class="rfq-field">
+                      <label>Comments</label>
+                      <textarea
+                        rows="3"
+                        formControlName="comments"
+                        placeholder="Add Comments"
+                        maxlength="200"
+                      ></textarea>
+                      <small> {{ quoteForm.get('comments')?.value?.length || 0 }}/200 </small>
+                      <div
+                        class="error"
+                        *ngIf="formSubmitted && quoteForm.get('comments')?.errors?.['required']"
                       >
-                        <i class="fa fa-trash"></i>
+                        Comments are required.
+                      </div>
+                      <div
+                        class="error"
+                        *ngIf="formSubmitted && quoteForm.get('comments')?.errors?.['maxlength']"
+                      >
+                        Comments cannot exceed 200 characters.
+                      </div>
+                    </div>
+
+                    <div style="text-align: right; margin-top: 10px">
+                      <button
+                        class="btn-primary"
+                        type="button"
+                        (click)="submitQuoteFile(wi)"
+                        [disabled]="isRfqExpired"
+                      >
+                        Submit
                       </button>
                     </div>
-
-                    <small class="hint">Maximum file size: 10 MB</small>
-
-                    <div class="error" *ngIf="fileSizeError">{{ fileSizeError }}</div>
-
-                    <div class="error" *ngIf="formSubmitted && selectedFiles.length === 0">
-                      Please upload at least one file.
-                    </div>
-                  </div>
-
-                  <div class="rfq-field">
-                    <label>Comments</label>
-                    <textarea
-                      rows="3"
-                      formControlName="comments"
-                      placeholder="Add Comments"
-                       maxlength="200"
-                    ></textarea>
-                    <small>
-  {{ (quoteForm.get('comments')?.value?.length || 0) }}/200
-</small>
-                    <div
-                      class="error"
-                      *ngIf="formSubmitted && quoteForm.get('comments')?.errors?.['required']"
-                    >
-                      Comments are required.
-                    </div>
-                    <div
-  class="error"
-  *ngIf="formSubmitted && quoteForm.get('comments')?.errors?.['maxlength']"
->
-  Comments cannot exceed 200 characters.
-</div>
-                  </div>
-
-                  <div style="text-align: right; margin-top: 10px">
-                    <button
-                      class="btn-primary"
-                      type="button"
-                      (click)="submitQuoteFile(wi)"
-                      [disabled]="isRfqExpired"
-                    >
-                      Submit
-                    </button>
-                  </div>
-                </form>
+                  </form>
+                </div>
               </div>
             </div>
+            <!-- /rfq-row -->
           </div>
-          <!-- /rfq-row -->
         </div>
-      </div>
-    </section>
+      </section>
+    </div>
   </div>
-</div>
+</main>
 
 <!-- Comment Modal -->
 <div class="comment-modal" *ngIf="showCommentModal">
