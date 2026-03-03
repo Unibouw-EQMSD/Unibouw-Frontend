@@ -8,14 +8,20 @@
 
     <!-- Right side -->
     <div class="header-right">
+      <div class="switch">
+        <input id="language-toggle" class="check-toggle check-toggle-round-flat" type="checkbox"  [checked]="currentLang === 'nl'" (change)="toggleLanguage($event)" />
+        <label for="language-toggle"></label>
+        <span class="on">EN</span>
+        <span class="off">NL</span>
+      </div>
       <!-- Translator -->
-      <label class="lang-toggle" title="Translate">
+      <!-- <label class="lang-toggle" title="Translate">
         <input type="checkbox" [checked]="currentLang === 'nl'" (change)="toggleLanguage($event)" />
         <span class="slider">
           <span class="lang en">EN</span>
           <span class="lang nl">NL</span>
         </span>
-      </label>
+      </label> -->
 
       <!-- Notification -->
       <div class="notification" *ngIf="isAdmin">
@@ -66,7 +72,7 @@
   <nav class="navbar navbar-dark navbar-expand-lg">
     <ul class="navbar-nav">
       <!-- <li><i class="fa-solid fa-gauge-simple-high" style="color: white;"></i></li> -->
-         <li>
+      <li>
         <a class="nav-item" [routerLink]="'/projectdetails'" [class.active]="isProjectsActive()">{{
           'HEADER.PROJECTS' | translate
         }}</a>
@@ -81,7 +87,6 @@
           'HEADER.SUBCONTRACTORS' | translate
         }}</a>
       </li>
-   
     </ul>
   </nav>
 </header>
@@ -114,7 +119,8 @@
                 (clickOutside)="open = false"
               >
                 <div
-                  class="dropdown-btn" style="padding-left: 12px"
+                  class="dropdown-btn"
+                  style="padding-left: 12px"
                   (click)="reminderForm.get('isEnable')?.value && toggleMaxSequenceDropdown()"
                   [class.is-invalid]="
                     reminderForm.get('maxReminderSequence')?.touched &&

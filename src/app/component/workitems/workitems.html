@@ -190,8 +190,8 @@
 </main>
 <!-- ✅ Popup -->
 <div *ngIf="showPopup" [ngClass]="{ popup: true, error: popupError }">
-  <span *ngIf="!popupError">✅</span>
-  <span *ngIf="popupError">❌</span>
+  <span *ngIf="!popupError"><i class="bi bi-check-circle"></i></span>
+  <span *ngIf="popupError"><i class="bi bi-x-circle"></i></span>
   {{ popupMessage }}
 </div>
 

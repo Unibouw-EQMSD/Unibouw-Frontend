@@ -1212,3 +1212,9 @@ mat-datepicker-content.mat-datepicker-content.mat-datepicker-content-animations-
 .cursor {cursor: pointer;}
 .td_checkbox {width: 30px;}
 .td_intDate {width: 180px; min-width: 180px;}
+.popup {
+    top: 44px !important;
+    right: 25px !important;
+    border-radius: 4px !important;
+    min-height: 51px;
+}
