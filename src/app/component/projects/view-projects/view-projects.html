@@ -311,8 +311,9 @@
                                           | currency: 'EUR' : 'symbol' : '1.2-2' : 'nl-NL'
                                       }}
                                       <br>
-                                    <div class="submissioncol">{{ rfq.dueDate }} 12:44</div>
-                                    </ng-container>
+<div class="submissioncol">
+  {{ rfq.submissionDateTime }}
+</div>                                    </ng-container>
                                   </div>
                                   </td>
                                   <td style="text-align: center; padding-left: 20px">
@@ -484,6 +485,11 @@
                                     {{
                                       w.quoteAmount | currency: 'EUR' : 'symbol' : '1.2-2' : 'nl-NL'
                                     }}
+
+                                    <br/>
+                                  <div class="submissioncol">
+  {{ w.submissionDateTime }}
+</div>  
                                   </ng-container>
                                 </td>
                                 <td style="text-align: center">
