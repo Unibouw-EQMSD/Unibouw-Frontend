@@ -1386,3 +1386,11 @@
 .mat-column-dueDate, .mat-column-rfqSentDate {width: 120px; white-space: nowrap;}
 
 .th-viml {width: 112px; max-width: 112px; text-align: center !important;}
+
+.submissioncol {
+    background: antiquewhite;
+    display: inline;
+   padding: .2rem .6rem;
+    border-radius: 10px;
+    font-size: 80%;
+}

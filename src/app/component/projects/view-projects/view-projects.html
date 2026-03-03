@@ -302,6 +302,7 @@
                                   </td>
                                   <td class="text-end"(click)="markViewed(work, rfq)"
                                   >
+                                  <div>
                                     <ng-container
                                       *ngIf="rfq.quoteAmount && rfq.quoteAmount !== '-'"
                                     >
@@ -309,7 +310,10 @@
                                         rfq.quoteAmount
                                           | currency: 'EUR' : 'symbol' : '1.2-2' : 'nl-NL'
                                       }}
+                                      <br>
+                                    <div class="submissioncol">{{ rfq.dueDate }} 12:44</div>
                                     </ng-container>
+                                  </div>
                                   </td>
                                   <td style="text-align: center; padding-left: 20px">
                                     <!-- PDF Icon with Disabled Logic -->
