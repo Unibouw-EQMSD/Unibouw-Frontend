@@ -617,8 +617,19 @@ ${reason === 'Anders' ? `Comment        : ${comment}` : ''}
 
     const { quoteAmount, comments } = this.quoteForm.getRawValue();
     const trimmedComment = comments?.trim();
-    const totalAmount = Number(quoteAmount || 0);
+const normalizeAmount = (value: string): number => {
+  if (!value) return 0;
 
+  // Remove thousands separator (.)
+  const noThousands = value.replace(/\./g, '');
+
+  // Replace decimal comma with dot
+  const normalized = noThousands.replace(',', '.');
+
+  return Number(normalized);
+};
+
+const totalAmount = normalizeAmount(quoteAmount);
     const key = `rfq_prev_submissions_${this.rfqId}_${this.subId}_${target.workItemID}`;
     const previous = JSON.parse(localStorage.getItem(key) || '[]');
 
