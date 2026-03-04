@@ -76,20 +76,49 @@ export class Workitems implements OnInit, AfterViewInit {
       );
     };
 
-    this.dataSource.sortingDataAccessor = (item: Workitem, property: string) => {
-      switch (property) {
-        case 'number':
-          return typeof item.number === 'number'
-            ? item.number
-            : parseInt(item.number.toString()) || 0;
-        case 'name':
-          return item.name?.toLowerCase() || '';
-        case 'description':
-          return (item.description || '').toLowerCase();
-        default:
-          return (item as any)[property];
+   this.dataSource.sortingDataAccessor = (item: Workitem, property: string) => {
+  switch (property) {
+    case 'number':
+      // Split by dot, compare each part as a number if possible
+      return (item.number || '')
+        .split('.')
+        .map((part: string) => {
+          const n = Number(part);
+          return isNaN(n) ? part : n;
+        });
+    case 'name':
+      return item.name?.toLowerCase() || '';
+    case 'description':
+      return (item.description || '').toLowerCase();
+    default:
+      return (item as any)[property];
+  }
+};
+
+this.dataSource.sortData = (data, sort) => {
+  const active = sort.active;
+  const direction = sort.direction === 'asc' ? 1 : -1;
+
+  return data.slice().sort((a, b) => {
+    const aValue = this.dataSource.sortingDataAccessor(a, active);
+    const bValue = this.dataSource.sortingDataAccessor(b, active);
+
+    // If value is array (semantic split), compare parts
+    if (Array.isArray(aValue) && Array.isArray(bValue)) {
+      for (let i = 0; i < Math.max(aValue.length, bValue.length); i++) {
+        if (aValue[i] === undefined) return -1 * direction;
+        if (bValue[i] === undefined) return 1 * direction;
+        if (aValue[i] < bValue[i]) return -1 * direction;
+        if (aValue[i] > bValue[i]) return 1 * direction;
       }
-    };
+      return 0;
+    }
+    // Fallback to normal comparison
+    if (aValue < bValue) return -1 * direction;
+    if (aValue > bValue) return 1 * direction;
+    return 0;
+  });
+};
 
     // first page load
     // this.loadCategoriesAndWorkitems(true);
@@ -187,7 +216,7 @@ export class Workitems implements OnInit, AfterViewInit {
           }
           if (this.sort) {
             this.dataSource.sort = this.sort;
-            this.sort.active = 'name';
+            this.sort.active = 'number';
             this.sort.direction = 'asc';
             this.sort.sortChange.emit({ active: 'name', direction: 'asc' });
           }
