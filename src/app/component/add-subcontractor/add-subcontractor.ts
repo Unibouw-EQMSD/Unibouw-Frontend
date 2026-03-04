@@ -272,7 +272,19 @@ ${indent}${indent}${workItemsText
   goBack(): void {
     this.location.back();
   }
+private semanticNumberSort(a: string, b: string): number {
+  const aParts = (a || '').split('.').map(Number);
+  const bParts = (b || '').split('.').map(Number);
+  const len = Math.max(aParts.length, bParts.length);
 
+  for (let i = 0; i < len; i++) {
+    const aVal = aParts[i] ?? 0;
+    const bVal = bParts[i] ?? 0;
+    if (aVal < bVal) return -1;
+    if (aVal > bVal) return 1;
+  }
+  return 0;
+}
   /** Dropdown logic */
   toggleDropdown() {
     this.isDropdownOpen = !this.isDropdownOpen;
@@ -338,8 +350,7 @@ ${indent}${indent}${workItemsText
         this.workitems = (items || [])
           .filter((w) => w.isActive !== false)
           .map((w) => ({ ...w, categoryID: this.selectedCategoryId }))
-          .sort((a, b) => a.name.localeCompare(b.name));
-
+.sort((a, b) => this.semanticNumberSort(a.number, b.number));
         // Restore selections for this category
         this.selectedWorkitems = this.selectionsByCategory.get(this.selectedCategoryId) || [];
         this.selectedCount = this.selectedWorkitems.length;
