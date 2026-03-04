@@ -1212,3 +1212,6 @@ mat-datepicker-content.mat-datepicker-content.mat-datepicker-content-animations-
     border-radius: 4px !important;
     min-height: 51px;
 }
+tbody.mat-calendar-body td {
+    padding: 7.14286% !important;
+}
