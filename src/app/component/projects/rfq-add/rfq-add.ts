@@ -389,6 +389,20 @@ export class RfqAdd {
     }
   }
 
+  private semanticNumberSort(a: string, b: string): number {
+  const aParts = (a || '').split('.').map(Number);
+  const bParts = (b || '').split('.').map(Number);
+  const len = Math.max(aParts.length, bParts.length);
+
+  for (let i = 0; i < len; i++) {
+    const aVal = aParts[i] ?? 0;
+    const bVal = bParts[i] ?? 0;
+    if (aVal < bVal) return -1;
+    if (aVal > bVal) return 1;
+  }
+  return 0;
+}
+
   todayForHtml(): string {
     const d = new Date();
     const m = (d.getMonth() + 1).toString().padStart(2, '0');
@@ -653,11 +667,9 @@ export class RfqAdd {
       error: (err: any) => console.error('Error loading projects:', err),
     });
   }
-
-  private sortWorkItemsAsc(items: Workitem[]): Workitem[] {
-    return items.sort((a, b) => a.name.localeCompare(b.name));
-  }
-
+private sortWorkItemsAsc(items: Workitem[]): Workitem[] {
+  return items.sort((a, b) => this.semanticNumberSort(a.number, b.number));
+}
   async loadCategoriesAndWorkitems1() {
     try {
       this.isLoader = true;
