@@ -9,6 +9,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
 import { ConfirmDialogComponent } from '../../../confirm-dialog-component/confirm-dialog-component';
 import { Location } from '@angular/common';
+import { AlertService } from '../../../services/alert.service';
 
 interface SubcontractorItem {
   subcontractorID: string;
@@ -74,6 +75,7 @@ export class RfqAdd {
     private router: Router,
     private dialog: MatDialog,
     private location: Location,
+    private alertService: AlertService,
   ) {}
 
   isLoader: boolean = false;
@@ -503,17 +505,17 @@ export class RfqAdd {
   // MODIFIED: onSubmit to handle both Create and Update (WITHOUT client-side mapping API call)
 
   async onSubmit(sendEmail: boolean = false, editedEmailBody: string = '') {
-    if (!this.selectedProject) return alert('Select a project first');
+    if (!this.selectedProject) return this.alertService.warning('Select a project first');
 
     const selectedProject = this.projects.find((p) => p.projectID === this.selectedProject);
-    if (!selectedProject) return alert('Project not found');
+    if (!selectedProject) return this.alertService.warning('Project not found');
 
     const selectedSubs = this.subcontractors.filter((s) => s.selected);
-    if (!this.globalDueDate) return alert('Please select the Global Due Date');
-    if (!selectedSubs.length) return alert('Select at least one subcontractor');
-    if (!this.selectedWorkItems.length) return alert('Select at least one work item');
+    if (!this.globalDueDate) return this.alertService.warning('Please select the Global Due Date');
+    if (!selectedSubs.length) return this.alertService.warning('Select at least one subcontractor');
+    if (!this.selectedWorkItems.length) return this.alertService.warning('Select at least one work item');
     if (selectedSubs.some((s) => !s.dueDate))
-      return alert('Please select a Due Date for all selected subcontractors.');
+      return this.alertService.warning('Please select a Due Date for all selected subcontractors.');
 
     this.isLoader = true;
     const now = new Date().toISOString();
@@ -546,7 +548,7 @@ export class RfqAdd {
             );
             const dueDateStr = mapping?.dueDate;
             if (!dueDateStr) {
-              alert('Due date missing for subcontractor');
+              this.alertService.error('Due date missing for subcontractor');
               return;
             }
             await this.rfqService
@@ -564,7 +566,7 @@ export class RfqAdd {
       }
     } catch (err) {
       console.error('Mapping save failed', err);
-      alert('Failed to save subcontractor–work item mappings.');
+      this.alertService.error('Failed to save subcontractor–work item mappings.');
       this.isLoader = false;
       return;
     }
@@ -616,7 +618,7 @@ export class RfqAdd {
 
     request.subscribe({
       next: () => {
-        alert(sendEmail ? 'RFQ sent successfully!' : 'RFQ saved successfully!');
+        this.alertService.success(sendEmail ? 'RFQ sent successfully!' : 'RFQ saved successfully!');
         localStorage.removeItem(this.RFQ_DRAFT_KEY);
         this.isLoader = false;
         this.router.navigate(['/view-projects', this.selectedProject], {
@@ -625,7 +627,7 @@ export class RfqAdd {
       },
       error: (err) => {
         console.error('RFQ failed', err);
-        alert('RFQ failed!');
+        this.alertService.error('RFQ failed!');
         this.isLoader = false;
       },
     });
@@ -972,9 +974,9 @@ toggleSelectAll() {
   }
 
   openPreview() {
-    if (!this.selectedProject) return alert('Select a project');
-    if (!this.selectedWorkItems.length) return alert('Select work item');
-    if (!this.selectedSubcontractors.length) return alert('Select subcontractors');
+    if (!this.selectedProject) return this.alertService.warning('Select a project');
+    if (!this.selectedWorkItems.length) return this.alertService.warning('Select work item');
+    if (!this.selectedSubcontractors.length) return this.alertService.warning('Select subcontractors');
 
     // 🔹 Map all selected work items
     const workItemNames = this.selectedWorkItems.map((w) => w.name);

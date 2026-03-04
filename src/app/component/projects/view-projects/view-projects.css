@@ -235,12 +235,11 @@
   align-items: center;
   background-color: #f8f8f8;
   border-bottom: 1px solid #eee;
-  padding: 8px 0px 18px;
+  padding: 8px 0px 8px;
 }
 
 .group-options label {
   margin-left: 10px;
-  font-size: 16px;
 }
 
 /* Dropdown for Work Item (like Construction) */
@@ -279,7 +278,7 @@
 .rfq-summary {
   display: grid;
   grid-template-columns: 250px repeat(6, 1fr); /* Work Item column wider, others equal */
-  gap: 15px;
+  gap: 8px;
   align-items: center;
 }
 
@@ -435,13 +434,13 @@
   width: 100%;
   justify-content: space-between;
   align-items: flex-start;
-  padding: 3px 8px;
-  margin-bottom: 10px;
+  padding: 3px 6px;
+  /* margin-bottom: 10px; */
   /* font-size: 14px; */
 }
 
 .rfq-summary > div {
-    width: 120px;
+    width: 90px;
     white-space: nowrap;
     text-align: center;
 }
@@ -1381,11 +1380,12 @@
     padding: 9px 4px 0 0;
     align-items: center;
 }
-.th-rfqid {width: 100px; max-width: 100px;}
+.th-rfqid {width: 68px; max-width: 68px;}
 .th-actions {width: 80px; max-width: 80px; white-space: nowrap;}
 .mat-column-dueDate, .mat-column-rfqSentDate {width: 120px; white-space: nowrap;}
 
-.th-viml {width: 112px; max-width: 112px; text-align: center !important;}
+.th-viml {width: 100px; max-width: 100px; text-align: center !important;}
+.th-quoteAmt {width: 120px; max-width: 120px; text-align:end !important; white-space: nowrap;}
 
 .submissioncol {
     background: antiquewhite;

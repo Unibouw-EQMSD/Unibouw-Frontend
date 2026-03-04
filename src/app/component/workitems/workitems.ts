@@ -6,6 +6,7 @@ import { MatTableDataSource } from '@angular/material/table';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatSort, Sort } from '@angular/material/sort';
 import { TranslateService } from '@ngx-translate/core';
+import { AlertService } from '../../services/alert.service';
 
 @Component({
   selector: 'app-workitems',
@@ -43,6 +44,7 @@ export class Workitems implements OnInit, AfterViewInit {
     private msalService: MsalService,
     private userService: UserService,
     private translate: TranslateService,
+    private alertService: AlertService,
   ) {}
 
   ngOnInit() {
@@ -214,10 +216,10 @@ export class Workitems implements OnInit, AfterViewInit {
     const newStatus = !item.isActive;
     item.isActive = newStatus;
     this.workitemService.updateIsActive(item.workItemID, newStatus).subscribe({
-      next: () => this.showPopupMessage(this.translate.instant('MESSAGES.STATUS_UPDATED_SUCCESS')),
+      next: () => this.alertService.success(this.translate.instant('MESSAGES.STATUS_UPDATED_SUCCESS')),
       error: () => {
         item.isActive = !newStatus;
-        this.showPopupMessage(this.translate.instant('MESSAGES.STATUS_UPDATED_FAILED'), true);
+        this.alertService.error(this.translate.instant('MESSAGES.STATUS_UPDATED_FAILED'));
       },
     });
   }

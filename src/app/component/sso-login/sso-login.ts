@@ -7,6 +7,7 @@ import { CommonModule } from '@angular/common';
 import { PublicClientApplication, AuthenticationResult } from '@azure/msal-browser';
 import { AppConfigService } from '../../services/app.config.service';
 import { UserService } from '../../services/User.service.';
+import { AlertService } from '../../services/alert.service';
 
 interface MeResponse {
   name: string;
@@ -35,8 +36,9 @@ export class SSOLogin implements OnInit {
   constructor(
     private http: HttpClient,
     private router: Router,
-    private appConfigService: AppConfigService,  private userService: UserService
-
+    private appConfigService: AppConfigService,
+    private userService: UserService,
+    private alertService: AlertService
   ) {
     this.msalInstance = (window as any).msalInstance;
 
@@ -133,7 +135,7 @@ this.userService.setUser(normalizedMe);
     await this.router.navigate(['/projectdetails'], { replaceUrl: true });
   } catch (error) {
     console.error('❌ continueLoginFlow failed:', error);
-    alert('Login failed. Please try again.');
+    this.alertService.error('Login failed. Please try again.');
   } finally {
     this.loading = false;
   }

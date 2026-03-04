@@ -49,6 +49,8 @@ import { TranslateModule, TranslateLoader, TranslateService } from '@ngx-transla
 import { TRANSLATE_HTTP_LOADER_CONFIG, TranslateHttpLoader, TranslateHttpLoaderConfig } from '@ngx-translate/http-loader';
 import { HttpClient } from '@angular/common/http';
 import { SubcontractorDetails } from './component/subcontractor/subcontractor-details/subcontractor-details';
+import { AlertComponent } from './confirm-dialog-component/alert/alert.component';
+import { MatSnackBarModule } from '@angular/material/snack-bar';
 
 export function MSALInstanceFactory(): PublicClientApplication {
   return (window as any).msalInstance;
@@ -74,6 +76,7 @@ export function HttpLoaderFactory() {
     AddSubcontractor,
     ViewProjects,
     SubcontractorDetails,
+    AlertComponent,
     // ConfirmDialogComponent,
     // ProjectSummary,
   ],
@@ -104,6 +107,7 @@ export function HttpLoaderFactory() {
     MatTabsModule,
     MatProgressSpinnerModule,
     MatTooltipModule,
+    MatSnackBarModule,
 
     // MSAL
     MsalModule.forRoot(

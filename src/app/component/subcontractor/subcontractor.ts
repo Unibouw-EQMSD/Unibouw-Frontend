@@ -7,6 +7,7 @@ import { MatSort } from '@angular/material/sort';
 import { forkJoin } from 'rxjs/internal/observable/forkJoin';
 import { TranslateService } from '@ngx-translate/core';
 import { Router } from '@angular/router';
+import { AlertService } from '../../services/alert.service';
 
 @Component({
   selector: 'app-subcontractor',
@@ -41,7 +42,9 @@ export class Subcontractor implements OnInit, AfterViewInit {
   constructor(
     private subcontractorService: SubcontractorService,
     private userService: UserService,
-    private translate: TranslateService,    private router: Router
+    private translate: TranslateService,
+    private router: Router,
+    private alertService: AlertService
   ) {}
 
   ngOnInit() {
@@ -138,7 +141,7 @@ export class Subcontractor implements OnInit, AfterViewInit {
 
   handleRowClick(row: any) {
   if (!row.isActive) {
-    alert('This subcontractor is inactive. You cannot view details.');
+    this.alertService.warning('This subcontractor is inactive. You cannot view details.');
     return;
   }
 

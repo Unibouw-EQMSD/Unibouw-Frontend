@@ -19,6 +19,7 @@ import { TranslateService } from '@ngx-translate/core';
 import { UserService } from '../../../services/User.service.';
 import { NavigationStart } from '@angular/router';
 import { filter, Subscription } from 'rxjs';
+import { AlertService } from '../../../services/alert.service';
 
 interface RfqResponse {
   name: string;
@@ -383,6 +384,7 @@ private toTime(value: any): number {
     private location: Location,
     private translate: TranslateService,
     public userService: UserService,
+    private alertService: AlertService,
   ) {
     registerLocaleData(localeNl);
   }
@@ -917,11 +919,11 @@ globalDueDate: this.formatDate(item.globalDueDate),
 
     this.rfqService.deleteRfq(rfqId).subscribe({
       next: () => {
-        alert('RFQ deleted successfully.');
+        this.alertService.success('RFQ deleted successfully.');
         this.dataSource.data = this.dataSource.data.filter((r: any) => r.id !== rfqId);
       },
       error: (err) => {
-        alert(err?.error?.message || 'Unable to delete RFQ.');
+        this.alertService.error(err?.error?.message || 'Unable to delete RFQ.');
       },
     });
   }
@@ -939,9 +941,9 @@ globalDueDate: this.formatDate(item.globalDueDate),
 
   onAction(action: string, element: Rfq) {
     if (action === 'View') {
-      alert(`Viewing RFQ: ${element.customerName}`);
+      this.alertService.info(`Viewing RFQ: ${element.customerName}`);
     } else if (action === 'Download') {
-      alert(`Downloading RFQ: ${element.customerName}`);
+      this.alertService.info(`Downloading RFQ: ${element.customerName}`);
     }
   }
 
@@ -1039,7 +1041,7 @@ downloadQuote(event: Event, documentId: string | null | undefined) {
   event.stopPropagation();
 
   if (!documentId || documentId === 'null' || documentId === 'undefined') {
-    alert('No file uploaded for this document.');
+    this.alertService.warning('No file uploaded for this document.');
     return;
   }
 
@@ -1054,7 +1056,7 @@ downloadQuote(event: Event, documentId: string | null | undefined) {
     },
     error: (err) => {
       console.error('Download error:', err);
-      alert('No file uploaded for this document.');
+      this.alertService.warning('No file uploaded for this document.');
     },
   });
 }
@@ -1245,7 +1247,7 @@ resetReminderPopup() {
     this.emailBodyError = false;
 
     if (!this.selectedRfqId || !this.subId) {
-      alert('Missing RFQ or Subcontractor information.');
+      this.alertService.warning('Missing RFQ or Subcontractor information.');
       return;
     }
 
@@ -1257,14 +1259,14 @@ resetReminderPopup() {
         next: (result) => {
           if (result.success) {
             this.snackBar.open('Reminder sent.', 'Close', { duration: 2000 });
-            alert('Reminder sent.');
+            this.alertService.success('Reminder sent.');
           } else {
             this.snackBar.open('Reminder sending failed.', 'Close', { duration: 2000 });
-            alert('Reminder sending failed.');
+            this.alertService.error('Reminder sending failed.');
           }
         },
         error: (error) => {
-          alert('Failed to send reminder: ' + (error?.error || error));
+          this.alertService.error('Failed to send reminder: ' + (error?.error || error));
         },
         complete: () => {
           this.isLoading = false;
@@ -1376,7 +1378,7 @@ conversationDateTime: string | null = null;
 
     // Check total files limit
     if (this.attachments.length + input.files.length > this.MAX_FILES) {
-      alert(`You can attach a maximum of ${this.MAX_FILES} files per message.`);
+      this.alertService.warning(`You can attach a maximum of ${this.MAX_FILES} files per message.`);
       input.value = '';
       return;
     }
@@ -1389,7 +1391,7 @@ conversationDateTime: string | null = null;
             ? 'The selected file exceeds the maximum allowed size of 10 MB.'
             : 'One or more selected files exceed the maximum allowed size of 10 MB.';
 
-        alert(message);
+        this.alertService.warning(message);
         continue;
       }
       this.attachments.push(file);
@@ -1831,7 +1833,7 @@ stopConversationAutoRefresh() {
         return;
     }
     if (!this.conversationsData?.length) {
-        alert('No conversation data available.');
+        this.alertService.warning('No conversation data available.');
         console.log("Blocked: no conversation data");
         return;
     }
@@ -1887,11 +1889,11 @@ stopConversationAutoRefresh() {
       .subscribe({
         next: () => {
           this.afterMessageSent();
-          //alert('Conversation logged successfully!');
+          //this.alertService.success('Conversation logged successfully!');
         },
         error: (err) => {
           console.error('Error saving conversation:', err);
-          alert('Failed to save conversation. Please try again.');
+          this.alertService.error('Failed to save conversation. Please try again.');
         },
       });
   }
@@ -1942,7 +1944,7 @@ stopConversationAutoRefresh() {
 
   // ✅ Validate message length
   if (messageTrimmed.length > 5000) {
-    alert('Message is too long. Please shorten your message.');
+    this.alertService.warning('Message is too long. Please shorten your message.');
     return;
   }
 
@@ -1962,7 +1964,7 @@ stopConversationAutoRefresh() {
 
   // 🚨 Validation: Make sure subcontractorID is present
   if (!draftConvo.subcontractorID) {
-    alert('No subcontractor selected. Please select a subcontractor first.');
+    this.alertService.warning('No subcontractor selected. Please select a subcontractor first.');
     return;
   }
 
@@ -2026,12 +2028,12 @@ stopConversationAutoRefresh() {
         this.subject = '';
         this.attachments = [];
         this.afterMessageSent();
-        alert('Conversation logged successfully!');
+        this.alertService.success('Conversation logged successfully!');
          window.location.reload();
       },
       error: (err) => {
         console.error('Error sending message:', err);
-        alert('Failed to save conversation. Please try again.');
+        this.alertService.error('Failed to save conversation. Please try again.');
       },
     });
 }
@@ -2098,7 +2100,7 @@ stopConversationAutoRefresh() {
 
     // Check total files limit
     if (this.replyAttachments.length + input.files.length > this.MAX_FILES) {
-      alert(`You can attach a maximum of ${this.MAX_FILES} files per message.`);
+      this.alertService.warning(`You can attach a maximum of ${this.MAX_FILES} files per message.`);
       input.value = '';
       return;
     }
@@ -2111,7 +2113,7 @@ stopConversationAutoRefresh() {
             ? 'The selected file exceeds the maximum allowed size of 10 MB.'
             : 'One or more selected files exceed the maximum allowed size of 10 MB.';
 
-        alert(message);
+        this.alertService.warning(message);
         continue;
       }
       this.replyAttachments.push(file);
@@ -2201,7 +2203,7 @@ if (replyText.length > 5000) {
   }
 downloadReplyAttachment(att: any) {
   if (!att?.attachmentID) {
-    alert('No file available for download.');
+    this.alertService.warning('No file available for download.');
     return;
   }
 
@@ -2216,7 +2218,7 @@ downloadReplyAttachment(att: any) {
     },
     error: (err) => {
       console.error('Download error:', err);
-      alert('File could not be downloaded.');
+      this.alertService.error('File could not be downloaded.');
     },
   });
 }

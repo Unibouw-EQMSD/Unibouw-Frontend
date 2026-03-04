@@ -7,6 +7,7 @@ import { Router, ActivatedRoute } from '@angular/router';
 import { countryList } from '../../shared/countries';
 import { Subscription } from 'rxjs';
 import { Location } from '@angular/common';
+import { AlertService } from '../../services/alert.service';
 
 @Component({
   selector: 'app-add-subcontractor',
@@ -157,6 +158,7 @@ ${indent}${indent}${workItemsText
     private subcontractorService: SubcontractorService,
     private userService: UserService,
     private location: Location,
+    private alertService: AlertService,
   ) {
     this.workitemSearchControl = new FormControl('');
 
@@ -542,19 +544,19 @@ ${indent}${indent}${workItemsText
     if (subcontractorID && files.length > 0) {
       this.subcontractorService.createAttachments(subcontractorID, files).subscribe({
         next: () => {
-          this.showPopupMessage('Subcontractor and files uploaded successfully!');
+          this.alertService.success('Subcontractor and files uploaded successfully!');
           this.handleFormResetAndRedirect();
         },
         error: (uploadErr) => {
           console.error('File upload failed:', uploadErr);
-          this.showPopupMessage('File upload failed.', true);
+          this.alertService.error('File upload failed.');
         },
       });
     } else {
       if (this.projectId && this.projectId !== 'null') {
-        this.showPopupMessage('Subcontractors added to the RFQ successfully.');
+        this.alertService.success('Subcontractors added to the RFQ successfully.');
       } else {
-        this.showPopupMessage('Subcontractor created successfully.');
+        this.alertService.success('Subcontractor created successfully.');
       }
 
       this.handleFormResetAndRedirect();

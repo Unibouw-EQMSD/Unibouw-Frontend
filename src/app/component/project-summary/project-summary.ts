@@ -22,6 +22,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { ActivatedRoute } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { RfqResponseService } from '../../services/rfq-response.service';
+import { AlertService } from '../../services/alert.service';
 
 interface NotInterestedData {
   reason: string;
@@ -124,6 +125,7 @@ export class ProjectSummary implements OnInit {
     private projectService: projectService,
     private fb: FormBuilder,
     private http: HttpClient,
+    private alertService: AlertService,
   ) {
     registerLocaleData(localeNl);
 
@@ -357,7 +359,7 @@ Follow-up Date : ${formattedDate}
     };
 
     if (!payload.projectID) {
-      alert('Project data not loaded yet. Please try again.');
+      this.alertService.warning('Project data not loaded yet. Please try again.');
       return;
     }
 
@@ -377,7 +379,7 @@ Follow-up Date : ${formattedDate}
         },
         error: (err) => {
           console.error('Error saving conversation:', err);
-          alert('Failed to save conversation. Please try again.');
+          this.alertService.error('Failed to save conversation. Please try again.');
         },
       });
   }
@@ -389,7 +391,7 @@ Follow-up Date : ${formattedDate}
     const rfqNumber = this.rfq?.rfqNumber || '';
 
     if (!reason) {
-      alert('Please select a reason.');
+      this.alertService.info('Please select a reason.');
       return;
     }
     if (reason !== 'Anders') {
@@ -398,7 +400,7 @@ Follow-up Date : ${formattedDate}
     }
 
     if (reason === 'Anders' && !comment) {
-      alert('Please enter a reason.');
+      this.alertService.info('Please enter a reason.');
       return;
     }
 
@@ -421,7 +423,7 @@ ${reason === 'Anders' ? `Comment        : ${comment}` : ''}
     };
 
     if (!payload.projectID) {
-      alert('Project data not loaded yet. Please try again.');
+      this.alertService.warning('Project data not loaded yet. Please try again.');
       return;
     }
 
@@ -441,7 +443,7 @@ ${reason === 'Anders' ? `Comment        : ${comment}` : ''}
         },
         error: (err) => {
           console.error('Error saving conversation:', err);
-          alert('Failed to save conversation. Please try again.');
+          this.alertService.error('Failed to save conversation. Please try again.');
         },
       });
   }
@@ -574,9 +576,9 @@ ${reason === 'Anders' ? `Comment        : ${comment}` : ''}
       .subscribe({
         next: () => {
           if (status === 'Maybe Later') {
-            alert('Your preference has been recorded. You may respond any time before the due date.');
+            this.alertService.success('Your preference has been recorded. You may respond any time before the due date.');
           } else {
-            alert(`Your response "${status}" was recorded successfully!`);
+            this.alertService.success(`Your response "${status}" was recorded successfully!`);
           }
 
           // ✅ SAVE PER WORK ITEM
@@ -594,7 +596,7 @@ ${reason === 'Anders' ? `Comment        : ${comment}` : ''}
           );
         },
         error: () => {
-          alert('Failed to submit response.');
+          this.alertService.error('Failed to submit response.');
           target.buttonsDisabled = false;
           target.isInterested = false;
         },
@@ -608,7 +610,7 @@ ${reason === 'Anders' ? `Comment        : ${comment}` : ''}
     this.formSubmitted = true;
 
     if (this.quoteForm.invalid) {
-      alert('Please fill all required fields.');
+      this.alertService.warning('Please fill all required fields.');
       return;
     }
 
@@ -637,7 +639,7 @@ const totalAmount = normalizeAmount(quoteAmount);
       .uploadQuoteFile(this.rfqId, this.subId, target.workItemID, file, totalAmount, comments)
       .subscribe({
         next: (res: any) => {
-          alert(target.isQuoteSubmitted ? 'Quote re-submitted!' : 'Quote submitted!');
+          this.alertService.success(target.isQuoteSubmitted ? 'Quote re-submitted!' : 'Quote submitted!');
 
           target.isQuoteSubmitted = true;
 
@@ -708,7 +710,7 @@ Comment        : ${trimmedComment}
     errorMessage = 'Upload failed: Server error. Please try again later.';
   }
 
-  alert(errorMessage);
+  this.alertService.error(errorMessage);
 
   this.formSubmitted = false;
 }
@@ -734,7 +736,7 @@ Comment        : ${trimmedComment}
 
     if (new Date() > dueDate) {
       this.buttonsDisabled = true;
-      alert('This RFQ link has expired. You can no longer respond.');
+      this.alertService.warning('This RFQ link has expired. You can no longer respond.');
     }
   }
 }

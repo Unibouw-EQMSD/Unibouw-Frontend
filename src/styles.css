@@ -9,7 +9,7 @@
 /* Body */
 body {
   font-family: 'Public Sans', sans-serif !important;
-  font-size: 1rem;
+  font-size: .9rem;
   background-color: #f5f5f9;
 }
 
@@ -60,7 +60,7 @@ app-sso-login {
 }
 
 #main {
-  margin-top: 105px;
+  margin-top: 100px;
   padding: 0 0 0px 0px;
   transition: all 0.3s;
   min-height: calc(100vh - 144px);
@@ -84,7 +84,7 @@ app-sso-login {
 }
 
 .pagetitle h1 {
-  font-size: 24px;
+  font-size: 22px;
   margin-bottom: 0;
   color: #003042;
   font-family: 'Work Sans', sans-serif !important;
@@ -240,12 +240,11 @@ app-sso-login {
 
 .tabs button {
   flex: 1;
-  padding: 6px 10px;
+  padding: 4px 10px;
   border: none;
   cursor: pointer;
   background: #e8eef3;
   font-weight: 400 !important;
-  font-size: 16px;
   color: #ff7f32;
   transition: 0.2s;
 }
@@ -383,11 +382,6 @@ table.mat-table {
   border-bottom: 1px solid #eee;
 }
 
-.full-width-table {
-  /* min-width: 600px; */
-  /* optional: horizontal scroll for wide tables */
-}
-
 .sticky-header {
   position: sticky;
   top: 0;
@@ -422,10 +416,10 @@ table.mat-table {
 
 td,
 th {
-  font-family: 'Public Sans', sans-serif !important;
+  /* font-family: 'Public Sans', sans-serif !important;
   font-size: 1rem;
-  font-weight: 400 !important;
-  padding: .5rem !important;
+  font-weight: 400 !important; */
+  padding: .3rem !important;
 }
 
 th {
@@ -447,7 +441,7 @@ td.inactive {
   color: #888 !important;
 }
 .td-actions {width: 100px;}
-.td-date {width: 120px; white-space: nowrap;}
+.td-date {width: 100px; white-space: nowrap;}
 /* Input wrapper - ensure proper stacking context */
 .input-wrapper {
   position: relative;
