@@ -311,8 +311,9 @@
                                           | currency: 'EUR' : 'symbol' : '1.2-2' : 'nl-NL'
                                       }}
                                       <br>
-                                    <div class="submissioncol">{{ rfq.dueDate }} 12:44</div>
-                                    </ng-container>
+<div class="submissioncol">
+  {{ rfq.submissionDateTime }}
+</div>                                    </ng-container>
                                   </div>
                                   </td>
                                   <td style="text-align: center; padding-left: 20px">
@@ -484,6 +485,11 @@
                                     {{
                                       w.quoteAmount | currency: 'EUR' : 'symbol' : '1.2-2' : 'nl-NL'
                                     }}
+
+                                    <br/>
+                                  <div class="submissioncol">
+  {{ w.submissionDateTime }}
+</div>  
                                   </ng-container>
                                 </td>
                                 <td style="text-align: center">
@@ -1008,7 +1014,7 @@
           <!-- Time Picker -->
           <div class="time-row">
             <label>{{ 'REMINDER_MODAL.SET_TIME' | translate }} </label>
-            <input type="time" class="time-input readonly-bg"  [(ngModel)]="reminderTime" />
+            <input type="time" class="time-input"  [(ngModel)]="reminderTime" />
             <i class="fa fa-clock-o time-icon"></i>
           </div>
         </div>

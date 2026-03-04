@@ -25,6 +25,7 @@ interface RfqResponse {
   rating: number;
   documentId: string;
   date: string;
+  submissionDateTime: string;
   rfqId: string;
   rfqNumber: string;
   responded: boolean;
@@ -611,6 +612,7 @@ this.rfqResponseService.getResponsesByProjectId(projectId).subscribe({
           quoteAmount: '-',
           dueDate: s.dueDate || '—', // <- DIRECT MAPPING
           createdOn: s.createdOn,
+           submissionDateTime: s.submissionDateTime || '—',
           actions: s.documentId ? ['pdf', 'chat'] : ['chat'],
         });
       });
@@ -673,6 +675,7 @@ this.rfqResponseService.getResponsesByProjectSubcontractors(projectId).subscribe
         documentId: item.documentId ? String(item.documentId) : null,
         rfqNumber: item.rfqNumber,
         date: item.date,
+        submissionDateTime: item.submissionDateTime || '—',
         responded: item.responded,
         interested: item.interested,
         notInterested: item.notInterested,
@@ -680,6 +683,7 @@ this.rfqResponseService.getResponsesByProjectSubcontractors(projectId).subscribe
         maybeLater: item.maybeLater,
         dueDate: item.dueDate || '—',    // <- DIRECT MAPPING
         createdOn: item.createdOn,
+        
         subcontractorId: item.subcontractorId ? String(item.subcontractorId) : null,
         rating: 0,
         quoteAmount: item.quoteAmount ?? item.quote ?? '-',
@@ -1012,24 +1016,25 @@ globalDueDate: this.formatDate(item.globalDueDate),
     item.dueDate = newDate;
   }
 
-  loadQuoteAmount(rfq: any) {
-    if (!rfq.subcontractorId || !rfq.workItemId) {
-      rfq.quoteAmount = '-';
-      return;
-    }
+loadQuoteAmount(item: any) {
 
-    this.rfqResponseService
-      .getQuoteAmount(rfq.rfqId, rfq.subcontractorId, rfq.workItemId)
-      .subscribe({
-        next: (res: any) => {
-          rfq.quoteAmount = res?.quoteAmount ?? '-';
-        },
-        error: (err) => {
-          console.error('❌ Error fetching quote amount:', err);
-          rfq.quoteAmount = '-';
-        },
-      });
+  if (!item.rfqId || !item.subcontractorId || !item.workItemId) {
+    item.quoteAmount = '-';
+    return;
   }
+
+  this.rfqResponseService
+    .getQuoteAmount(item.rfqId, item.subcontractorId, item.workItemId)
+    .subscribe({
+      next: (res: any) => {
+        item.quoteAmount = res?.quoteAmount ?? '-';
+      },
+      error: (err) => {
+        console.error('❌ Error fetching quote amount:', err);
+        item.quoteAmount = '-';
+      },
+    });
+}
 downloadQuote(event: Event, documentId: string | null | undefined) {
   event.stopPropagation();
 

@@ -861,7 +861,7 @@ header {
     width: 34px !important;
     height: 34px !important;
     flex: 0 0 auto !important;
-  }
+  
 
   /* .truncate-text {
   display: inline-block;
@@ -871,7 +871,7 @@ header {
   text-overflow: ellipsis;
   vertical-align: middle;
 }
-*/ .mat-mdc-tooltip {
+ .mat-mdc-tooltip {
   background: #0f172a !important;
   color: #fff !important;
   font-size: 13px !important;

@@ -519,8 +519,7 @@
                           [checked]="isSelected(w)"
                           (change)="toggleWorkitem($event, w)"
                         />
-                        {{ w.name }}
-                      </label>
+{{ w.number }} - {{ w.name }}                      </label>
                     </ng-container>
 
                     <ng-template #noWorkitems>

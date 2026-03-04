@@ -174,7 +174,7 @@ ${indent}${indent}${workItemsText
         '',
         [Validators.required, Validators.maxLength(100), Validators.pattern(/^[A-Za-z0-9,\-\s]+$/)],
       ],
-      country: ['', Validators.required],
+      country: ['Netherlands', Validators.required],
       registeredDate: [''],
       email: [
         '',
