@@ -638,22 +638,21 @@
 
                 <div class="chat-container" *ngIf="(convoSubcontractors?.length ?? 0) > 0">
                   <!-- LEFT SIDEBAR -->
-                  <div class="chat-sidebar">
-                    <div class="sidebar-list" *ngIf="(convoSubcontractors?.length ?? 0) > 0">
-                      <div
-                        class="sidebar-item"
-                        *ngFor="let sub of convoSubcontractors; let i = index"
-                        [class.active]="selectedIndex === i"
-                        (click)="onSubClick(sub.id, i)"
-                      >
-                        {{ sub.name }}
-                      </div>
-                    </div>
-
-                    <button class="log-btn" (click)="openLogConvo()">
+            <div class="chat-sidebar">
+  <div class="sidebar-list" *ngIf="(convoSubcontractors?.length ?? 0) > 0">
+    <div
+      class="sidebar-item"
+      *ngFor="let sub of convoSubcontractors"
+      [class.active]="sub.id === selectedSubcontractorId"
+      (click)="onSubClick(sub.id)"
+    >
+      {{ sub.name }}
+    </div>
+  </div>
+    <button class="log-btn" (click)="openLogConvo()">
                       {{ 'CONVERSATION.LOG_CONVERSATION' | translate }}
                     </button>
-                  </div>
+</div>
 
                   <!-- RIGHT CHAT AREA -->
                   <div class="chat-content">
@@ -797,7 +796,7 @@
                                 (click)="downloadReplyAttachment(att)"
                                 *ngFor="let att of convo.convoattachments"
                               >
-                                <a target="_blank">
+                                <a target="_blank"  class="hyperlink">
                                   {{ att.fileName }}
                                 </a>
                               </div>

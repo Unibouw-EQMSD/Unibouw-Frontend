@@ -959,6 +959,18 @@
   padding-top: 4px;
 }
 
+a.hyperlink {
+  color: #1976d2;       /* Material blue or use #007bff for Bootstrap blue */
+  text-decoration: underline;
+  cursor: pointer;
+  font-weight: 500;
+  transition: color 0.2s;
+}
+a.hyperlink:hover {
+  color: #0d47a1;       /* Darker blue on hover */
+  text-decoration: underline;
+}
+
 .send-icon {
   font-size: 20px;
   cursor: pointer;

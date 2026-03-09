@@ -20,6 +20,8 @@ import { UserService } from '../../../services/User.service.';
 import { NavigationStart } from '@angular/router';
 import { filter, Subscription } from 'rxjs';
 import { AlertService } from '../../../services/alert.service';
+import { ConfirmDialogComponent } from '../../../confirm-dialog-component/confirm-dialog-component';
+import { MatDialog } from '@angular/material/dialog';
 
 interface RfqResponse {
   name: string;
@@ -385,6 +387,7 @@ private toTime(value: any): number {
     private translate: TranslateService,
     public userService: UserService,
     private alertService: AlertService,
+     private dialog: MatDialog,
   ) {
     registerLocaleData(localeNl);
   }
@@ -914,19 +917,31 @@ globalDueDate: this.formatDate(item.globalDueDate),
   });
 }
 
-  deleteRfq(rfqId: string) {
-    if (!confirm('Are you sure you want to delete this RFQ?')) return;
+deleteRfq(rfqId: string) {
+  const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+    width: '350px',
+    position: { top: '10%', right: '35%' },
+    panelClass: 'center-dialog',
+    data: {
+      title: 'Confirm',
+      message: 'Are you sure you want to delete this RFQ?',
+    },
+  });
 
-    this.rfqService.deleteRfq(rfqId).subscribe({
-      next: () => {
-        this.alertService.success('RFQ deleted successfully.');
-        this.dataSource.data = this.dataSource.data.filter((r: any) => r.id !== rfqId);
-      },
-      error: (err) => {
-        this.alertService.error(err?.error?.message || 'Unable to delete RFQ.');
-      },
-    });
-  }
+  dialogRef.afterClosed().subscribe((result: boolean) => {
+    if (result === true) {
+      this.rfqService.deleteRfq(rfqId).subscribe({
+        next: () => {
+          this.alertService.success('RFQ deleted successfully.');
+          this.dataSource.data = this.dataSource.data.filter((r: any) => r.id !== rfqId);
+        },
+        error: (err) => {
+          this.alertService.error(err?.error?.message || 'Unable to delete RFQ.');
+        },
+      });
+    }
+  });
+}
 
   formatDate(dateString: string): string {
     if (!dateString) return '-';
@@ -1408,16 +1423,13 @@ conversationDateTime: string | null = null;
   selectedSubcontractorId: string | null = null;
   selectedIndex: number = 0; // default first item active
 
-  onSubClick(subId: string, index: number): void {
-    if (this.selectedSubcontractorId === subId) return;
-
-    this.selectedIndex = index;
-    this.selectedSubcontractorId = subId;
-     console.log('Subcontractor selected:', subId);
-    this.isSpinLoading = true;
-    this.pmSubConversationData = [];
-    this.loadConversationBySub(subId);
-  }
+onSubClick(subId: string): void {
+  if (this.selectedSubcontractorId === subId) return;
+  this.selectedSubcontractorId = subId;
+  this.isSpinLoading = true;
+  this.pmSubConversationData = [];
+  this.loadConversationBySub(subId);
+}
 
  
 loadConversationSubcontractors(force = false) {
@@ -1432,19 +1444,30 @@ loadConversationSubcontractors(force = false) {
     this.convoSubcontractors = Array.from(map.values());
     this.isLoading = false;
 
-    // Auto-select first subcontractor if none is selected
-    if (
-      this.convoSubcontractors.length > 0 &&
-      !this.selectedSubcontractorId
-    ) {
-      this.onSubClick(this.convoSubcontractors[0].id, 0);
+    // Restore highlight and conversation!
+    if (this.convoSubcontractors.length > 0) {
+      // If we had a previously selected subcontractor, keep it
+      if (this.selectedSubcontractorId) {
+        const found = this.convoSubcontractors.find(sub => sub.id === this.selectedSubcontractorId);
+        if (found) {
+          // Re-trigger conversation load if needed
+          this.loadConversationBySub(this.selectedSubcontractorId);
+        } else {
+          // If not found (e.g., deleted), select the first
+          this.selectedSubcontractorId = this.convoSubcontractors[0].id;
+          this.loadConversationBySub(this.selectedSubcontractorId);
+        }
+      } else {
+        // No selection yet, select the first
+        this.selectedSubcontractorId = this.convoSubcontractors[0].id;
+        this.loadConversationBySub(this.selectedSubcontractorId);
+      }
     }
   }, err => {
     this.isLoading = false;
     console.error('Error loading conversation subcontractors', err);
   });
 }
-
   filterConversations(): void {
     const search = this.conversationSearchText.trim().toLowerCase();
 
@@ -1742,45 +1765,31 @@ public getAmsterdamDateTimeLocalString(dateInput: string | Date | null | undefin
   return `${get('year')}-${get('month')}-${get('day')}T${get('hour')}:${get('minute')}`;
 }
 
-  getLocalTime(dateUtc: string | Date | null | undefined): string {
-    if (!dateUtc) {
+ getLocalTime(dateValue: string | Date | null | undefined): string {
+  if (!dateValue) return '';
+
+  try {
+    const date = dateValue instanceof Date ? dateValue : new Date(dateValue);
+
+    if (isNaN(date.getTime())) {
+      console.warn('Invalid date:', dateValue);
       return '';
     }
 
-    try {
-      let date: Date;
-
-      if (typeof dateUtc === 'string') {
-        // ✅ If no timezone info, assume UTC
-        if (!dateUtc.includes('Z') && !dateUtc.includes('+') && !dateUtc.includes('-', 10)) {
-          date = new Date(dateUtc + 'Z');
-        } else {
-          date = new Date(dateUtc);
-        }
-      } else {
-        date = new Date(dateUtc);
-      }
-
-      if (isNaN(date.getTime())) {
-        console.warn('Invalid date:', dateUtc);
-        return '';
-      }
-
-      // ✅ No timeZone parameter = uses user's local timezone
-      return date.toLocaleString('en-GB', {
-  timeZone: 'Europe/Amsterdam',
-  day: '2-digit',
-  month: '2-digit',
-  year: 'numeric',
-  hour: '2-digit',
-  minute: '2-digit',
-  hour12: false,
-});
-    } catch (error) {
-      console.error('Date parsing error:', dateUtc, error);
-      return '';
-    }
+    // Backend already stores Amsterdam time, so just format it.
+    return date.toLocaleString('en-GB', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false,
+    });
+  } catch (error) {
+    console.error('Date parsing error:', dateValue, error);
+    return '';
   }
+}
 
 
   private convoRefreshTimer: any;
@@ -1889,7 +1898,7 @@ stopConversationAutoRefresh() {
       .subscribe({
         next: () => {
           this.afterMessageSent();
-          //this.alertService.success('Conversation logged successfully!');
+          this.alertService.success('Conversation logged successfully!');
         },
         error: (err) => {
           console.error('Error saving conversation:', err);
@@ -2029,7 +2038,7 @@ stopConversationAutoRefresh() {
         this.attachments = [];
         this.afterMessageSent();
         this.alertService.success('Conversation logged successfully!');
-         window.location.reload();
+        //  window.location.reload();
       },
       error: (err) => {
         console.error('Error sending message:', err);
