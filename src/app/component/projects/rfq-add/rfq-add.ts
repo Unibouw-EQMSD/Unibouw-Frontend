@@ -1,6 +1,6 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { ChangeDetectorRef, Component, HostListener } from '@angular/core';
-import { firstValueFrom, forkJoin, lastValueFrom, Observable, ObservableInput } from 'rxjs';
+import { catchError, finalize, firstValueFrom, forkJoin, lastValueFrom, Observable, ObservableInput, throwError, timeout } from 'rxjs';
 import { Subcontractors, SubcontractorService } from '../../../services/subcontractor.service';
 import { Workitem, WorkitemCategory, WorkitemService } from '../../../services/workitem.service';
 import { Rfq, RfqService } from '../../../services/rfq.service';
@@ -563,11 +563,11 @@ export class RfqAdd {
   }
   // MODIFIED: onSubmit to handle both Create and Update (WITHOUT client-side mapping API call)
 
-  async onSubmit(sendEmail: boolean = false, editedEmailBody: string = '') {
-    if (!this.selectedProject) return this.alertService.warning('Select a project first');
+async onSubmit(sendEmail: boolean = false, editedEmailBody: string = '') {
+  if (!this.selectedProject) return this.alertService.warning('Select a project first');
 
-    const selectedProject = this.projects.find((p) => p.projectID === this.selectedProject);
-    if (!selectedProject) return this.alertService.warning('Project not found');
+  const selectedProject = this.projects.find((p) => p.projectID === this.selectedProject);
+  if (!selectedProject) return this.alertService.warning('Project not found');
 
     const selectedSubs = this.subcontractors.filter((s) => s.selected);
     if (!this.globalDueDate) return this.alertService.warning('Please select the Global Due Date');
@@ -581,69 +581,57 @@ export class RfqAdd {
     if (selectedSubs.some((s) => !s.dueDate))
       return this.alertService.warning('Please select a Due Date for all selected subcontractors.');
 
-    this.isLoader = true;
+  this.isLoader = true;
+
+  // ✅ absolute failsafe: stop loader after 60s no matter what
+  const loaderTimer = setTimeout(() => {
+    this.isLoader = false;
+    this.alertService.warning(
+      'Still processing. Please check after some time (email sending can take longer).',
+    );
+  }, 60000);
+
+  try {
     const now = new Date().toISOString();
     const isUpdate = !!this.rfqIdForEdit;
     const rfqID = this.rfqIdForEdit || '00000000-0000-0000-0000-000000000000';
     const createdBy = this.originalRfq?.createdBy || 'System';
     const emailBodyToUse = editedEmailBody || this.customNote || '';
 
-    // ✅ RFQ main due date = earliest due date among selected subcontractors
-  
-      
-    // ✅ Map subcontractors → dueDate
     const subcontractorDueDates = selectedSubs.map((s) => ({
       subcontractorID: s.subcontractorID,
       dueDate: new Date(s.dueDate!).toISOString().split('T')[0],
     }));
 
     let subsToEmail: any[] = [];
-    if (sendEmail && this.rfqIdForEdit) {
-      // ✅ EDIT MODE → only NEW subcontractors
-      subsToEmail = this.getNewOrModifiedSubcontractors();
-    }
-    /* ---------------- STEP 1: SAVE SUBCONTRACTOR–WORKITEM MAPPINGS ---------------- */
-    try {
-      if (isUpdate) {
-        for (const sub of selectedSubs) {
-          for (const work of this.selectedWorkItems) {
-            const mapping = subcontractorDueDates.find(
-              (d) => d.subcontractorID === sub.subcontractorID,
-            );
-            const dueDateStr = mapping?.dueDate;
-            if (!dueDateStr) {
-              this.alertService.error('Due date missing for subcontractor');
-              return;
-            }
-            await this.rfqService
-              .saveOrUpdateRfqSubcontractorMapping(
-                rfqID,
-                sub.subcontractorID,
-                work.workItemID,
-                dueDateStr,
-              )
-              .toPromise();
-          }
+    if (sendEmail && this.rfqIdForEdit) subsToEmail = this.getNewOrModifiedSubcontractors();
+
+    // STEP 1: mappings
+    if (isUpdate) {
+      for (const sub of selectedSubs) {
+        for (const work of this.selectedWorkItems) {
+          const mapping = subcontractorDueDates.find((d) => d.subcontractorID === sub.subcontractorID);
+          const dueDateStr = mapping?.dueDate;
+
+          if (!dueDateStr) throw new Error('Due date missing for subcontractor');
+
+          await this.rfqService
+            .saveOrUpdateRfqSubcontractorMapping(rfqID, sub.subcontractorID, work.workItemID, dueDateStr)
+            .toPromise();
         }
-      } else {
-        await this.saveSubcontractorWorkItemMappings(selectedSubs, this.selectedWorkItems, rfqID);
       }
-    } catch (err) {
-      console.error('Mapping save failed', err);
-      this.alertService.error('Failed to save subcontractor–work item mappings.');
-      this.isLoader = false;
-      return;
+    } else {
+      await this.saveSubcontractorWorkItemMappings(selectedSubs, this.selectedWorkItems, rfqID);
     }
 
-    /* ---------------- STEP 2: BUILD RFQ PAYLOAD ---------------- */
+    // STEP 2: payload
     let sentDateToUse = this.originalRfq?.sentDate || null;
     if (sendEmail) sentDateToUse = now;
 
     const rfqPayload = {
       rfqID,
       sentDate: sentDateToUse,
-// dueDate: new Date(this.globalDueDate!).toISOString().split('T')[0],
-      GlobalDueDate: new Date(this.globalDueDate!).toISOString().split('T')[0], // USE UI PICK
+      GlobalDueDate: new Date(this.globalDueDate!).toISOString().split('T')[0],
       rfqSent: sendEmail ? 1 : this.originalRfq?.rfqSent || 0,
       quoteReceived: this.originalRfq?.quoteReceived || 0,
       customerID: selectedProject.customerID,
@@ -657,20 +645,11 @@ export class RfqAdd {
       subcontractorsToEmail: subsToEmail.map((s) => s.subcontractorID),
     };
 
-    console.log('🟦 RFQ PAYLOAD BEFORE SUBMIT:', rfqPayload);
-
     const subcontractorIds = selectedSubs.map((s) => s.subcontractorID);
     const workItems = this.selectedWorkItems.map((w) => w.workItemID);
 
-    /* ---------------- STEP 3: CALL CREATE / UPDATE ---------------- */
-    const request = isUpdate
-      ? this.rfqService.updateRfq(
-          rfqPayload.rfqID!,
-          rfqPayload,
-          subcontractorIds,
-          workItems,
-          sendEmail,
-        )
+    const request$ = isUpdate
+      ? this.rfqService.updateRfq(rfqPayload.rfqID!, rfqPayload, subcontractorIds, workItems, sendEmail)
       : this.rfqService.createRfqSimple(
           rfqPayload,
           subcontractorIds,
@@ -680,22 +659,19 @@ export class RfqAdd {
           subcontractorDueDates,
         );
 
-    request.subscribe({
-      next: () => {
-        this.alertService.success(sendEmail ? 'RFQ sent successfully!' : 'RFQ saved successfully!');
-        localStorage.removeItem(this.RFQ_DRAFT_KEY);
-        this.isLoader = false;
-        this.router.navigate(['/view-projects', this.selectedProject], {
-          queryParams: { tab: 'rfq' },
-        });
-      },
-      error: (err) => {
-        console.error('RFQ failed', err);
-        this.alertService.error('RFQ failed!');
-        this.isLoader = false;
-      },
-    });
+    await request$.pipe(timeout(60000)).toPromise();
+
+    this.alertService.success(sendEmail ? 'RFQ sent successfully!' : 'RFQ saved successfully!');
+    localStorage.removeItem(this.RFQ_DRAFT_KEY);
+    this.router.navigate(['/view-projects', this.selectedProject], { queryParams: { tab: 'rfq' } });
+  } catch (err) {
+    console.error('RFQ failed', err);
+    this.alertService.error('RFQ failed or timed out.');
+  } finally {
+    clearTimeout(loaderTimer);
+    this.isLoader = false;
   }
+}
 
   loadProjectDetails(id: string) {
     this.projectService.getProjectById(id).subscribe({

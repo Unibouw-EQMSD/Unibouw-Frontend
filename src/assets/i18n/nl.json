@@ -153,7 +153,7 @@
 
   "RFQ_FOOTER_ACTIONS": {
     "CANCEL": "Annuleren",
-    "PREVIEW": "Voorbeeld",
+    "PREVIEW": "Volgende",
     "SAVE_DRAFT": "Concept opslaan",
     "SEND_TO_SUBCONTRACTORS": "Verzenden naar onderaannemers"
   },
@@ -161,8 +161,9 @@
   "RFQ_PREVIEW": {
     "TITLE": "Offerteaanvraag",
     "SUBTITLE": "RFQ-uitnodiging voor onderaannemers",
+"DEAR":"Geachte [onderaannemer]",
 
-    "RFQ_ID": "RFQ-ID",
+    "RFQ_ID": "Offerteaanvraag-ID",
     "PROJECT": "Project",
     "WORK_ITEMS": "Werkonderdelen",
     "DUE_DATE": "Vervaldatum",
@@ -195,7 +196,9 @@
     "WRITE_REPLY": "Schrijf een antwoord…",
     "ENTER_SUBJECT": "Onderwerp invoeren",
     "ENTER_MESSAGE": "Voer uw bericht in...",
-    "MESSAGE_TOO_LONG": "Het bericht is te lang. Verkort uw bericht."
+    "MESSAGE_TOO_LONG": "Het bericht is te lang. Verkort uw bericht.",
+        "VALIDATION": "Velden mogen niet leeg zijn."
+
   },
 
   "REMINDER_MODAL": {
@@ -290,6 +293,8 @@
     "SUBMIT": "Indienen",
 
     "REQUIRED": "Dit veld is verplicht.",
+    "VALIDATION": "De naam van de onderaannemer moet minimaal 3 tekens lang zijn.",
+
     "INVALID_EMAIL": "Voer een geldig e-mailadres in.",
     "INVALID_PHONE": "Voer een geldig telefoonnummer in (8–15 cijfers).",
 
@@ -297,7 +302,28 @@
     "ADDRESS_PLACEHOLDER_2": "Adres 2",
 
     "SUCCESS": "Succesvol opgeslagen",
-    "ERROR": "Er is iets misgegaan"
+    "ERROR": "Er is iets misgegaan",
+     "SELECT_PLACEHOLDER": "-- Selecteren --",
+    "PHONE_PLACEHOLDER": "Voer telefoonnummer in",
+
+    "NAME_PATTERN_ERROR": "Alleen letters, spaties, punt (.), koppelteken (-) en ampersand (&) zijn toegestaan.",
+    "NAME_MAXLENGTH_ERROR": "De naam van de onderaannemer mag niet langer zijn dan 150 tekens.",
+
+    "LOCATION_PATTERN_ERROR": "Alleen letters, cijfers, spaties, komma (,) en koppelteken (-) zijn toegestaan.",
+    "LOCATION_MAXLENGTH_ERROR": "Locatie mag niet langer zijn dan 100 tekens.",
+
+    "EMAIL_MAXLENGTH_ERROR": "E-mail mag niet langer zijn dan 100 tekens.",
+    "CONTACT_EMAIL_MAXLENGTH_ERROR": "E-mail mag niet langer zijn dan 100 tekens.",
+
+    "CONTACT_MINLENGTH_ERROR": "De naam van de contactpersoon moet minimaal 3 tekens lang zijn.",
+    "CONTACT_MAXLENGTH_ERROR": "De naam van de contactpersoon mag niet langer zijn dan 150 tekens.",
+    "CONTACT_PATTERN_ERROR": "Alleen letters, spaties, punt (.) en koppelteken (-) zijn toegestaan.",
+
+    "ADDRESS_PATTERN_ERROR": "Alleen letters, cijfers, komma (,), punt (.), koppelteken (-), schuine streep (/), en regeleinden zijn toegestaan.",
+    "OFFICE_MINLENGTH_ERROR": "Kantooradres moet minimaal 10 tekens lang zijn.",
+    "OFFICE_MAXLENGTH_ERROR": "Kantooradres mag niet langer zijn dan 300 tekens.",
+    "BILLING_MINLENGTH_ERROR": "Factuuradres moet minimaal 10 tekens lang zijn.",
+    "BILLING_MAXLENGTH_ERROR": "Factuuradres mag niet langer zijn dan 300 tekens."
   },
   "NOT_INTERESTED_REASONS": {
     "REASON_1": "Onvoldoende capaciteit / planning zit vol",

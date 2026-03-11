@@ -398,17 +398,17 @@
         <button type="button" class="btn btn-secondary" (click)="openPreview()">
           {{ 'RFQ_FOOTER_ACTIONS.PREVIEW' | translate }}
         </button>
-        <button
+        <!-- <button
           type="button"
           class="btn btn-primary"
           *ngIf="!rfqIdForEdit"
           (click)="onSubmit(false)"
         >
           {{ 'RFQ_FOOTER_ACTIONS.SAVE_DRAFT' | translate }}
-        </button>
-        <button type="button" class="btn btn-secondary" (click)="onSubmit(true)">
+        </button> -->
+        <!-- <button type="button" class="btn btn-secondary" (click)="onSubmit(true)">
           {{ 'RFQ_FOOTER_ACTIONS.SEND_TO_SUBCONTRACTORS' | translate }}
-        </button>
+        </button> -->
       </div>
     </div>
   </div>
@@ -439,7 +439,7 @@
       </div>
 
       <div class="modal-body" *ngIf="!isLoader">
-        <p>Dear [Subcontractor],</p>
+        <p>{{ 'RFQ_PREVIEW.DEAR' | translate }},</p>
         <textarea class="email-body-editor" [(ngModel)]="editedEmailBody"></textarea>
 
         <div class="details-box">
@@ -481,6 +481,14 @@
       <div class="modal-footer">
         <button class="btn btn-cancel" (click)="closePreview()" [disabled]="isLoader">
           {{ 'RFQ_PREVIEW.CLOSE' | translate }}
+        </button>
+           <button
+          type="button"
+          class="btn btn-primary"
+          *ngIf="!rfqIdForEdit"
+          (click)="onSubmit(false)"
+        >
+          {{ 'RFQ_FOOTER_ACTIONS.SAVE_DRAFT' | translate }}
         </button>
         <button
           class="btn btn-primary"
