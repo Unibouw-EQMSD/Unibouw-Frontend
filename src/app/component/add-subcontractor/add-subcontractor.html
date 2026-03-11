@@ -55,19 +55,18 @@
                       "
                       class="text-danger text-sm"
                     >
-                      Only letters, spaces, dot (.), hyphen (-), and ampersand (&) are allowed.
+                      {{ 'SUBCONTRACTOR_FORM.NAME_PATTERN_ERROR' | translate }}
                     </span>
                     <span
                       *ngIf="subcontractorForm.get('name')?.errors?.['minlength']"
                       class="text-danger text-sm"
                     >
-                      Subcontractor name must be at least 3 characters.
-                    </span>
+    {{ 'SUBCONTRACTOR_FORM.VALIDATION' | translate }}                    </span>
                     <span
                       *ngIf="subcontractorForm.get('name')?.errors?.['maxlength']"
                       class="text-danger text-sm"
                     >
-                      Subcontractor name must not exceed 150 characters.
+                      {{ 'SUBCONTRACTOR_FORM.NAME_MAXLENGTH_ERROR' | translate }}
                     </span>
                   </div>
                 </div>
@@ -114,7 +113,7 @@
                       *ngIf="subcontractorForm.get('email')?.errors?.['maxlength']"
                       class="text-danger text-sm"
                     >
-                      Email must not exceed 100 characters.
+                      {{ 'SUBCONTRACTOR_FORM.EMAIL_MAXLENGTH_ERROR' | translate }}
                     </span>
                   </div>
                 </div>
@@ -151,13 +150,13 @@
                       *ngIf="subcontractorForm.get('location')?.errors?.['pattern']"
                       class="text-danger text-sm"
                     >
-                      Only letters, numbers, spaces, comma (,) and hyphen (-) are allowed.
+                      {{ 'SUBCONTRACTOR_FORM.LOCATION_PATTERN_ERROR' | translate }}
                     </span>
                     <span
                       *ngIf="subcontractorForm.get('location')?.errors?.['maxlength']"
                       class="text-danger text-sm"
                     >
-                      Location must not exceed 100 characters.
+                      {{ 'SUBCONTRACTOR_FORM.LOCATION_MAXLENGTH_ERROR' | translate }}
                     </span>
                   </div>
                 </div>
@@ -177,7 +176,7 @@
                         subcontractorForm.get('country')?.invalid,
                     }"
                   >
-                    <option value="">-- Select --</option>
+                    <option value="">{{ 'SUBCONTRACTOR_FORM.SELECT_PLACEHOLDER' | translate }}</option>
                     <option *ngFor="let c of countries" [value]="c">{{ c }}</option>
                   </select>
                   <div class="form-error-space">
@@ -228,19 +227,19 @@
                       "
                       class="text-danger text-sm"
                     >
-                      Only letters, spaces, dot (.) and hyphen (-) are allowed.
+                      {{ 'SUBCONTRACTOR_FORM.CONTACT_PATTERN_ERROR' | translate }}
                     </span>
                     <span
                       *ngIf="subcontractorForm.get('contactPerson')?.errors?.['minlength']"
                       class="text-danger text-sm"
                     >
-                      Contact name must be at least 3 characters.
+                      {{ 'SUBCONTRACTOR_FORM.CONTACT_MINLENGTH_ERROR' | translate }}
                     </span>
                     <span
                       *ngIf="subcontractorForm.get('contactPerson')?.errors?.['maxlength']"
                       class="text-danger text-sm"
                     >
-                      Contact name must not exceed 150 characters.
+                      {{ 'SUBCONTRACTOR_FORM.CONTACT_MAXLENGTH_ERROR' | translate }}
                     </span>
                   </div>
                 </div>
@@ -276,7 +275,7 @@
                       type="tel"
                       formControlName="contactNumber"
                       class="form-control phone-input"
-                      placeholder="Enter phone number"
+                      placeholder="{{ 'SUBCONTRACTOR_FORM.PHONE_PLACEHOLDER' | translate }}"
                       [ngClass]="{
                         'is-invalid':
                           subcontractorForm.get('contactNumber')?.touched &&
@@ -345,7 +344,7 @@
                       *ngIf="subcontractorForm.get('contactEmail')?.errors?.['maxlength']"
                       class="text-danger text-sm"
                     >
-                      Email must not exceed 100 characters.
+                      {{ 'SUBCONTRACTOR_FORM.CONTACT_EMAIL_MAXLENGTH_ERROR' | translate }}
                     </span>
                   </div>
                 </div>
@@ -404,20 +403,19 @@
                       "
                       class="text-danger text-sm"
                     >
-                      Only letters, numbers, comma (,), dot(.), hyphen(-), slash(/), and line breaks
-                      are allowed.
+                      {{ 'SUBCONTRACTOR_FORM.ADDRESS_PATTERN_ERROR' | translate }}
                     </span>
                     <span
                       *ngIf="subcontractorForm.get('officeAddress')?.errors?.['minlength']"
                       class="text-danger text-sm"
                     >
-                      Office Address must be at least 10 characters.
+                      {{ 'SUBCONTRACTOR_FORM.OFFICE_MINLENGTH_ERROR' | translate }}
                     </span>
                     <span
                       *ngIf="subcontractorForm.get('officeAddress')?.errors?.['maxlength']"
                       class="text-danger text-sm"
                     >
-                      Office Address must not exceed 300 characters.
+                      {{ 'SUBCONTRACTOR_FORM.OFFICE_MAXLENGTH_ERROR' | translate }}
                     </span>
                   </div>
                 </div>
@@ -450,20 +448,19 @@
                       "
                       class="text-danger text-sm"
                     >
-                      Only letters, numbers, comma (,), dot(.), hyphen(-), slash(/), and line breaks
-                      are allowed.
+                      {{ 'SUBCONTRACTOR_FORM.ADDRESS_PATTERN_ERROR' | translate }}
                     </span>
                     <span
                       *ngIf="subcontractorForm.get('billingAddress')?.errors?.['minlength']"
                       class="text-danger text-sm"
                     >
-                      Billing Address must be at least 10 characters.
+                      {{ 'SUBCONTRACTOR_FORM.BILLING_MINLENGTH_ERROR' | translate }}
                     </span>
                     <span
                       *ngIf="subcontractorForm.get('billingAddress')?.errors?.['maxlength']"
                       class="text-danger text-sm"
                     >
-                      Billing Address must not exceed 300 characters.
+                      {{ 'SUBCONTRACTOR_FORM.BILLING_MAXLENGTH_ERROR' | translate }}
                     </span>
                   </div>
                 </div>

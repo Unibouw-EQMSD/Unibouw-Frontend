@@ -876,7 +876,7 @@
                         <input
                           type="text"
                           class="form-control"
-                          placeholder="Enter Subject"
+                          placeholder="{{'CONVERSATION.ENTER_SUBJECT'| translate}}"
                           [(ngModel)]="subject"
                           (ngModelChange)="onInputChange()"
                         />
@@ -884,7 +884,7 @@
                         <input
                           type="text"
                           class="form-control"
-                          placeholder="Enter your message..."
+                          placeholder="{{'CONVERSATION.ENTER_MESSAGE'| translate}}"
                           [(ngModel)]="messageText"
                           (ngModelChange)="onInputChange()"
                         />
@@ -911,7 +911,7 @@
                       </div>
                     </div>
 
-                    <span class="error-span" *ngIf="showInvalid"> Fields cannot be empty. </span>
+                    <span class="error-span" *ngIf="showInvalid"> {{'CONVERSATION.VALIDATION' | translate}} </span>
                   </div>
                 </div>
               </div>

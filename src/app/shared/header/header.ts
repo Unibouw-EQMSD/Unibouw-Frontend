@@ -75,15 +75,15 @@ export class Header implements OnInit {
   }
 
   ngOnInit() {
-    this.userService.getUser();
+  this.userService.getUser();
 
-this.userName$.subscribe(v => console.log('header userName$:', v));
-    const savedLang = localStorage.getItem('lang') as 'en' | 'nl' | null;
-    this.currentLang = savedLang ?? 'en';
-    this.translate.use(this.currentLang);
+  const savedLang = (localStorage.getItem('lang') as 'en' | 'nl' | null) ?? 'nl';
+  this.currentLang = savedLang;
 
-    this.isAdmin = this.userService.isAdmin();
+  this.translate.setDefaultLang('nl');
+  this.translate.use(savedLang);
 
+  this.isAdmin = this.userService.isAdmin();
     this.reminderForm.get('isEnable')?.valueChanges.subscribe((enabled) => {
       const action = enabled ? 'enable' : 'disable';
 

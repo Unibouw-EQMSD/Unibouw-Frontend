@@ -152,7 +152,7 @@
 
   "RFQ_FOOTER_ACTIONS": {
     "CANCEL": "Cancel",
-    "PREVIEW": "Preview",
+    "PREVIEW": "Next",
     "SAVE_DRAFT": "Save Draft",
     "SEND_TO_SUBCONTRACTORS": "Send to Subcontractors"
   },
@@ -160,7 +160,7 @@
   "RFQ_PREVIEW": {
     "TITLE": "Quote Request",
     "SUBTITLE": "RFQ Invitation for Subcontractors",
-
+"DEAR":"Dear [Subcontractor]",
     "RFQ_ID": "RFQ ID",
     "PROJECT": "Project",
     "WORK_ITEMS": "Work Item(s)",
@@ -193,7 +193,8 @@
     "WRITE_REPLY": "Write a reply…",
     "ENTER_SUBJECT": "Enter Subject",
     "ENTER_MESSAGE": "Enter your message...",
-    "MESSAGE_TOO_LONG": "Message is too long. Please shorten your message."
+    "MESSAGE_TOO_LONG": "Message is too long. Please shorten your message.",
+    "VALIDATION": "Fields cannot be empty."
   },
 
   "REMINDER_MODAL": {
@@ -286,6 +287,7 @@
     "SUBMIT": "Submit",
 
     "REQUIRED": "This field is required.",
+    "VALIDATION": "Subcontractor name must be at least 3 characters.",
     "INVALID_EMAIL": "Enter a valid email address.",
     "INVALID_PHONE": "Enter a valid phone number (8–15 digits).",
 
@@ -293,7 +295,28 @@
     "ADDRESS_PLACEHOLDER_2": "Address 2",
 
     "SUCCESS": "Saved successfully",
-    "ERROR": "Something went wrong"
+    "ERROR": "Something went wrong",
+     "SELECT_PLACEHOLDER": "-- Select --",
+    "PHONE_PLACEHOLDER": "Enter phone number",
+
+    "NAME_PATTERN_ERROR": "Only letters, spaces, dot (.), hyphen (-), and ampersand (&) are allowed.",
+    "NAME_MAXLENGTH_ERROR": "Subcontractor name must not exceed 150 characters.",
+
+    "LOCATION_PATTERN_ERROR": "Only letters, numbers, spaces, comma (,), and hyphen (-) are allowed.",
+    "LOCATION_MAXLENGTH_ERROR": "Location must not exceed 100 characters.",
+
+    "EMAIL_MAXLENGTH_ERROR": "Email must not exceed 100 characters.",
+    "CONTACT_EMAIL_MAXLENGTH_ERROR": "Email must not exceed 100 characters.",
+
+    "CONTACT_MINLENGTH_ERROR": "Contact name must be at least 3 characters.",
+    "CONTACT_MAXLENGTH_ERROR": "Contact name must not exceed 150 characters.",
+    "CONTACT_PATTERN_ERROR": "Only letters, spaces, dot (.) and hyphen (-) are allowed.",
+
+    "ADDRESS_PATTERN_ERROR": "Only letters, numbers, comma (,), dot (.), hyphen (-), slash (/), and line breaks are allowed.",
+    "OFFICE_MINLENGTH_ERROR": "Office Address must be at least 10 characters.",
+    "OFFICE_MAXLENGTH_ERROR": "Office Address must not exceed 300 characters.",
+    "BILLING_MINLENGTH_ERROR": "Billing Address must be at least 10 characters.",
+    "BILLING_MAXLENGTH_ERROR": "Billing Address must not exceed 300 characters."
   },
   "NOT_INTERESTED_REASONS": {
     "REASON_1": "Onvoldoende capaciteit / planning zit vol",
