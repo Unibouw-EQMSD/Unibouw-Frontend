@@ -54,25 +54,25 @@
     <div class="rfq-layout" *ngIf="project; else errorBlock">
       <!-- LEFT: Project Details -->
       <aside class="left-card">
-        <div class="details-card">
-          <h3>Project Details</h3>
+        <div class="card">
+          <div class="card-header"><h3 class="panel-title">Project Details</h3></div>
+          <div class="card-body">
+            <div class="detail-row">
+              <span class="label">Project Code</span>
+              <span class="form-control-plaintext">{{ project.number || '—' }}</span>
+            </div>
 
-          <div class="detail-row">
-            <span class="label">Project Code</span>
-            <span class="value">{{ project.number || '—' }}</span>
-          </div>
+            <div class="detail-row">
+              <span class="label">Project</span>
+              <span class="form-control-plaintext">{{ project.name || '—' }}</span>
+            </div>
 
-          <div class="detail-row">
-            <span class="label">Project</span>
-            <span class="value">{{ project.name || '—' }}</span>
-          </div>
+            <div class="detail-row">
+              <span class="label">Customer</span>
+              <span class="form-control-plaintext">{{ project.customerName || '—' }}</span>
+            </div>
 
-          <div class="detail-row">
-            <span class="label">Customer</span>
-            <span class="value">{{ project.customerName || '—' }}</span>
-          </div>
-
-          <!-- <div class="detail-row">
+            <!-- <div class="detail-row">
           <span class="label">Person Name</span>
           <span class="value">{{ project.personName || '—' }}</span>
         </div>
@@ -82,37 +82,39 @@
           <span class="value">{{ project.personRole || '—' }}</span>
         </div> -->
 
-          <div class="detail-row">
-            <span class="label">Start Date</span>
-            <span class="value">{{ project.startDate | date: 'dd-MM-yyyy' }}</span>
-          </div>
+            <div class="detail-row">
+              <span class="label">Start Date</span>
+              <span class="form-control-plaintext">{{ project.startDate | date: 'dd-MM-yyyy' }}</span>
+            </div>
 
-          <div class="detail-row">
-            <span class="label">Committed Date</span>
-            <span class="value">{{ project.completionDate | date: 'dd-MM-yyyy' }}</span>
-          </div>
+            <div class="detail-row">
+              <span class="label">Committed Date</span>
+              <span class="form-control-plaintext">{{ project.completionDate | date: 'dd-MM-yyyy' }}</span>
+            </div>
 
-          <div class="detail-row">
-            <span class="label">Status</span>
-            <span class="value status {{ statusClass(project.status) }}">
-              {{ project.status || 'In Progress' }}
-            </span>
-          </div>
+            <div class="detail-row">
+              <span class="label">Status</span>
+              <span class="form-control-plaintext status {{ statusClass(project.status) }}">
+                {{ project.status || 'In Progress' }}
+              </span>
+            </div>
 
-          <div class="detail-row">
-            <span class="label">Specification</span>
-            <span class="value">
-              <a [href]="project.sharepointURL" target="_blank">Project Files</a>
-            </span>
+            <div class="detail-row">
+              <span class="label">Specification</span>
+              <span class="form-control-plaintext">
+                <a [href]="project.sharepointURL" target="_blank">Project Files</a>
+              </span>
+            </div>
           </div>
         </div>
       </aside>
 
       <!-- RIGHT: RFQ Details -->
       <section class="right-card">
-        <div class="panel">
+        <div class="card">
           <!-- RFQ header row INSIDE white box (like screenshot) -->
-          <div class="panel-header">
+          <div class="card-header">
+          <div class="d-flex align-items-center justify-content-between">
             <h3 class="panel-title">RFQ Details</h3>
 
             <div class="panel-due">
@@ -123,8 +125,9 @@
               </strong>
             </div>
           </div>
+          </div>
 
-          <div class="rfq-list">
+          <div class="card-body rfq-list">
             <div class="rfq-row" *ngFor="let wi of workItems">
               <div class="rfq-row-head rfq-row-head--flex">
                 <!-- Left: Workitem Code + Work Item + Status badge -->
@@ -312,14 +315,15 @@
 
               <!-- Expanded quote panel (unchanged) -->
               <div
-                class="quote-details-panel"
+                class="card m-3"
                 *ngIf="expandedId === wi.workItemID && wi.status === 'Interested'"
               >
-                <div class="quote-grid">
+              <div class="card-header quote-details-header">Quote Details</div>
+                <div class="card-body quote-grid">
                   <div class="prev-col" *ngIf="wi.previousSubmissions?.length">
                     <span class="section-title">Previous Submissions</span>
 
-                    <div class="d-flex gap-4" *ngFor="let s of wi.previousSubmissions">
+                    <div class="previous_quoteDetails d-flex gap-4" *ngFor="let s of wi.previousSubmissions">
                       <div>
                         <div class="submission-label">Submitted on</div>
                         <div class="submission-value">{{ s.date | date: 'dd-MM-yyyy, HH:mm' }}</div>
@@ -349,7 +353,6 @@
                           {{ s.amount | currency: 'EUR' : 'symbol' : '1.2-2' : 'nl-NL' }}
                         </div>
                       </div>
-
                     </div>
                   </div>
 
@@ -359,8 +362,8 @@
                     }}</span>
 
                     <div class="rfq-field">
-                      <label>Total Quote Amount (€)</label>
-                      <input type="text" formControlName="quoteAmount" placeholder="Enter amount" />
+                      <label>Total Quote Amount (€) <span class="mandatory  text-danger">*</span></label>
+                      <input type="text" class="form-control" formControlName="quoteAmount" placeholder="Enter amount" />
 
                       <!-- Required -->
                       <div
@@ -380,11 +383,11 @@
                     </div>
 
                     <div class="rfq-field">
-                      <label>Attachments</label>
+                      <label>Attachments  <span class="mandatory text-danger">*</span></label>
                       <div class="attachments-container">
                         <input
                           #fileInput
-                          type="file"
+                          type="file" class="form-control"
                           (change)="onFileSelected($event)"
                           [disabled]="isRfqExpired"
                         />
@@ -408,7 +411,7 @@
                     </div>
 
                     <div class="rfq-field">
-                      <label>Comments</label>
+                      <label>Comments  <span class="mandatory text-danger">*</span></label>
                       <textarea
                         rows="3"
                         formControlName="comments"

@@ -592,7 +592,7 @@ input.check-toggle-round-flat + label:after {
   top: 4px;
   left: 4px;
   bottom: 4px;
-  width: 24px;
+  width: 26px;
   background-color: #fff;
   -webkit-border-radius: 52px;
   -moz-border-radius: 52px;
