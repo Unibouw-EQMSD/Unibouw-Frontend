@@ -177,6 +177,7 @@
   "RFQ_ACTIONS": {
     "DOWNLOAD_QUOTE": "Download Quote",
     "NO_QUOTE_UPLOADED": "No Quote Uploaded",
+  "UPLOAD": "Upload",
     "SET_REMINDER": "Set Reminder",
     "EDIT_RFQ": "Edit RFQ",
     "DELETE_RFQ": "Delete RFQ",
@@ -238,7 +239,8 @@
     "CODE": "Workitem Code",
     "NAME": "Workitem",
     "TAB_UNIBOUW": "Unibouw",
-    "TAB_STANDARD": "Standard"
+    "TAB_STANDARD": "Standard",
+    "TAB_UPLOADED": "Uploaded"
   },
   "SUBCONTRACTOR": {
     "TITLE": "Subcontractors",

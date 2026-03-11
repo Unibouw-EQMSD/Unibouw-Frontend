@@ -32,8 +32,14 @@ interface SubcontractorItem {
 export class RfqAdd {
   projects: any[] = [];
   selectedProject: string = '';
-  selectedTab: 'standard' | 'unibouw' = 'unibouw';
+  // allow three categories now; default still unibouw
+  selectedTab: 'standard' | 'unibouw' | 'uploaded' = 'unibouw';
   globalDueDate: any = '';
+  // new container for uploaded-workitems category (may be empty)
+  uploadedWorkitems: Workitem[] = [];
+
+  // track files attached via the Uploaded tab
+  uploadedFiles: { name: string; selected: boolean; file?: File }[] = [];
   createdDate: Date = new Date();
   selectedDueDate: string = '';
   standardWorkitems: Workitem[] = [];
@@ -133,7 +139,11 @@ export class RfqAdd {
         this.globalDueDate = state.globalDueDate ?? '';
 
         // Restore workitems
-        const allWorkItems = [...this.standardWorkitems, ...this.unibouwWorkitems];
+        const allWorkItems = [...this.standardWorkitems, ...this.unibouwWorkitems, ...this.uploadedWorkitems];
+        // also restore uploaded file selection if present
+        if (state.uploadedFiles) {
+          this.uploadedFiles = state.uploadedFiles;
+        }
 
         this.selectedWorkItems = allWorkItems.filter((w) =>
           state.selectedWorkItems?.includes(w.workItemID),
@@ -182,11 +192,16 @@ export class RfqAdd {
     this.globalDueDate = state.globalDueDate ?? '';
 
     // restore workitems AFTER they are loaded
-    const allWorkItems = [...this.standardWorkitems, ...this.unibouwWorkitems];
+    const allWorkItems = [...this.standardWorkitems, ...this.unibouwWorkitems, ...this.uploadedWorkitems];
 
     this.selectedWorkItems = allWorkItems.filter((w) =>
       state.selectedWorkItems?.includes(w.workItemID),
     );
+
+    // restore uploaded files if any
+    if (state.uploadedFiles) {
+      this.uploadedFiles = state.uploadedFiles;
+    }
 
     // restore subcontractor state later (after loadSubcontractors)
   }
@@ -205,6 +220,7 @@ export class RfqAdd {
           selected: s.selected,
           dueDate: s.dueDate,
         })),
+        uploadedFiles: this.uploadedFiles.map(f => ({ name: f.name, selected: f.selected })),
       }),
     );
   }
@@ -307,9 +323,14 @@ export class RfqAdd {
 
       if (this.selectedWorkItems.length) {
         const first = this.selectedWorkItems[0];
-        this.selectedTab = this.standardWorkitems.some((w) => w.workItemID === first.workItemID)
-          ? 'standard'
-          : 'unibouw';
+        // decide which tab the first selected workitem belongs to
+      if (this.standardWorkitems.some((w) => w.workItemID === first.workItemID)) {
+        this.selectedTab = 'standard';
+      } else if (this.unibouwWorkitems.some((w) => w.workItemID === first.workItemID)) {
+        this.selectedTab = 'unibouw';
+      } else if (this.uploadedWorkitems.some((w) => w.workItemID === first.workItemID)) {
+        this.selectedTab = 'uploaded';
+      }
       }
 
       // 🚀 Single-pass to find earliest date (prioritize GlobalDueDate)
@@ -388,6 +409,30 @@ export class RfqAdd {
     } else {
       // Clear date when unselected
       sub.dueDate = '';
+    }
+  }
+
+  /** 🚧 Uploaded files helpers **/
+  onFileSelected(event: any) {
+    const files: FileList = event.target.files;
+    if (!files || files.length === 0) return;
+
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      // avoid duplicates by name
+      if (this.uploadedFiles.some((f) => f.name === file.name)) continue;
+      this.uploadedFiles.push({ name: file.name, selected: true, file });
+    }
+
+    // reset input so same file can be chosen again later if removed
+    event.target.value = '';
+    this.saveDraft();
+  }
+
+  removeUploadedFile(index: number) {
+    if (index >= 0 && index < this.uploadedFiles.length) {
+      this.uploadedFiles.splice(index, 1);
+      this.saveDraft();
     }
   }
 
@@ -527,7 +572,12 @@ export class RfqAdd {
     const selectedSubs = this.subcontractors.filter((s) => s.selected);
     if (!this.globalDueDate) return this.alertService.warning('Please select the Global Due Date');
     if (!selectedSubs.length) return this.alertService.warning('Select at least one subcontractor');
-    if (!this.selectedWorkItems.length) return this.alertService.warning('Select at least one work item');
+    if (this.selectedTab === 'uploaded') {
+      const selectedFiles = this.uploadedFiles.filter(f => f.selected);
+      if (!selectedFiles.length) return this.alertService.warning('Please select at least one file');
+    } else {
+      if (!this.selectedWorkItems.length) return this.alertService.warning('Select at least one work item');
+    }
     if (selectedSubs.some((s) => !s.dueDate))
       return this.alertService.warning('Please select a Due Date for all selected subcontractors.');
 
@@ -734,6 +784,11 @@ private sortWorkItemsAsc(items: Workitem[]): Workitem[] {
 
       const unibouwCategory = categoryMap.get(1);
       const standardCategory = categoryMap.get(2);
+      // try to pick up an "uploaded" category if the backend provides one
+      // it may not exist yet, so it's optional
+      const uploadedCategory = (categories || []).find(
+        (c) => c.categoryName?.toLowerCase() === 'uploaded',
+      );
 
       // Validate required category IDs
       if (!unibouwCategory || !standardCategory) {
@@ -741,15 +796,28 @@ private sortWorkItemsAsc(items: Workitem[]): Workitem[] {
         return;
       }
 
-     const [standard, unibouw] = await lastValueFrom(
-  forkJoin([
-    this.workitemService.getWorkitems(standardCategory.categoryID, true),  // Pass true for onlyActive
-    this.workitemService.getWorkitems(unibouwCategory.categoryID, true),
-  ]),
-);
+      // fetch the normal tab items in one go
+      const [standard, unibouw] = await lastValueFrom(
+        forkJoin([
+          this.workitemService.getWorkitems(standardCategory.categoryID, true), // Pass true for onlyActive
+          this.workitemService.getWorkitems(unibouwCategory.categoryID, true),
+        ]),
+      );
 
       this.standardWorkitems = this.sortWorkItemsAsc(standard ?? []);
       this.unibouwWorkitems = this.sortWorkItemsAsc(unibouw ?? []);
+
+      // if uploaded category exists, load it as well
+      if (uploadedCategory) {
+        try {
+          const uploaded = await lastValueFrom(
+            this.workitemService.getWorkitems(uploadedCategory.categoryID, true),
+          );
+          this.uploadedWorkitems = this.sortWorkItemsAsc(uploaded ?? []);
+        } catch (e) {
+          console.warn('Failed to load uploaded workitems', e);
+        }
+      }
     } catch (err) {
       console.error('Error loading categories or workitems:', err);
     } finally {
@@ -944,8 +1012,14 @@ private sortWorkItemsAsc(items: Workitem[]): Workitem[] {
     this.subcontractors = [];
   }
 
-  getSelectedCountByTab(tab: 'unibouw' | 'standard'): number {
-    const source = tab === 'unibouw' ? this.unibouwWorkitems : this.standardWorkitems;
+  getSelectedCountByTab(tab: 'unibouw' | 'standard' | 'uploaded'): number {
+    if (tab === 'uploaded') {
+      return this.uploadedFiles.filter((f) => f.selected).length;
+    }
+
+    let source: Workitem[];
+    if (tab === 'unibouw') source = this.unibouwWorkitems;
+    else source = this.standardWorkitems;
 
     return this.selectedWorkItems.filter((sel) =>
       source.some((src) => src.workItemID === sel.workItemID),

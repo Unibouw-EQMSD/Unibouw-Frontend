@@ -178,6 +178,7 @@
   "RFQ_ACTIONS": {
     "DOWNLOAD_QUOTE": "Offerte downloaden",
     "NO_QUOTE_UPLOADED": "Geen offerte geüpload",
+  "UPLOAD": "Upload",
     "SET_REMINDER": "Herinnering instellen",
     "EDIT_RFQ": "RFQ bewerken",
     "DELETE_RFQ": "RFQ verwijderen",
@@ -239,7 +240,8 @@
     "CODE": "Werkonderdeel code",
     "NAME": "Werkonderdeel",
     "TAB_UNIBOUW": "Unibouw",
-    "TAB_STANDARD": "NL-SfB"
+    "TAB_STANDARD": "NL-SfB",
+    "TAB_UPLOADED": "Geüpload"
   },
   "SUBCONTRACTOR": {
     "TITLE": "Onderaannemers",
