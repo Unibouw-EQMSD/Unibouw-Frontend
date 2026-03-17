@@ -40,7 +40,7 @@
             title="Back"
             (click)="goBack()"
           ></i> -->
-          {{ projectDetails?.name }}
+          {{ projectDetails.number }} - {{ projectDetails?.name }}
         </h1>
       </div>
 
@@ -181,11 +181,15 @@
                       <div class="work-item-header" (click)="work.open = !work.open">
                         <div class="rfq-summary">
                           <div>
-                            <span class="label">{{ 'RFQ_TABLE.WORK_ITEM' | translate }}</span>
-                            <div class="truncate-text" [title]="work.name">
-                              {{ work.name }}
-                            </div>
+                          <span class="label">{{ 'RFQ_TABLE.WORK_ITEM' | translate }}<span class="ms-3">
+                            <strong>{{ work.number || '—' }}</strong> 
+                       
+                          </span></span>
+                          
+                          <div class="truncate-text" [title]="work.name">
+                            {{ work.name }}
                           </div>
+                        </div>
                           <div>
                             <span class="label">{{
                               'RESPONSE_VIEW.REQUESTS_SENT' | translate
@@ -438,6 +442,8 @@
                           <table class="rfq-table">
                             <thead>
                               <tr>
+                                <!-- Workitem Code -->
+                                <td>Workitem Code</td> 
                                 <th>{{ 'RESPONSE_VIEW.WORK_ITEM' | translate }}</th>
                                 <th class="td-date">{{ 'RESPONSE_VIEW.DATE' | translate }}</th>
                                 <th class="th-rfqid">{{ 'RESPONSE_VIEW.RFQ_ID' | translate }}</th>
@@ -463,6 +469,8 @@
                                 *ngFor="let w of getFilteredSubWorkItems(sub)"
                                 (click)="markViewed(sub, w)"
                               >
+                                <!-- Workitem Code -->
+                                <td>03.2.001</td>
                                 <td>{{ w.workItemName }}</td>
                                 <td>{{ w.dueDate }}</td>
                                 <td>{{ w.rfqNumber }}</td>

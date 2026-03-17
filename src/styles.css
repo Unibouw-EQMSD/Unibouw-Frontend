@@ -63,7 +63,7 @@ app-sso-login {
   margin-top: 100px;
   padding: 0 0 0px 0px;
   transition: all 0.3s;
-  min-height: calc(100vh - 144px);
+  min-height: calc(100vh - 142px);
 }
 
 /* Container */

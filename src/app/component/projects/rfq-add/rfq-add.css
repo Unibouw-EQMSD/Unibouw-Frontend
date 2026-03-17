@@ -1,12 +1,13 @@
-
 .col-form-label {
-    padding: 0 !important;
-    color: #695bbb;
-    white-space: nowrap;
+  padding: 0 !important;
+  color: #695bbb;
+  white-space: nowrap;
 }
 
 .table-Fixedheader-wrapper {
-  max-height: calc(100vh - 370px);}
+  min-height: calc(100vh - 319px);
+  max-height: calc(100vh - 319px);
+}
 .form-card {
   display: grid;
   grid-template-columns: 2fr 1fr; /* left = form, right = workitems */
@@ -58,7 +59,7 @@
 
 .workitems-table th:first-child,
 .workitems-table td:first-child {
-  width: 60px;            /* adjust: 40/50/60 */
+  width: 60px; /* adjust: 40/50/60 */
   text-align: center;
 }
 .workitems-table th:nth-child(2),
@@ -80,7 +81,6 @@
 .workitems-table th {
   font-weight: 600;
 }
-
 
 /* Optional: give workitems a light border for clarity */
 .workitems-section {
@@ -527,5 +527,6 @@
   gap: 15px;
 } */
 
-
-.subcontractors-card .form-control {padding: .275rem .75rem !important; }
+.subcontractors-card .form-control {
+  padding: 0.275rem 0.75rem !important;
+}

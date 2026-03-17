@@ -45,6 +45,7 @@ interface RfqResponse {
 
 interface WorkItem {
   workItemId: string;
+  number: string;
   name: string;
   requestsSent: number;
   notResponded: number;
@@ -578,6 +579,8 @@ this.rfqResponseService.getResponsesByProjectId(projectId).subscribe({
       if (!workItemMap.has(w.workItemId)) {
         workItemMap.set(w.workItemId, {
           workItemId: w.workItemId,
+          // Fallback order: explicit code field -> numbered code -> raw ID
+          number: w.number,
           name: w.workItemName,
           open: false,
           searchText: '',
