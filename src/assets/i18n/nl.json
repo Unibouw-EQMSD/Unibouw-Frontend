@@ -201,6 +201,14 @@
 
   },
 
+  "RFQ_EMAIL": {
+    "INTRO": "U wordt uitgenodigd om een offerte in te dienen voor de volgende details:",
+    "RFQ_ID_PENDING": "Het RFQ-ID wordt gegenereerd nadat de RFQ is opgeslagen.",
+    "DEAR": "Beste",
+    "REGARDS": "Met vriendelijke groet",
+    "TEAM": "Team"
+  },
+
   "REMINDER_MODAL": {
     "SETTINGS": "Instellingen",
     "SENDING_REMINDER": "Herinnering verzenden...",

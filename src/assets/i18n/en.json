@@ -198,6 +198,14 @@
     "VALIDATION": "Fields cannot be empty."
   },
 
+  "RFQ_EMAIL": {
+    "INTRO": "You are invited to submit a quotation for the following details:",
+    "RFQ_ID_PENDING": "RFQ ID will be generated after RFQ save.",
+    "DEAR": "Dear",
+    "REGARDS": "Regards",
+    "TEAM": "Team"
+  },
+
   "REMINDER_MODAL": {
     "SETTINGS": "Settings",
     "SENDING_REMINDER": "Sending Reminder...",

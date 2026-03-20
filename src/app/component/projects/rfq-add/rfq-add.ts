@@ -10,6 +10,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { ConfirmDialogComponent } from '../../../confirm-dialog-component/confirm-dialog-component';
 import { Location } from '@angular/common';
 import { AlertService } from '../../../services/alert.service';
+import { TranslateService } from '@ngx-translate/core';
 
 interface SubcontractorItem {
   subcontractorID: string;
@@ -71,6 +72,7 @@ export class RfqAdd {
   }[] = [];
 
   constructor(
+     private translate: TranslateService,
     private cdr: ChangeDetectorRef,
     private workitemService: WorkitemService,
     private subcontractorService: SubcontractorService,
@@ -596,7 +598,9 @@ async onSubmit(sendEmail: boolean = false, editedEmailBody: string = '') {
     const isUpdate = !!this.rfqIdForEdit;
     const rfqID = this.rfqIdForEdit || '00000000-0000-0000-0000-000000000000';
     const createdBy = this.originalRfq?.createdBy || 'System';
-    const emailBodyToUse = editedEmailBody || this.customNote || '';
+    const defaultIntro = this.translate.instant('RFQ_EMAIL.INTRO');
+
+    const emailBodyToUse = editedEmailBody || this.customNote || defaultIntro|| '';
 
     const subcontractorDueDates = selectedSubs.map((s) => ({
       subcontractorID: s.subcontractorID,
@@ -1035,33 +1039,38 @@ toggleSelectAll() {
     return (this.subcontractors || []).filter((s: any) => s.selected);
   }
 
-  openPreview() {
-    if (!this.selectedProject) return this.alertService.warning('Select a project');
-    if (!this.selectedWorkItems.length) return this.alertService.warning('Select work item');
-    if (!this.selectedSubcontractors.length) return this.alertService.warning('Select subcontractors');
+async openPreview() {
+  if (!this.selectedProject) return this.alertService.warning(this.translate.instant('Select a project')); // ideally also a key
+  if (!this.selectedWorkItems.length) return this.alertService.warning(this.translate.instant('Select work item'));
+  if (!this.selectedSubcontractors.length) return this.alertService.warning(this.translate.instant('Select subcontractors'));
 
-    // 🔹 Map all selected work items
-    const workItemNames = this.selectedWorkItems.map((w) => w.name);
+  const t = await firstValueFrom(
+    this.translate.get([
+      'RFQ_EMAIL.INTRO',
+      'RFQ_EMAIL.RFQ_ID_PENDING'
+    ])
+  );
 
-    // 🔹 Always assign new object (change detection safe)
-    this.previewData = {
-      rfqId: this.originalRfq?.rfqNumber || 'RFQ ID will be generated after RFQ save.',
-      projectName: this.projectDetails?.name || 'N/A',
-      workItems: workItemNames, // ✅ MULTIPLE
-      dueDate: this.globalDueDate,
-      subcontractors: this.selectedSubcontractors.map((s) => s.name),
-    };
+  const workItemNames = this.selectedWorkItems.map(w => w.name);
 
-    // 🔹 Regenerate email body every time
-    this.editedEmailBody = `You are invited to submit a quotation for the following details:`;
+  // assign new object (as you already do)
+  this.previewData = {
+    rfqId: this.originalRfq?.rfqNumber || t['RFQ_EMAIL.RFQ_ID_PENDING'],
+    projectName: this.projectDetails?.name || 'N/A', // if you want, also translate N/A
+    workItems: workItemNames,
+    dueDate: this.globalDueDate,
+    subcontractors: this.selectedSubcontractors.map(s => s.name),
+  };
 
-    // 🔹 Toggle modal safely
-    this.showPreview = false;
-    setTimeout(() => {
-      this.showPreview = true;
-      document.body.style.overflow = 'hidden';
-    }, 0);
-  }
+  // translated default intro text
+  this.editedEmailBody = t['RFQ_EMAIL.INTRO'];
+
+  this.showPreview = false;
+  setTimeout(() => {
+    this.showPreview = true;
+    document.body.style.overflow = 'hidden';
+  }, 0);
+}
 
   closePreview() {
     this.showPreview = false;

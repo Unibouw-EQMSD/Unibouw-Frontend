@@ -50,8 +50,24 @@ export class ProjectDetails {
   @ViewChild(MatSort) sort!: MatSort;
 
   ngOnInit() {
-    this.loadProjects();
-  }
+ this.dataSource.filterPredicate = (data: projectdetails, filter: string) => {
+    const term = filter.trim().toLowerCase();
+
+    const haystack = [
+      data.number,
+      data.name,
+      data.customerName,
+      data.personName,
+      data.status
+    ]
+      .filter(v => v !== null && v !== undefined)
+      .join(' ')
+      .toLowerCase();
+
+    return haystack.includes(term);
+  };
+
+  this.loadProjects();  }
   ngAfterViewInit(): void {
     // This ensures MatSort and MatPaginator are available
     this.dataSource.sort = this.sort;
