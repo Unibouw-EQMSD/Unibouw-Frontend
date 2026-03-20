@@ -4,6 +4,7 @@ import { from, Observable, switchMap, map } from 'rxjs';
 import { MsalService } from '@azure/msal-angular';
 import { AppConfigService } from './app.config.service';
 import appConfig from '../../assets/app.config.json';
+import { TranslateService } from '@ngx-translate/core';
 
 export interface Rfq {
   id?: string;
@@ -42,6 +43,7 @@ export class RfqService {
     private http: HttpClient,
     private msalService: MsalService,
     private appConfigService: AppConfigService,
+    private translate: TranslateService,
   ) {
     this.apiURL = this.appConfigService.getConfig().apiURL;
     this.rfqEndpoint = `${this.apiURL}/Rfq`;
@@ -169,33 +171,36 @@ export class RfqService {
     );
   }
 
-  createRfqSimple(
-    rfq: any,
-    subcontractorIds: string[],
-    workItems: string[],
-    emailBody: string,
-    sendEmail: boolean = false,
-    subcontractorDueDates: RfqSubcontractorDueDate[],
-  ): Observable<any> {
-    let params = new HttpParams();
-    subcontractorIds.forEach((id) => (params = params.append('subcontractorIds', id)));
-    workItems.forEach((id) => (params = params.append('workItems', id)));
-    params = params.set('emailBody', emailBody);
-    params = params.set('sendEmail', sendEmail.toString());
+ createRfqSimple(
+  rfq: any,
+  subcontractorIds: string[],
+  workItems: string[],
+  emailBody: string,
+  sendEmail: boolean = false,
+  subcontractorDueDates: RfqSubcontractorDueDate[],
+): Observable<any> {
+  let params = new HttpParams();
 
-    // Merge rfq and due dates into one object for the POST body
-    const body = {
-      ...rfq,
-      subcontractorDueDates,
-    };
+  subcontractorIds.forEach((id) => (params = params.append('subcontractorIds', id)));
+  workItems.forEach((id) => (params = params.append('workItems', id)));
 
-    return from(this.getHeaders()).pipe(
-      switchMap((headers) =>
-        this.http.post(`${this.apiURL}/Rfq/create-simple`, body, { headers, params }),
-      ),
-    );
-  }
+  params = params.set('emailBody', emailBody);
+  params = params.set('sendEmail', sendEmail.toString());
 
+  // ✅ add this
+  params = params.set('language', this.translate.currentLang || 'en');
+
+  const body = {
+    ...rfq,
+    subcontractorDueDates,
+  };
+
+  return from(this.getHeaders()).pipe(
+    switchMap((headers) =>
+      this.http.post(`${this.apiURL}/Rfq/create-simple`, body, { headers, params }),
+    ),
+  );
+}
   updateRfq(
     rfqID: string,
     rfqPayload: any,
