@@ -580,7 +580,7 @@ this.rfqResponseService.getResponsesByProjectId(projectId).subscribe({
         workItemMap.set(w.workItemId, {
           workItemId: w.workItemId,
           // Fallback order: explicit code field -> numbered code -> raw ID
-          number: w.number,
+number: w.workItemNumber, 
           name: w.workItemName,
           open: false,
           searchText: '',
@@ -678,6 +678,7 @@ this.rfqResponseService.getResponsesByProjectSubcontractors(projectId).subscribe
 
       group.workItems.push({
         workItemId: item.workItemId ? String(item.workItemId) : null,
+        number: item.workItemNumber,
         workItemName: item.workItemName,
         rfqId: item.rfqId ? String(item.rfqId) : null,
         documentId: item.documentId ? String(item.documentId) : null,
