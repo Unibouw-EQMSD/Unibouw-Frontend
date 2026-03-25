@@ -718,11 +718,11 @@
                             [class.reply-highlight]="
                               replyingToMessageId === convo.conversationMessageID
                             "
-                            [ngClass]="{
-                              right: convo.senderType === 'PM',
-                              left: convo.senderType !== 'PM',
-                              reply: convo.subcontractorMessageID,
-                            }"
+                           [ngClass]="{
+  right: convo.senderType && convo.senderType.trim().toUpperCase() === 'PM',
+  left: !convo.senderType || convo.senderType.trim().toUpperCase() !== 'PM',
+  reply: convo.subcontractorMessageID
+}"
                           >
                             <!-- MESSAGE META -->
                             <div class="message-header">

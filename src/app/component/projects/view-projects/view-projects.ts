@@ -1679,29 +1679,34 @@ const mappedAttachments =
       }),
     )
     .subscribe({
-      next: (res: any[]) => {
-        this.allPmSubConversationData = res ?? [];
-        this.pmSubConversationData = [...this.allPmSubConversationData];
+  next: (res: any[]) => {
+    this.allPmSubConversationData = res ?? [];
+    // Normalize senderType on every message (does NOT change your structure)
+    this.pmSubConversationData = (this.allPmSubConversationData || []).map(msg => ({
+      ...msg,
+      senderType: (msg.senderType || msg.SenderType || '').trim()
+    }));
 
-        console.log(
-          '[FINAL RESULT]',
-          this.pmSubConversationData.map((c) => ({
-            id: c.conversationMessageID,
-            parentID: c.subcontractorMessageID,
-            parentSender: c.parentSenderName,
-            parentDateTime: c.parentMessageDateTime,
-            attachments: c.convoattachments?.length ?? 0,
-            attachmentNames: (c.convoattachments || []).map((a: any) => a.fileName),
-          })),
-        );
+    console.log(
+      '[FINAL RESULT]',
+      this.pmSubConversationData.map((c) => ({
+        id: c.conversationMessageID,
+        senderType: c.senderType, // <--- DEBUG
+        parentID: c.subcontractorMessageID,
+        parentSender: c.parentSenderName,
+        parentDateTime: c.parentMessageDateTime,
+        attachments: c.convoattachments?.length ?? 0,
+        attachmentNames: (c.convoattachments || []).map((a: any) => a.fileName),
+      })),
+    );
 
-        setTimeout(() => this.scrollToBottom(), 0);
-      },
-      error: (err) => {
-        this.isSpinLoading = false;
-        console.error('[ERROR] Loading conversation failed:', err);
-      },
-    });
+    setTimeout(() => this.scrollToBottom(), 0);
+  },
+  error: (err) => {
+    this.isSpinLoading = false;
+    console.error('[ERROR] Loading conversation failed:', err);
+  },
+});
 }
 
   cleanMessage(message: string): string {
