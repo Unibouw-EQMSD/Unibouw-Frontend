@@ -4,24 +4,12 @@
   <div class="container">
     <div class="pagetitle" *ngIf="rfqIdForEdit">
       <h1>
-        <!-- <i
-          class="fa fa-arrow-left arrow-left"
-          aria-hidden="true"
-          title="Back"
-          (click)="goBack()"
-        ></i> -->
         {{ 'RFQ_ACTIONS.EDIT_RFQ' | translate }}
       </h1>
     </div>
 
     <div class="pagetitle" *ngIf="!rfqIdForEdit">
       <h1>
-        <!-- <i
-          class="fa fa-arrow-left arrow-left"
-          aria-hidden="true"
-          title="Back"
-          (click)="goBack()"
-        ></i> -->
         {{ 'RFQ_ACTIONS.ADD_RFQ' | translate }}
       </h1>
     </div>
@@ -29,13 +17,11 @@
     <!-- FULL PAGE SKELETON -->
     <div *ngIf="isLoader" class="full-page-skeleton">
       <div class="skeleton-search skeleton"></div>
-
       <div class="skeleton-table-header3">
         <div class="skeleton th skeleton"></div>
         <div class="skeleton th skeleton"></div>
         <div class="skeleton th skeleton"></div>
       </div>
-
       <div class="skeleton-box"></div>
     </div>
 
@@ -43,21 +29,16 @@
       <!-- Header Section -->
       <div class="card-header" *ngIf="!isLoader">
         <div class="row justify-content-start align-items-center gap-2">
-          <!-- Project Name Section (Always visible) -->
           <div class="col-auto d-flex justify-content-start align-items-center">
             <label class="col-form-label">{{ 'PROJECT_DETAILS.PROJECT' | translate }}</label>
             <span>
               {{ projectDetails?.name || ('COMMON.LOADING' | translate) }}
             </span>
           </div>
-
-          <!-- ⭐ RFQ ID Section (Only in Edit Mode) -->
           <div *ngIf="rfqIdForEdit" class="col-auto d-flex justify-content-start align-items-center me-2">
             <label class="col-form-label">{{ 'RFQ_TABLE.RFQ_NUMBER' | translate }}</label>
             <span>{{ rfqNumber }}</span>
           </div>
-
-          <!-- ⭐ Created Date Section (Only in Edit Mode) -->
           <div *ngIf="rfqIdForEdit" class="col-auto d-flex justify-content-start align-items-center me-2">
             <label class="col-form-label">{{ 'RFQ_PAGE.CREATED_DATE' | translate }}</label>
             <span>{{ createdDateDisplay }}</span>
@@ -70,7 +51,7 @@
       </div>
       <div class="card-body">
         <div class="row">
-          <!-- Left column: Workitems + Tabs -->
+          <!-- Left column: Add Mode = tabs+workitems+upload, Edit Mode = nothing -->
           <div class="col-sm-6" *ngIf="!rfqIdForEdit">
             <!-- Tabs -->
             <div class="tabs">
@@ -105,19 +86,15 @@
                 </span>
               </button>
             </div>
-
-            <!-- Workitems Loader (only for non-uploaded tabs) -->
             <div class="workitems-loader" *ngIf="isLoader && selectedTab !== 'uploaded'">
               <mat-spinner diameter="40"></mat-spinner>
             </div>
-
-            <!-- Uploaded tab content -->
+            <!-- Uploaded tab content for Add mode -->
             <ng-container *ngIf="selectedTab === 'uploaded'">
               <div class="m-2 d-flex align-items-center">
                 <label class="col-form-label mb-0">{{ 'UPLOAD' | translate }}</label>
                 <input type="file" class="form-control form-control-sm ms-2 pb-0" (change)="onFileSelected($event)" multiple />
               </div>
-
               <div class="table-Fixedheader-wrapper" *ngIf="uploadedFiles.length">
                 <table class="table table-Fixedheader table-striped">
                   <tbody>
@@ -137,7 +114,6 @@
                   </tbody>
                 </table>
               </div>
-
               <div
                 *ngIf="!uploadedFiles.length"
                 style="padding: 20px; text-align: center; color: #999; font-style: italic"
@@ -145,7 +121,6 @@
                 No files uploaded yet.
               </div>
             </ng-container>
-
             <!-- Workitems Table (standard/unibouw) -->
             <ng-container *ngIf="selectedTab !== 'uploaded'">
               <div class="table-Fixedheader-wrapper" *ngIf="!isLoader">
@@ -153,7 +128,7 @@
                   <thead>
                     <tr>
                       <th class="w-70px">{{ 'RFQ_PAGE.SELECT' | translate }}</th>
-                       <th>{{'WORKITEM.CODE' | translate }}</th>
+                      <th>{{'WORKITEM.CODE' | translate }}</th>
                       <th>{{ 'RFQ_PAGE.WORK_ITEM' | translate }}</th>
                     </tr>
                   </thead>
@@ -171,7 +146,7 @@
                           class="cursor-pointer"
                         />
                       </td>
-                    <td>   <strong> {{ item.number }}</strong></td>
+                      <td><strong> {{ item.number }}</strong></td>
                       <td>{{ item.name }}</td>
                     </tr>
                   </tbody>
@@ -181,109 +156,41 @@
           </div>
 
           <!-- Right column: Subcontractors -->
-          <div class="col-sm-6 subcontractors-card" *ngIf="!rfqIdForEdit">
-            <div class="card">
-              <div
-                *ngIf="globalDateError"
-                style="margin-top: 6px; color: #dc3545; font-size: 13px; font-weight: 500"
-              >
-                {{ 'RFQ_PAGE.SELECT_SUBCONTRACTOR_ERROR' | translate }}
+          <div class="col-sm-6 subcontractors-card" [style.width]="rfqIdForEdit ? '100%' : null">
+            <!-- ADD this: Upload/project-docs UI at the top in Edit mode only -->
+            <ng-container *ngIf="rfqIdForEdit">
+              <div class="m-2 d-flex align-items-center">
+                <label class="col-form-label mb-0">{{ 'UPLOAD' | translate }}</label>
+                <input type="file" class="form-control form-control-sm ms-2 pb-0" (change)="onFileSelected($event)" multiple />
               </div>
-              <div class="card-header d-flex justify-content-between align-items-center">
-                <div class="d-flex align-items-center">
-                  <h6 class="mb-0 pb-0 me-3">{{ 'RFQ_PAGE.SUBCONTRACTORS' | translate }}</h6>
-                  <button type="button" (click)="addSub()" class="btn btn-primary btn-add">
-                    <span class="material-symbols-outlined"> add </span>
-                  </button>
-                </div>
-                <div class="d-flex justify-content-between align-items-center">
-                  <div class="me-2">
-                    <label class="col-form-label"
-                      >{{ 'RFQ_PAGE.DUE_DATE' | translate
-                      }}<span class="text-danger">*</span></label
-                    >
-                  </div>
-
-                  <div class="me-4">
-                    <input
-                      type="date"
-                      [(ngModel)]="globalDueDate"
-                      (change)="applyGlobalDate()"
-                      [min]="minDate"
-                      class="form-control"
-                    />
-                  </div>
-                  <div class="form-check ms-2">
-                    <input
-                      class="form-check-input"
-                      type="checkbox"
-                      [(ngModel)]="showAll"
-                      (change)="toggleSelectAll()"
-                    />
-                    <label class="form-check-label" for="showall">{{
-                      'RFQ_PAGE.SHOW_ALL' | translate
-                    }}</label>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Column Labels -->
-
-              <!-- List -->
-              <div class="table-Fixedheader-wrapper">
+              <div class="table-Fixedheader-wrapper" *ngIf="uploadedFiles.length">
                 <table class="table table-Fixedheader table-striped">
-                  <thead>
-                    <tr>
-                      <th class="td_checkbox"></th>
-                      <th>{{ 'RFQ_PAGE.NAME' | translate }}</th>
-                      <th class="td_intDate">{{ 'RFQ_PAGE.DUE_DATE' | translate }}</th>
-                    </tr>
-                  </thead>
                   <tbody>
                     <tr
-                      class="checkbox-listRow"
-                      *ngFor="let sub of subcontractors; let i = index"
-                      [style.background-color]="i % 2 === 0 ? '#fcfcfc' : '#f0f2f5'"
+                      *ngFor="let file of uploadedFiles; let i = index"
+                      [class.selected]="file.selected"
                     >
-                      <td>
+                      <td class="w-70px">
                         <input
                           type="checkbox"
-                          [(ngModel)]="sub.selected"
-                          (change)="onSubcontractorToggle(sub)"
-                          class="form-check-input"
+                          [(ngModel)]="file.selected"
+                          class="cursor-pointer"
                         />
                       </td>
-                      <td>{{ sub.name }}</td>
-                      <td>
-                        <input
-                          type="date"
-                          [(ngModel)]="sub.dueDate"
-                          [disabled]="!sub.selected"
-                          [min]="minDate"
-                          class="form-control"
-                        />
-                      </td>
+                      <td colspan="2">{{ file.name }}</td>
                     </tr>
                   </tbody>
                 </table>
-                <div
-                  *ngIf="!selectedWorkItems.length"
-                  style="padding: 20px; text-align: center; color: #999; font-style: italic"
-                >
-                  {{ 'RFQ_PAGE.SELECT_WORKITEM_MESSAGE' | translate }}
-                </div>
-
-                <div
-                  *ngIf="selectedWorkItems.length && noSubMessage"
-                  style="padding: 20px; text-align: center; color: #dc3545; font-weight: 500"
-                >
-                  {{ noSubMessage }}
-                </div>
               </div>
-            </div>
-          </div>
+              <div
+                *ngIf="!uploadedFiles.length"
+                style="padding: 20px; text-align: center; color: #999; font-style: italic"
+              >
+                No files uploaded yet.
+              </div>
+            </ng-container>
 
-          <div class="col-sm-6 subcontractors-card" *ngIf="rfqIdForEdit" style="width: 100%">
+            <!-- Subcontractor card (always visible) -->
             <div
               *ngIf="globalDateError"
               style="margin-top: 6px; color: #dc3545; font-size: 13px; font-weight: 500"
@@ -300,7 +207,6 @@
                     <span class="material-symbols-outlined"> add </span>
                   </button>
                 </div>
-
                 <div class="d-flex justify-content-between align-items-center">
                   <div class="me-2">
                     <label class="col-form-label"
@@ -323,17 +229,13 @@
                       class="form-check-input"
                       [(ngModel)]="showAll"
                       (change)="toggleSelectAll()"
-                      class="form-check-input"
-                    /><label for="showall" class="form-check-label">{{
+                    />
+                    <label for="showall" class="form-check-label">{{
                       'RFQ_PAGE.SHOW_ALL' | translate
                     }}</label>
                   </div>
                 </div>
               </div>
-
-              <!-- Start of Table -->
-
-              <!-- List -->
               <div class="table-Fixedheader-wrapper">
                 <table class="table table-Fixedheader table-striped">
                   <thead>
@@ -376,7 +278,6 @@
                 >
                   {{ 'RFQ_PAGE.SELECT_WORKITEM_MESSAGE' | translate }}
                 </div>
-
                 <div
                   *ngIf="selectedWorkItems.length && noSubMessage"
                   style="padding: 20px; text-align: center; color: #dc3545; font-weight: 500"
@@ -384,8 +285,6 @@
                   {{ noSubMessage }}
                 </div>
               </div>
-              <!-- List -->
-              <!-- End of Table -->
             </div>
           </div>
         </div>
@@ -398,17 +297,7 @@
         <button type="button" class="btn btn-secondary" (click)="openPreview()">
           {{ 'RFQ_FOOTER_ACTIONS.PREVIEW' | translate }}
         </button>
-        <!-- <button
-          type="button"
-          class="btn btn-primary"
-          *ngIf="!rfqIdForEdit"
-          (click)="onSubmit(false)"
-        >
-          {{ 'RFQ_FOOTER_ACTIONS.SAVE_DRAFT' | translate }}
-        </button> -->
-        <!-- <button type="button" class="btn btn-secondary" (click)="onSubmit(true)">
-          {{ 'RFQ_FOOTER_ACTIONS.SEND_TO_SUBCONTRACTORS' | translate }}
-        </button> -->
+        <!-- ...other buttons unchanged... -->
       </div>
     </div>
   </div>
@@ -424,24 +313,18 @@
     (click)="$event.stopPropagation()"
   >
     <div class="modal-content-box modal-content">
-      <!-- ================= HEADER ================= -->
       <div class="modal-header">
         <h4 class="modal-title" id="previewTitle">{{ 'RFQ_PREVIEW.TITLE' | translate }}</h4>
         <small class="text-muted ms-3">{{ 'RFQ_PREVIEW.SUBTITLE' | translate }}</small>
       </div>
-
-      <!-- ================= BODY ================= -->
-      <!-- Skeleton Body While Loading -->
       <div *ngIf="isLoader" class="skeleton-wrapper">
         <div class="skeleton skeleton-box mx-9 my-5" style="width: 90%; height: 110px"></div>
         <div class="skeleton skeleton-box mx-9 my-5" style="width: 90%; height: 40px"></div>
         <div class="skeleton skeleton-box mx-9 my-5" style="width: 90%; height: 40px"></div>
       </div>
-
       <div class="modal-body" *ngIf="!isLoader">
         <p>{{ 'RFQ_PREVIEW.DEAR' | translate }},</p>
         <textarea class="email-body-editor" [(ngModel)]="editedEmailBody"></textarea>
-
         <div class="details-box">
           <div class="detail-item">
             <div class="detail-label">{{ 'RFQ_PREVIEW.RFQ_ID' | translate }}</div>
@@ -468,7 +351,6 @@
             </div>
           </div>
         </div>
-
         <div class="closing-remarks">
           <p>{{ 'RFQ_PREVIEW.REGARDS' | translate }}</p>
           <p>
@@ -476,13 +358,11 @@
           </p>
         </div>
       </div>
-
-      <!-- ================= FOOTER ================= -->
       <div class="modal-footer">
         <button class="btn btn-cancel" (click)="closePreview()" [disabled]="isLoader">
           {{ 'RFQ_PREVIEW.CLOSE' | translate }}
         </button>
-           <button
+        <button
           type="button"
           class="btn btn-primary"
           *ngIf="!rfqIdForEdit"

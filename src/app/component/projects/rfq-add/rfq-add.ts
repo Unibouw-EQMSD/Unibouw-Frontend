@@ -40,7 +40,13 @@ export class RfqAdd {
   uploadedWorkitems: Workitem[] = [];
 
   // track files attached via the Uploaded tab
-  uploadedFiles: { name: string; selected: boolean; file?: File }[] = [];
+uploadedFiles: {
+  name: string;
+  selected: boolean;
+  file?: File;                  // only for new uploads
+  source: 'new' | 'project';    // identify row type
+  projectDocumentID?: string;   // only for project docs
+}[] = [];
   createdDate: Date = new Date();
   selectedDueDate: string = '';
   standardWorkitems: Workitem[] = [];
@@ -62,7 +68,7 @@ export class RfqAdd {
   workItemName: string = 'N/A';
   globalDateError = false;
   originalRfqSubcontractors: any[] = [];
-
+projectDocuments: { projectDocumentID: string; fileName: string; selected: boolean }[] = [];
   private readonly RFQ_DRAFT_KEY = 'rfq_add_state';
   private skipDraftSave = false;
   originalSubcontractorState: {
@@ -108,6 +114,8 @@ export class RfqAdd {
 
     if (this.projectId) {
       this.loadProjectDetails(this.projectId);
+        this.loadProjectDocumentsIntoUploadTab(this.projectId);
+
       this.selectedProject = this.projectId;
     }
 
@@ -182,6 +190,40 @@ export class RfqAdd {
     this.location.back();
   }
 
+ private loadProjectDocumentsIntoUploadTab(projectId: string) {
+  if (!projectId) return;
+
+  this.rfqService.getProjectDocuments(projectId).subscribe({
+    next: (docs: any[]) => {
+      // Remove old project-doc rows first (keep newly uploaded rows)
+      this.uploadedFiles = (this.uploadedFiles || []).filter(x => x.source === 'new');
+
+      // Add project docs as selectable rows
+      const projectRows = (docs || []).map(d => ({
+        name: d.fileName,
+        selected: false,
+        source: 'project' as const,
+        projectDocumentID: d.projectDocumentID
+      }));
+
+      // Merge (avoid duplicates by projectDocumentID)
+      const existingProjectIds = new Set(
+        this.uploadedFiles.filter(x => x.source === 'project').map(x => x.projectDocumentID)
+      );
+
+      projectRows.forEach(r => {
+        if (!existingProjectIds.has(r.projectDocumentID)) {
+          this.uploadedFiles.push(r);
+        }
+      });
+
+      // Force UI refresh
+      this.uploadedFiles = [...this.uploadedFiles];
+      this.cdr.detectChanges();
+    },
+    error: err => console.error('Failed to load project documents', err)
+  });
+}
   private restoreDraft() {
     if (this.rfqIdForEdit) return;
 
@@ -415,21 +457,22 @@ export class RfqAdd {
   }
 
   /** 🚧 Uploaded files helpers **/
-  onFileSelected(event: any) {
-    const files: FileList = event.target.files;
-    if (!files || files.length === 0) return;
+onFileSelected(event: any) {
+  const files: FileList = event.target.files;
+  if (!files || files.length === 0) return;
 
-    for (let i = 0; i < files.length; i++) {
-      const file = files[i];
-      // avoid duplicates by name
-      if (this.uploadedFiles.some((f) => f.name === file.name)) continue;
-      this.uploadedFiles.push({ name: file.name, selected: true, file });
-    }
+  for (let i = 0; i < files.length; i++) {
+    const file = files[i];
 
-    // reset input so same file can be chosen again later if removed
-    event.target.value = '';
-    this.saveDraft();
+    // avoid duplicates by name for new uploads
+    if (this.uploadedFiles.some((f) => f.source === 'new' && f.name === file.name)) continue;
+
+    this.uploadedFiles.push({ name: file.name, selected: true, file, source: 'new' });
   }
+
+  event.target.value = '';
+  this.saveDraft();
+}
 
   removeUploadedFile(index: number) {
     if (index >= 0 && index < this.uploadedFiles.length) {
@@ -571,21 +614,23 @@ async onSubmit(sendEmail: boolean = false, editedEmailBody: string = '') {
   const selectedProject = this.projects.find((p) => p.projectID === this.selectedProject);
   if (!selectedProject) return this.alertService.warning('Project not found');
 
-    const selectedSubs = this.subcontractors.filter((s) => s.selected);
-    if (!this.globalDueDate) return this.alertService.warning('Please select the Global Due Date');
-    if (!selectedSubs.length) return this.alertService.warning('Select at least one subcontractor');
-    if (this.selectedTab === 'uploaded') {
-      const selectedFiles = this.uploadedFiles.filter(f => f.selected);
-      if (!selectedFiles.length) return this.alertService.warning('Please select at least one file');
-    } else {
-      if (!this.selectedWorkItems.length) return this.alertService.warning('Select at least one work item');
-    }
-    if (selectedSubs.some((s) => !s.dueDate))
-      return this.alertService.warning('Please select a Due Date for all selected subcontractors.');
+  const selectedSubs = this.subcontractors.filter((s) => s.selected);
+
+  if (!this.globalDueDate) return this.alertService.warning('Please select the Global Due Date');
+  if (!selectedSubs.length) return this.alertService.warning('Select at least one subcontractor');
+
+  if (this.selectedTab === 'uploaded') {
+    const selectedRows = this.uploadedFiles.filter((f) => f.selected);
+    if (!selectedRows.length) return this.alertService.warning('Please select at least one file');
+  } else {
+    if (!this.selectedWorkItems.length) return this.alertService.warning('Select at least one work item');
+  }
+
+  if (selectedSubs.some((s) => !s.dueDate))
+    return this.alertService.warning('Please select a Due Date for all selected subcontractors.');
 
   this.isLoader = true;
 
-  // ✅ absolute failsafe: stop loader after 60s no matter what
   const loaderTimer = setTimeout(() => {
     this.isLoader = false;
     this.alertService.warning(
@@ -596,44 +641,53 @@ async onSubmit(sendEmail: boolean = false, editedEmailBody: string = '') {
   try {
     const now = new Date().toISOString();
     const isUpdate = !!this.rfqIdForEdit;
-    const rfqID = this.rfqIdForEdit || '00000000-0000-0000-0000-000000000000';
+    const tempRfqIdForCreate = '00000000-0000-0000-0000-000000000000';
+
     const createdBy = this.originalRfq?.createdBy || 'System';
     const defaultIntro = this.translate.instant('RFQ_EMAIL.INTRO');
-
-    const emailBodyToUse = editedEmailBody || this.customNote || defaultIntro|| '';
+    const emailBodyToUse = editedEmailBody || this.customNote || defaultIntro || '';
 
     const subcontractorDueDates = selectedSubs.map((s) => ({
       subcontractorID: s.subcontractorID,
       dueDate: new Date(s.dueDate!).toISOString().split('T')[0],
     }));
 
-    let subsToEmail: any[] = [];
-    if (sendEmail && this.rfqIdForEdit) subsToEmail = this.getNewOrModifiedSubcontractors();
+    // ✅ Always email all selected subs in edit mode!
+    let subsToEmail: any[] = selectedSubs;
 
-    // STEP 1: mappings
+    const rfqIDForPayload = this.rfqIdForEdit || tempRfqIdForCreate;
+
+    // STEP 1: Save mappings
     if (isUpdate) {
       for (const sub of selectedSubs) {
         for (const work of this.selectedWorkItems) {
-          const mapping = subcontractorDueDates.find((d) => d.subcontractorID === sub.subcontractorID);
+          const mapping = subcontractorDueDates.find(
+            (d) => d.subcontractorID === sub.subcontractorID,
+          );
           const dueDateStr = mapping?.dueDate;
 
           if (!dueDateStr) throw new Error('Due date missing for subcontractor');
 
           await this.rfqService
-            .saveOrUpdateRfqSubcontractorMapping(rfqID, sub.subcontractorID, work.workItemID, dueDateStr)
+            .saveOrUpdateRfqSubcontractorMapping(
+              rfqIDForPayload,
+              sub.subcontractorID,
+              work.workItemID,
+              dueDateStr,
+            )
             .toPromise();
         }
       }
     } else {
-      await this.saveSubcontractorWorkItemMappings(selectedSubs, this.selectedWorkItems, rfqID);
+      await this.saveSubcontractorWorkItemMappings(selectedSubs, this.selectedWorkItems, rfqIDForPayload);
     }
 
-    // STEP 2: payload
+    // STEP 2: Build payload
     let sentDateToUse = this.originalRfq?.sentDate || null;
     if (sendEmail) sentDateToUse = now;
 
-    const rfqPayload = {
-      rfqID,
+    const rfqPayload: any = {
+      rfqID: rfqIDForPayload,
       sentDate: sentDateToUse,
       GlobalDueDate: new Date(this.globalDueDate!).toISOString().split('T')[0],
       rfqSent: sendEmail ? 1 : this.originalRfq?.rfqSent || 0,
@@ -663,10 +717,41 @@ async onSubmit(sendEmail: boolean = false, editedEmailBody: string = '') {
           subcontractorDueDates,
         );
 
-    await request$.pipe(timeout(60000)).toPromise();
+    // IMPORTANT: capture response to extract created RFQ id
+    const res: any = await request$.pipe(timeout(60000)).toPromise();
+
+    // Determine final rfqId
+    const finalRfqId =
+      this.rfqIdForEdit ||
+      res?.data?.rfqID ||
+      res?.data?.rfqId ||
+      res?.rfqID ||
+      res?.rfqId;
+
+    if (!finalRfqId) {
+      throw new Error('RFQ saved but RFQ ID was not returned by API.');
+    }
+
+    // STEP 3: Project document reuse + upload
+    const selectedProjectDocIds = (this.uploadedFiles || [])
+      .filter((f: any) => f.selected && f.source === 'project' && !!f.projectDocumentID)
+      .map((f: any) => String(f.projectDocumentID));
+
+    if (selectedProjectDocIds.length) {
+      await this.rfqService.linkProjectDocsToRfq(finalRfqId, selectedProjectDocIds).pipe(timeout(60000)).toPromise();
+    }
+
+    const selectedNewFiles = (this.uploadedFiles || [])
+      .filter((f: any) => f.selected && f.source === 'new' && !!f.file)
+      .map((f: any) => f.file as File);
+
+    if (selectedNewFiles.length) {
+      await this.rfqService.uploadDocsToRfq(finalRfqId, this.selectedProject, selectedNewFiles).pipe(timeout(60000)).toPromise();
+    }
 
     this.alertService.success(sendEmail ? 'RFQ sent successfully!' : 'RFQ saved successfully!');
     localStorage.removeItem(this.RFQ_DRAFT_KEY);
+
     this.router.navigate(['/view-projects', this.selectedProject], { queryParams: { tab: 'rfq' } });
   } catch (err) {
     console.error('RFQ failed', err);
@@ -676,7 +761,6 @@ async onSubmit(sendEmail: boolean = false, editedEmailBody: string = '') {
     this.isLoader = false;
   }
 }
-
   loadProjectDetails(id: string) {
     this.projectService.getProjectById(id).subscribe({
       next: (res) => {
@@ -983,6 +1067,9 @@ private sortWorkItemsAsc(items: Workitem[]): Workitem[] {
     this.selectedProject = projectId;
     this.selectedWorkItems = [];
     this.subcontractors = [];
+
+      this.loadProjectDocumentsIntoUploadTab(projectId);
+
   }
 
   onCancel() {
@@ -993,10 +1080,9 @@ private sortWorkItemsAsc(items: Workitem[]): Workitem[] {
   }
 
   getSelectedCountByTab(tab: 'unibouw' | 'standard' | 'uploaded'): number {
-    if (tab === 'uploaded') {
-      return this.uploadedFiles.filter((f) => f.selected).length;
-    }
-
+   if (tab === 'uploaded') {
+  return this.uploadedFiles.filter((f) => f.selected).length;
+}
     let source: Workitem[];
     if (tab === 'unibouw') source = this.unibouwWorkitems;
     else source = this.standardWorkitems;

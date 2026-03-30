@@ -65,6 +65,36 @@ export class RfqService {
     });
   }
 
+
+  getProjectDocuments(projectId: string) {
+  return from(this.getHeaders()).pipe(
+    switchMap(headers =>
+      this.http.get<{ data: any[] }>(`${this.apiURL}/projects/${projectId}/documents`, { headers })
+    ),
+    map(res => res.data || [])
+  );
+}
+
+linkProjectDocsToRfq(rfqId: string, projectDocumentIds: string[]) {
+  return from(this.getHeaders()).pipe(
+    switchMap(headers =>
+      this.http.post(`${this.apiURL}/rfq/${rfqId}/documents/link`, { projectDocumentIds }, { headers })
+    )
+  );
+}
+
+uploadDocsToRfq(rfqId: string, projectId: string, files: File[]) {
+  const fd = new FormData();
+  files.forEach(f => fd.append('files', f));
+
+  return from(this.getHeaders()).pipe(
+    switchMap(headers => {
+      const h = headers.delete('Content-Type');
+      return this.http.post(`${this.apiURL}/rfq/${rfqId}/documents/upload?projectId=${projectId}`, fd, { headers: h });
+    })
+  );
+}
+
   /** Fetch all RFQs */
   getAllRfq(): Observable<Rfq[]> {
     return from(this.getHeaders()).pipe(
