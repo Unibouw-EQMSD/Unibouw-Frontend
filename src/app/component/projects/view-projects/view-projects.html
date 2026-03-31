@@ -111,9 +111,11 @@
                   <label class="col-form-label">{{
                     'PROJECT_DETAILS.SPECIFICATION' | translate
                   }}</label>
-                  <span class="value">
-                    <a [href]="projectDetails.sharepointURL" target="_blank">Project Files</a>
-                  </span>
+                 <div *ngFor="let doc of projectDocs">
+  <a href (click)="downloadDoc($event, doc.projectDocumentID, doc.fileName)">
+    {{ doc.fileName }}
+  </a>
+</div>
                 </div>
               </div>
             </div>

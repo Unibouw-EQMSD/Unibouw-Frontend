@@ -101,9 +101,11 @@
 
             <div class="detail-row">
               <span class="label">Specification</span>
-              <span class="form-control-plaintext">
-                <a [href]="project.sharepointURL" target="_blank">Project Files</a>
-              </span>
+        <div *ngFor="let doc of projectDocs">
+  <a href (click)="downloadDoc($event, doc.projectDocumentID, doc.fileName)">
+    {{ doc.fileName }}
+  </a>
+</div>
             </div>
           </div>
         </div>

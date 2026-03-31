@@ -23,6 +23,7 @@ import { ActivatedRoute } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { RfqResponseService } from '../../services/rfq-response.service';
 import { AlertService } from '../../services/alert.service';
+import { RfqService } from '../../services/rfq.service';
 
 interface NotInterestedData {
   reason: string;
@@ -49,6 +50,7 @@ interface LogConversation {
 export class ProjectSummary implements OnInit {
   project: any = null;
   subcontractor: any = null;
+  projectId!: string;
   workItems: any[] = [];
   isLoading = true;
   errorMsg = '';
@@ -96,6 +98,7 @@ export class ProjectSummary implements OnInit {
   showQuotePanel = false;
   hideRightSummaryCard = false;
   rightSectionVisible = true;
+projectDocs: any[] = [];
 
   quoteForm!: FormGroup;
   @ViewChild('fileInput') fileInput!: ElementRef<HTMLInputElement>;
@@ -121,6 +124,8 @@ export class ProjectSummary implements OnInit {
 
   constructor(
     private route: ActivatedRoute,
+        private rfqService: RfqService,
+    
     private rfqResponseService: RfqResponseService,
     private projectService: projectService,
     private fb: FormBuilder,
@@ -139,29 +144,32 @@ export class ProjectSummary implements OnInit {
     this.r.setStyle(this.el.nativeElement, '--tt-y', `${e.clientY}px`);
   }
 
-  ngOnInit(): void {
-    this.quoteForm = this.fb.group({
-      quoteAmount: ['', [Validators.required, Validators.pattern(/^[0-9.,]+$/)]],
-comments: ['', [Validators.required, Validators.maxLength(200)]],    });
+ngOnInit(): void {
+  this.route.queryParams.subscribe(params => {
+    this.projectId = params['projectId'] || '';
+    if (this.projectId) {
+      console.log('loadProjectDocs called with:', this.projectId);
+      this.loadProjectDocs(this.projectId);
+    }
+    // ... other logic for RFQ/subId etc ...
+    this.rfqId = params['rfqId'];
+    this.subId = params['subId'];
+    this.number = params['number'];
 
-    this.route.queryParams.subscribe((params) => {
-      this.rfqId = params['rfqId'];
-      this.subId = params['subId'];
-      this.number = params['number'];
+    if (this.rfqId && this.subId) {
+      this.loadProjectSummary(this.rfqId);
+      this.loadPreviousSubmissions();
+    } else {
+      this.isLoading = false;
+      this.errorMsg = 'Missing required parameters (rfqId or subId).';
+    }
+  });
 
-      if (this.rfqId && this.subId) {
-        // ✅ DO NOT restore interest/buttons state using RFQ number key.
-        // Interest is per workItemID and will be restored inside loadProjectSummary().
-
-        this.loadProjectSummary(this.rfqId);
-        this.loadPreviousSubmissions();
-      } else {
-        this.isLoading = false;
-        this.errorMsg = 'Missing required parameters (rfqId or subId).';
-      }
-    });
-  }
-
+  this.quoteForm = this.fb.group({
+    quoteAmount: ['', [Validators.required, Validators.pattern(/^[0-9.,]+$/)]],
+    comments: ['', [Validators.required, Validators.maxLength(200)]],
+  });
+}
   openQuotePanel() {
     this.showQuotePanel = true;
     this.rightSectionVisible = true;
@@ -192,7 +200,9 @@ comments: ['', [Validators.required, Validators.maxLength(200)]],    });
         this.project = res.project;
         this.rfq = res.rfq;
         this.workItems = res.workItems || [];
-
+if (res.project.projectID) {
+        this.loadProjectDocs(res.project.projectID);
+      }
         // ================= DATE HANDLING =================
         const now = new Date();
         this.today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(
@@ -603,6 +613,41 @@ ${reason === 'Anders' ? `Comment        : ${comment}` : ''}
       });
   }
 
+downloadDoc(event: Event, docId: string, fileName: string) {
+  event.preventDefault();
+
+  // Try to get projectId from this.project if not set
+  let projectId = this.projectId || (this.project?.projectID || this.project?.projectId || '');
+
+  if (!projectId) {
+    this.alertService.error('Project ID missing, cannot download file.');
+    return;
+  }
+
+  this.rfqService.downloadProjectDoc(projectId, docId).subscribe({
+    next: (blob) => {
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = fileName || 'document.pdf';
+      a.click();
+      URL.revokeObjectURL(url);
+    },
+    error: (err) => {
+      this.alertService.error('Download failed.');
+      console.error('Download error:', err);
+    }
+  });
+}
+loadProjectDocs(projectId: string | undefined) {
+  console.log('loadProjectDocs called with:', projectId);
+  if (!projectId) return;
+  this.rfqService.getProjectDocuments(projectId).subscribe({
+    next: docs => this.projectDocs = docs,
+    error: err => console.error('Failed to load project docs', err)
+  });
+}
+
   submitQuoteFile(wi?: any) {
     const target = this.pickWorkItem(wi);
     if (!target) return;
@@ -630,6 +675,9 @@ const normalizeAmount = (value: string): number => {
 
   return Number(normalized);
 };
+
+
+
 
 const totalAmount = normalizeAmount(quoteAmount);
     const key = `rfq_prev_submissions_${this.rfqId}_${this.subId}_${target.workItemID}`;

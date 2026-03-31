@@ -177,6 +177,7 @@ export class ViewProjects {
   dateTimeTouched = false;
   conversationSearchText = '';
   // convoattachments?: RFQConversationMessageAttachment[];
+projectDocs: any[] = [];
 
   convoSubcontractors: { id: string; name: string }[] = [];
   replyingToMessageId: string | null = null;
@@ -450,6 +451,7 @@ ngOnInit(): void {
   if (this.projectId) {
     this.loadProjectDetails(this.projectId);
     this.loadRfqResponseSummary(this.projectId);
+  this.loadProjectDocs(this.projectId);
 
     if (this.selectedTab === 'rfq') {
       this.loadRfqData();
@@ -1503,6 +1505,31 @@ loadConversationSubcontractors(force = false) {
   getWebPath(path: string): string {
     return path ? path.replace(/\\/g, '/') : '';
   }
+
+  loadProjectDocs(projectId: string) {
+  this.rfqService.getProjectDocuments(projectId).subscribe({
+    next: docs => this.projectDocs = docs,
+    error: err => console.error('Failed to load project docs', err)
+  });
+}
+
+downloadDoc(event: Event, docId: string, fileName: string) {
+  event.preventDefault();
+  this.rfqService.downloadProjectDoc(this.projectId, docId).subscribe({
+    next: (blob) => {
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = fileName || 'document.pdf';
+      a.click();
+      URL.revokeObjectURL(url);
+    },
+    error: (err) => {
+      this.alertService.error('Download failed.');
+      console.error('Download error:', err);
+    }
+  });
+}
 loadConversationBySub(subId: string): void {
   if (!subId) return;
 

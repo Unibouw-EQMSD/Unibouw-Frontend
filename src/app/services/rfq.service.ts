@@ -75,6 +75,17 @@ export class RfqService {
   );
 }
 
+downloadProjectDoc(projectId: string, projectDocumentID: string): Observable<Blob> {
+  return from(this.getHeaders()).pipe(
+    switchMap(headers =>
+      this.http.get(
+        `${this.apiURL}/projects/${projectId}/documents/${projectDocumentID}/download`,
+        { headers, responseType: 'blob' }
+      )
+    )
+  );
+}
+
 linkProjectDocsToRfq(rfqId: string, projectDocumentIds: string[]) {
   return from(this.getHeaders()).pipe(
     switchMap(headers =>
