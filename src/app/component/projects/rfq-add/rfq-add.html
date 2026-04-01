@@ -52,7 +52,8 @@
       <div class="card-body">
         <div class="row">
           <!-- Left column: Add Mode = tabs+workitems+upload, Edit Mode = nothing -->
-          <div class="col-sm-6" *ngIf="!rfqIdForEdit">
+          <div class="col-sm-6">
+          <div *ngIf="!rfqIdForEdit">
             <!-- Tabs -->
             <div class="tabs">
               <button
@@ -154,9 +155,6 @@
               </div>
             </ng-container>
           </div>
-
-          <!-- Right column: Subcontractors -->
-          <div class="col-sm-6 subcontractors-card" [style.width]="rfqIdForEdit ? '100%' : null">
             <!-- ADD this: Upload/project-docs UI at the top in Edit mode only -->
             <ng-container *ngIf="rfqIdForEdit">
               <div class="m-2 d-flex align-items-center">
@@ -189,6 +187,10 @@
                 No files uploaded yet.
               </div>
             </ng-container>
+          </div>
+
+          <!-- Right column: Subcontractors -->
+          <div class="col-sm-6 subcontractors-card">
 
             <!-- Subcontractor card (always visible) -->
             <div
