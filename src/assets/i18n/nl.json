@@ -124,7 +124,13 @@
     "DUE_DATE": "Vervaldatum",
     "NO_OF_SUBCONTRACTORS": "Aantal onderaannemers",
     "QUOTE_RECEIVED": "Offerte ontvangen",
-    "STATUS": "Status"
+    "STATUS": "Status",
+    "RFQ_SENT": "Offerteaanvraag succesvol verzonden",
+    "RFQ_FAILED": "De offerteaanvraag is mislukt of verlopen.",
+    "DELETE_RFQ": "Weet u zeker dat u deze offerteaanvraag wilt verwijderen?",
+    "RFQ_DELETE" : "Offerteaanvraag succesvol verwijderd"
+
+
   },
 
    "RFQ_PAGE": {
@@ -406,6 +412,12 @@
     "SAVE_CONFIGURATION" : "Configuratie opslaan"
 
   },
+
+  
+  "COMMON":{
+    "CONFIRM": "Bevestigen"
+  },
+
   "FORM_ACTIONS": {
     "CANCEL": "Annuleren",
     "PREVIEW": "Voorbeeld",

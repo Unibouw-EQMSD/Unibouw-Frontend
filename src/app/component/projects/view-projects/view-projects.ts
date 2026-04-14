@@ -929,17 +929,19 @@ deleteRfq(rfqId: string) {
     position: { top: '10%', right: '35%' },
     panelClass: 'center-dialog',
     data: {
-      title: 'Confirm',
-      message: 'Are you sure you want to delete this RFQ?',
+      title: this.translate.instant('COMMON.CONFIRM'), // optional improvement
+      message: this.translate.instant('RFQ_TABLE.DELETE_RFQ'),
     },
   });
+
 
   dialogRef.afterClosed().subscribe((result: boolean) => {
     if (result === true) {
       this.rfqService.deleteRfq(rfqId).subscribe({
         next: () => {
-          this.alertService.success('RFQ deleted successfully.');
-          this.dataSource.data = this.dataSource.data.filter((r: any) => r.id !== rfqId);
+this.alertService.success(
+  this.translate.instant('RFQ_TABLE.RFQ_DELETE')
+);          this.dataSource.data = this.dataSource.data.filter((r: any) => r.id !== rfqId);
         },
         error: (err) => {
           this.alertService.error(err?.error?.message || 'Unable to delete RFQ.');

@@ -749,13 +749,15 @@ async onSubmit(sendEmail: boolean = false, editedEmailBody: string = '') {
       await this.rfqService.uploadDocsToRfq(finalRfqId, this.selectedProject, selectedNewFiles).pipe(timeout(60000)).toPromise();
     }
 
-    this.alertService.success(sendEmail ? 'RFQ sent successfully!' : 'RFQ saved successfully!');
+    const key = sendEmail ? 'RFQ_TABLE.RFQ_SENT' : 'RFQ_TABLE.RFQ_SAVED';
+this.alertService.success(this.translate.instant(key));
     localStorage.removeItem(this.RFQ_DRAFT_KEY);
 
     this.router.navigate(['/view-projects', this.selectedProject], { queryParams: { tab: 'rfq' } });
   } catch (err) {
     console.error('RFQ failed', err);
-    this.alertService.error('RFQ failed or timed out.');
+const key = 'RFQ_TABLE.RFQ_FAILED';
+this.alertService.error(this.translate.instant(key));
   } finally {
     clearTimeout(loaderTimer);
     this.isLoader = false;

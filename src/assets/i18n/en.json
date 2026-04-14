@@ -125,7 +125,11 @@
     "DUE_DATE": "Due Date",
     "NO_OF_SUBCONTRACTORS": "No. of Subcontractors",
     "QUOTE_RECEIVED": "Quote Recieved",
-    "STATUS": "Status"
+    "STATUS": "Status",
+    "RFQ_SENT": "RFQ Sent Successfully",
+    "RFQ_FAILED": "RFQ failed or timed out.",
+    "DELETE_RFQ": "Are you sure you want to delete this RFQ?",
+    "RFQ_DELETE" : "RFQ Deleted Successfully"
   },
 
   "RFQ_PAGE": {
@@ -400,6 +404,11 @@
     "SAVE": "Save",
     "SAVE_CONFIGURATION" : "Save Configuration"
   },
+
+  "COMMON":{
+    "CONFIRM": "Confirm"
+  },
+  
   "FORM_ACTIONS": {
     "CANCEL": "Cancel",
     "PREVIEW": "Preview",
