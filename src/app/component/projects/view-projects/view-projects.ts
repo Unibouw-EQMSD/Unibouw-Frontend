@@ -417,7 +417,7 @@ private setupTabCleanupOnExit(tabKey: string): void {
   );
 
   if (selected.getTime() > amsterdamNow.getTime()) {
-    this.dateTimeError = 'Future time selection is not allowed';
+this.dateTimeError = this.translate.instant('CONVERSATION.FUTURE_TIME');
     this.conversationDateTime = null;
   } else {
     this.dateTimeError = '';
@@ -929,17 +929,19 @@ deleteRfq(rfqId: string) {
     position: { top: '10%', right: '35%' },
     panelClass: 'center-dialog',
     data: {
-      title: 'Confirm',
-      message: 'Are you sure you want to delete this RFQ?',
+      title: this.translate.instant('COMMON.CONFIRM'), // optional improvement
+      message: this.translate.instant('RFQ_TABLE.DELETE_RFQ'),
     },
   });
+
 
   dialogRef.afterClosed().subscribe((result: boolean) => {
     if (result === true) {
       this.rfqService.deleteRfq(rfqId).subscribe({
         next: () => {
-          this.alertService.success('RFQ deleted successfully.');
-          this.dataSource.data = this.dataSource.data.filter((r: any) => r.id !== rfqId);
+this.alertService.success(
+  this.translate.instant('RFQ_TABLE.RFQ_DELETE')
+);          this.dataSource.data = this.dataSource.data.filter((r: any) => r.id !== rfqId);
         },
         error: (err) => {
           this.alertService.error(err?.error?.message || 'Unable to delete RFQ.');
@@ -1934,11 +1936,13 @@ stopConversationAutoRefresh() {
       .subscribe({
         next: () => {
           this.afterMessageSent();
-          this.alertService.success('Conversation logged successfully!');
+          const key = 'CONVERSATION.SUCCESS_CONVO';
+this.alertService.success(this.translate.instant(key));
         },
         error: (err) => {
           console.error('Error saving conversation:', err);
-          this.alertService.error('Failed to save conversation. Please try again.');
+        const key = 'CONVERSATION.FAILED_CONVO';
+this.alertService.error(this.translate.instant(key));
         },
       });
   }
@@ -2073,13 +2077,13 @@ stopConversationAutoRefresh() {
         this.subject = '';
         this.attachments = [];
         this.afterMessageSent();
-        this.alertService.success('Conversation logged successfully!');
-        //  window.location.reload();
+ const key = 'CONVERSATION.SUCCESS_CONVO';
+this.alertService.success(this.translate.instant(key));        //  window.location.reload();
       },
       error: (err) => {
         console.error('Error sending message:', err);
-        this.alertService.error('Failed to save conversation. Please try again.');
-      },
+ const key = 'CONVERSATION.FAILED_CONVO';
+this.alertService.error(this.translate.instant(key));      },
     });
 }
 

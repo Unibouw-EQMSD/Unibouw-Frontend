@@ -98,21 +98,32 @@
               </div>
               <div class="table-Fixedheader-wrapper" *ngIf="uploadedFiles.length">
                 <table class="table table-Fixedheader table-striped">
-                  <tbody>
-                    <tr
-                      *ngFor="let file of uploadedFiles; let i = index"
-                      [class.selected]="file.selected"
-                    >
-                      <td class="w-70px">
-                        <input
-                          type="checkbox"
-                          [(ngModel)]="file.selected"
-                          class="cursor-pointer"
-                        />
-                      </td>
-                      <td colspan="2">{{ file.name }}</td>
-                    </tr>
-                  </tbody>
+                 <tbody>
+  <tr
+    *ngFor="let file of uploadedFiles; let i = index"
+    [class.selected]="file.selected"
+  >
+    <td class="w-70px">
+      <input
+        type="checkbox"
+        [(ngModel)]="file.selected"
+        class="cursor-pointer"
+      />
+    </td>
+    <td>{{ file.name }}</td>
+    <td *ngIf="file.source === 'new'">
+      <button
+        class="btn btn-sm btn-primary"
+        (click)="saveSingleUploadedFile(i)"
+        [disabled]="file.saving || file.saved"
+      >
+        {{ file.saving ? 'Saving...' : (file.saved ? 'Saved' : 'Save') }}
+      </button>
+      <span *ngIf="file.saveError" style="color: red; font-size: 13px; margin-left:10px;">Error</span>
+    </td>
+    <td *ngIf="file.source !== 'new'"></td>
+  </tr>
+</tbody>
                 </table>
               </div>
               <div

@@ -8,6 +8,7 @@ import { countryList } from '../../shared/countries';
 import { Subscription } from 'rxjs';
 import { Location } from '@angular/common';
 import { AlertService } from '../../services/alert.service';
+import { TranslateService } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-add-subcontractor',
@@ -159,6 +160,8 @@ ${indent}${indent}${workItemsText
     private userService: UserService,
     private location: Location,
     private alertService: AlertService,
+    private translate: TranslateService
+
   ) {
     this.workitemSearchControl = new FormControl('');
 
@@ -567,7 +570,9 @@ private semanticNumberSort(a: string, b: string): number {
       if (this.projectId && this.projectId !== 'null') {
         this.alertService.success('Subcontractors added to the RFQ successfully.');
       } else {
-        this.alertService.success('Subcontractor created successfully.');
+        const key = 'SUBCONTRACTOR.SUBCONTRACTOR_CREATED';
+
+        this.alertService.success(this.translate.instant(key));
       }
 
       this.handleFormResetAndRedirect();
