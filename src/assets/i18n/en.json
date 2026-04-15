@@ -12,7 +12,9 @@
     "ACTIONS": "Actions",
     "NO_DATA": "No data available",
     "LOADING": "Loading...",
-    "ITEMS": "Items per page:"
+    "ITEMS": "Items per page:",
+        "CONFIRM": "Confirm"
+
   },
   "HEADER": {
     "LOGOUT": "Logout",
@@ -139,7 +141,7 @@
     "CREATED_DATE": "Created Date",
     "WORK_ITEM": "Work Item",
 
-
+"DISCARD": "Discard all the changes?",
     "SELECT": "Select",
 
     "SUBCONTRACTORS": "Subcontractors",
@@ -199,7 +201,10 @@
     "ENTER_SUBJECT": "Enter Subject",
     "ENTER_MESSAGE": "Enter your message...",
     "MESSAGE_TOO_LONG": "Message is too long. Please shorten your message.",
-    "VALIDATION": "Fields cannot be empty."
+    "VALIDATION": "Fields cannot be empty.",
+    "FAILED_CONVO": "Failed to save conversation. Please try again.",
+    "SUCCESS_CONVO": "Conversation logged successfully!",
+    "FUTURE_TIME": "Future time selection is not allowed"
   },
 
   "RFQ_EMAIL": {
@@ -270,7 +275,8 @@
     "INACTIVE": "Inactive",
     "WORKITEMS": "Workitems",
     "NO_WORKITEMS": "No workitems assigned",
-    "BACK_TO_LISTING": "Back to Listing"
+    "BACK_TO_LISTING": "Back to Listing",
+    "SUBCONTRACTOR_CREATED": "Subcontractor created successfully."
   },
 
   "SUBCONTRACTOR_FORM": {
@@ -405,10 +411,7 @@
     "SAVE_CONFIGURATION" : "Save Configuration"
   },
 
-  "COMMON":{
-    "CONFIRM": "Confirm"
-  },
-  
+
   "FORM_ACTIONS": {
     "CANCEL": "Cancel",
     "PREVIEW": "Preview",

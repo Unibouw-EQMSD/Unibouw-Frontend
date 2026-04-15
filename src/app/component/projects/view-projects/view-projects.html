@@ -819,7 +819,7 @@
                               <textarea
                                 class="reply-textarea"
                                 rows="3"
-                                placeholder="Write a reply…"
+                                placeholder="{{'CONVERSATION.WRITE_REPLY'| translate}}"
                                 [(ngModel)]="replyTexts[convo.conversationMessageID]"
                                 (input)="validateReply(convo.conversationMessageID)"
                               ></textarea>

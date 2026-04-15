@@ -43,9 +43,12 @@ export class RfqAdd {
 uploadedFiles: {
   name: string;
   selected: boolean;
-  file?: File;                  // only for new uploads
-  source: 'new' | 'project';    // identify row type
-  projectDocumentID?: string;   // only for project docs
+  file?: File;
+  source: 'new' | 'project';
+  projectDocumentID?: string;
+  saving?: boolean;
+  saved?: boolean;
+  saveError?: boolean;
 }[] = [];
   createdDate: Date = new Date();
   selectedDueDate: string = '';
@@ -281,8 +284,8 @@ projectDocuments: { projectDocumentID: string; fileName: string; selected: boole
       panelClass: 'center-dialog',
 
       data: {
-        title: 'Confirm',
-        message: 'Discard all changes?',
+        title: this.translate.instant('COMMON.CONFIRM'),
+        message: this.translate.instant('RFQ_PAGE.DISCARD'),
       },
     });
 
@@ -773,6 +776,37 @@ this.alertService.error(this.translate.instant(key));
       },
     });
   }
+
+  async saveSingleUploadedFile(index: number) {
+  const fileObj = this.uploadedFiles[index];
+  if (!fileObj || fileObj.source !== 'new' || !fileObj.file) return;
+
+  fileObj.saving = true;
+  fileObj.saveError = false;
+  try {
+    // Use the correct rfqId and projectId
+    const rfqId = this.rfqIdForEdit;
+    const projectId = this.selectedProject;
+
+    if (!rfqId) {
+      this.alertService.warning('Please save the RFQ before uploading files');
+      fileObj.saving = false;
+      return;
+    }
+
+    await this.rfqService.uploadDocsToRfq(rfqId, projectId, [fileObj.file]).toPromise();
+
+    fileObj.saved = true;
+    this.alertService.success('File uploaded successfully');
+  } catch (e) {
+    fileObj.saveError = true;
+    this.alertService.error('File upload failed');
+    console.error('File upload failed:', e);
+  } finally {
+    fileObj.saving = false;
+    this.cdr.detectChanges();
+  }
+}
   loadProjects() {
     this.projectService.getProjects().subscribe({
       next: (res: projectdetails[]) => {

@@ -12,7 +12,9 @@
     "ACTIONS": "Acties",
     "NO_DATA": "Geen gegevens beschikbaar",
     "LOADING": "Laden...",
-    "ITEMS": "Artikelen per pagina:"
+    "ITEMS": "Artikelen per pagina:",
+    "CONFIRM": "Bevestigen"
+
 
   },
   "HEADER": {
@@ -142,6 +144,7 @@
 
     "TAB_UNIBOUW": "Unibouw",
     "TAB_STANDARD": "Standaard",
+"DISCARD": "Alle wijzigingen ongedaan maken?",
 
     "SELECT": "Selecteren",
 
@@ -203,7 +206,13 @@
     "ENTER_SUBJECT": "Onderwerp invoeren",
     "ENTER_MESSAGE": "Voer uw bericht in...",
     "MESSAGE_TOO_LONG": "Het bericht is te lang. Verkort uw bericht.",
-        "VALIDATION": "Velden mogen niet leeg zijn."
+    "VALIDATION": "Velden mogen niet leeg zijn.",
+    "FAILED_CONVO": "Het opslaan van het gesprek is mislukt. Probeer het opnieuw.",
+    "SUCCESS_CONVO": "Het gesprek is succesvol vastgelegd!",
+        "FUTURE_TIME": "Het is niet mogelijk om een ​​tijdstip in de toekomst te selecteren."
+
+
+
 
   },
 
@@ -276,7 +285,9 @@
     "INACTIVE": "Inactief",
     "WORKITEMS": "Werkonderdelen",
     "NO_WORKITEMS": "Geen toegewezen werkonderdelen",
-    "BACK_TO_LISTING": "Terug naar lijst"
+    "BACK_TO_LISTING": "Terug naar lijst",
+        "SUBCONTRACTOR_CREATED": "Ondercontract succesvol aangemaakt."
+
 
   },
   "SUBCONTRACTOR_FORM": {
@@ -414,9 +425,6 @@
   },
 
   
-  "COMMON":{
-    "CONFIRM": "Bevestigen"
-  },
 
   "FORM_ACTIONS": {
     "CANCEL": "Annuleren",

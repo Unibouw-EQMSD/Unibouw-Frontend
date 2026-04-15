@@ -417,7 +417,7 @@ private setupTabCleanupOnExit(tabKey: string): void {
   );
 
   if (selected.getTime() > amsterdamNow.getTime()) {
-    this.dateTimeError = 'Future time selection is not allowed';
+this.dateTimeError = this.translate.instant('CONVERSATION.FUTURE_TIME');
     this.conversationDateTime = null;
   } else {
     this.dateTimeError = '';
@@ -1936,11 +1936,13 @@ stopConversationAutoRefresh() {
       .subscribe({
         next: () => {
           this.afterMessageSent();
-          this.alertService.success('Conversation logged successfully!');
+          const key = 'CONVERSATION.SUCCESS_CONVO';
+this.alertService.success(this.translate.instant(key));
         },
         error: (err) => {
           console.error('Error saving conversation:', err);
-          this.alertService.error('Failed to save conversation. Please try again.');
+        const key = 'CONVERSATION.FAILED_CONVO';
+this.alertService.error(this.translate.instant(key));
         },
       });
   }
@@ -2075,13 +2077,13 @@ stopConversationAutoRefresh() {
         this.subject = '';
         this.attachments = [];
         this.afterMessageSent();
-        this.alertService.success('Conversation logged successfully!');
-        //  window.location.reload();
+ const key = 'CONVERSATION.SUCCESS_CONVO';
+this.alertService.success(this.translate.instant(key));        //  window.location.reload();
       },
       error: (err) => {
         console.error('Error sending message:', err);
-        this.alertService.error('Failed to save conversation. Please try again.');
-      },
+ const key = 'CONVERSATION.FAILED_CONVO';
+this.alertService.error(this.translate.instant(key));      },
     });
 }
 
