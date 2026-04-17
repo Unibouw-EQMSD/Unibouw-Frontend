@@ -11,11 +11,13 @@ import { ConfirmDialogComponent } from '../../../confirm-dialog-component/confir
 import { Location } from '@angular/common';
 import { AlertService } from '../../../services/alert.service';
 import { TranslateService } from '@ngx-translate/core';
+import { MatTableDataSource } from '@angular/material/table';
 
 interface SubcontractorItem {
   subcontractorID: string;
   name: string;
   selected?: boolean;
+    location?: string; 
   dueDate?: string;
   category?: string;
   personName?: string;
@@ -36,6 +38,10 @@ export class RfqAdd {
   selectedTab: 'standard' | 'unibouw' | 'uploaded' = 'unibouw';
   globalDueDate: any = '';
   uploadedWorkitems: Workitem[] = [];
+  dataSourceWorkitems = new MatTableDataSource<any>();
+dataSourceSubcontractors = new MatTableDataSource<any>();
+  searchWorkitem: string = '';
+searchSubcontractor: string = '';
   uploadedFiles: {
     name: string;
     selected: boolean;
@@ -114,8 +120,29 @@ export class RfqAdd {
 editedEmailBody: this.editedEmailBody?.trim() ? this.editedEmailBody : null      }),
     );
   }
+applyWorkitemFilter() {
+  const value = this.searchWorkitem.trim().toLowerCase();
 
+  const source =
+    this.selectedTab === 'standard'
+      ? this.standardWorkitems
+      : this.unibouwWorkitems;
 
+  this.dataSourceWorkitems.data = source.filter(item =>
+    item.name.toLowerCase().includes(value) ||
+    item.number.toLowerCase().includes(value)
+  );
+}
+
+// 🔍 Subcontractor filter
+applySubcontractorFilter() {
+  const value = this.searchSubcontractor.trim().toLowerCase();
+
+  this.dataSourceSubcontractors.data = this.subcontractors.filter(sub =>
+    sub.name.toLowerCase().includes(value) ||
+    (sub.location || '').toLowerCase().includes(value)
+  );
+}
 onSaveDraftClick() {
   this.saveDraft();   // 🔥 manually store draft
   this.onSubmit(false); // existing logic
@@ -437,6 +464,7 @@ this.editedEmailBody = this.originalRfq.customNote || '';
         subcontractorID: String(s.subcontractorID ?? ''),
         name: String(s.name ?? ''),
         email: String(s.email ?? ''),
+        location: String(s.location ?? ''),
         selected: rfqDueDateMap.has(this.normalizeId(s.subcontractorID)),
         dueDate: rfqDueDateMap.get(this.normalizeId(s.subcontractorID)) ?? '',
         linkedWorkItemIDs: mappings
@@ -453,6 +481,7 @@ this.editedEmailBody = this.originalRfq.customNote || '';
         }
       });
       this.subcontractors = [...this.subcontractors];
+      this.dataSourceSubcontractors.data = this.subcontractors;
       this.cdr.detectChanges();
     } catch (err) {
       console.error('❌ Error loading subcontractors:', err);
@@ -717,6 +746,11 @@ console.log('👉 this.customNote:', this.customNote);
       );
       this.standardWorkitems = this.sortWorkItemsAsc(standard ?? []);
       this.unibouwWorkitems = this.sortWorkItemsAsc(unibouw ?? []);
+      // 👇 ADD THIS
+this.dataSourceWorkitems.data =
+  this.selectedTab === 'standard'
+    ? this.standardWorkitems
+    : this.unibouwWorkitems;
       if (uploadedCategory) {
         try {
           const uploaded = await lastValueFrom(
@@ -733,6 +767,13 @@ console.log('👉 this.customNote:', this.customNote);
       this.isLoader = false;
     }
   }
+
+updateWorkitemDatasource() {
+  this.dataSourceWorkitems.data =
+    this.selectedTab === 'standard'
+      ? this.standardWorkitems
+      : this.unibouwWorkitems;
+}
 
   isWorkItemSelected(item: Workitem): boolean {
     return this.selectedWorkItems.some((w) => w.workItemID === item.workItemID);

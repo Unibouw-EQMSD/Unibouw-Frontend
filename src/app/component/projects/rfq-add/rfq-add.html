@@ -65,11 +65,11 @@
             <div *ngIf="!rfqIdForEdit">
               <!-- Tabs -->
               <div class="tabs">
-                <button
-                  mat-button
-                  (click)="selectedTab = 'unibouw'"
-                  [class.active]="selectedTab === 'unibouw'"
-                >
+               <button
+  mat-button
+  (click)="selectedTab = 'unibouw'; updateWorkitemDatasource()"
+  [class.active]="selectedTab === 'unibouw'"
+>
                   {{ 'WORKITEM.TAB_UNIBOUW' | translate }}
                   <span class="count-badge" *ngIf="getSelectedCountByTab('unibouw') > 0">
                     {{ getSelectedCountByTab('unibouw') }}
@@ -156,8 +156,13 @@
               <ng-container *ngIf="selectedTab !== 'uploaded'">
                 
                 <div class="m-2 d-flex align-items-center">
-                  <input type="text" class="form-control mb-2" placeholder="Search" />
-                </div>
+<input
+  type="text"
+  class="form-control mb-2"
+  placeholder="Search"
+  [(ngModel)]="searchWorkitem"
+  (input)="applyWorkitemFilter()"
+/>                </div>
                 <div class="table-Fixedheader-wrapper" *ngIf="!isLoader">
                   <table class="table table-Fixedheader table-striped">
                     <thead>
@@ -169,13 +174,10 @@
                     </thead>
                     <tbody>
                       <tr
-                        *ngFor="
-                          let item of selectedTab === 'standard'
-                            ? standardWorkitems
-                            : unibouwWorkitems
-                        "
-                        [class.selected]="isWorkItemSelected(item)"
-                      >
+*ngFor="let item of dataSourceWorkitems.data"
+    [class.selected]="isWorkItemSelected(item)"
+  >
+
                         <td>
                           <input
                             type="checkbox"
@@ -280,7 +282,13 @@
                   </div>
                 </div>
               </div>
-              <div class="m-2 d-flex align-items-center"><input type="text" placeholder="Search" class="form-control mb-2"></div>
+              <div class="m-2 d-flex align-items-center"><input
+  type="text"
+  placeholder="Search"
+  class="form-control mb-2"
+  [(ngModel)]="searchSubcontractor"
+  (input)="applySubcontractorFilter()"
+/></div>
               <div class="table-Fixedheader-wrapper">
                 <table class="table table-Fixedheader table-striped">
                   <thead>
@@ -295,7 +303,7 @@
                   <tbody>
                     <tr
                       class="checkbox-listRow"
-                      *ngFor="let sub of subcontractors; let i = index"
+                     *ngFor="let sub of dataSourceSubcontractors.data; let i = index"
                       [style.background-color]="i % 2 === 0 ? '#fcfcfc' : '#f0f2f5'"
                     >
                       <td class="td_checkbox">
@@ -308,7 +316,7 @@
                       </td>
                       <td>{{ sub.name }}</td>
                       <td><div class="rating">★ 0</div></td>
-                      <td>Location</td>
+<td>{{ sub.location || '-' }}</td>
                       <td class="td_intDate">
                         <input
                           type="date"

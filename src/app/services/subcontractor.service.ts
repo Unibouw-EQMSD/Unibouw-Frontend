@@ -5,6 +5,7 @@ import { MsalService } from '@azure/msal-angular';
 import { AppConfigService } from './app.config.service';
 
 export interface Subcontractors {
+  location: string;
   subcontractorID: string;
   name: string;
   category: string;
@@ -66,6 +67,7 @@ export class SubcontractorService {
       (res.data || []).map((it) => ({
         subcontractorID: it.subcontractorID,
         name: it.name || '',
+        location:it.location || '',
         category: it.category || '',
         contactName: it.contactName || '',
         contactPhone: it.contactPhone || '',

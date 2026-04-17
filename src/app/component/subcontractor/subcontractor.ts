@@ -134,10 +134,10 @@ export class Subcontractor implements OnInit, AfterViewInit {
       },
     });
   }
-  applyFilter() {
-    this.dataSource.filter = this.searchText.trim().toLowerCase();
-    if (this.dataSource.paginator) this.dataSource.paginator.firstPage();
-  }
+    applyFilter() {
+      this.dataSource.filter = this.searchText.trim().toLowerCase();
+      if (this.dataSource.paginator) this.dataSource.paginator.firstPage();
+    }
 
   handleRowClick(row: any) {
   if (!row.isActive) {
