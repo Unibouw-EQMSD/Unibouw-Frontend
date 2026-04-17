@@ -55,19 +55,6 @@
   min-height: 20px;
 }
 
-.form-control {
-  border: none;
-  border-bottom: 1px solid #ddd;
-  padding: 6px 8px;
-  font-size: 14px;
-  border-radius: 0;
-}
-
-.form-control-textarea {
-  border: 1px solid #ddd;
-  padding: 6px 8px;
-}
-
 .form-checkbox-label {
   margin-left: 6px;
 }
@@ -109,15 +96,6 @@
 .is-invalid-textarea {
   border: none;
   border: 1px solid rgb(255, 0, 0) !important;
-}
-
-.form-control:focus,
-.form-control:active,
-.form-control:focus-visible {
-  outline: none !important;
-  box-shadow: none !important;
-  border: none;
-  border-bottom: 1px solid #063d4c; /* optional focus color */
 }
 
 .full-width {

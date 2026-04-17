@@ -1215,3 +1215,39 @@ mat-datepicker-content.mat-datepicker-content.mat-datepicker-content-animations-
 tbody.mat-calendar-body td {
     padding: 7.14286% !important;
 }
+.form-control {
+    border: none;
+    border-bottom: 1px solid #ddd;
+    padding: 6px 8px;
+    font-size: 14px;
+    border-radius: 0;
+}
+.form-control:focus,
+.form-control:active,
+.form-control:focus-visible {
+  outline: none !important;
+  box-shadow: none !important;
+  border: none;
+  border-bottom: 1px solid #063d4c; /* optional focus color */
+}
+.form-control-textarea {
+  border: 1px solid #ddd;
+  padding: 6px 8px;
+}
+
+.form-checkbox-label {
+  margin-left: 6px;
+}
+
+/* Rating styling (orange stars + value) */
+.rating {
+  color: orange;
+  font-size: 14px;
+  margin-left: 5px;
+}
+
+.rating span {
+  margin-left: 3px;
+  font-size: 12px;
+  color: #333;
+}

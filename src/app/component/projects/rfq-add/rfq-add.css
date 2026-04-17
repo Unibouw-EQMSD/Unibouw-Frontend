@@ -5,8 +5,8 @@
 }
 
 .table-Fixedheader-wrapper {
-  min-height: calc(100vh - 319px);
-  max-height: calc(100vh - 319px);
+  min-height: calc(100vh - 371px);
+  max-height: calc(100vh - 371px);
 }
 .form-card {
   display: grid;
@@ -530,3 +530,5 @@
 .subcontractors-card .form-control {
   padding: 0.275rem 0.75rem !important;
 }
+
+.w-40 {width: 40px;}
