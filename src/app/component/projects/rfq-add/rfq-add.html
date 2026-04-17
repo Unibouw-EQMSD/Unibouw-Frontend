@@ -337,8 +337,11 @@
       </div>
       <div class="modal-body" *ngIf="!isLoader">
         <p>{{ 'RFQ_PREVIEW.DEAR' | translate }},</p>
-        <textarea class="email-body-editor" [(ngModel)]="editedEmailBody"></textarea>
-        <div class="details-box">
+<textarea
+  class="email-body-editor"
+  [(ngModel)]="editedEmailBody"
+  (ngModelChange)="saveDraft()"
+></textarea>        <div class="details-box">
           <div class="detail-item">
             <div class="detail-label">{{ 'RFQ_PREVIEW.RFQ_ID' | translate }}</div>
             <div class="detail-value" style="font-style: italic">{{ previewData?.rfqId }}</div>
@@ -375,14 +378,14 @@
         <button class="btn btn-cancel" (click)="closePreview()" [disabled]="isLoader">
           {{ 'RFQ_PREVIEW.CLOSE' | translate }}
         </button>
-        <button
-          type="button"
-          class="btn btn-primary"
-          *ngIf="!rfqIdForEdit"
-          (click)="onSubmit(false)"
-        >
-          {{ 'RFQ_FOOTER_ACTIONS.SAVE_DRAFT' | translate }}
-        </button>
+      <button
+  type="button"
+  class="btn btn-primary"
+  *ngIf="!rfqIdForEdit"
+  (click)="onSaveDraftClick()"
+>
+  {{ 'RFQ_FOOTER_ACTIONS.SAVE_DRAFT' | translate }}
+</button>
         <button
           class="btn btn-primary"
           (click)="onSubmit(true, editedEmailBody)"

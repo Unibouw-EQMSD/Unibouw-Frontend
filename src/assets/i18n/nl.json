@@ -431,5 +431,9 @@
     "PREVIEW": "Voorbeeld",
     "SAVE_DRAFT": "Concept opslaan",
     "SEND_TO_SUBCONTRACTORS": "Verstuur naar onderaannemers"
+  },
+
+    "APP": {
+    "TITLE": "Offerte aanvragen Unibouw"
   }
 }

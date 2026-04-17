@@ -257,7 +257,7 @@
     "CODE": "Workitem Code",
     "NAME": "Workitem",
     "TAB_UNIBOUW": "Unibouw",
-    "TAB_STANDARD": "Standard",
+    "TAB_STANDARD": "NL-SfB",
     "TAB_UPLOADED": "Uploaded"
   },
   "SUBCONTRACTOR": {
@@ -417,5 +417,9 @@
     "PREVIEW": "Preview",
     "SAVE_DRAFT": "Save Draft",
     "SEND_TO_SUBCONTRACTORS": "Send to Subcontractors"
+  },
+
+   "APP": {
+    "TITLE": "QMS Unibouw"
   }
 }

@@ -1,5 +1,6 @@
 import { Component, signal } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
+import { Title } from '@angular/platform-browser';
 
 @Component({
   selector: 'app-root',
@@ -8,11 +9,22 @@ import { TranslateService } from '@ngx-translate/core';
   styleUrl: './app.css'
 })
 export class App {
-   constructor(private translate: TranslateService) {
-    translate.setDefaultLang('en');
+  constructor(
+    private translate: TranslateService,
+    private titleService: Title
+  ) {
+    // Set the initial translated title when the app loads
+    this.setTranslatedTitle();
 
-    // later you can read this from user profile / localStorage
-    translate.use('en'); // or 'nl'
+    // Listen for language change and update title accordingly
+    this.translate.onLangChange.subscribe(() => {
+      this.setTranslatedTitle();
+    });
   }
-  protected readonly title = signal('Unibouw');
+
+  private setTranslatedTitle() {
+    this.translate.get('APP.TITLE').subscribe(title => {
+      this.titleService.setTitle(title);
+    });
+  }
 }
