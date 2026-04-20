@@ -111,10 +111,12 @@
                   <label class="col-form-label">{{
                     'PROJECT_DETAILS.SPECIFICATION' | translate
                   }}</label>
-                 <div *ngFor="let doc of projectDocs">
-  <a href (click)="downloadDoc($event, doc.projectDocumentID, doc.fileName)">
+                 <div *ngFor="let doc of projectDocs" class="d-flex justify-content-between align-items-center">
+  <a href="" (click)="downloadDoc($event, doc.projectDocumentID, doc.fileName)">
     {{ doc.fileName }}
   </a>
+  <a class="text-danger" href="" (click)="deleteDoc($event, doc.projectDocumentID)" title="Delete {{ doc.fileName }}">
+    <i class="bi bi-trash3"></i></a>
 </div>
                 </div>
               </div>

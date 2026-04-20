@@ -86,6 +86,16 @@ downloadProjectDoc(projectId: string, projectDocumentID: string): Observable<Blo
   );
 }
 
+deleteProjectDoc(projectId: string, projectDocumentID: string): Observable<any> {
+  return from(this.getHeaders()).pipe(
+    switchMap((headers) =>
+      this.http.delete(`${this.apiURL}/projects/${projectId}/documents/${projectDocumentID}`, {
+        headers,
+      }),
+    ),
+  );
+}
+
 linkProjectDocsToRfq(rfqId: string, projectDocumentIds: string[]) {
   return from(this.getHeaders()).pipe(
     switchMap(headers =>

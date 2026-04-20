@@ -1532,6 +1532,34 @@ downloadDoc(event: Event, docId: string, fileName: string) {
     }
   });
 }
+
+deleteDoc(event: Event, docId: string) {
+  event.preventDefault();
+
+  const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+    width: '350px',
+    position: { top: '10%', right: '35%' },
+    panelClass: 'center-dialog',
+    data: {
+      title: this.translate.instant('COMMON.CONFIRM'),
+      message: this.translate.instant('COMMON.DELETE_CONFIRM'),
+    },
+  });
+
+  dialogRef.afterClosed().subscribe((result: boolean) => {
+    if (result !== true) return;
+
+    this.rfqService.deleteProjectDoc(this.projectId, docId).subscribe({
+      next: () => {
+        this.projectDocs = this.projectDocs.filter((doc) => doc.projectDocumentID !== docId);
+        this.alertService.success('Document deleted successfully.');
+      },
+      error: (err) => {
+        this.alertService.error(err?.error?.message || 'Unable to delete document.');
+      },
+    });
+  });
+}
 loadConversationBySub(subId: string): void {
   if (!subId) return;
 
