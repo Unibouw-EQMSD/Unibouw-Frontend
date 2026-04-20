@@ -24,6 +24,7 @@ import { HttpClient } from '@angular/common/http';
 import { RfqResponseService } from '../../services/rfq-response.service';
 import { AlertService } from '../../services/alert.service';
 import { RfqService } from '../../services/rfq.service';
+import { Title } from '@angular/platform-browser';
 
 interface NotInterestedData {
   reason: string;
@@ -131,6 +132,7 @@ projectDocs: any[] = [];
     private fb: FormBuilder,
     private http: HttpClient,
     private alertService: AlertService,
+     private titleService: Title
   ) {
     registerLocaleData(localeNl);
 
@@ -145,6 +147,7 @@ projectDocs: any[] = [];
   }
 
 ngOnInit(): void {
+  this.titleService.setTitle('QMS Unibouw');
   this.route.queryParams.subscribe(params => {
     this.projectId = params['projectId'] || '';
     if (this.projectId) {
@@ -553,65 +556,93 @@ ${reason === 'Anders' ? `Comment        : ${comment}` : ''}
 
     return baseClass;
   }
+submitInterest(status: string, wi?: any) {
+  const target = this.pickWorkItem(wi);
+  if (!target) return;
 
-  submitInterest(status: string, wi?: any) {
-    const target = this.pickWorkItem(wi);
-    if (!target) return;
+  // mark viewed
+  this.rfqResponseService.markAsViewed(this.rfqId, this.subId, target.workItemID).subscribe();
 
-    // mark viewed
-    this.rfqResponseService.markAsViewed(this.rfqId, this.subId, target.workItemID).subscribe();
+  // set state for UI
+  target.status = status;
+  target.viewed = true;
 
-    // set state for UI
-    target.status = status;
-    target.viewed = true;
+  // only disable buttons when Interested (as your old logic)
+  target.buttonsDisabled = status === 'Interested';
+  target.isInterested = status === 'Interested';
 
-    // only disable buttons when Interested (as your old logic)
-    target.buttonsDisabled = status === 'Interested';
-    target.isInterested = status === 'Interested';
-
-    // expand quote panel only if Interested
-    if (status === 'Interested') {
-      this.expandedId = target.workItemID;
-    } else if (this.expandedId === target.workItemID) {
-      this.expandedId = null;
-    }
-
-    const reasonPayload =
-      status === 'Not Interested'
-        ? { reason: target.notInterested?.reason || '', comment: target.notInterested?.comment || '' }
-        : null;
-
-    this.rfqResponseService
-      .submitRfqResponse(this.rfqId, this.subId, target.workItemID, status, reasonPayload, null)
-      .subscribe({
-        next: () => {
-          if (status === 'Maybe Later') {
-            this.alertService.success('Your preference has been recorded. You may respond any time before the due date.');
-          } else {
-            this.alertService.success(`Your response "${status}" was recorded successfully!`);
-          }
-
-          // ✅ SAVE PER WORK ITEM
-          const key = `rfq_state_${this.rfqId}_${this.subId}_${target.workItemID}`;
-          localStorage.setItem(
-            key,
-            JSON.stringify({
-              status,
-              viewed: true,
-              buttonsDisabled: target.buttonsDisabled,
-              isInterested: target.isInterested,
-              notInterested: reasonPayload,
-              maybeLaterDate: target.maybeLaterDate || null,
-            }),
-          );
-        },
-        error: () => {
-          this.alertService.error('Failed to submit response.');
-          target.buttonsDisabled = false;
-          target.isInterested = false;
-        },
-      });
+  // expand quote panel only if Interested
+  if (status === 'Interested') {
+    this.expandedId = target.workItemID;
+  } else if (this.expandedId === target.workItemID) {
+    this.expandedId = null;
   }
+
+  const reasonPayload =
+    status === 'Not Interested'
+      ? { reason: target.notInterested?.reason || '', comment: target.notInterested?.comment || '' }
+      : null;
+
+  this.rfqResponseService
+    .submitRfqResponse(this.rfqId, this.subId, target.workItemID, status, reasonPayload, null)
+    .subscribe({
+      next: () => {
+        if (status === 'Maybe Later') {
+          this.alertService.success('Your preference has been recorded. You may respond any time before the due date.');
+        } else {
+          this.alertService.success(`Your response "${status}" was recorded successfully!`);
+        }
+
+        // ✅ SAVE PER WORK ITEM
+        const key = `rfq_state_${this.rfqId}_${this.subId}_${target.workItemID}`;
+        localStorage.setItem(
+          key,
+          JSON.stringify({
+            status,
+            viewed: true,
+            buttonsDisabled: target.buttonsDisabled,
+            isInterested: target.isInterested,
+            notInterested: reasonPayload,
+            maybeLaterDate: target.maybeLaterDate || null,
+          }),
+        );
+
+        // === NEW: Log Interested in conversation table ===
+        if (status === 'Interested') {
+          const workItemName = target?.name || '';
+          const rfqNumber = this.rfq?.rfqNumber || '';
+
+          const message = `
+Interested – Confirmation
+
+RFQ Number     : ${rfqNumber}
+Work Item Name : ${workItemName}
+`.trim();
+
+          const payload: LogConversation = {
+            projectID: this.project?.projectID,
+            subcontractorID: this.subId,
+            conversationType: 'Email',
+            subject: 'Marked as Interested',
+            message,
+            messageDateTime: null as any,
+          };
+
+          if (payload.projectID) {
+            this.projectService.createLogConversation(payload).subscribe({
+              next: (r) => console.log('Interested logged successfully:', r),
+              error: (err) => console.error('Failed to log Interested:', err),
+            });
+          }
+        }
+      },
+      error: () => {
+        this.alertService.error('Failed to submit response.');
+        target.buttonsDisabled = false;
+        target.isInterested = false;
+      },
+    });
+}
 
 downloadDoc(event: Event, docId: string, fileName: string) {
   event.preventDefault();
