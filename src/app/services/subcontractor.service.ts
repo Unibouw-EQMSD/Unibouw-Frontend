@@ -14,6 +14,8 @@ export interface Subcontractors {
   email: string;
   isActive?: boolean;
   editItem?: boolean;
+    linkedWorkItemIDs?: string[];
+
 }
 
 @Injectable({ providedIn: 'root' })
@@ -55,30 +57,35 @@ export class SubcontractorService {
   }
 
   /* Get all subcontractors */
- getSubcontractors(onlyActive: boolean = false): Observable<Subcontractors[]> {
+getSubcontractors(): Observable<Subcontractors[]> {
   return from(this.getHeaders()).pipe(
     switchMap((headers) =>
-      this.http.get<{ count: number; data: Subcontractors[] }>(
-        `${this.getsubcontractor}?onlyActive=${onlyActive}`,
+      this.http.get<{ count: number; data: any[] }>(
+        `${this.getsubcontractor}`,
         { headers }
       )
     ),
-    map((res) =>
-      (res.data || []).map((it) => ({
-        subcontractorID: it.subcontractorID,
-        name: it.name || '',
-        location:it.location || '',
-        category: it.category || '',
-        contactName: it.contactName || '',
-        contactPhone: it.contactPhone || '',
-        email: it.email || '',
-        isActive: it.isActive,
+    map((res) => {
+      console.log('🔵 RAW API RESPONSE:', res.data);
+
+      return (res.data || []).map((it: any) => ({
+        subcontractorID: it.SubcontractorID ?? it.subcontractorID,
+        name: it.Name ?? '',
+        location: it.Location ?? '',
+        category: it.WorkItemName ?? '-',
+        contactName: it.ContactName ?? '',
+        contactPhone: it.ContactPhone ?? '',
+        email: it.Email ?? '',
+        isActive: it.IsActive ?? false,
+
+        // ✅ CRITICAL FIX
+        linkedWorkItemIDs: it.WorkItemIDs ?? [],
+
         editItem: false,
-      }))
-    ),
+      }));
+    })
   );
 }
-
   getSubcontractorById(id: string): Observable<Subcontractors> {
   return from(this.getHeaders()).pipe(
     switchMap((headers) =>

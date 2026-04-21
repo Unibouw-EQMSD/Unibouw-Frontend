@@ -489,31 +489,30 @@ private semanticNumberSort(a: string, b: string): number {
 
     const formValue = this.subcontractorForm.value;
 
-    const payload = {
-      erp_ID: formValue.erpId?.trim() || '',
-      name: formValue.name?.trim(),
-      rating: formValue.rating || 0,
-      email: formValue.email, // main subcontractor email
-      phoneNumber1: this.selectedCountry.code + ' ' + formValue.contactNumber,
-      phoneNumber2: '', // optional
-      location: formValue.location,
-      country: formValue.country,
-      officeAddress: formValue.officeAddress,
-      billingAddress: formValue.sameAsOffice
-        ? formValue.officeAddress
-        : formValue.billingAddress || '',
-      personID: null,
-      workItemIDs: Array.from(
-        new Set(
-          Array.from(this.selectionsByCategory.values())
-            .flat()
-            .map((w) => w.workItemID),
-        ),
-      ),
-      contactName: formValue.contactPerson,
-      contactEmail: formValue.contactEmail,
-      contactPhone: this.selectedCountry.code + formValue.contactNumber,
-    };
+  const payload = {
+  name: formValue.name?.trim(),
+  rating: formValue.rating || 0,
+  email: formValue.email,
+  phoneNumber1: this.selectedCountry.code + ' ' + formValue.contactNumber,
+  phoneNumber2: '',
+  location: formValue.location,
+  country: formValue.country,
+  officeAddress: formValue.officeAddress,
+  billingAddress: formValue.sameAsOffice
+    ? formValue.officeAddress
+    : formValue.billingAddress || '',
+  personID: null,
+  workItemIDs: Array.from(
+    new Set(
+      Array.from(this.selectionsByCategory.values())
+        .flat()
+        .map((w) => w.workItemID),
+    ),
+  ),
+  contactName: formValue.contactPerson,
+  contactEmail: formValue.contactEmail,
+  contactPhone: this.selectedCountry.code + formValue.contactNumber,
+};
 
     this.subcontractorService.createSubcontractor(payload).subscribe({
       next: (res) => {
