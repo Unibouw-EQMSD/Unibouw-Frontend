@@ -682,7 +682,14 @@ loadProjectDocs(projectId: string | undefined) {
   submitQuoteFile(wi?: any) {
     const target = this.pickWorkItem(wi);
     if (!target) return;
+const sharepointUrl = this.project?.sharepointURL;
 
+if (!sharepointUrl || !sharepointUrl.trim()) {
+  this.alertService.error(
+    'Unable to upload Quote, Please contact Unibouw Team or try again later.'
+  );
+  return;
+}
     this.formSubmitted = true;
 
     if (this.quoteForm.invalid) {

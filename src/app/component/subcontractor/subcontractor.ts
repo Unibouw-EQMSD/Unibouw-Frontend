@@ -97,43 +97,31 @@ export class Subcontractor implements OnInit, AfterViewInit {
       }
     };
   }
-  loadSubcontractors() {
-    this.isLoading = true;
+loadSubcontractors() {
+  this.isLoading = true;
 
-    forkJoin({
-      subcontractors: this.subcontractorService.getSubcontractors(),
-      mappings: this.subcontractorService.getSubcontractorWorkItemMappings(),
-    }).subscribe({
-      next: ({ subcontractors, mappings }) => {
-        // Merge: attach work items to subcontractors
-        const merged = subcontractors.map((sub) => {
-          const related = mappings
-            .filter((m) => m.subcontractorName?.trim() === sub.name?.trim())
-            .map((m) => m.workItemName)
-            .join(', ');
-          return { ...sub, category: related || '-' };
-        });
+  this.subcontractorService.getSubcontractors().subscribe({
+    next: (res) => {
+      console.log('FINAL DATA:', res);
 
-        this.dataSource.data = merged;
+      this.dataSource.data = res;
 
-        // ✅ Re-attach paginator and sort after data assignment
-        if (this.paginator) {
-          this.dataSource.paginator = this.paginator;
-          this.paginator.firstPage();
-        }
+      if (this.paginator) {
+        this.dataSource.paginator = this.paginator;
+      }
 
-        if (this.sort) {
-          this.dataSource.sort = this.sort;
-        }
+      if (this.sort) {
+        this.dataSource.sort = this.sort;
+      }
 
-        this.isLoading = false;
-      },
-      error: (err) => {
-        console.error('❌ API Error:', err);
-        this.isLoading = false;
-      },
-    });
-  }
+      this.isLoading = false;
+    },
+    error: (err) => {
+      console.error(err);
+      this.isLoading = false;
+    }
+  });
+}
     applyFilter() {
       this.dataSource.filter = this.searchText.trim().toLowerCase();
       if (this.dataSource.paginator) this.dataSource.paginator.firstPage();
