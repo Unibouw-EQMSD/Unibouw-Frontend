@@ -424,6 +424,8 @@
     "CANCEL": "Annuleren",
     "RESET": "Resetten",
     "SAVE": "Opslaan",
+        "UPDATE": "Updatedatum", 
+
     "SAVE_CONFIGURATION" : "Configuratie opslaan"
 
   },
