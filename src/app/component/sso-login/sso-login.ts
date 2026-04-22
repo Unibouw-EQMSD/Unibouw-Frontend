@@ -8,7 +8,8 @@ import { PublicClientApplication, AuthenticationResult } from '@azure/msal-brows
 import { AppConfigService } from '../../services/app.config.service';
 import { UserService } from '../../services/User.service.';
 import { AlertService } from '../../services/alert.service';
-
+import { Title } from '@angular/platform-browser';
+import { TranslateService } from '@ngx-translate/core';
 interface MeResponse {
   name: string;
   email: string;
@@ -33,12 +34,16 @@ export class SSOLogin implements OnInit {
   private redirectUri: string = '';
   private scopes: string[] = [];
 
+
   constructor(
     private http: HttpClient,
     private router: Router,
     private appConfigService: AppConfigService,
     private userService: UserService,
-    private alertService: AlertService
+    private alertService: AlertService,
+      private title: Title,
+      private translate: TranslateService
+
   ) {
     this.msalInstance = (window as any).msalInstance;
 
@@ -51,6 +56,17 @@ export class SSOLogin implements OnInit {
 
   // single ngOnInit()
 async ngOnInit() {
+this.title.setTitle('QMS Unibouw');
+
+// ✅ Override when translation is available
+this.translate.get('APP.TITLE').subscribe((t: string) => {
+  const val = (t || '').trim();
+
+  // If key is missing, ngx-translate returns the key itself ("APP.TITLE")
+  if (val && val !== 'APP.TITLE') {
+    this.title.setTitle(val);
+  }
+});
   this.loading = true;
   console.log('[SSOLogin] ngOnInit fired');
 
