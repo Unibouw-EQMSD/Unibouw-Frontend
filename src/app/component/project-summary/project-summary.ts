@@ -25,6 +25,7 @@ import { RfqResponseService } from '../../services/rfq-response.service';
 import { AlertService } from '../../services/alert.service';
 import { RfqService } from '../../services/rfq.service';
 import { Title } from '@angular/platform-browser';
+import { MsalService } from '@azure/msal-angular';
 
 interface NotInterestedData {
   reason: string;
@@ -70,7 +71,7 @@ export class ProjectSummary implements OnInit {
 
   maxFileSize = 10 * 1024 * 1024;
   fileSizeError = '';
-
+maybeLaterWarning = '';
   today = '';
   dueDate = '';
   maybeLaterError = '';
@@ -132,6 +133,8 @@ projectDocs: any[] = [];
     private fb: FormBuilder,
     private http: HttpClient,
     private alertService: AlertService,
+      private msalService: MsalService,
+
      private titleService: Title
   ) {
     registerLocaleData(localeNl);
@@ -148,13 +151,16 @@ projectDocs: any[] = [];
 
 ngOnInit(): void {
   this.titleService.setTitle('QMS Unibouw');
+
+  const accounts = this.msalService.instance.getAllAccounts();
+
+  if (!accounts.length) {
+    // 🔥 FORCE LOGIN
+    this.msalService.loginRedirect();
+    return;
+  }
+
   this.route.queryParams.subscribe(params => {
-    this.projectId = params['projectId'] || '';
-    if (this.projectId) {
-      console.log('loadProjectDocs called with:', this.projectId);
-      this.loadProjectDocs(this.projectId);
-    }
-    // ... other logic for RFQ/subId etc ...
     this.rfqId = params['rfqId'];
     this.subId = params['subId'];
     this.number = params['number'];
@@ -185,6 +191,17 @@ ngOnInit(): void {
     return `${year}-${month}-${day}`;
   }
 
+  private isAfterDueDate(dateStr: string): boolean {
+  if (!dateStr || !this.dueDate) return false;
+  return new Date(dateStr + 'T00:00:00') > new Date(this.dueDate + 'T23:59:59');
+}
+
+private formatDateDDMMYYYY(dateStr: string): string {
+  return dateStr
+    ? new Date(dateStr).toLocaleDateString('en-GB').replace(/\//g, '-')
+    : '';
+}
+
   loadProjectSummary(rfqId: string) {
     this.isLoading = true;
 
@@ -200,8 +217,12 @@ ngOnInit(): void {
           return;
         }
 
-        this.project = res.project;
-        this.rfq = res.rfq;
+this.project = res.project;
+
+if (this.project?.projectID) {
+  this.projectId = this.project.projectID;  // 🔥 SINGLE SOURCE
+  this.loadProjectDocs(this.projectId);     // ✅ correct place
+}        this.rfq = res.rfq;
         this.workItems = res.workItems || [];
 if (res.project.projectID) {
         this.loadProjectDocs(res.project.projectID);
@@ -322,52 +343,54 @@ console.log('RESTORE KEY PARTS', {
   }
 
   confirmMaybeLater(wi: any) {
-    this.maybeLaterError = '';
+  this.maybeLaterError = '';
+  this.maybeLaterWarning = '';
 
-    if (this.isRfqExpired) {
-      this.maybeLaterError = 'This RFQ link has expired.';
-      return;
-    }
+  if (this.isRfqExpired) {
+    this.maybeLaterError = 'This RFQ link has expired.';
+    return;
+  }
 
-    if (!wi.maybeLaterDate) {
-      this.maybeLaterError = 'Please select a date.';
-      return;
-    }
+  if (!wi.maybeLaterDate) {
+    this.maybeLaterError = 'Please select a date.';
+    return;
+  }
 
-    if (wi.maybeLaterDate < this.today) {
-      this.maybeLaterError = 'Date cannot be in the past.';
-      return;
-    }
+  if (wi.maybeLaterDate < this.today) {
+    this.maybeLaterError = 'Date cannot be in the past.';
+    return;
+  }
 
-    if (wi.maybeLaterDate > this.dueDate) {
-      this.maybeLaterError = 'Date must be on or before RFQ due date.';
-      return;
-    }
+  const beyondDueDate = this.isAfterDueDate(wi.maybeLaterDate);
 
-    wi.status = 'Maybe Later';
+ const selectedDateFormatted = this.formatDateDDMMYYYY(wi.maybeLaterDate);
 
-    const workItemName = wi?.name || '';
-    const rfqNumber = this.rfq?.rfqNumber || '';
-    const maybeLaterDate = wi.maybeLaterDate;
+if (beyondDueDate) {
+  this.maybeLaterWarning =
+    `The selected date (${selectedDateFormatted}) is beyond the due date of this RFQ. ` +
+    `If you would like to submit the quote beyond the due date, please contact Unibouw ` +
+    `because this link will expire after the due date.`;
+}
 
-    const formattedDate = maybeLaterDate
-      ? new Date(maybeLaterDate).toLocaleDateString('en-GB').replace(/\//g, '-')
-      : '';
+  wi.status = 'Maybe Later';
 
-    const message = `
-Maybe Later – Confirmation
+  const rfqNumber = this.rfq?.rfqNumber || '';
+  const workItemName = wi?.name || '';
 
-RFQ Number     : ${rfqNumber}
-Work Item Name : ${workItemName}
-Follow-up Date : ${formattedDate}
-`.trim();
+  // Always save the response (Maybe Later + chosen date)
+  this.submitInterest('Maybe Later', wi);
+
+  // Conversation log only if beyond due date
+  if (beyondDueDate) {
+    const message =
+      `${this.subcontractor?.name || 'Subcontractor'} indicated willingness to submit the quote after the RFQ due date and selected ${selectedDateFormatted} as the expected submission date.`;
 
     const payload: LogConversation = {
       projectID: this.project?.projectID,
       subcontractorID: this.subId,
       conversationType: 'Email',
-      subject: 'Marked as Maybe Later',
-      message,
+      subject: 'Maybe Later – Beyond Due Date',
+      message: message,
       messageDateTime: null as any,
     };
 
@@ -376,26 +399,20 @@ Follow-up Date : ${formattedDate}
       return;
     }
 
-    this.isLoading = true;
-
-    this.projectService
-      .createLogConversation(payload)
-      .pipe(
-        tap((res) => console.log('Log conversation saved:', res)),
-        finalize(() => (this.isLoading = false)),
-      )
-      .subscribe({
-        next: () => {
-          wi.status = 'Maybe Later';
-          this.submitInterest('Maybe Later', wi);
-          this.closeDropdowns();
-        },
-        error: (err) => {
-          console.error('Error saving conversation:', err);
-          this.alertService.error('Failed to save conversation. Please try again.');
-        },
-      });
+    this.projectService.createLogConversation(payload).subscribe({
+      next: () => {
+        // optional success toast (or keep silent)
+      },
+      error: (err) => {
+        console.error('Error saving conversation:', err);
+        // do not block save; just inform
+        this.alertService.error('Failed to save conversation log. Please try again.');
+      },
+    });
   }
+
+  this.closeDropdowns();
+}
 
   confirmNotInterested(wi: any): void {
     const reason = wi?.notInterested?.reason?.trim();
@@ -583,9 +600,14 @@ submitInterest(status: string, wi?: any) {
       ? { reason: target.notInterested?.reason || '', comment: target.notInterested?.comment || '' }
       : null;
 
-  this.rfqResponseService
-    .submitRfqResponse(this.rfqId, this.subId, target.workItemID, status, reasonPayload, null)
-    .subscribe({
+ this.rfqResponseService.submitRfqResponse(
+  this.rfqId,
+  this.subId,
+  target.workItemID,
+  status,
+  reasonPayload,
+  status === 'Maybe Later' ? target.maybeLaterDate : null
+) .subscribe({
       next: () => {
         if (status === 'Maybe Later') {
           this.alertService.success('Your preference has been recorded. You may respond any time before the due date.');

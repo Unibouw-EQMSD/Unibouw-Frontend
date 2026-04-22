@@ -65,36 +65,17 @@
             <div *ngIf="!rfqIdForEdit">
               <!-- Tabs -->
               <div class="tabs">
-               <button
-  mat-button
-  (click)="selectedTab = 'unibouw'; updateWorkitemDatasource()"
-  [class.active]="selectedTab === 'unibouw'"
->
-                  {{ 'WORKITEM.TAB_UNIBOUW' | translate }}
-                  <span class="count-badge" *ngIf="getSelectedCountByTab('unibouw') > 0">
-                    {{ getSelectedCountByTab('unibouw') }}
-                  </span>
-                </button>
-                <button
-                  mat-button
-                  (click)="selectedTab = 'standard'"
-                  [class.active]="selectedTab === 'standard'"
-                >
-                  {{ 'WORKITEM.TAB_STANDARD' | translate }}
-                  <span class="count-badge" *ngIf="getSelectedCountByTab('standard') > 0">
-                    {{ getSelectedCountByTab('standard') }}
-                  </span>
-                </button>
-                <button
-                  mat-button
-                  (click)="selectedTab = 'uploaded'"
-                  [class.active]="selectedTab === 'uploaded'"
-                >
-                  {{ 'WORKITEM.TAB_UPLOADED' | translate }}
-                  <span class="count-badge" *ngIf="getSelectedCountByTab('uploaded') > 0">
-                    {{ getSelectedCountByTab('uploaded') }}
-                  </span>
-                </button>
+           <button mat-button (click)="onTabChange('unibouw')" [class.active]="selectedTab === 'unibouw'">
+  {{ 'WORKITEM.TAB_UNIBOUW' | translate }}
+</button>
+
+<button mat-button (click)="onTabChange('standard')" [class.active]="selectedTab === 'standard'">
+  {{ 'WORKITEM.TAB_STANDARD' | translate }}
+</button>
+
+<button mat-button (click)="onTabChange('uploaded')" [class.active]="selectedTab === 'uploaded'">
+  {{ 'WORKITEM.TAB_UPLOADED' | translate }}
+</button>
               </div>
               <div class="workitems-loader" *ngIf="isLoader && selectedTab !== 'uploaded'">
                 <mat-spinner diameter="40"></mat-spinner>

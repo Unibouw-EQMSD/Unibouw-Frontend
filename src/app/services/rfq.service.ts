@@ -50,20 +50,26 @@ export class RfqService {
   }
 
   /** Generate headers with Azure AD token */
-  private async getHeaders(): Promise<HttpHeaders> {
-    const accounts = this.msalService.instance.getAllAccounts();
-    if (!accounts.length) throw new Error('No MSAL account found');
+private async getHeaders(): Promise<HttpHeaders> {
+  const accounts = this.msalService.instance.getAllAccounts();
 
-    const result = await this.msalService.instance.acquireTokenSilent({
-      account: accounts[0],
-      scopes: ['api://96b6d570-73e9-4669-98d6-745f22f4acc0/Api.Read'],
-    });
-
+  // 🔥 allow anonymous
+  if (!accounts.length) {
     return new HttpHeaders({
       Accept: 'application/json',
-      Authorization: `Bearer ${result.accessToken}`,
     });
   }
+
+  const result = await this.msalService.instance.acquireTokenSilent({
+    account: accounts[0],
+    scopes: ['api://96b6d570-73e9-4669-98d6-745f22f4acc0/Api.Read'],
+  });
+
+  return new HttpHeaders({
+    Accept: 'application/json',
+    Authorization: `Bearer ${result.accessToken}`,
+  });
+}
 
 
   getProjectDocuments(projectId: string) {

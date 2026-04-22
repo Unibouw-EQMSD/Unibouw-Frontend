@@ -122,17 +122,30 @@ private subcontractorsCache: SubcontractorItem[] = [];
 editedEmailBody: this.editedEmailBody?.trim() ? this.editedEmailBody : null      }),
     );
   }
-applyWorkitemFilter() {
-  const value = this.searchWorkitem.trim().toLowerCase();
 
-  const source =
-    this.selectedTab === 'standard'
-      ? this.standardWorkitems
-      : this.unibouwWorkitems;
+onTabChange(tab: 'standard' | 'unibouw' | 'uploaded') {
+  this.selectedTab = tab;
+
+  // clear search + reset datasource
+  this.searchWorkitem = '';
+  this.updateWorkitemDatasource();
+
+  // optional: also clear subcontractor search if you want
+  // this.searchSubcontractor = '';
+  // this.applySubcontractorFilter();
+}
+
+applyWorkitemFilter() {
+  const value = (this.searchWorkitem || '').trim().toLowerCase();
+
+  let source: any[] = [];
+  if (this.selectedTab === 'standard') source = this.standardWorkitems;
+  else if (this.selectedTab === 'unibouw') source = this.unibouwWorkitems;
+  else source = this.uploadedWorkitems;
 
   this.dataSourceWorkitems.data = source.filter(item =>
-    item.name.toLowerCase().includes(value) ||
-    item.number.toLowerCase().includes(value)
+    (item.name || '').toLowerCase().includes(value) ||
+    (item.number || '').toLowerCase().includes(value)
   );
 }
 
@@ -789,10 +802,13 @@ this.dataSourceWorkitems.data =
   }
 
 updateWorkitemDatasource() {
-  this.dataSourceWorkitems.data =
-    this.selectedTab === 'standard'
-      ? this.standardWorkitems
-      : this.unibouwWorkitems;
+  if (this.selectedTab === 'standard') {
+    this.dataSourceWorkitems.data = [...this.standardWorkitems];
+  } else if (this.selectedTab === 'unibouw') {
+    this.dataSourceWorkitems.data = [...this.unibouwWorkitems];
+  } else {
+    this.dataSourceWorkitems.data = [...this.uploadedWorkitems];
+  }
 }
 
   isWorkItemSelected(item: Workitem): boolean {

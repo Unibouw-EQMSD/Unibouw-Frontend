@@ -879,6 +879,61 @@ header {
   text-overflow: ellipsis;
   vertical-align: middle;
 }
+
+.rfq-warning {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+
+  margin: 12px 0 0 0;
+  padding: 12px 14px;
+
+  background: #fffbeb;          /* light amber */
+  border: 1px solid #f59e0b;    /* amber border */
+  border-radius: 10px;
+}
+
+.rfq-warning__icon {
+  width: 26px;
+  height: 26px;
+  flex: 0 0 26px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background: #fef3c7;          /* slightly darker amber */
+  border: 1px solid #f59e0b;
+  border-radius: 50%;
+  color: #b45309;               /* amber-700 */
+  margin-top: 1px;
+}
+
+.rfq-warning__icon i {
+  font-size: 14px;
+  line-height: 1;
+}
+
+.rfq-warning__content {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.rfq-warning__title {
+  font-size: 13px;
+  font-weight: 700;
+  color: #92400e;               /* amber-800 */
+  margin-bottom: 4px;
+}
+
+.rfq-warning__message {
+  font-size: 13px;
+  line-height: 1.45;
+  color: #78350f;               /* amber-900 */
+  white-space: normal;
+  word-break: break-word;
+}
+
  .mat-mdc-tooltip {
   background: #0f172a !important;
   color: #fff !important;
