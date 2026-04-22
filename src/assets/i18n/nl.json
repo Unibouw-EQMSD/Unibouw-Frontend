@@ -13,7 +13,9 @@
     "NO_DATA": "Geen gegevens beschikbaar",
     "LOADING": "Laden...",
     "ITEMS": "Artikelen per pagina:",
-    "CONFIRM": "Bevestigen"
+    "CONFIRM": "Bevestigen",
+            "DELETE_CONFIRM":"Weet je zeker dat je het wilt verwijderen?"
+
 
 
   },
@@ -128,6 +130,8 @@
     "QUOTE_RECEIVED": "Offerte ontvangen",
     "STATUS": "Status",
     "RFQ_SENT": "Offerteaanvraag succesvol verzonden",
+    "RFQ_SAVED": "Offerteaanvraag succesvol opgeslagen",
+
     "RFQ_FAILED": "De offerteaanvraag is mislukt of verlopen.",
     "DELETE_RFQ": "Weet u zeker dat u deze offerteaanvraag wilt verwijderen?",
     "RFQ_DELETE" : "Offerteaanvraag succesvol verwijderd"

@@ -206,6 +206,10 @@ validateReply(id: string) {
     }
   }
 
+isAdmin(): boolean {
+  return this.userService.isAdmin();
+}
+
   isAddDisabled(): boolean {
     if (!this.customReminderDates.length) return false;
 

@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { map, switchMap, from, Observable } from 'rxjs';
 import { MsalService } from '@azure/msal-angular';
 import { AppConfigService } from './app.config.service';
@@ -108,12 +108,14 @@ getSubcontractors(): Observable<Subcontractors[]> {
 }
 
   /* Create a new subcontractor */
-  createSubcontractor(payload: any): Observable<any> {
-    return from(this.getHeaders()).pipe(
-      switchMap((headers) => this.http.post(this.subcontractorUrl, payload, { headers })),
-    );
-  }
-
+createSubcontractor(payload: any, language: string = 'en'): Observable<any> {
+  return from(this.getHeaders()).pipe(
+    switchMap((headers) => {
+      const params = new HttpParams().set('language', language);
+      return this.http.post(this.subcontractorUrl, payload, { headers, params });
+    }),
+  );
+}
   /* Upload attachments for a subcontractor */
   createAttachments(subcontractorID: string, files: File[]): Observable<any> {
     const formData = new FormData();

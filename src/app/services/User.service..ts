@@ -16,7 +16,7 @@ export class UserService {
   constructor(
     private http: HttpClient,
     private msalService: MsalService,
-    private appConfigService: AppConfigService
+    private appConfigService: AppConfigService,
   ) {
     this.apiURL = this.appConfigService.getConfig().apiURL;
   }

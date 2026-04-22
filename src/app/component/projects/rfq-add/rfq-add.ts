@@ -983,6 +983,22 @@ applySubcontractorView() {
     ).length;
   }
 
+removeFile(index: number, file: any) {
+  console.log('DELETE CLICKED:', index, file);
+
+  if (!file) return;
+
+  this.uploadedFiles.splice(index, 1);
+
+  this.uploadedFiles = [...this.uploadedFiles];
+  this.dataSourceWorkitems.data = [...this.uploadedFiles];
+
+  this.cdr.detectChanges();
+
+  this.saveDraft();
+}
+
+
 async toggleSelectAll() {
   console.log('🔁 TOGGLE SHOW ALL:', this.showAll);
 

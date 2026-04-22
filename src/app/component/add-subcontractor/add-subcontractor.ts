@@ -236,6 +236,23 @@ ${indent}${indent}${workItemsText
   }
 
   ngOnInit() {
+
+    this.subcontractorForm.get('email')?.valueChanges.subscribe(() => {
+    const c = this.subcontractorForm.get('email');
+    if (c?.errors?.['emailExists']) {
+      const { emailExists, ...rest } = c.errors;
+      c.setErrors(Object.keys(rest).length ? rest : null);
+    }
+  });
+
+  // Clear backend nameExists error when user changes name
+  this.subcontractorForm.get('name')?.valueChanges.subscribe(() => {
+    const c = this.subcontractorForm.get('name');
+    if (c?.errors?.['nameExists']) {
+      const { nameExists, ...rest } = c.errors;
+      c.setErrors(Object.keys(rest).length ? rest : null);
+    }
+  });
     this.route.paramMap.subscribe((params) => {
       this.projectName = params.get('projectName');
       this.projectId = params.get('projectID');
@@ -513,8 +530,10 @@ private semanticNumberSort(a: string, b: string): number {
   contactEmail: formValue.contactEmail,
   contactPhone: this.selectedCountry.code + formValue.contactNumber,
 };
+const lang = this.translate.currentLang || 'en';
 
-    this.subcontractorService.createSubcontractor(payload).subscribe({
+
+    this.subcontractorService.createSubcontractor(payload,lang).subscribe({
       next: (res) => {
         this.submitAttempted = false;
         // 🔔 Send MS Teams notification
@@ -536,15 +555,15 @@ private semanticNumberSort(a: string, b: string): number {
           const message = err.error.message || 'Already exists.';
 
           if (field === 'email') {
-            this.subcontractorForm.get('email')?.setErrors({
-              emailExists: message,
-            });
+           const emailCtrl = this.subcontractorForm.get('email');
+emailCtrl?.setErrors({ ...(emailCtrl.errors || {}), emailExists: message });
+emailCtrl?.markAsTouched();
           }
 
           if (field === 'name') {
-            this.subcontractorForm.get('name')?.setErrors({
-              nameExists: message,
-            });
+           const nameCtrl = this.subcontractorForm.get('name');
+nameCtrl?.setErrors({ ...(nameCtrl.errors || {}), nameExists: message });
+nameCtrl?.markAsTouched();
           }
         }
       },

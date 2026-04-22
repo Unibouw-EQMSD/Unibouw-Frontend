@@ -126,13 +126,7 @@
                         </td>
                         <td>{{ file.name }}</td>
                         <td *ngIf="file.source === 'new'">
-                          <button
-                            class="btn btn-sm btn-primary"
-                            (click)="saveSingleUploadedFile(i)"
-                            [disabled]="file.saving || file.saved"
-                          >
-                            {{ file.saving ? 'Saving...' : file.saved ? 'Saved' : 'Save' }}
-                          </button>
+                          
                           <span
                             *ngIf="file.saveError"
                             style="color: red; font-size: 13px; margin-left: 10px"
@@ -140,8 +134,15 @@
                           >
                         </td>
                         <td *ngIf="file.source !== 'new'"></td>
-                        <td class="w-40"><i title="Delete RFQ" class="bi bi-trash3 text-danger cursor"></i></td>
-                      </tr>
+<td class="w-40">
+  <button
+  type="button"
+  class="btn btn-link p-0"
+  (click)="removeFile(i, file)"
+>
+  <i class="bi bi-trash3 text-danger"></i>
+</button>
+</td>                      </tr>
                     </tbody>
                   </table>
                 </div>
@@ -354,6 +355,15 @@
         <button type="button" class="btn btn-secondary" (click)="openPreview()">
           {{ 'RFQ_FOOTER_ACTIONS.PREVIEW' | translate }}
         </button>
+        <button
+  type="button"
+  class="btn btn-primary"
+  *ngIf="rfqIdForEdit"
+  (click)="onSubmit(false, editedEmailBody)"
+  [disabled]="isLoader"
+>
+  Update
+</button>
         <!-- ...other buttons unchanged... -->
       </div>
     </div>
@@ -430,6 +440,8 @@
 >
   {{ 'RFQ_FOOTER_ACTIONS.SAVE_DRAFT' | translate }}
 </button>
+
+
         <button
           class="btn btn-primary"
           (click)="onSubmit(true, editedEmailBody)"

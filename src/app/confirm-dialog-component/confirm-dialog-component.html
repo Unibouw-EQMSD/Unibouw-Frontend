@@ -8,7 +8,7 @@
   </mat-dialog-content>
 
   <mat-dialog-actions>
-    <button mat-button (click)="onNo()">No</button>
-    <button mat-raised-button color="warn" (click)="onYes()">Yes</button>
+    <button mat-button (click)="onNo()">{{ 'MESSAGES.NO' | translate }}</button>
+    <button mat-raised-button color="warn" (click)="onYes()">{{ 'MESSAGES.YES' | translate }}</button>
   </mat-dialog-actions>
 </div>
