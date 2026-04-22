@@ -95,10 +95,12 @@ downloadProjectDoc(projectId: string, projectDocumentID: string): Observable<Blo
 deleteProjectDoc(projectId: string, projectDocumentID: string): Observable<any> {
   return from(this.getHeaders()).pipe(
     switchMap((headers) =>
-      this.http.delete(`${this.apiURL}/projects/${projectId}/documents/${projectDocumentID}`, {
-        headers,
-      }),
-    ),
+      this.http.post(
+        `${this.apiURL}/projects/${projectId}/documents/${projectDocumentID}/delete`,
+        {},                 // empty body
+        { headers }         // options
+      )
+    )
   );
 }
 

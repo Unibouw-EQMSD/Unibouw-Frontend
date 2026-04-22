@@ -384,15 +384,19 @@ private semanticNumberSort(a: string, b: string): number {
   /**
    * Switch category and preserve selections
    */
-  selectCategory(id: string) {
-    // Save current category selections
-    this.selectionsByCategory.set(this.selectedCategoryId, this.selectedWorkitems);
+selectCategory(id: string) {
+  // Save current category selections
+  this.selectionsByCategory.set(this.selectedCategoryId, this.selectedWorkitems);
 
-    // Switch to new category
-    this.selectedCategoryId = id;
-    this.loadWorkitems();
-  }
+  // Switch category
+  this.selectedCategoryId = id;
 
+  // ✅ Clear search when tab switches
+  this.workitemSearchControl.setValue('', { emitEvent: false });
+
+  // Reload workitems
+  this.loadWorkitems();
+}
   toggleWorkitem(event: any, item: Workitem) {
     const itemWithCategory = { ...item, categoryID: this.selectedCategoryId };
     if (event.target.checked) {

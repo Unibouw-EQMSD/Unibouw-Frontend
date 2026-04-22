@@ -25,9 +25,9 @@
       <div class="skeleton-box"></div>
     </div>
 
-    <div class="card" *ngIf="!isLoader">
+    <div class="card" >
       <!-- Header Section -->
-      <div class="card-header" *ngIf="!isLoader">
+      <div class="card-header" >
         <div class="row justify-content-start align-items-center gap-2">
           <div class="col-auto d-flex justify-content-start align-items-center">
             <label class="col-form-label">{{ 'PROJECT_DETAILS.PROJECT' | translate }}</label>
@@ -91,7 +91,7 @@
                     multiple
                   />
                 </div>
-                <div class="table-Fixedheader-wrapper" *ngIf="uploadedFiles.length">
+                <div class="table-Fixedheader-wrapper" #workitemsWrapper *ngIf="uploadedFiles.length">
                   <table class="table table-Fixedheader table-striped">
                     <tbody>
                       <tr
@@ -156,7 +156,7 @@
                     </thead>
                     <tbody>
                       <tr
-*ngFor="let item of dataSourceWorkitems.data"
+*ngFor="let item of dataSourceWorkitems.data;trackBy: trackByWorkItemId"
     [class.selected]="isWorkItemSelected(item)"
   >
 
@@ -336,14 +336,15 @@
         <button type="button" class="btn btn-secondary" (click)="openPreview()">
           {{ 'RFQ_FOOTER_ACTIONS.PREVIEW' | translate }}
         </button>
-        <button
+      <button
   type="button"
   class="btn btn-primary"
   *ngIf="rfqIdForEdit"
-  (click)="onSubmit(false, editedEmailBody)"
+  (click)="onSubmit(false, editedEmailBody, true)"
   [disabled]="isLoader"
 >
-{{'BUTTONS.UPDATE'| translate}}</button>
+  {{ 'BUTTONS.UPDATE' | translate }}
+</button>
         <!-- ...other buttons unchanged... -->
       </div>
     </div>

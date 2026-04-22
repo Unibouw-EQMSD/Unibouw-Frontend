@@ -51,6 +51,11 @@
   margin-top: 5px;
 }
 
+.table-Fixedheader-wrapper {
+  max-height: 450px;   /* or your existing height */
+  overflow-y: auto;
+}
+
 .workitems-table {
   width: 100%;
   border-collapse: collapse;
