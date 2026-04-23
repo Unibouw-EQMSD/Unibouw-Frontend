@@ -67,6 +67,8 @@ searchSubcontractor: string = '';
   projectId!: string;
   projectDetails: any;
   rfqIdForEdit: string | null = null;
+    selectionsByCategory = new Map<string, Workitem[]>(); // preserve selections per category
+
   originalRfq: any = null;
   rfqNumber: string = 'N/A';
   createdDateDisplay: string = 'N/A';
@@ -80,6 +82,7 @@ searchSubcontractor: string = '';
     subcontractorID: string;
     dueDate?: string;
     selected: boolean;
+    
   }[] = [];
   isLoader: boolean = false;
   allSubcontractors: SubcontractorItem[] = [];
@@ -105,7 +108,7 @@ private subcontractorsCache: SubcontractorItem[] = [];
   getDraftKey(): string {
     return this.rfqIdForEdit ? `rfq_edit_state_${this.rfqIdForEdit}` : 'rfq_add_state';
   }
-
+private baseSelectedSubcontractorIds = new Set<string>();
   public saveDraft() {
     if (this.skipDraftSave) return;
     localStorage.setItem(
@@ -503,6 +506,11 @@ this.editedEmailBody = this.originalRfq.customNote || '';
         selected: !!s.selected,
         dueDate: s.dueDate,
       }));
+      this.baseSelectedSubcontractorIds = new Set(
+  this.subcontractors
+    .filter(s => s.selected)
+    .map(s => this.normalizeId(s.subcontractorID))
+);
       this.isLoader = false;
       this.cdr.detectChanges();
     } catch (err) {
@@ -920,6 +928,8 @@ private restoreWorkitemsScroll(): void {
     });
   }
 
+
+  
   async saveSingleUploadedFile(index: number) {
     const fileObj = this.uploadedFiles[index];
     if (!fileObj || fileObj.source !== 'new' || !fileObj.file) return;
@@ -1044,6 +1054,12 @@ async onWorkitemToggle(item: Workitem, checked: boolean) {
   this.restoreWorkitemsScroll();
 }
 
+
+  getSelectedCount(categoryId: string): number {
+    return (this.selectionsByCategory.get(categoryId) || []).length;
+  }
+
+
 async loadSubcontractorsForSelectedWorkitems(): Promise<void> {
   console.log('🚀 loadSubcontractorsForSelectedWorkitems START');
 
@@ -1066,15 +1082,23 @@ async loadSubcontractorsForSelectedWorkitems(): Promise<void> {
     console.log('📦 API SUBS:', subs);
 
     // ✅ ALWAYS CACHE ALL
-    this.allSubcontractors = activeSubs.map((s: any) => ({
-      subcontractorID: s.subcontractorID,
-      name: s.name,
-      email: s.email,
-      location: s.location,
-      selected: false,
-      dueDate: '',
-      linkedWorkItemIDs: s.linkedWorkItemIDs || []
-    }));
+   
+const rebuiltSubs: SubcontractorItem[] = activeSubs.map((s: any) => ({
+  subcontractorID: s.subcontractorID,
+  name: s.name,
+  email: s.email,
+  location: s.location,
+  selected: false,
+  dueDate: '',
+  linkedWorkItemIDs: s.linkedWorkItemIDs || []
+}));
+
+// ✅ MERGE WITH EXISTING STATE (THIS PRESERVES DUE DATE)
+this.allSubcontractors = this.mergeSubcontractorState(
+  rebuiltSubs,
+  this.allSubcontractors
+);
+
 
     console.log('✅ Cached allSubcontractors:', this.allSubcontractors);
 
@@ -1091,11 +1115,17 @@ async loadSubcontractorsForSelectedWorkitems(): Promise<void> {
     console.log('🎯 FILTERED:', filtered);
 
     // ✅ respect toggle state
-    this.subcontractors = this.showAll
-      ? [...this.allSubcontractors]
-      : filtered;
+    
+this.subcontractors = this.showAll
+  ? [...this.allSubcontractors]
+  : this.allSubcontractors.filter(sub =>
+      (sub.linkedWorkItemIDs || []).some(id =>
+        selectedWorkItemIds.has(this.normalizeId(id))
+      )
+    );
 
-    this.dataSourceSubcontractors.data = this.subcontractors;
+this.dataSourceSubcontractors.data = this.subcontractors;
+
 
     this.noSubMessage = this.subcontractors.length
       ? ''
@@ -1229,69 +1259,91 @@ removeFile(index: number, file: any) {
 }
 
 
-async toggleSelectAll() {
-  console.log('🔁 TOGGLE SHOW ALL:', this.showAll);
+private mergeSubcontractorState(
+  source: SubcontractorItem[],
+  existing: SubcontractorItem[]
+): SubcontractorItem[] {
 
-  // ✅ SHOW ALL → CALL API DIRECTLY
-  if (this.showAll) {
-    try {
-      this.isLoader = true;
+  const existingMap = new Map<string, SubcontractorItem>(
+    (existing || []).map(s => [
+      this.normalizeId(s.subcontractorID),
+      s
+    ])
+  );
+
+  return (source || []).map(s => {
+    const old = existingMap.get(this.normalizeId(s.subcontractorID));
+
+    return {
+      ...s,
+      selected: old?.selected ?? false,
+      dueDate: old?.dueDate ?? '',
+    };
+  });
+}
+
+async toggleSelectAll(): Promise<void> {
+  this.isLoader = true;
+
+  try {
+    // ===================== SHOW ALL =====================
+    if (this.showAll === true) {
 
       const subs = await firstValueFrom(
         this.subcontractorService.getSubcontractors()
       );
 
-      console.log('📦 ALL SUBS FROM API:', subs);
-const activeOnly = (subs || []).filter(s => s.isActive === true);
+      const activeOnly = (subs || []).filter(s => s.isActive === true);
 
-      this.subcontractors = activeOnly.map((s: any) => ({
-        subcontractorID: s.subcontractorID,
-        name: s.name,
-        email: s.email,
-        location: s.location,
-        selected: false,
-        dueDate: '',
-        linkedWorkItemIDs: s.linkedWorkItemIDs || []
-      }));
+      this.allSubcontractors = activeOnly.map((s: any) => {
+        const id = this.normalizeId(s.subcontractorID);
 
-      console.log('👁 SHOW ALL RESULT:', this.subcontractors);
+        const isBaseSelected =
+          this.baseSelectedSubcontractorIds.has(id);
 
-      this.dataSourceSubcontractors.data = this.subcontractors;
+        const existing = this.subcontractors.find(
+          x => this.normalizeId(x.subcontractorID) === id
+        );
 
-      this.noSubMessage = this.subcontractors.length
-        ? ''
-        : 'No subcontractors available.';
+        return {
+          subcontractorID: s.subcontractorID,
+          name: s.name,
+          email: s.email,
+          location: s.location,
+          linkedWorkItemIDs: s.linkedWorkItemIDs || [],
+          selected: isBaseSelected,
+          dueDate: isBaseSelected ? (existing?.dueDate || '') : ''
+        } as SubcontractorItem;
+      });
 
-    } catch (err) {
-      console.error('❌ Error loading all subcontractors:', err);
-      this.subcontractors = [];
-      this.dataSourceSubcontractors.data = [];
-      this.noSubMessage = 'Error loading subcontractors.';
-    } finally {
-      this.isLoader = false;
+      // VIEW = all subcontractors
+      this.subcontractors = [...this.allSubcontractors];
     }
 
-    return;
+    // ===================== HIDE EXTRAS =====================
+    else {
+      this.subcontractors = this.allSubcontractors.filter(sub =>
+        this.baseSelectedSubcontractorIds.has(
+          this.normalizeId(sub.subcontractorID)
+        )
+      );
+    }
+
+    // ===================== UPDATE TABLE =====================
+    this.dataSourceSubcontractors.data = [...this.subcontractors];
+
+    this.noSubMessage = this.subcontractors.length
+      ? ''
+      : this.showAll
+        ? 'No subcontractors available.'
+        : 'No subcontractors mapped to selected work items.';
+
+  } catch (err) {
+    console.error('❌ toggleSelectAll failed:', err);
+    this.alertService.error('Failed to load subcontractors.');
+  } finally {
+    this.isLoader = false;
   }
-
-  // ✅ SHOW FILTERED (existing logic)
-  const selectedWorkItemIds = new Set(
-    this.selectedWorkItems.map(w => this.normalizeId(w.workItemID))
-  );
-
-  this.subcontractors = this.subcontractors.filter(sub =>
-    (sub.linkedWorkItemIDs || []).some(id =>
-      selectedWorkItemIds.has(this.normalizeId(id))
-    )
-  );
-
-  console.log('🎯 FILTERED RESULT:', this.subcontractors);
-
-  this.dataSourceSubcontractors.data = this.subcontractors;
-
-  this.noSubMessage = this.subcontractors.length
-    ? ''
-    : 'No subcontractors mapped to selected work items.';
 }
 
   get selectedSubcontractors() {
