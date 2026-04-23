@@ -132,7 +132,7 @@
           <div class="card-body rfq-list">
             <div class="rfq-row" *ngFor="let wi of workItems">
               <div class="rfq-row-head rfq-row-head--flex">
-                <div *ngIf="wi.maybeLaterWarning" class="rfq-warning-outside">
+                <!-- <div *ngIf="wi.maybeLaterWarning" class="rfq-warning-outside">
   <div class="rfq-warning-outside__icon">
     <i class="fa fa-triangle-exclamation"></i>
   </div>
@@ -145,7 +145,7 @@
       {{ wi.maybeLaterWarning }}
     </div>
   </div>
-</div>
+</div> -->
                 <!-- Left: Workitem Code + Work Item + Status badge -->
                 <div class="rfq-left">
                   <!-- Status badge (restored) -->
@@ -326,18 +326,23 @@
                   </button>
                 </div>
               </div>
-              <div *ngIf="maybeLaterWarning" class="rfq-warning">
-  <div class="rfq-warning__icon">
+     
+<div *ngIf="wi.maybeLaterWarning" class="rfq-warning">
+  <div class="rfq-warning-outside__icon">
     <i class="fa fa-triangle-exclamation"></i>
   </div>
 
   <div class="rfq-warning__content">
-    <div class="rfq-warning__title">Selected date is after RFQ due date</div>
+    <div class="rfq-warning__title">
+      Selected date is after RFQ due date
+    </div>
+
     <div class="rfq-warning__message">
-      {{ maybeLaterWarning }}
+      {{ wi.maybeLaterWarning }}
     </div>
   </div>
 </div>
+
 
               <!-- Expanded quote panel (unchanged) -->
               <div

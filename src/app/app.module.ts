@@ -52,6 +52,36 @@ import { SubcontractorDetails } from './component/subcontractor/subcontractor-de
 import { AlertComponent } from './confirm-dialog-component/alert/alert.component';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 
+import {
+  MsalInterceptorConfiguration,
+  MSAL_INTERCEPTOR_CONFIG,
+  MsalInterceptor
+} from '@azure/msal-angular';
+import { InteractionType } from '@azure/msal-browser';
+import { HTTP_INTERCEPTORS } from '@angular/common/http';
+
+
+
+
+export function MSALInterceptorConfigFactory(): MsalInterceptorConfiguration {
+  const appConfig = (window as any).appConfig;
+
+  const protectedResourceMap = new Map<string, string[]>();
+
+  // ✅ Use apiURL from app.config.json
+  protectedResourceMap.set(
+    appConfig.apiURL,
+    appConfig.scopes
+  );
+
+  return {
+    interactionType: InteractionType.Redirect,
+    protectedResourceMap,
+  };
+}
+
+
+
 export function MSALInstanceFactory(): PublicClientApplication {
   return (window as any).msalInstance;
 }

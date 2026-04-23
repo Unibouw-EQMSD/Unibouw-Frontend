@@ -93,27 +93,40 @@ export class projectService {
     this.getprojectsurl = this.apiURL + '/Projects';
   }
 
-  private async getHeaders(): Promise<HttpHeaders> {
-    const accounts = this.msalService.instance.getAllAccounts();
+  private tokenPromise?: Promise<string | null>;
 
-    // 🔐 If not logged in yet, send request without auth
-    if (!accounts.length) {
-      return new HttpHeaders({
-        Accept: '*/*',
-      });
-    }
+private async getHeaders(): Promise<HttpHeaders> {
+  const account = this.msalService.instance.getActiveAccount()
+    || this.msalService.instance.getAllAccounts()[0];
 
-    const result = await this.msalService.instance.acquireTokenSilent({
-      account: accounts[0],
-      scopes: ['api://96b6d570-73e9-4669-98d6-745f22f4acc0/Api.Read'],
-    });
-
-    return new HttpHeaders({
-      Accept: '*/*',
-      Authorization: `Bearer ${result.accessToken}`,
-    });
+  if (!account) {
+    return new HttpHeaders({ Accept: '*/*' });
   }
 
+  if (!this.tokenPromise) {
+    this.tokenPromise = this.msalService.instance
+      .acquireTokenSilent({
+        account,
+        scopes: ['api://96b6d570-73e9-4669-98d6-745f22f4acc0/Api.Read'],
+      })
+      .then(res => res.accessToken)
+      .catch(err => {
+        console.error('Token acquisition failed', err);
+        return null;
+      })
+      .finally(() => {
+        // ✅ allow next refresh later
+        this.tokenPromise = undefined;
+      });
+  }
+
+  const token = await this.tokenPromise;
+
+  return new HttpHeaders({
+    Accept: '*/*',
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+  });
+}
   getProjectById(id: string): Observable<projectdetails> {
     return from(this.getHeaders()).pipe(
       switchMap((headers) =>

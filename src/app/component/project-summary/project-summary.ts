@@ -341,77 +341,92 @@ console.log('RESTORE KEY PARTS', {
   onDocClick() {
     this.closeDropdowns();
   }
+confirmMaybeLater(wi: any): void {
+ 
+// ✅ reset ONLY this work item state
+  wi.maybeLaterError = '';
+  wi.maybeLaterWarning = '';
 
-  confirmMaybeLater(wi: any) {
-  this.maybeLaterError = '';
-  this.maybeLaterWarning = '';
-
+  // ✅ RFQ expired check
   if (this.isRfqExpired) {
-    this.maybeLaterError = 'This RFQ link has expired.';
+    wi.maybeLaterError = 'This RFQ link has expired.';
     return;
   }
 
+  // ✅ Date required
   if (!wi.maybeLaterDate) {
-    this.maybeLaterError = 'Please select a date.';
+    wi.maybeLaterError = 'Please select a date.';
     return;
   }
 
+  // ✅ Past date check
   if (wi.maybeLaterDate < this.today) {
-    this.maybeLaterError = 'Date cannot be in the past.';
+    wi.maybeLaterError = 'Date cannot be in the past.';
     return;
   }
 
+  // ✅ Due-date comparison
   const beyondDueDate = this.isAfterDueDate(wi.maybeLaterDate);
+  const selectedDateFormatted = this.formatDateDDMMYYYY(wi.maybeLaterDate);
 
- const selectedDateFormatted = this.formatDateDDMMYYYY(wi.maybeLaterDate);
-
-if (beyondDueDate) {
-  this.maybeLaterWarning =
-    `The selected date (${selectedDateFormatted}) is beyond the due date of this RFQ. ` +
-    `If you would like to submit the quote beyond the due date, please contact Unibouw ` +
-    `because this link will expire after the due date.`;
-}
-
-  wi.status = 'Maybe Later';
-
-  const rfqNumber = this.rfq?.rfqNumber || '';
-  const workItemName = wi?.name || '';
-
-  // Always save the response (Maybe Later + chosen date)
-  this.submitInterest('Maybe Later', wi);
-
-  // Conversation log only if beyond due date
+  // ✅ SHOW WARNING STRUCTURE (same as your first code)
   if (beyondDueDate) {
-    const message =
-      `${this.subcontractor?.name || 'Subcontractor'} indicated willingness to submit the quote after the RFQ due date and selected ${selectedDateFormatted} as the expected submission date.`;
+    wi.maybeLaterWarning =
+      `The selected date (${selectedDateFormatted}) is beyond the due date of this RFQ. ` +
+      `If you would like to submit the quote beyond the due date, please contact Unibouw ` +
+      `because this link will expire after the due date.`;
+  }
 
-    const payload: LogConversation = {
-      projectID: this.project?.projectID,
-      subcontractorID: this.subId,
-      conversationType: 'Email',
-      subject: 'Maybe Later – Beyond Due Date',
-      message: message,
-      messageDateTime: null as any,
-    };
+  // ✅ Prepare conversation message (ALWAYS log Maybe Later)
+  const payload: LogConversation = {
+    projectID: this.project?.projectID,
+    subcontractorID: this.subId,
+    conversationType: 'Email',
+    subject: beyondDueDate
+      ? 'Maybe Later – Beyond Due Date'
+      : 'Marked as Maybe Later',
+    message: beyondDueDate
+      ? `${this.subcontractor?.name || 'Subcontractor'} indicated willingness to submit the quote ` +
+        `after the RFQ due date and selected ${selectedDateFormatted} as the expected submission date.`
+      : `
+Maybe Later – Confirmation
 
-    if (!payload.projectID) {
-      this.alertService.warning('Project data not loaded yet. Please try again.');
-      return;
-    }
+RFQ Number     : ${this.rfq?.rfqNumber || ''}
+Work Item Name : ${wi?.name || ''}
+Follow-up Date : ${selectedDateFormatted}
+`.trim(),
+    messageDateTime: null as any,
+  };
 
-    this.projectService.createLogConversation(payload).subscribe({
+  // ✅ Safety check
+  if (!payload.projectID) {
+    this.alertService.warning('Project data not loaded yet. Please try again.');
+    return;
+  }
+
+  this.isLoading = true;
+
+  // ✅ ✅ VERY IMPORTANT: LOG FIRST (prevents MSAL token race)
+  this.projectService
+    .createLogConversation(payload)
+    .pipe(finalize(() => (this.isLoading = false)))
+    .subscribe({
       next: () => {
-        // optional success toast (or keep silent)
+        // ✅ Update UI state AFTER log succeeds
+        wi.status = 'Maybe Later';
+
+        // ✅ Persist RFQ response AFTER logging
+        this.submitInterest('Maybe Later', wi);
+
+        // ✅ Close dropdown
+        this.closeDropdowns();
       },
       error: (err) => {
         console.error('Error saving conversation:', err);
-        // do not block save; just inform
-        this.alertService.error('Failed to save conversation log. Please try again.');
+        this.alertService.error('Failed to save conversation. Please try again.');
       },
     });
-  }
 
-  this.closeDropdowns();
 }
 
   confirmNotInterested(wi: any): void {
