@@ -212,13 +212,15 @@
                             class="text-input"
                             [(ngModel)]="wi.maybeLaterDate"
                             [ngModelOptions]="{ standalone: true }"
+                              (ngModelChange)="onMaybeLaterDateChange(wi)" 
                             [min]="today"
                             [disabled]="isRfqExpired"
                           />
                         </div>
 
-                        <div class="error" *ngIf="maybeLaterError">{{ maybeLaterError }}</div>
-                        <div style="text-align: right">
+<div class="error" *ngIf="wi.maybeLaterError">
+  {{ wi.maybeLaterError }}
+</div>                        <div style="text-align: right">
                           <button
                             class="btn-primary"
                             type="button"

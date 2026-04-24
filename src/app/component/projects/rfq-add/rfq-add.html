@@ -235,7 +235,13 @@
                       </td>
                       <td colspan="2">{{ file.name }}</td>
                       
-                        <td class="w-40"><i title="Delete RFQ" class="bi bi-trash3 text-danger cursor"></i></td>
+                        <td class="w-40"><button
+  type="button"
+  class="btn btn-link p-0"
+  (click)="removeFile(i, file)"
+>
+  <i class="bi bi-trash3 text-danger"></i>
+</button></td>
                     </tr>
                   </tbody>
                 </table>

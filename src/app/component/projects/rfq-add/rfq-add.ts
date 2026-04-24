@@ -501,6 +501,7 @@ this.editedEmailBody = this.originalRfq.customNote || '';
       this.subcontractors = this.subcontractors.filter((sub) =>
         sub.linkedWorkItemIDs?.some((id) => selectedWorkItemIds.has(id)),
       );
+      this.allSubcontractors = [...this.subcontractors];
       this.originalSubcontractorState = this.subcontractors.map((s) => ({
         subcontractorID: s.subcontractorID,
         selected: !!s.selected,
@@ -1282,50 +1283,53 @@ private mergeSubcontractorState(
   });
 }
 
+private isMappedToSelectedWorkItems(sub: SubcontractorItem): boolean {
+  const selectedWorkItemIds = new Set(
+    this.selectedWorkItems.map(w => this.normalizeId(w.workItemID))
+  );
+
+  return (sub.linkedWorkItemIDs || []).some(id =>
+    selectedWorkItemIds.has(this.normalizeId(id))
+  );
+}
+
+
 async toggleSelectAll(): Promise<void> {
   this.isLoader = true;
 
   try {
-    // ===================== SHOW ALL =====================
-    if (this.showAll === true) {
+    // ✅ keep current state
+    const currentState = [...this.allSubcontractors];
 
+    if (this.showAll) {
+      // ===================== SHOW ALL =====================
       const subs = await firstValueFrom(
         this.subcontractorService.getSubcontractors()
       );
 
       const activeOnly = (subs || []).filter(s => s.isActive === true);
 
-      this.allSubcontractors = activeOnly.map((s: any) => {
-        const id = this.normalizeId(s.subcontractorID);
+      const rebuilt: SubcontractorItem[] = activeOnly.map((s: any) => ({
+        subcontractorID: s.subcontractorID,
+        name: s.name,
+        email: s.email,
+        location: s.location,
+        selected: false,
+        dueDate: '',
+        linkedWorkItemIDs: s.linkedWorkItemIDs || []
+      }));
 
-        const isBaseSelected =
-          this.baseSelectedSubcontractorIds.has(id);
+      // ✅ merge → preserves selected + dueDate
+      this.allSubcontractors = this.mergeSubcontractorState(
+        rebuilt,
+        currentState
+      );
 
-        const existing = this.subcontractors.find(
-          x => this.normalizeId(x.subcontractorID) === id
-        );
-
-        return {
-          subcontractorID: s.subcontractorID,
-          name: s.name,
-          email: s.email,
-          location: s.location,
-          linkedWorkItemIDs: s.linkedWorkItemIDs || [],
-          selected: isBaseSelected,
-          dueDate: isBaseSelected ? (existing?.dueDate || '') : ''
-        } as SubcontractorItem;
-      });
-
-      // VIEW = all subcontractors
       this.subcontractors = [...this.allSubcontractors];
-    }
-
-    // ===================== HIDE EXTRAS =====================
-    else {
+    } else {
+      // ===================== HIDE EXTRAS =====================
       this.subcontractors = this.allSubcontractors.filter(sub =>
-        this.baseSelectedSubcontractorIds.has(
-          this.normalizeId(sub.subcontractorID)
-        )
+        this.isMappedToSelectedWorkItems(sub)
       );
     }
 
@@ -1345,6 +1349,7 @@ async toggleSelectAll(): Promise<void> {
     this.isLoader = false;
   }
 }
+
 
   get selectedSubcontractors() {
     return (this.subcontractors || []).filter((s: any) => s.selected);
