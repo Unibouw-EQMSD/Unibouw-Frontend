@@ -430,6 +430,7 @@ this.dateTimeError = this.translate.instant('CONVERSATION.FUTURE_TIME');
   }
 
 ngOnInit(): void {
+  
   const now = new Date();
   const yyyy = now.getFullYear();
   const mm = String(now.getMonth() + 1).padStart(2, '0');
@@ -1436,45 +1437,59 @@ conversationDateTime: string | null = null;
   selectedIndex: number = 0; // default first item active
 
 onSubClick(subId: string): void {
-  if (this.selectedSubcontractorId === subId) return;
+
+  // ✅ allow re-selection even if same user (fix restore issue)
+  if (this.selectedSubcontractorId === subId && this.pmSubConversationData.length > 0) {
+    return;
+  }
+
   this.selectedSubcontractorId = subId;
   this.isSpinLoading = true;
   this.pmSubConversationData = [];
+
   this.loadConversationBySub(subId);
 }
-
  
 loadConversationSubcontractors(force = false) {
   this.isLoading = true;
+
   forkJoin({
     messagedSubs: this.rfqResponseService.getSubcontractorsByLatestMessage(this.projectId),
     allSubs: this.rfqResponseService.getAllSubcontractorsByProjectId(this.projectId),
   }).subscribe(({ messagedSubs, allSubs }) => {
+
     const map = new Map<string, { id: string, name: string }>();
-    (allSubs || []).forEach(sub => map.set(sub.subcontractorID, { id: sub.subcontractorID, name: sub.subcontractorName }));
-    (messagedSubs || []).forEach((sub: { subcontractorID: string; subcontractorName: any; }) => map.set(sub.subcontractorID, { id: sub.subcontractorID, name: sub.subcontractorName }));
+
+    (allSubs || []).forEach(sub =>
+      map.set(sub.subcontractorID, { id: sub.subcontractorID, name: sub.subcontractorName })
+    );
+
+    (messagedSubs || []).forEach((sub: any) =>
+      map.set(sub.subcontractorID, { id: sub.subcontractorID, name: sub.subcontractorName })
+    );
+
     this.convoSubcontractors = Array.from(map.values());
     this.isLoading = false;
 
-    // Restore highlight and conversation!
-    if (this.convoSubcontractors.length > 0) {
-      // If we had a previously selected subcontractor, keep it
-      if (this.selectedSubcontractorId) {
-        const found = this.convoSubcontractors.find(sub => sub.id === this.selectedSubcontractorId);
-        if (found) {
-          // Re-trigger conversation load if needed
-          this.loadConversationBySub(this.selectedSubcontractorId);
-        } else {
-          // If not found (e.g., deleted), select the first
-          this.selectedSubcontractorId = this.convoSubcontractors[0].id;
-          this.loadConversationBySub(this.selectedSubcontractorId);
-        }
-      } else {
-        // No selection yet, select the first
-        this.selectedSubcontractorId = this.convoSubcontractors[0].id;
-        this.loadConversationBySub(this.selectedSubcontractorId);
-      }
+    // ✅ RESTORE SELECTED SUBCONTRACTOR FIRST
+    const savedSub = localStorage.getItem('convo_selected_sub');
+    if (savedSub) {
+      this.selectedSubcontractorId = savedSub;
+      localStorage.removeItem('convo_selected_sub');
     }
+
+    // ================= SAFE SELECTION LOGIC =================
+    if (this.convoSubcontractors.length > 0) {
+
+      // If nothing selected yet, pick first
+      if (!this.selectedSubcontractorId) {
+        this.selectedSubcontractorId = this.convoSubcontractors[0].id;
+      }
+
+      // Load conversation for selected
+      this.loadConversationBySub(this.selectedSubcontractorId);
+    }
+
   }, err => {
     this.isLoading = false;
     console.error('Error loading conversation subcontractors', err);
@@ -1556,8 +1571,7 @@ deleteDoc(event: Event, docId: string) {
     this.rfqService.deleteProjectDoc(this.projectId, docId).subscribe({
       next: () => {
         this.projectDocs = this.projectDocs.filter((doc) => doc.projectDocumentID !== docId);
-        this.alertService.success('Document deleted successfully.');
-      },
+this.alertService.success(this.translate.instant('MESSAGES.DOCUMENT_DELETED'));      },
       error: (err) => {
         this.alertService.error(err?.error?.message || 'Unable to delete document.');
       },
@@ -2207,81 +2221,78 @@ this.alertService.error(this.translate.instant(key));      },
     this.replyAttachments.splice(index, 1);
   }
 
-  sendReply(convo: RFQConversationMessage) {
-    const parentId = convo.conversationMessageID;
-    const replyText = this.replyTexts[parentId!] ?? '';
+sendReply(convo: RFQConversationMessage) {
+  const parentId = String(convo.conversationMessageID);
+  const replyText = this.replyTexts[parentId] ?? '';
 
-    if (!replyText.trim()) {
-      this.replyError = this.translate.instant('VALIDATION.REPLY_ERROR');
-      return;
-    }
-if (replyText.length > 5000) {
-  this.replyCharError[String(parentId)] = true;
-  return;
-}
-    this.isSendingReply = true;
-    this.replyError = '';
-
-    const formData = new FormData();
-    formData.append('subcontractorMessageID', String(parentId));
-    formData.append('message', replyText);
-    formData.append('subject', this.replySubject);
-
-    this.replyAttachments.forEach((file) => formData.append('attachments', file));
-
-    this.rfqService
-      .replyToConversation(formData)
-      .pipe(
-        finalize(() => {
-          // ONLY stop loader here
-          this.isSendingReply = false;
-        }),
-      )
-      .subscribe({
-        next: (reply: any) => {
-          // ✅ SUCCESS → API returned 200
-          // alert('Reply sent successfully!');
-
-          if (!reply) {
-            // Handles rare 204 safely (no UI update)
-            window.location.reload();
-            return;
-          }
-
-          const normalizedReply: RFQConversationMessage = {
-            conversationMessageID: String(reply.conversationMessageID ?? reply.messageID),
-            subcontractorMessageID: String(parentId),
-            projectID: reply.projectID,
-            subcontractorID: reply.subcontractorID,
-            senderType: reply.senderType,
-            messageText: reply.messageText,
-            subject: reply.subject,
-
-            messageDateTime: reply.messageDateTime ? new Date(reply.messageDateTime) : new Date(),
-            status: reply.status,
-            createdBy: reply.createdBy,
-            createdOn: reply.createdOn,
-          };
-
-          const index = this.pmSubConversationData.findIndex(
-            (m) => String(m.conversationMessageID) === String(parentId),
-          );
-
-          if (index === -1) {
-            this.pmSubConversationData.push(normalizedReply);
-          } else {
-            this.pmSubConversationData.splice(index + 1, 0, normalizedReply);
-          }
-
-          this.cancelReply();
-          window.location.reload();
-        },
-        error: (err) => {
-          console.error('❌ Error sending reply:', err);
-          this.replyError = 'Email failed. Reply saved as draft.';
-        },
-      });
+  if (!replyText.trim()) {
+    this.replyError = this.translate.instant('VALIDATION.REPLY_ERROR');
+    return;
   }
+
+  if (replyText.length > 5000) {
+    this.replyCharError[parentId] = true;
+    return;
+  }
+
+  this.isSendingReply = true;
+  this.replyError = '';
+
+  const formData = new FormData();
+  formData.append('subcontractorMessageID', parentId);
+  formData.append('message', replyText);
+  formData.append('subject', this.replySubject);
+
+  this.replyAttachments.forEach((file) =>
+    formData.append('attachments', file)
+  );
+
+  this.rfqService
+    .replyToConversation(formData)
+    .pipe(
+      finalize(() => {
+        this.isSendingReply = false;
+      })
+    )
+    .subscribe({
+      next: (reply: any) => {
+        if (!reply) return;
+
+        // ✅ Save selected subcontractor ONLY if valid
+        if (this.selectedSubcontractorId) {
+          localStorage.setItem(
+            'convo_selected_sub',
+            String(this.selectedSubcontractorId)
+          );
+        }
+
+        // ✅ Save scroll position
+        const chatContainer = document.querySelector('.chat-messages');
+        if (chatContainer) {
+          localStorage.setItem(
+            'convo_scroll',
+            String((chatContainer as HTMLElement).scrollTop)
+          );
+        }
+
+        // ✅ Save last replied message (for optional scroll focus)
+        const msgId = reply.conversationMessageID ?? reply.messageID;
+        if (msgId) {
+          localStorage.setItem('convo_last_msg', String(msgId));
+        }
+
+        // ✅ Reset reply UI
+        this.cancelReply();
+
+        // ✅ Reload page (state will be restored in ngOnInit or after data load)
+        window.location.reload();
+      },
+      error: (err) => {
+        console.error('❌ Error sending reply:', err);
+        this.replyError = 'Email failed. Reply saved as draft.';
+      },
+    });
+}
 downloadReplyAttachment(att: any) {
   if (!att?.attachmentID) {
     this.alertService.warning('No file available for download.');

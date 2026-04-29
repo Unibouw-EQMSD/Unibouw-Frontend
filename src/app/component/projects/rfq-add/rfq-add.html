@@ -116,7 +116,7 @@
               <!-- Uploaded tab content for Add mode -->
               <ng-container *ngIf="selectedTab === 'uploaded'">
                 <div class="m-2 d-flex align-items-center">
-                  <label class="col-form-label mb-0">{{ 'UPLOAD' | translate }}</label>
+                  <label class="col-form-label mb-0">{{ 'RFQ_ACTIONS.UPLOAD' | translate }}</label>
                   <input
                     type="file"
                     class="form-control form-control-sm ms-2 pb-0"
@@ -164,8 +164,7 @@
                   *ngIf="!uploadedFiles.length"
                   style="padding: 20px; text-align: center; color: #999; font-style: italic"
                 >
-                  No files uploaded yet.
-                </div>
+{{'MESSAGES.NO_FILES_UPLOADED' | translate}}                </div>
               </ng-container>
               <!-- Workitems Table (standard/unibouw) -->
               <ng-container *ngIf="selectedTab !== 'uploaded'">
@@ -174,7 +173,7 @@
 <input
   type="text"
   class="form-control mb-2"
-  placeholder="Search"
+placeholder="{{ 'COMMON.SEARCH' | translate }}"
   [(ngModel)]="searchWorkitem"
   (input)="applyWorkitemFilter()"
 />                </div>
@@ -215,7 +214,7 @@
             <!-- ADD this: Upload/project-docs UI at the top in Edit mode only -->
             <ng-container *ngIf="rfqIdForEdit">
               <div class="m-2 d-flex align-items-center">
-                <label class="col-form-label mb-0">{{ 'UPLOAD' | translate }}</label>
+                <label class="col-form-label mb-0">{{ 'RFQ_ACTIONS.UPLOAD' | translate }}</label>
                 <input
                   type="file"
                   class="form-control form-control-sm ms-2 pb-0"
@@ -305,7 +304,7 @@
               </div>
               <div class="m-2 d-flex align-items-center"><input
   type="text"
-  placeholder="Search"
+placeholder="{{ 'COMMON.SEARCH' | translate }}"
   class="form-control mb-2"
   [(ngModel)]="searchSubcontractor"
   (input)="applySubcontractorFilter()"
@@ -316,15 +315,15 @@
                     <tr>
                       <th class="td_checkbox"></th>
                       <th>{{ 'RFQ_PAGE.NAME' | translate }}</th>
-                      <th>Rating</th>
-                      <th>Location</th>
+                      <th>{{'RFQ_PAGE.RATING' | translate}}</th>
+                      <th>{{'RFQ_PAGE.LOCATION' | translate}}</th>
                       <th class="td_intDate">{{ 'RFQ_PAGE.DUE_DATE' | translate }}</th>
                     </tr>
                   </thead>
                   <tbody>
                     <tr
                       class="checkbox-listRow"
-                     *ngFor="let sub of dataSourceSubcontractors.data; let i = index"
+                    *ngFor="let sub of dataSourceSubcontractors.data; let i = index; trackBy: trackBySubId"
                       [style.background-color]="i % 2 === 0 ? '#fcfcfc' : '#f0f2f5'"
                     >
                       <td class="td_checkbox">

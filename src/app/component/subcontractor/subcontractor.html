@@ -140,7 +140,7 @@
           ></tr>
           <tr
             mat-row
-            *matRowDef="let row; columns: displayedColumns"
+           *matRowDef="let row; columns: displayedColumns; trackBy: trackById"
             [class.hidden]="isLoading"
             [class.inactive]="!row.isActive"
 (click)="handleRowClick(row)"

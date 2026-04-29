@@ -153,6 +153,8 @@
     "SHOW_ALL": "Show all",
 
     "NAME": "Name",
+    "RATING": "Rating",
+    "LOCATION": "Location",
 
     "SELECT_WORKITEM_MESSAGE": "Please select a work item to view subcontractors.",
     "SELECT_SUBCONTRACTOR_ERROR": "Select at least one subcontractor to apply the due date"
@@ -185,7 +187,7 @@
   "RFQ_ACTIONS": {
     "DOWNLOAD_QUOTE": "Download Quote",
     "NO_QUOTE_UPLOADED": "No Quote Uploaded",
-  "UPLOAD": "Upload",
+  "UPLOAD": "UPLOAD",
     "SET_REMINDER": "Set Reminder",
     "EDIT_RFQ": "Edit RFQ",
     "DELETE_RFQ": "Delete RFQ",
@@ -398,7 +400,9 @@
     "STATUS_UPDATED_SUCCESS": "Status updated successfully!",
     "STATUS_UPDATED_FAILED": "Failed to update status. Please try again.",
     "REMINDER_SAVED": "Reminder configuration saved successfully",
-    "REMINDER_RESET": "Reminder configuration reset"
+    "REMINDER_RESET": "Reminder configuration reset",
+    "DOCUMENT_DELETED": "Document deleted successfully.",
+    "NO_FILES_UPLOADED": "No files uploaded yet."
   },
   "MODAL": {
     "COMMENTS_TITLE": "Comments",

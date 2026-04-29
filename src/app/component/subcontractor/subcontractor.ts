@@ -97,13 +97,20 @@ export class Subcontractor implements OnInit, AfterViewInit {
       }
     };
   }
+private cachedData: Subcontractors[] = [];
+
 loadSubcontractors() {
+  // ✅ If already loaded, reuse it
+  if (this.cachedData.length) {
+    this.dataSource.data = this.cachedData;
+    return;
+  }
+
   this.isLoading = true;
 
   this.subcontractorService.getSubcontractors().subscribe({
     next: (res) => {
-      console.log('FINAL DATA:', res);
-
+      this.cachedData = res;   // ✅ cache it
       this.dataSource.data = res;
 
       if (this.paginator) {
@@ -122,10 +129,19 @@ loadSubcontractors() {
     }
   });
 }
-    applyFilter() {
-      this.dataSource.filter = this.searchText.trim().toLowerCase();
-      if (this.dataSource.paginator) this.dataSource.paginator.firstPage();
-    }
+   private filterTimeout: any;
+
+applyFilter() {
+  clearTimeout(this.filterTimeout);
+
+  this.filterTimeout = setTimeout(() => {
+    this.dataSource.filter = this.searchText.trim().toLowerCase();
+    if (this.dataSource.paginator) this.dataSource.paginator.firstPage();
+  }, 300); // small delay
+}
+trackById(index: number, item: any) {
+  return item.subcontractorID;
+}
 
   handleRowClick(row: any) {
   if (!row.isActive) {

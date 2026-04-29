@@ -344,6 +344,15 @@ uploadDocsToRfq(rfqId: string, projectId: string, files: File[]) {
     );
   }
 
+  getRfqDocuments(rfqId: string): Observable<any[]> {
+  return from(this.getHeaders()).pipe(
+    switchMap(headers =>
+      this.http.get<{ data: any[] }>(`${this.apiURL}/rfq/${rfqId}/documents`, { headers })
+    ),
+    map(res => res.data || [])
+  );
+}
+
 replyToConversation(payload: FormData): Observable<any> {
   return from(this.getHeaders()).pipe(
     switchMap((headers) => {

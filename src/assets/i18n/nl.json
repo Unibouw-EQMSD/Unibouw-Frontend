@@ -157,6 +157,8 @@
 
     "DUE_DATE": "Vervaldatum",
     "SHOW_ALL": "Alles tonen",
+    "RATING": "Beoordeling",
+    "LOCATION": "Locatie",
 
     "NAME": "Naam",
 
@@ -192,7 +194,7 @@
   "RFQ_ACTIONS": {
     "DOWNLOAD_QUOTE": "Offerte downloaden",
     "NO_QUOTE_UPLOADED": "Geen offerte geüpload",
-  "UPLOAD": "Upload",
+  "UPLOAD": "UPLOADEN",
     "SET_REMINDER": "Herinnering instellen",
     "EDIT_RFQ": "RFQ bewerken",
     "DELETE_RFQ": "RFQ verwijderen",
@@ -412,7 +414,11 @@
     "STATUS_UPDATED_SUCCESS": "Status succesvol bijgewerkt!",
     "STATUS_UPDATED_FAILED": "Status bijwerken mislukt. Probeer het opnieuw.",
     "REMINDER_SAVED": "Herinneringsconfiguratie succesvol opgeslagen",
-    "REMINDER_RESET": "Herinneringsconfiguratie gereset"
+    "REMINDER_RESET": "Herinneringsconfiguratie gereset",
+        "DOCUMENT_DELETED": "Document succesvol verwijderd.",
+            "NO_FILES_UPLOADED": "Er zijn nog geen bestanden geüpload."
+
+
   },
   "MODAL": {
     "COMMENTS_TITLE": "Opmerkingen",

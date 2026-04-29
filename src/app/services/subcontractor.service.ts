@@ -78,8 +78,8 @@ getSubcontractors(): Observable<Subcontractors[]> {
         email: it.Email ?? '',
         isActive: it.IsActive ?? false,
 
-        // ✅ CRITICAL FIX
-        linkedWorkItemIDs: it.WorkItemIDs ?? [],
+        // ✅ FIXED (IMPORTANT)
+        linkedWorkItemIDs: it.WorkItemIDs ?? it.workItemIDs ?? [],
 
         editItem: false,
       }));

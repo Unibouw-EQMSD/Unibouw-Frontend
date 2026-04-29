@@ -233,7 +233,7 @@ if (res.project.projectID) {
           now.getDate(),
         ).padStart(2, '0')}`;
 
-        const rawDueDate = this.rfq?.globalDueDate || this.rfq?.dueDate || this.rfq?.DueDate;
+        const rawDueDate =  this.rfq?.dueDate || this.rfq?.DueDate;
         if (rawDueDate) {
           const dateOnly = rawDueDate.split('T')[0];
           this.dueDate = dateOnly;
